@@ -298,7 +298,8 @@ test('task workspace can execute a task and open execution detail', async ({ pag
   await expect(page.getByRole('heading', { name: 'Refactor server composition' })).toBeVisible();
   await expect(page.getByText('最新事件：任务已创建：Refactor server composition')).toBeVisible();
 
-  await page.getByRole('link', { name: 'Refactor server composition Split route registration from domain logic completed single' }).click();
+  await page.locator('a[href="/tasks/task-1"]').click();
+  await expect(page).toHaveURL(/\/tasks\/task-1$/);
   await expect(page.getByRole('heading', { name: '任务详情' })).toBeVisible();
   await expect(page.getByText('software-architect')).toBeVisible();
   await page.getByRole('button', { name: '执行任务' }).click();
@@ -330,18 +331,18 @@ test('task workspace filters actionable work', async ({ page }) => {
 
 test('approval queue renders and can approve an item', async ({ page }) => {
   await page.goto('/approvals');
-  await expect(page.getByRole('heading', { name: 'Queue snapshot' })).toBeVisible();
-  await expect(page.getByText('Next pending approval')).toBeVisible();
+  await expect(page.getByRole('heading', { name: '队列快照' })).toBeVisible();
+  await expect(page.getByText('下一条待处理审批')).toBeVisible();
   await expect(page.getByText('审批列表')).toBeVisible();
   await expect(page.getByText('approval-1')).not.toBeVisible();
   await expect(page.getByRole('link', { name: 'task-risky' })).toBeVisible();
   await expect(page.getByText('pending', { exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'All statuses' })).toBeVisible();
-  await page.getByRole('button', { name: '批准' }).click();
+  await expect(page.getByRole('button', { name: '全部状态' })).toBeVisible();
+  await page.getByRole('button', { name: '批准', exact: true }).click();
   await expect(page.getByText('approved', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Pending only' }).click();
-  await expect(page.getByText('No approvals match the selected filter.')).toBeVisible();
-  await page.getByRole('button', { name: 'Approved only' }).click();
+  await page.getByRole('button', { name: '只看待处理' }).click();
+  await expect(page.getByText('当前筛选下没有匹配的审批记录。')).toBeVisible();
+  await page.getByRole('button', { name: '只看已批准' }).click();
   await expect(page.getByText('approved', { exact: true })).toBeVisible();
   await page.getByRole('link', { name: 'task-risky' }).click();
   await expect(page.getByRole('heading', { name: '任务详情' })).toBeVisible();
