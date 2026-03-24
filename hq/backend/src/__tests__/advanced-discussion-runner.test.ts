@@ -24,11 +24,11 @@ function makeTask(overrides: Partial<TaskRecord> = {}): TaskRecord {
 test('runAdvancedDiscussionExecution keeps the pending record when no runner is provided', async () => {
   const task = makeTask();
   const store = {
-    saveExecution() {},
-    updateExecution() {
+    async saveExecution() {},
+    async updateExecution() {
       throw new Error('should not update execution without runner');
     },
-    updateTask() {
+    async updateTask() {
       throw new Error('should not update task without runner');
     },
   } as unknown as Pick<Store, 'saveExecution' | 'updateExecution' | 'updateTask'>;
@@ -45,17 +45,17 @@ test('runAdvancedDiscussionExecution completes when a runner is injected', async
   let updatedTaskStatus = '';
 
   const store = {
-    saveExecution(execution) {
+    async saveExecution(execution) {
       savedExecution = execution;
     },
-    updateExecution(_id, updater) {
+    async updateExecution(_id, updater) {
       if (!savedExecution) {
         throw new Error('execution was not saved');
       }
       savedExecution = updater(savedExecution);
       return savedExecution;
     },
-    updateTask(_id, updater) {
+    async updateTask(_id, updater) {
       const updated = updater(task);
       updatedTaskStatus = updated.status;
       return updated;

@@ -14,7 +14,7 @@ export interface ExecutionLifecycleRecord {
   completedAt?: string;
 }
 
-export function runTaskExecution(
+export async function runTaskExecution(
   input: {
     taskId: string;
     executor: 'claude' | 'codex' | 'openai';
@@ -23,17 +23,20 @@ export function runTaskExecution(
     executionMode?: TaskExecutionMode;
   },
   store: Pick<Store, 'saveExecution' | 'updateExecution' | 'updateTask'>
-) {
+): Promise<{
+  execution: ExecutionLifecycleRecord;
+  task: Awaited<ReturnType<Store['updateTask']>>;
+}> {
   const started = beginExecution({
     taskId: input.taskId,
     executor: input.executor,
     memoryContextExcerpt: input.memoryContextExcerpt,
   });
 
-  store.saveExecution(started);
+  await store.saveExecution(started);
   const completed = completeExecution(started, { summary: input.summary });
-  store.updateExecution(started.id, () => completed);
-  const task = store.updateTask(input.taskId, (currentTask) => ({
+  await store.updateExecution(started.id, () => completed);
+  const task = await store.updateTask(input.taskId, (currentTask) => ({
     ...currentTask,
     status: 'completed',
     updatedAt: new Date().toISOString(),

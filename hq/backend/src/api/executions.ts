@@ -96,13 +96,13 @@ function projectExecution(
 }
 
 export function registerExecutionRoutes(app: express.Application, store: Store) {
-  app.get('/api/executions', (req, res) => {
+  app.get('/api/executions', async (req, res) => {
     const taskId = readStringQuery(req.query.taskId);
     const status = readStringQuery(req.query.status);
     const executor = readStringQuery(req.query.executor);
     const limit = readLimitQuery(req.query.limit);
     const fields = readFieldsQuery(req.query.fields);
-    const baseExecutions = taskId ? store.getExecutionsByTaskId(taskId) : store.getExecutions();
+    const baseExecutions = taskId ? await store.getExecutionsByTaskId(taskId) : await store.getExecutions();
     const total = baseExecutions.length;
     const matched = baseExecutions.filter((execution) => {
       if (status && execution.status !== status) {
@@ -139,8 +139,8 @@ export function registerExecutionRoutes(app: express.Application, store: Store) 
     });
   });
 
-  app.get('/api/executions/:id', (req, res) => {
-    const execution = store.getExecutionById(req.params.id);
+  app.get('/api/executions/:id', async (req, res) => {
+    const execution = await store.getExecutionById(req.params.id);
     if (!execution) {
       return res.status(404).json({
         error: 'execution not found',

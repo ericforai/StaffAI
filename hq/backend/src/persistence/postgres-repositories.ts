@@ -13,10 +13,6 @@ interface PgClientLike {
   ): Promise<{ rows: TResult[]; rowCount: number | null }>;
 }
 
-interface QueueLike {
-  enqueue(operation: () => Promise<void>): void;
-}
-
 interface PgRuntime {
   client: PgClientLike;
   schema: string;
@@ -122,171 +118,107 @@ function resolveRuntime(options: PostgresPersistenceOptions): PgRuntime {
   return { client: pool, schema, taskTable, approvalTable, executionTable };
 }
 
-function createQueue(client: PgClientLike, label: string): QueueLike {
-  let chain = Promise.resolve<void>(undefined);
-  return {
-    enqueue(operation) {
-      chain = chain
-        .then(operation)
-        .catch((error) => {
-          console.error(`[postgres-repositories] ${label} query failed`, error);
-        });
-    },
+function createBootstrapper(
+  client: PgClientLike,
+  tableName: string,
+  tableLabel: string,
+  includesTaskLookupIndex: boolean
+): () => Promise<void> {
+  let bootstrapPromise: Promise<void> | null = null;
+
+  return async () => {
+    if (!bootstrapPromise) {
+      bootstrapPromise = (async () => {
+        await client.query(
+          `CREATE TABLE IF NOT EXISTS ${tableName} (
+            id TEXT PRIMARY KEY,
+            payload JSONB NOT NULL,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+          )`
+        );
+        if (includesTaskLookupIndex) {
+          await client.query(
+            `CREATE INDEX IF NOT EXISTS ${quoteIdentifier(`${tableLabel}_task_id_idx`)}
+             ON ${tableName} ((payload->>'taskId'))`
+          );
+        }
+      })();
+    }
+
+    await bootstrapPromise;
   };
 }
 
-function scheduleRefreshAll<TRecord extends { id: string }>(
-  queue: QueueLike,
-  client: PgClientLike,
-  tableName: string,
-  cache: Map<string, TRecord>
-) {
-  queue.enqueue(async () => {
-    const result = await client.query<QueryResultRow<TRecord>>(
-      `SELECT payload FROM ${tableName} ORDER BY updated_at ASC`
-    );
-    cache.clear();
-    for (const row of result.rows) {
-      cache.set(row.payload.id, cloneRecord(row.payload));
-    }
-  });
+async function listRecords<TRecord>(client: PgClientLike, tableName: string): Promise<TRecord[]> {
+  const result = await client.query<QueryResultRow<TRecord>>(
+    `SELECT payload FROM ${tableName} ORDER BY updated_at ASC`
+  );
+  return result.rows.map((row) => cloneRecord(row.payload));
 }
 
-function scheduleRefreshById<TRecord extends { id: string }>(
-  queue: QueueLike,
-  client: PgClientLike,
-  tableName: string,
-  cache: Map<string, TRecord>,
-  id: string
-) {
-  queue.enqueue(async () => {
-    const result = await client.query<QueryResultRow<TRecord>>(
-      `SELECT payload FROM ${tableName} WHERE id = $1 LIMIT 1`,
-      [id]
-    );
-    if (result.rows.length === 0) {
-      cache.delete(id);
-      return;
-    }
-    cache.set(id, cloneRecord(result.rows[0].payload));
-  });
+async function getRecordById<TRecord>(client: PgClientLike, tableName: string, id: string): Promise<TRecord | null> {
+  const result = await client.query<QueryResultRow<TRecord>>(
+    `SELECT payload FROM ${tableName} WHERE id = $1 LIMIT 1`,
+    [id]
+  );
+  return result.rows[0] ? cloneRecord(result.rows[0].payload) : null;
 }
 
-function scheduleRefreshByTaskId<TRecord extends { id: string; taskId: string }>(
-  queue: QueueLike,
+async function listRecordsByTaskId<TRecord>(
   client: PgClientLike,
   tableName: string,
-  cache: Map<string, TRecord>,
   taskId: string
-) {
-  queue.enqueue(async () => {
-    const result = await client.query<QueryResultRow<TRecord>>(
-      `SELECT payload FROM ${tableName} WHERE payload->>'taskId' = $1 ORDER BY updated_at ASC`,
-      [taskId]
-    );
-    for (const row of result.rows) {
-      cache.set(row.payload.id, cloneRecord(row.payload));
-    }
-  });
+): Promise<TRecord[]> {
+  const result = await client.query<QueryResultRow<TRecord>>(
+    `SELECT payload FROM ${tableName} WHERE payload->>'taskId' = $1 ORDER BY updated_at ASC`,
+    [taskId]
+  );
+  return result.rows.map((row) => cloneRecord(row.payload));
 }
 
-function scheduleUpsert<TRecord extends { id: string }>(
-  queue: QueueLike,
+async function upsertRecord<TRecord extends { id: string }>(
   client: PgClientLike,
   tableName: string,
   record: TRecord
-) {
+): Promise<void> {
   const payload = JSON.stringify(record);
-  queue.enqueue(async () => {
-    await client.query(
-      `INSERT INTO ${tableName} (id, payload, updated_at)
-       VALUES ($1, $2::jsonb, NOW())
-       ON CONFLICT (id) DO UPDATE SET
-         payload = EXCLUDED.payload,
-         updated_at = NOW()`,
-      [record.id, payload]
-    );
-  });
-}
-
-function scheduleBootstrap(
-  queue: QueueLike,
-  client: PgClientLike,
-  tableName: string,
-  tableLabel: string,
-  includesTaskLookupIndex: boolean
-) {
-  queue.enqueue(async () => {
-    await client.query(
-      `CREATE TABLE IF NOT EXISTS ${tableName} (
-        id TEXT PRIMARY KEY,
-        payload JSONB NOT NULL,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )`
-    );
-    if (includesTaskLookupIndex) {
-      await client.query(
-        `CREATE INDEX IF NOT EXISTS ${quoteIdentifier(`${tableLabel}_task_id_idx`)}
-         ON ${tableName} ((payload->>'taskId'))`
-      );
-    }
-  });
-}
-
-function createInitializer<TRecord extends { id: string }>(
-  queue: QueueLike,
-  client: PgClientLike,
-  tableName: string,
-  tableLabel: string,
-  cache: Map<string, TRecord>,
-  includesTaskLookupIndex: boolean
-) {
-  let initialized = false;
-  return () => {
-    if (initialized) return;
-    initialized = true;
-    scheduleBootstrap(queue, client, tableName, tableLabel, includesTaskLookupIndex);
-    scheduleRefreshAll(queue, client, tableName, cache);
-  };
+  await client.query(
+    `INSERT INTO ${tableName} (id, payload, updated_at)
+     VALUES ($1, $2::jsonb, NOW())
+     ON CONFLICT (id) DO UPDATE SET
+       payload = EXCLUDED.payload,
+       updated_at = NOW()`,
+    [record.id, payload]
+  );
 }
 
 export function createPostgresTaskRepository(options: PostgresPersistenceOptions): TaskRepository {
   const runtime = resolveRuntime(options);
   const tableName = qualifyTable(runtime.schema, runtime.taskTable);
-  const cache = new Map<string, TaskRecord>();
-  const queue = createQueue(runtime.client, runtime.taskTable);
-  const initialize = createInitializer(queue, runtime.client, tableName, runtime.taskTable, cache, false);
+  const ensureBootstrapped = createBootstrapper(runtime.client, tableName, runtime.taskTable, false);
 
   return {
-    list() {
-      initialize();
-      scheduleRefreshAll(queue, runtime.client, tableName, cache);
-      return Array.from(cache.values()).map((task) => cloneRecord(task));
+    async list() {
+      await ensureBootstrapped();
+      return listRecords<TaskRecord>(runtime.client, tableName);
     },
-    getById(taskId) {
-      initialize();
-      const found = cache.get(taskId);
-      if (!found) {
-        scheduleRefreshById(queue, runtime.client, tableName, cache, taskId);
-      }
-      return found ? cloneRecord(found) : null;
+    async getById(taskId) {
+      await ensureBootstrapped();
+      return getRecordById<TaskRecord>(runtime.client, tableName, taskId);
     },
-    save(task) {
-      initialize();
-      cache.set(task.id, cloneRecord(task));
-      scheduleUpsert(queue, runtime.client, tableName, task);
+    async save(task) {
+      await ensureBootstrapped();
+      await upsertRecord(runtime.client, tableName, task);
     },
-    update(taskId, updater) {
-      initialize();
-      const current = cache.get(taskId);
+    async update(taskId, updater) {
+      await ensureBootstrapped();
+      const current = await getRecordById<TaskRecord>(runtime.client, tableName, taskId);
       if (!current) {
-        scheduleRefreshById(queue, runtime.client, tableName, cache, taskId);
         return null;
       }
-      const updated = updater(cloneRecord(current));
-      cache.set(taskId, cloneRecord(updated));
-      scheduleUpsert(queue, runtime.client, tableName, updated);
+      const updated = updater(current);
+      await upsertRecord(runtime.client, tableName, updated);
       return cloneRecord(updated);
     },
   };
@@ -295,42 +227,33 @@ export function createPostgresTaskRepository(options: PostgresPersistenceOptions
 export function createPostgresApprovalRepository(options: PostgresPersistenceOptions): ApprovalRepository {
   const runtime = resolveRuntime(options);
   const tableName = qualifyTable(runtime.schema, runtime.approvalTable);
-  const cache = new Map<string, ApprovalRecord>();
-  const queue = createQueue(runtime.client, runtime.approvalTable);
-  const initialize = createInitializer(queue, runtime.client, tableName, runtime.approvalTable, cache, true);
+  const ensureBootstrapped = createBootstrapper(runtime.client, tableName, runtime.approvalTable, true);
 
   return {
-    list() {
-      initialize();
-      scheduleRefreshAll(queue, runtime.client, tableName, cache);
-      return Array.from(cache.values()).map((approval) => cloneRecord(approval));
+    async list() {
+      await ensureBootstrapped();
+      return listRecords<ApprovalRecord>(runtime.client, tableName);
     },
-    listByTaskId(taskId) {
-      initialize();
-      scheduleRefreshByTaskId(queue, runtime.client, tableName, cache, taskId);
-      return Array.from(cache.values())
-        .filter((approval) => approval.taskId === taskId)
-        .map((approval) => cloneRecord(approval));
+    async listByTaskId(taskId) {
+      await ensureBootstrapped();
+      return listRecordsByTaskId<ApprovalRecord>(runtime.client, tableName, taskId);
     },
-    save(approval) {
-      initialize();
-      cache.set(approval.id, cloneRecord(approval));
-      scheduleUpsert(queue, runtime.client, tableName, approval);
+    async save(approval) {
+      await ensureBootstrapped();
+      await upsertRecord(runtime.client, tableName, approval);
     },
-    updateStatus(approvalId, status) {
-      initialize();
-      const current = cache.get(approvalId);
+    async updateStatus(approvalId, status) {
+      await ensureBootstrapped();
+      const current = await getRecordById<ApprovalRecord>(runtime.client, tableName, approvalId);
       if (!current) {
-        scheduleRefreshById(queue, runtime.client, tableName, cache, approvalId);
         return null;
       }
       const updated: ApprovalRecord = {
-        ...cloneRecord(current),
+        ...current,
         status,
         resolvedAt: new Date().toISOString(),
       };
-      cache.set(approvalId, cloneRecord(updated));
-      scheduleUpsert(queue, runtime.client, tableName, updated);
+      await upsertRecord(runtime.client, tableName, updated);
       return cloneRecord(updated);
     },
   };
@@ -339,46 +262,33 @@ export function createPostgresApprovalRepository(options: PostgresPersistenceOpt
 export function createPostgresExecutionRepository(options: PostgresPersistenceOptions): ExecutionRepository {
   const runtime = resolveRuntime(options);
   const tableName = qualifyTable(runtime.schema, runtime.executionTable);
-  const cache = new Map<string, ExecutionRecord>();
-  const queue = createQueue(runtime.client, runtime.executionTable);
-  const initialize = createInitializer(queue, runtime.client, tableName, runtime.executionTable, cache, true);
+  const ensureBootstrapped = createBootstrapper(runtime.client, tableName, runtime.executionTable, true);
 
   return {
-    list() {
-      initialize();
-      scheduleRefreshAll(queue, runtime.client, tableName, cache);
-      return Array.from(cache.values()).map((execution) => cloneRecord(execution));
+    async list() {
+      await ensureBootstrapped();
+      return listRecords<ExecutionRecord>(runtime.client, tableName);
     },
-    getById(executionId) {
-      initialize();
-      const found = cache.get(executionId);
-      if (!found) {
-        scheduleRefreshById(queue, runtime.client, tableName, cache, executionId);
-      }
-      return found ? cloneRecord(found) : null;
+    async getById(executionId) {
+      await ensureBootstrapped();
+      return getRecordById<ExecutionRecord>(runtime.client, tableName, executionId);
     },
-    listByTaskId(taskId) {
-      initialize();
-      scheduleRefreshByTaskId(queue, runtime.client, tableName, cache, taskId);
-      return Array.from(cache.values())
-        .filter((execution) => execution.taskId === taskId)
-        .map((execution) => cloneRecord(execution));
+    async listByTaskId(taskId) {
+      await ensureBootstrapped();
+      return listRecordsByTaskId<ExecutionRecord>(runtime.client, tableName, taskId);
     },
-    save(execution) {
-      initialize();
-      cache.set(execution.id, cloneRecord(execution));
-      scheduleUpsert(queue, runtime.client, tableName, execution);
+    async save(execution) {
+      await ensureBootstrapped();
+      await upsertRecord(runtime.client, tableName, execution);
     },
-    update(executionId, updater) {
-      initialize();
-      const current = cache.get(executionId);
+    async update(executionId, updater) {
+      await ensureBootstrapped();
+      const current = await getRecordById<ExecutionRecord>(runtime.client, tableName, executionId);
       if (!current) {
-        scheduleRefreshById(queue, runtime.client, tableName, cache, executionId);
         return null;
       }
-      const updated = updater(cloneRecord(current));
-      cache.set(executionId, cloneRecord(updated));
-      scheduleUpsert(queue, runtime.client, tableName, updated);
+      const updated = updater(current);
+      await upsertRecord(runtime.client, tableName, updated);
       return cloneRecord(updated);
     },
   };

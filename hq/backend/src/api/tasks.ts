@@ -9,7 +9,7 @@ import type { TaskRecord } from '../shared/task-types';
 interface TaskRouteDependencies {
   runAdvancedDiscussion?: (topic: string) => Promise<{ summary: string }>;
   onTaskCreated?: (task: TaskRecord) => void;
-  onApprovalRequested?: (taskId: string) => void;
+  onApprovalRequested?: (taskId: string) => Promise<void> | void;
   onExecutionStarted?: (input: { taskId: string; executor: 'claude' | 'codex' | 'openai' }) => void;
   onExecutionFinished?: (execution: ExecutionLifecycleRecord) => void;
   loadMemoryContext?: (task: TaskRecord) => Promise<string | undefined | void> | string | undefined | void;
@@ -21,15 +21,16 @@ export function registerTaskRoutes(
   store: Store,
   dependencies: TaskRouteDependencies = {}
 ) {
-  app.get('/api/tasks', (_req, res) => {
+  app.get('/api/tasks', async (_req, res) => {
+    const tasks = await buildTaskListReadModel(store);
     return res.json({
-      tasks: buildTaskListReadModel(store),
+      tasks,
       stage: 'sprint-1-skeleton',
     });
   });
 
-  app.get('/api/tasks/:id', (req, res) => {
-    const detail = buildTaskDetailReadModel(req.params.id, store);
+  app.get('/api/tasks/:id', async (req, res) => {
+    const detail = await buildTaskDetailReadModel(req.params.id, store);
     if (!detail) {
       return res.status(404).json({
         error: 'task not found',
@@ -45,7 +46,7 @@ export function registerTaskRoutes(
   });
 
   app.post('/api/tasks/:id/execute', async (req, res) => {
-    const task = store.getTaskById(req.params.id);
+    const task = await store.getTaskById(req.params.id);
     if (!task) {
       return res.status(404).json({
         error: 'task not found',
@@ -94,7 +95,7 @@ export function registerTaskRoutes(
     });
   });
 
-  app.post('/api/tasks', (req, res) => {
+  app.post('/api/tasks', async (req, res) => {
     const title = typeof req.body?.title === 'string' ? req.body.title : '';
     const description = typeof req.body?.description === 'string' ? req.body.description : '';
     const executionMode = typeof req.body?.executionMode === 'string' ? req.body.executionMode : undefined;
@@ -104,11 +105,11 @@ export function registerTaskRoutes(
       return res.status(400).json({ error: validation.error });
     }
 
-    const task = createTaskDraft({ title, description, executionMode }, store);
+    const task = await createTaskDraft({ title, description, executionMode }, store);
     dependencies.onTaskCreated?.(task);
 
     if (task.approvalRequired) {
-      dependencies.onApprovalRequested?.(task.id);
+      await dependencies.onApprovalRequested?.(task.id);
     }
 
     return res.status(201).json({

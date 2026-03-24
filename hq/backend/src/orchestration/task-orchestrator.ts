@@ -27,10 +27,10 @@ export function validateTaskDraft(input: TaskDraftInput) {
   };
 }
 
-export function createTaskDraft(
+export async function createTaskDraft(
   input: TaskDraftInput,
   store: Pick<Store, 'saveTask' | 'saveApproval'>
-): TaskRecord {
+): Promise<TaskRecord> {
   const now = new Date().toISOString();
   const title = input.title.trim();
   const description = input.description.trim();
@@ -53,9 +53,9 @@ export function createTaskDraft(
     updatedAt: now,
   };
 
-  store.saveTask(task);
+  await store.saveTask(task);
   if (approvalDecision.approvalRequired) {
-    createApprovalRecord(task.id, store);
+    await createApprovalRecord(task.id, store);
   }
   return task;
 }

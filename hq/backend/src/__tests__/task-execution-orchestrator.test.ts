@@ -26,15 +26,15 @@ test('executeTaskRecord runs single execution through runtime service', async ()
   const executions: unknown[] = [];
   let updatedTaskStatus = '';
   const store = {
-    saveExecution(execution) {
+    async saveExecution(execution) {
       executions.push(execution);
     },
-    updateExecution(_id, updater) {
+    async updateExecution(_id, updater) {
       const updated = updater(executions[0] as never);
       executions[0] = updated;
       return updated;
     },
-    updateTask(_id, updater) {
+    async updateTask(_id, updater) {
       const updated = updater(task);
       updatedTaskStatus = updated.status;
       return updated;
@@ -60,15 +60,15 @@ test('executeTaskRecord loads memory context before execution and writes back su
   const executions: unknown[] = [];
   const callOrder: string[] = [];
   const store = {
-    saveExecution(execution) {
+    async saveExecution(execution) {
       executions.push(execution);
     },
-    updateExecution(_id, updater) {
+    async updateExecution(_id, updater) {
       const updated = updater(executions[0] as never);
       executions[0] = updated;
       return updated;
     },
-    updateTask(_id, updater) {
+    async updateTask(_id, updater) {
       return updater(task);
     },
   } as Pick<Store, 'saveExecution' | 'updateExecution' | 'updateTask'>;
@@ -98,11 +98,11 @@ test('executeTaskRecord loads memory context before execution and writes back su
 test('executeTaskRecord keeps advanced discussion as a distinct branch', async () => {
   const task = makeTask({ executionMode: 'advanced_discussion' });
   const store = {
-    saveExecution() {},
-    updateExecution() {
+    async saveExecution() {},
+    async updateExecution() {
       return null;
     },
-    updateTask() {
+    async updateTask() {
       return task;
     },
   } as Pick<Store, 'saveExecution' | 'updateExecution' | 'updateTask'>;
@@ -126,15 +126,15 @@ test('executeTaskRecord can complete advanced discussion through an injected run
   const executions: unknown[] = [];
   let updatedTaskStatus = '';
   const store = {
-    saveExecution(execution) {
+    async saveExecution(execution) {
       executions.push(execution);
     },
-    updateExecution(_id, updater) {
+    async updateExecution(_id, updater) {
       const updated = updater(executions[0] as never);
       executions[0] = updated;
       return updated;
     },
-    updateTask(_id, updater) {
+    async updateTask(_id, updater) {
       const updated = updater(task);
       updatedTaskStatus = updated.status;
       return updated;

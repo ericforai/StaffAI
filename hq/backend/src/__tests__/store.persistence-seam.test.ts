@@ -42,18 +42,18 @@ function makeExecution(overrides: Partial<ExecutionRecord> = {}): ExecutionRecor
   };
 }
 
-test('store delegates task/approval/execution operations through injected repositories', () => {
+test('store delegates task/approval/execution operations through injected repositories', async () => {
   const tasks: TaskRecord[] = [];
   const approvals: ApprovalRecord[] = [];
   const executions: ExecutionRecord[] = [];
 
   const taskRepository: TaskRepository = {
-    list: () => [...tasks],
-    getById: (id) => tasks.find((task) => task.id === id) || null,
-    save: (task) => {
+    list: async () => [...tasks],
+    getById: async (id) => tasks.find((task) => task.id === id) || null,
+    save: async (task) => {
       tasks.push(task);
     },
-    update: (id, updater) => {
+    update: async (id, updater) => {
       const index = tasks.findIndex((task) => task.id === id);
       if (index < 0) return null;
       tasks[index] = updater(tasks[index]);
@@ -62,12 +62,12 @@ test('store delegates task/approval/execution operations through injected reposi
   };
 
   const approvalRepository: ApprovalRepository = {
-    list: () => [...approvals],
-    listByTaskId: (taskId) => approvals.filter((approval) => approval.taskId === taskId),
-    save: (approval) => {
+    list: async () => [...approvals],
+    listByTaskId: async (taskId) => approvals.filter((approval) => approval.taskId === taskId),
+    save: async (approval) => {
       approvals.push(approval);
     },
-    updateStatus: (approvalId, status) => {
+    updateStatus: async (approvalId, status) => {
       const index = approvals.findIndex((approval) => approval.id === approvalId);
       if (index < 0) return null;
       approvals[index] = {
@@ -80,13 +80,13 @@ test('store delegates task/approval/execution operations through injected reposi
   };
 
   const executionRepository: ExecutionRepository = {
-    list: () => [...executions],
-    getById: (id) => executions.find((execution) => execution.id === id) || null,
-    listByTaskId: (taskId) => executions.filter((execution) => execution.taskId === taskId),
-    save: (execution) => {
+    list: async () => [...executions],
+    getById: async (id) => executions.find((execution) => execution.id === id) || null,
+    listByTaskId: async (taskId) => executions.filter((execution) => execution.taskId === taskId),
+    save: async (execution) => {
       executions.push(execution);
     },
-    update: (id, updater) => {
+    update: async (id, updater) => {
       const index = executions.findIndex((execution) => execution.id === id);
       if (index < 0) return null;
       executions[index] = updater(executions[index]);
@@ -100,21 +100,21 @@ test('store delegates task/approval/execution operations through injected reposi
     executionRepository,
   });
 
-  store.saveTask(makeTask());
-  store.saveApproval(makeApproval());
-  store.saveExecution(makeExecution());
+  await store.saveTask(makeTask());
+  await store.saveApproval(makeApproval());
+  await store.saveExecution(makeExecution());
 
-  assert.equal(store.getTasks().length, 1);
-  assert.equal(store.getApprovals().length, 1);
-  assert.equal(store.getExecutions().length, 1);
-  assert.equal(store.getTaskById('task-1')?.id, 'task-1');
-  assert.equal(store.getExecutionById('execution-1')?.id, 'execution-1');
-  assert.equal(store.getApprovalsByTaskId('task-1').length, 1);
-  assert.equal(store.getExecutionsByTaskId('task-1').length, 1);
+  assert.equal((await store.getTasks()).length, 1);
+  assert.equal((await store.getApprovals()).length, 1);
+  assert.equal((await store.getExecutions()).length, 1);
+  assert.equal((await store.getTaskById('task-1'))?.id, 'task-1');
+  assert.equal((await store.getExecutionById('execution-1'))?.id, 'execution-1');
+  assert.equal((await store.getApprovalsByTaskId('task-1')).length, 1);
+  assert.equal((await store.getExecutionsByTaskId('task-1')).length, 1);
 
-  const updatedTask = store.updateTask('task-1', (task) => ({ ...task, status: 'completed' }));
-  const updatedApproval = store.updateApprovalStatus('approval-1', 'approved');
-  const updatedExecution = store.updateExecution('execution-1', (execution) => ({
+  const updatedTask = await store.updateTask('task-1', (task) => ({ ...task, status: 'completed' }));
+  const updatedApproval = await store.updateApprovalStatus('approval-1', 'approved');
+  const updatedExecution = await store.updateExecution('execution-1', (execution) => ({
     ...execution,
     status: 'completed',
     outputSummary: 'done',

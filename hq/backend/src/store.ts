@@ -264,9 +264,9 @@ export class Store extends EventEmitter {
 
   // --- Task Logic ---
 
-  public getTasks(): TaskRecord[] {
+  public async getTasks(): Promise<TaskRecord[]> {
     try {
-      return this.taskRepository.list();
+      return await this.taskRepository.list();
     } catch (err) {
       console.error('Failed to load tasks:', err);
     }
@@ -274,23 +274,23 @@ export class Store extends EventEmitter {
     return [];
   }
 
-  public saveTask(task: TaskRecord) {
-    this.taskRepository.save(task);
+  public async saveTask(task: TaskRecord): Promise<void> {
+    await this.taskRepository.save(task);
   }
 
-  public getTaskById(taskId: string): TaskRecord | null {
-    return this.taskRepository.getById(taskId);
+  public async getTaskById(taskId: string): Promise<TaskRecord | null> {
+    return await this.taskRepository.getById(taskId);
   }
 
-  public updateTask(taskId: string, updater: (task: TaskRecord) => TaskRecord): TaskRecord | null {
-    return this.taskRepository.update(taskId, updater);
+  public async updateTask(taskId: string, updater: (task: TaskRecord) => TaskRecord): Promise<TaskRecord | null> {
+    return await this.taskRepository.update(taskId, updater);
   }
 
   // --- Approval Logic ---
 
-  public getApprovals(): ApprovalRecord[] {
+  public async getApprovals(): Promise<ApprovalRecord[]> {
     try {
-      return this.approvalRepository.list();
+      return await this.approvalRepository.list();
     } catch (err) {
       console.error('Failed to load approvals:', err);
     }
@@ -298,23 +298,26 @@ export class Store extends EventEmitter {
     return [];
   }
 
-  public saveApproval(approval: ApprovalRecord) {
-    this.approvalRepository.save(approval);
+  public async saveApproval(approval: ApprovalRecord): Promise<void> {
+    await this.approvalRepository.save(approval);
   }
 
-  public updateApprovalStatus(approvalId: string, status: ApprovalRecord['status']): ApprovalRecord | null {
-    return this.approvalRepository.updateStatus(approvalId, status);
+  public async updateApprovalStatus(
+    approvalId: string,
+    status: ApprovalRecord['status']
+  ): Promise<ApprovalRecord | null> {
+    return await this.approvalRepository.updateStatus(approvalId, status);
   }
 
-  public getApprovalsByTaskId(taskId: string): ApprovalRecord[] {
-    return this.approvalRepository.listByTaskId(taskId);
+  public async getApprovalsByTaskId(taskId: string): Promise<ApprovalRecord[]> {
+    return await this.approvalRepository.listByTaskId(taskId);
   }
 
   // --- Execution Logic ---
 
-  public getExecutions(): ExecutionRecord[] {
+  public async getExecutions(): Promise<ExecutionRecord[]> {
     try {
-      return this.executionRepository.list();
+      return await this.executionRepository.list();
     } catch (err) {
       console.error('Failed to load executions:', err);
     }
@@ -322,19 +325,22 @@ export class Store extends EventEmitter {
     return [];
   }
 
-  public saveExecution(execution: ExecutionRecord) {
-    this.executionRepository.save(execution);
+  public async saveExecution(execution: ExecutionRecord): Promise<void> {
+    await this.executionRepository.save(execution);
   }
 
-  public updateExecution(executionId: string, updater: (execution: ExecutionRecord) => ExecutionRecord): ExecutionRecord | null {
-    return this.executionRepository.update(executionId, updater);
+  public async updateExecution(
+    executionId: string,
+    updater: (execution: ExecutionRecord) => ExecutionRecord
+  ): Promise<ExecutionRecord | null> {
+    return await this.executionRepository.update(executionId, updater);
   }
 
-  public getExecutionById(executionId: string): ExecutionRecord | null {
-    return this.executionRepository.getById(executionId);
+  public async getExecutionById(executionId: string): Promise<ExecutionRecord | null> {
+    return await this.executionRepository.getById(executionId);
   }
 
-  public getExecutionsByTaskId(taskId: string): ExecutionRecord[] {
-    return this.executionRepository.listByTaskId(taskId);
+  public async getExecutionsByTaskId(taskId: string): Promise<ExecutionRecord[]> {
+    return await this.executionRepository.listByTaskId(taskId);
   }
 }

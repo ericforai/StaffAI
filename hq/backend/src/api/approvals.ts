@@ -12,15 +12,16 @@ export function registerApprovalRoutes(
   store: Store,
   dependencies: ApprovalRouteDependencies = {}
 ) {
-  app.get('/api/approvals', (_req, res) => {
+  app.get('/api/approvals', async (_req, res) => {
+    const approvals = await store.getApprovals();
     return res.json({
-      approvals: store.getApprovals(),
+      approvals,
       stage: 'sprint-1-skeleton',
     });
   });
 
-  app.post('/api/approvals/:id/approve', (req, res) => {
-    const approval = approveApproval(req.params.id, store);
+  app.post('/api/approvals/:id/approve', async (req, res) => {
+    const approval = await approveApproval(req.params.id, store);
     if (!approval) {
       return res.status(404).json({
         error: 'approval not found',
@@ -29,7 +30,7 @@ export function registerApprovalRoutes(
       });
     }
 
-    const task = store.updateTask(approval.taskId, (currentTask) => ({
+    const task = await store.updateTask(approval.taskId, (currentTask) => ({
       ...currentTask,
       status: 'created',
       approvalRequired: false,
@@ -44,8 +45,8 @@ export function registerApprovalRoutes(
     });
   });
 
-  app.post('/api/approvals/:id/reject', (req, res) => {
-    const approval = rejectApproval(req.params.id, store);
+  app.post('/api/approvals/:id/reject', async (req, res) => {
+    const approval = await rejectApproval(req.params.id, store);
     if (!approval) {
       return res.status(404).json({
         error: 'approval not found',
@@ -54,7 +55,7 @@ export function registerApprovalRoutes(
       });
     }
 
-    const task = store.updateTask(approval.taskId, (currentTask) => ({
+    const task = await store.updateTask(approval.taskId, (currentTask) => ({
       ...currentTask,
       status: 'cancelled',
       approvalRequired: true,

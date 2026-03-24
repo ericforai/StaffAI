@@ -21,7 +21,7 @@ export async function runAdvancedDiscussionExecution(
     executor,
   });
 
-  store.saveExecution(execution);
+  await store.saveExecution(execution);
 
   if (!runner) {
     return {
@@ -32,8 +32,8 @@ export async function runAdvancedDiscussionExecution(
 
   const result = await runner(task);
   const completed = completeExecution(execution, { summary: result.summary });
-  store.updateExecution(execution.id, () => completed);
-  const updatedTask = store.updateTask(task.id, (currentTask) => ({
+  await store.updateExecution(execution.id, () => completed);
+  const updatedTask = await store.updateTask(task.id, (currentTask) => ({
     ...currentTask,
     status: 'completed',
     updatedAt: new Date().toISOString(),

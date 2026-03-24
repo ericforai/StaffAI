@@ -23,19 +23,19 @@ test('validateTaskDraft rejects empty fields', () => {
   assert.equal(validation.error, 'title and description are required');
 });
 
-test('createTaskDraft builds a routed task and persists it via store', () => {
+test('createTaskDraft builds a routed task and persists it via store', async () => {
   const savedTasks: unknown[] = [];
   const savedApprovals: unknown[] = [];
   const store = {
-    saveTask(task) {
+    async saveTask(task) {
       savedTasks.push(task);
     },
-    saveApproval(approval) {
+    async saveApproval(approval) {
       savedApprovals.push(approval);
     },
   } as Pick<Store, 'saveTask' | 'saveApproval'>;
 
-  const task = createTaskDraft(
+  const task = await createTaskDraft(
     {
       title: 'Refactor server composition',
       description: 'Split route registration from domain logic',

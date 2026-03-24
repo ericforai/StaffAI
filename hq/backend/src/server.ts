@@ -103,8 +103,8 @@ export class WebServer {
       onTaskCreated: (task) => {
         taskEvents.taskCreated(task);
       },
-      onApprovalRequested: (taskId) => {
-        const approvals = this.store.getApprovalsByTaskId(taskId);
+      onApprovalRequested: async (taskId) => {
+        const approvals = await this.store.getApprovalsByTaskId(taskId);
         const latestApproval = approvals[approvals.length - 1];
         if (latestApproval) {
           taskEvents.approvalRequested(latestApproval);

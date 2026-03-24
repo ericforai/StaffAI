@@ -13,45 +13,45 @@ function writeJsonFile(filePath: string, data: unknown) {
 }
 
 export interface TaskRepository {
-  list(): TaskRecord[];
-  getById(taskId: string): TaskRecord | null;
-  save(task: TaskRecord): void;
-  update(taskId: string, updater: (task: TaskRecord) => TaskRecord): TaskRecord | null;
+  list(): Promise<TaskRecord[]>;
+  getById(taskId: string): Promise<TaskRecord | null>;
+  save(task: TaskRecord): Promise<void>;
+  update(taskId: string, updater: (task: TaskRecord) => TaskRecord): Promise<TaskRecord | null>;
 }
 
 export interface ApprovalRepository {
-  list(): ApprovalRecord[];
-  listByTaskId(taskId: string): ApprovalRecord[];
-  save(approval: ApprovalRecord): void;
-  updateStatus(approvalId: string, status: ApprovalRecord['status']): ApprovalRecord | null;
+  list(): Promise<ApprovalRecord[]>;
+  listByTaskId(taskId: string): Promise<ApprovalRecord[]>;
+  save(approval: ApprovalRecord): Promise<void>;
+  updateStatus(approvalId: string, status: ApprovalRecord['status']): Promise<ApprovalRecord | null>;
 }
 
 export interface ExecutionRepository {
-  list(): ExecutionRecord[];
-  getById(executionId: string): ExecutionRecord | null;
-  listByTaskId(taskId: string): ExecutionRecord[];
-  save(execution: ExecutionRecord): void;
+  list(): Promise<ExecutionRecord[]>;
+  getById(executionId: string): Promise<ExecutionRecord | null>;
+  listByTaskId(taskId: string): Promise<ExecutionRecord[]>;
+  save(execution: ExecutionRecord): Promise<void>;
   update(
     executionId: string,
     updater: (execution: ExecutionRecord) => ExecutionRecord
-  ): ExecutionRecord | null;
+  ): Promise<ExecutionRecord | null>;
 }
 
 export function createFileTaskRepository(filePath: string): TaskRepository {
   return {
-    list() {
+    async list() {
       return readJsonFile<TaskRecord[]>(filePath, []);
     },
-    getById(taskId) {
-      return this.list().find((task) => task.id === taskId) || null;
+    async getById(taskId) {
+      return (await this.list()).find((task) => task.id === taskId) || null;
     },
-    save(task) {
-      const tasks = this.list();
+    async save(task) {
+      const tasks = await this.list();
       tasks.push(task);
       writeJsonFile(filePath, tasks);
     },
-    update(taskId, updater) {
-      const tasks = this.list();
+    async update(taskId, updater) {
+      const tasks = await this.list();
       const index = tasks.findIndex((task) => task.id === taskId);
       if (index < 0) {
         return null;
@@ -67,19 +67,19 @@ export function createFileTaskRepository(filePath: string): TaskRepository {
 
 export function createFileApprovalRepository(filePath: string): ApprovalRepository {
   return {
-    list() {
+    async list() {
       return readJsonFile<ApprovalRecord[]>(filePath, []);
     },
-    listByTaskId(taskId) {
-      return this.list().filter((approval) => approval.taskId === taskId);
+    async listByTaskId(taskId) {
+      return (await this.list()).filter((approval) => approval.taskId === taskId);
     },
-    save(approval) {
-      const approvals = this.list();
+    async save(approval) {
+      const approvals = await this.list();
       approvals.push(approval);
       writeJsonFile(filePath, approvals);
     },
-    updateStatus(approvalId, status) {
-      const approvals = this.list();
+    async updateStatus(approvalId, status) {
+      const approvals = await this.list();
       const target = approvals.find((approval) => approval.id === approvalId);
       if (!target) {
         return null;
@@ -95,22 +95,22 @@ export function createFileApprovalRepository(filePath: string): ApprovalReposito
 
 export function createFileExecutionRepository(filePath: string): ExecutionRepository {
   return {
-    list() {
+    async list() {
       return readJsonFile<ExecutionRecord[]>(filePath, []);
     },
-    getById(executionId) {
-      return this.list().find((execution) => execution.id === executionId) || null;
+    async getById(executionId) {
+      return (await this.list()).find((execution) => execution.id === executionId) || null;
     },
-    listByTaskId(taskId) {
-      return this.list().filter((execution) => execution.taskId === taskId);
+    async listByTaskId(taskId) {
+      return (await this.list()).filter((execution) => execution.taskId === taskId);
     },
-    save(execution) {
-      const executions = this.list();
+    async save(execution) {
+      const executions = await this.list();
       executions.push(execution);
       writeJsonFile(filePath, executions);
     },
-    update(executionId, updater) {
-      const executions = this.list();
+    async update(executionId, updater) {
+      const executions = await this.list();
       const index = executions.findIndex((execution) => execution.id === executionId);
       if (index < 0) {
         return null;
@@ -127,16 +127,16 @@ export function createFileExecutionRepository(filePath: string): ExecutionReposi
 export function createInMemoryTaskRepository(seed: TaskRecord[] = []): TaskRepository {
   const tasks = [...seed];
   return {
-    list() {
+    async list() {
       return [...tasks];
     },
-    getById(taskId) {
+    async getById(taskId) {
       return tasks.find((task) => task.id === taskId) || null;
     },
-    save(task) {
+    async save(task) {
       tasks.push(task);
     },
-    update(taskId, updater) {
+    async update(taskId, updater) {
       const index = tasks.findIndex((task) => task.id === taskId);
       if (index < 0) {
         return null;
@@ -150,16 +150,16 @@ export function createInMemoryTaskRepository(seed: TaskRecord[] = []): TaskRepos
 export function createInMemoryApprovalRepository(seed: ApprovalRecord[] = []): ApprovalRepository {
   const approvals = [...seed];
   return {
-    list() {
+    async list() {
       return [...approvals];
     },
-    listByTaskId(taskId) {
+    async listByTaskId(taskId) {
       return approvals.filter((approval) => approval.taskId === taskId);
     },
-    save(approval) {
+    async save(approval) {
       approvals.push(approval);
     },
-    updateStatus(approvalId, status) {
+    async updateStatus(approvalId, status) {
       const target = approvals.find((approval) => approval.id === approvalId);
       if (!target) {
         return null;
@@ -174,19 +174,19 @@ export function createInMemoryApprovalRepository(seed: ApprovalRecord[] = []): A
 export function createInMemoryExecutionRepository(seed: ExecutionRecord[] = []): ExecutionRepository {
   const executions = [...seed];
   return {
-    list() {
+    async list() {
       return [...executions];
     },
-    getById(executionId) {
+    async getById(executionId) {
       return executions.find((execution) => execution.id === executionId) || null;
     },
-    listByTaskId(taskId) {
+    async listByTaskId(taskId) {
       return executions.filter((execution) => execution.taskId === taskId);
     },
-    save(execution) {
+    async save(execution) {
       executions.push(execution);
     },
-    update(executionId, updater) {
+    async update(executionId, updater) {
       const index = executions.findIndex((execution) => execution.id === executionId);
       if (index < 0) {
         return null;

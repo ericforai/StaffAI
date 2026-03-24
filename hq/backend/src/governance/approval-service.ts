@@ -26,7 +26,7 @@ export function evaluateApprovalRequirement(input: ApprovalInput): ApprovalDecis
   };
 }
 
-export function createApprovalRecord(taskId: string, store: Pick<Store, 'saveApproval'>): ApprovalRecord {
+export async function createApprovalRecord(taskId: string, store: Pick<Store, 'saveApproval'>): Promise<ApprovalRecord> {
   const approval: ApprovalRecord = {
     id: randomUUID(),
     taskId,
@@ -35,14 +35,14 @@ export function createApprovalRecord(taskId: string, store: Pick<Store, 'saveApp
     requestedAt: new Date().toISOString(),
   };
 
-  store.saveApproval(approval);
+  await store.saveApproval(approval);
   return approval;
 }
 
-export function approveApproval(approvalId: string, store: Pick<Store, 'updateApprovalStatus'>) {
-  return store.updateApprovalStatus(approvalId, 'approved');
+export async function approveApproval(approvalId: string, store: Pick<Store, 'updateApprovalStatus'>) {
+  return await store.updateApprovalStatus(approvalId, 'approved');
 }
 
-export function rejectApproval(approvalId: string, store: Pick<Store, 'updateApprovalStatus'>) {
-  return store.updateApprovalStatus(approvalId, 'rejected');
+export async function rejectApproval(approvalId: string, store: Pick<Store, 'updateApprovalStatus'>) {
+  return await store.updateApprovalStatus(approvalId, 'rejected');
 }

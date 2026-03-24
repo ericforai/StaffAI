@@ -51,74 +51,74 @@ function makeExecution(overrides: Partial<ExecutionRecord> = {}): ExecutionRecor
   };
 }
 
-test('file-backed task repository supports list/get/save/update', () => {
+test('file-backed task repository supports list/get/save/update', async () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'task-repo-'));
   const filePath = path.join(tempDir, 'tasks.json');
   const repository = createFileTaskRepository(filePath);
 
-  assert.deepEqual(repository.list(), []);
-  repository.save(makeTask());
-  assert.equal(repository.list().length, 1);
-  assert.equal(repository.getById('task-1')?.title, 'Sample task');
+  assert.deepEqual(await repository.list(), []);
+  await repository.save(makeTask());
+  assert.equal((await repository.list()).length, 1);
+  assert.equal((await repository.getById('task-1'))?.title, 'Sample task');
 
-  const updated = repository.update('task-1', (task) => ({ ...task, status: 'completed' }));
+  const updated = await repository.update('task-1', (task) => ({ ...task, status: 'completed' }));
   assert.equal(updated?.status, 'completed');
-  assert.equal(repository.getById('task-1')?.status, 'completed');
+  assert.equal((await repository.getById('task-1'))?.status, 'completed');
 
   fs.rmSync(tempDir, { recursive: true, force: true });
 });
 
-test('file-backed approval repository supports list/save/updateStatus/listByTaskId', () => {
+test('file-backed approval repository supports list/save/updateStatus/listByTaskId', async () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'approval-repo-'));
   const filePath = path.join(tempDir, 'approvals.json');
   const repository = createFileApprovalRepository(filePath);
 
-  repository.save(makeApproval());
-  assert.equal(repository.list().length, 1);
-  assert.equal(repository.listByTaskId('task-1').length, 1);
+  await repository.save(makeApproval());
+  assert.equal((await repository.list()).length, 1);
+  assert.equal((await repository.listByTaskId('task-1')).length, 1);
 
-  const updated = repository.updateStatus('approval-1', 'approved');
+  const updated = await repository.updateStatus('approval-1', 'approved');
   assert.equal(updated?.status, 'approved');
   assert.equal(typeof updated?.resolvedAt, 'string');
 
   fs.rmSync(tempDir, { recursive: true, force: true });
 });
 
-test('file-backed execution repository supports list/get/save/update/listByTaskId', () => {
+test('file-backed execution repository supports list/get/save/update/listByTaskId', async () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'execution-repo-'));
   const filePath = path.join(tempDir, 'executions.json');
   const repository = createFileExecutionRepository(filePath);
 
-  repository.save(makeExecution());
-  assert.equal(repository.list().length, 1);
-  assert.equal(repository.listByTaskId('task-1').length, 1);
-  assert.equal(repository.getById('execution-1')?.status, 'pending');
+  await repository.save(makeExecution());
+  assert.equal((await repository.list()).length, 1);
+  assert.equal((await repository.listByTaskId('task-1')).length, 1);
+  assert.equal((await repository.getById('execution-1'))?.status, 'pending');
 
-  const updated = repository.update('execution-1', (execution) => ({
+  const updated = await repository.update('execution-1', (execution) => ({
     ...execution,
     status: 'completed',
     outputSummary: 'done',
   }));
   assert.equal(updated?.status, 'completed');
-  assert.equal(repository.getById('execution-1')?.outputSummary, 'done');
+  assert.equal((await repository.getById('execution-1'))?.outputSummary, 'done');
 
   fs.rmSync(tempDir, { recursive: true, force: true });
 });
 
-test('in-memory repositories support non-file-backed persistence mode', () => {
+test('in-memory repositories support non-file-backed persistence mode', async () => {
   const taskRepository = createInMemoryTaskRepository();
   const approvalRepository = createInMemoryApprovalRepository();
   const executionRepository = createInMemoryExecutionRepository();
 
-  taskRepository.save(makeTask());
-  approvalRepository.save(makeApproval());
-  executionRepository.save(makeExecution());
+  await taskRepository.save(makeTask());
+  await approvalRepository.save(makeApproval());
+  await executionRepository.save(makeExecution());
 
-  assert.equal(taskRepository.list().length, 1);
-  assert.equal(approvalRepository.list().length, 1);
-  assert.equal(executionRepository.list().length, 1);
+  assert.equal((await taskRepository.list()).length, 1);
+  assert.equal((await approvalRepository.list()).length, 1);
+  assert.equal((await executionRepository.list()).length, 1);
 
-  assert.equal(taskRepository.getById('task-1')?.id, 'task-1');
-  assert.equal(approvalRepository.listByTaskId('task-1').length, 1);
-  assert.equal(executionRepository.listByTaskId('task-1').length, 1);
+  assert.equal((await taskRepository.getById('task-1'))?.id, 'task-1');
+  assert.equal((await approvalRepository.listByTaskId('task-1')).length, 1);
+  assert.equal((await executionRepository.listByTaskId('task-1')).length, 1);
 });

@@ -29,24 +29,24 @@ test('evaluateApprovalRequirement leaves normal work as low risk', () => {
   assert.equal(decision.approvalRequired, false);
 });
 
-test('createApprovalRecord persists a pending approval', () => {
+test('createApprovalRecord persists a pending approval', async () => {
   const approvals: unknown[] = [];
   const store = {
-    saveApproval(approval: ApprovalRecord) {
+    async saveApproval(approval: ApprovalRecord) {
       approvals.push(approval);
     },
   } as Pick<Store, 'saveApproval'>;
 
-  const approval = createApprovalRecord('task-1', store);
+  const approval = await createApprovalRecord('task-1', store);
   assert.equal(approval.taskId, 'task-1');
   assert.equal(approval.status, 'pending');
   assert.equal(approval.requestedBy, 'system');
   assert.equal(approvals.length, 1);
 });
 
-test('approveApproval updates approval status', () => {
+test('approveApproval updates approval status', async () => {
   const store = {
-    updateApprovalStatus(id: string, status: ApprovalStatus) {
+    async updateApprovalStatus(id: string, status: ApprovalStatus) {
       return {
         id,
         taskId: 'task-1',
@@ -58,13 +58,13 @@ test('approveApproval updates approval status', () => {
     },
   } as Pick<Store, 'updateApprovalStatus'>;
 
-  const approval = approveApproval('approval-1', store);
+  const approval = await approveApproval('approval-1', store);
   assert.equal(approval?.status, 'approved');
 });
 
-test('rejectApproval updates approval status', () => {
+test('rejectApproval updates approval status', async () => {
   const store = {
-    updateApprovalStatus(id: string, status: ApprovalStatus) {
+    async updateApprovalStatus(id: string, status: ApprovalStatus) {
       return {
         id,
         taskId: 'task-1',
@@ -76,6 +76,6 @@ test('rejectApproval updates approval status', () => {
     },
   } as Pick<Store, 'updateApprovalStatus'>;
 
-  const approval = rejectApproval('approval-1', store);
+  const approval = await rejectApproval('approval-1', store);
   assert.equal(approval?.status, 'rejected');
 });

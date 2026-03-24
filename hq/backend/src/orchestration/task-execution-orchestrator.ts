@@ -50,7 +50,7 @@ export async function executeTaskRecord(
     };
   }
 
-  const result = runTaskExecution(
+  const result = await runTaskExecution(
     {
       taskId: task.id,
       executor: input.executor,

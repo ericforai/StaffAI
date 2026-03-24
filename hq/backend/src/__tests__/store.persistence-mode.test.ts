@@ -28,7 +28,43 @@ function makeTask(id: string): TaskRecord {
   };
 }
 
-test('store uses memory repositories when AGENCY_PERSISTENCE_MODE=memory', () => {
+function createSqlStateMock() {
+  const rowsByTable = new Map<string, Map<string, Record<string, unknown>>>();
+
+  function getTableStore(tableName: string) {
+    let table = rowsByTable.get(tableName);
+    if (!table) {
+      table = new Map<string, Record<string, unknown>>();
+      rowsByTable.set(tableName, table);
+    }
+    return table;
+  }
+
+  return async function queryMock(...args: unknown[]) {
+    const queryText = typeof args[0] === 'string' ? args[0] : String((args[0] as { text?: string })?.text ?? '');
+    const values = Array.isArray(args[1]) ? (args[1] as unknown[]) : [];
+
+    const insertMatch = queryText.match(/INSERT INTO ("[^"]+"\."[^"]+")/);
+    if (insertMatch) {
+      const table = getTableStore(insertMatch[1]);
+      const id = String(values[0]);
+      const payload = JSON.parse(String(values[1])) as Record<string, unknown>;
+      table.set(id, payload);
+      return { rows: [], rowCount: 1 };
+    }
+
+    const byIdMatch = queryText.match(/SELECT payload FROM ("[^"]+"\."[^"]+") WHERE id = \$1 LIMIT 1/);
+    if (byIdMatch) {
+      const table = getTableStore(byIdMatch[1]);
+      const payload = table.get(String(values[0]));
+      return { rows: payload ? [{ payload }] : [], rowCount: payload ? 1 : 0 };
+    }
+
+    return { rows: [], rowCount: 0 };
+  };
+}
+
+test('store uses memory repositories when AGENCY_PERSISTENCE_MODE=memory', async () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'store-memory-mode-'));
   const tasksFile = path.join(tempDir, 'tasks.json');
   const approvalsFile = path.join(tempDir, 'approvals.json');
@@ -41,10 +77,10 @@ test('store uses memory repositories when AGENCY_PERSISTENCE_MODE=memory', () =>
 
   try {
     const store = new Store();
-    store.saveTask(makeTask('task-memory-1'));
+    await store.saveTask(makeTask('task-memory-1'));
 
-    assert.equal(store.getTasks().length, 1);
-    assert.equal(store.getTaskById('task-memory-1')?.id, 'task-memory-1');
+    assert.equal((await store.getTasks()).length, 1);
+    assert.equal((await store.getTaskById('task-memory-1'))?.id, 'task-memory-1');
     assert.equal(fs.existsSync(tasksFile), false);
     assert.equal(fs.existsSync(approvalsFile), false);
     assert.equal(fs.existsSync(executionsFile), false);
@@ -73,29 +109,24 @@ test('store uses memory repositories when AGENCY_PERSISTENCE_MODE=memory', () =>
   }
 });
 
-async function flushAsyncQueue() {
-  await new Promise<void>((resolve) => setImmediate(resolve));
-  await new Promise<void>((resolve) => setImmediate(resolve));
-}
-
 test('store uses postgres repositories when AGENCY_PERSISTENCE_MODE=postgres', async () => {
   process.env.AGENCY_PERSISTENCE_MODE = 'postgres';
   process.env.AGENCY_POSTGRES_URL = 'postgres://placeholder';
   const executedSql: string[] = [];
   const originalQuery = Pool.prototype.query;
+  const sqlStateMock = createSqlStateMock();
   (Pool.prototype as unknown as {
     query: (...args: unknown[]) => Promise<{ rows: unknown[]; rowCount: number }>;
   }).query = async function queryMock(...args: unknown[]) {
     const queryText = typeof args[0] === 'string' ? args[0] : String((args[0] as { text?: string })?.text ?? '');
     executedSql.push(queryText);
-    return { rows: [], rowCount: 0 };
+    return sqlStateMock(...args);
   };
 
   try {
     const store = new Store();
-    store.saveTask(makeTask('task-postgres-1'));
-    const task = store.getTaskById('task-postgres-1');
-    await flushAsyncQueue();
+    await store.saveTask(makeTask('task-postgres-1'));
+    const task = await store.getTaskById('task-postgres-1');
 
     assert.equal(task?.id, 'task-postgres-1');
     assert.equal(executedSql.some((sql) => sql.includes('CREATE TABLE IF NOT EXISTS "public"."tasks"')), true);
