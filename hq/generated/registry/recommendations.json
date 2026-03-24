@@ -1,0 +1,37 @@
+[
+  {
+    "stage": "brainstorm",
+    "actions": [
+      "hire_experts",
+      "inspect_host_injection"
+    ]
+  },
+  {
+    "stage": "review",
+    "actions": [
+      "run_expert_discussion",
+      "inspect_host_injection"
+    ]
+  },
+  {
+    "stage": "debug",
+    "actions": [
+      "switch_to_serial",
+      "fallback_to_web_ui"
+    ]
+  },
+  {
+    "stage": "ship",
+    "actions": [
+      "run_expert_discussion",
+      "inspect_host_injection"
+    ]
+  },
+  {
+    "stage": "consult",
+    "actions": [
+      "hire_experts",
+      "run_expert_discussion"
+    ]
+  }
+]

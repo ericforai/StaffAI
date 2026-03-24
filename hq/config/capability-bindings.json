@@ -1,0 +1,50 @@
+{
+  "version": "1.0.0",
+  "bindings": [
+    {
+      "id": "qa-browser-runtime",
+      "label": "QA Browser Runtime",
+      "description": "Bind QA/testing experts to browser-capable execution with degraded fallback.",
+      "match": {
+        "departments": ["testing"],
+        "idPatterns": ["evidence", "reality", "qa", "accessibility"]
+      },
+      "runtime": {
+        "requiredCapabilities": ["discussion.orchestrate", "workflow.recommend"],
+        "preferredExecutors": ["codex", "claude"],
+        "fallbackMode": "web_ui",
+        "recommendedHosts": ["claude", "codex"]
+      }
+    },
+    {
+      "id": "review-diff-runtime",
+      "label": "Review Diff Runtime",
+      "description": "Bind review-oriented experts to serial/parallel discussion with report persistence.",
+      "match": {
+        "departments": ["engineering"],
+        "idPatterns": ["review", "security", "threat", "senior", "architect"]
+      },
+      "runtime": {
+        "requiredCapabilities": ["discussion.orchestrate", "discussion.consult", "skill.discover"],
+        "preferredExecutors": ["codex", "claude", "openai"],
+        "fallbackMode": "serial",
+        "recommendedHosts": ["codex", "claude"]
+      }
+    },
+    {
+      "id": "ops-executor-runtime",
+      "label": "Ops Executor Runtime",
+      "description": "Bind operations/support experts to reliable executor fallback ordering.",
+      "match": {
+        "departments": ["support", "project-management"],
+        "idPatterns": ["ops", "infra", "project", "workflow"]
+      },
+      "runtime": {
+        "requiredCapabilities": ["discussion.consult", "executor.claude", "executor.codex"],
+        "preferredExecutors": ["claude", "codex", "openai"],
+        "fallbackMode": "consult_only",
+        "recommendedHosts": ["claude", "codex", "gemini"]
+      }
+    }
+  ]
+}

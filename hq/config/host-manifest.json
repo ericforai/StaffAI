@@ -1,0 +1,74 @@
+{
+  "project": {
+    "name": "The Agency HQ",
+    "stateDir": "~/.agency",
+    "webUrl": "http://localhost:3008",
+    "apiUrl": "http://localhost:3333",
+    "mcpEntry": "hq/backend/dist/mcp-server.js"
+  },
+  "hosts": [
+    {
+      "id": "claude",
+      "label": "Claude Code",
+      "configFile": "CLAUDE.md",
+      "instructionTitle": "The Agency HQ",
+      "snippetTarget": ".claude/CLAUDE.md or project CLAUDE.md",
+      "capabilityLevel": "full",
+      "supportedExecutors": ["claude", "codex", "openai"],
+      "supportsSampling": true,
+      "supportsInjection": true,
+      "supportsRuntimeExecution": true,
+      "injection": {
+        "targetFile": ".claude/CLAUDE.md",
+        "strategy": "append",
+        "priority": "primary"
+      },
+      "degradation": {
+        "mode": "native",
+        "manualFallback": "Fallback to the generated CLAUDE snippet and the HQ Web UI if local runtime wiring is incomplete."
+      }
+    },
+    {
+      "id": "codex",
+      "label": "Codex",
+      "configFile": "AGENTS.md",
+      "instructionTitle": "The Agency HQ",
+      "snippetTarget": ".codex/AGENTS.md or project AGENTS.md",
+      "capabilityLevel": "full",
+      "supportedExecutors": ["codex", "claude", "openai"],
+      "supportsSampling": true,
+      "supportsInjection": true,
+      "supportsRuntimeExecution": true,
+      "injection": {
+        "targetFile": ".codex/AGENTS.md",
+        "strategy": "append",
+        "priority": "primary"
+      },
+      "degradation": {
+        "mode": "native",
+        "manualFallback": "Fallback to the generated AGENTS snippet or use the HQ Web UI when host-side instructions are missing."
+      }
+    },
+    {
+      "id": "gemini",
+      "label": "Gemini CLI",
+      "configFile": "GEMINI.md",
+      "instructionTitle": "The Agency HQ",
+      "snippetTarget": "Project GEMINI.md or workspace instructions",
+      "capabilityLevel": "partial",
+      "supportedExecutors": ["openai"],
+      "supportsSampling": false,
+      "supportsInjection": false,
+      "supportsRuntimeExecution": true,
+      "injection": {
+        "targetFile": "GEMINI.md",
+        "strategy": "manual",
+        "priority": "secondary"
+      },
+      "degradation": {
+        "mode": "partial",
+        "manualFallback": "Use the generated GEMINI snippet manually and fall back to the HQ Web UI for orchestration."
+      }
+    }
+  ]
+}

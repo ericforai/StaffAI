@@ -1,0 +1,11 @@
+[
+  "discussion.orchestrate",
+  "discussion.consult",
+  "host.inject",
+  "agent.discover",
+  "skill.discover",
+  "executor.claude",
+  "executor.codex",
+  "executor.openai",
+  "workflow.recommend"
+]

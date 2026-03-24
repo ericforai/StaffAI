@@ -20,6 +20,31 @@ Born from a Reddit thread and months of iteration, **The Agency** is a growing c
 
 **Think of it as**: Assembling your dream team, except they're AI specialists who never sleep, never complain, and always deliver.
 
+### Runtime Foundation (HQ)
+
+The Agency now ships with **HQ runtime foundation** as a first-class path for real multi-agent execution:
+
+- **Single source of truth**: `hq/config/host-manifest.json`
+- **Host-aware runtime APIs**:
+  - `GET /api/runtime/hosts`
+  - `GET /api/runtime/discovery`
+  - `POST /api/runtime/recommend`
+- **Unified runtime state**: `~/.agency/` (or `AGENCY_HOME`)
+- **Host adapters + degradation policy**: explicit capability levels (`full` / `partial`) and fallback recommendations
+- **Control surface in UI**: runtime host routing, recommendations, and degraded status are visible in the main command deck
+
+Quick bootstrap:
+
+```bash
+cd hq && ./setup.sh
+cd hq && ./start.sh
+```
+
+Then open:
+
+- `http://localhost:3008` for HQ command deck
+- `http://localhost:3333/startup-check` for runtime startup status
+
 ---
 
 ## ⚡ Quick Start
@@ -483,6 +508,12 @@ Each agent is designed with:
 ## 🔌 Multi-Tool Integrations
 
 The Agency works natively with Claude Code, and ships conversion + install scripts so you can use the same agents across every major agentic coding tool.
+
+Integrations now align with the HQ runtime foundation model:
+
+- host-specific instruction injection targets are generated from one manifest
+- host capability differences are explicit (sampling/injection/runtime execution)
+- when a host is partially capable, HQ provides a degraded but usable fallback path instead of failing silently
 
 ### Supported Tools
 

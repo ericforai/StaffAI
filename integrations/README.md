@@ -1,7 +1,32 @@
 # 🔌 Integrations
 
 This directory contains The Agency integrations and converted formats for
-supported agentic coding tools.
+supported agentic coding tools, aligned to the **HQ runtime foundation**
+workflow.
+
+## Runtime Foundation Narrative
+
+Integrations are no longer just file conversion. They are part of one runtime
+story:
+
+1. **Manifest-first host model** in `hq/config/host-manifest.json`
+2. **Generated host artifacts** for instruction injection and compatibility
+3. **Unified runtime state** under `~/.agency/` (or `AGENCY_HOME`)
+4. **Runtime APIs** used by HQ and clients:
+   - `GET /api/runtime/hosts`
+   - `GET /api/runtime/discovery`
+   - `POST /api/runtime/recommend`
+5. **Graceful degradation** when a host is partial (for example manual
+   injection + Web UI fallback)
+
+If you are setting up HQ for host-aware execution, run:
+
+```bash
+cd hq && ./setup.sh
+cd hq && ./start.sh
+```
+
+Then open `http://localhost:3008` for the runtime-aware command deck.
 
 ## Supported Tools
 

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "the-agency-hq": {
+      "command": "node",
+      "args": ["/Users/user/agency-agents/hq/backend/dist/mcp-server.js"]
+    }
+  }
+}

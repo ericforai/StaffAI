@@ -1,0 +1,56 @@
+{
+  "version": "1.0.0",
+  "hosts": [
+    {
+      "hostId": "claude",
+      "policyMode": "enforced",
+      "instructionPriority": ["runtime-snippet", "project-doc", "user-directive"],
+      "toolRouting": {
+        "preferredTools": ["consult_the_agency", "expert_discussion", "find_experts"],
+        "blockedTools": [],
+        "fallbackTools": ["consult_the_agency"]
+      },
+      "stageRecommendations": {
+        "brainstorm": ["find_experts", "consult_the_agency"],
+        "review": ["expert_discussion", "report_task_result"],
+        "debug": ["expert_discussion", "consult_the_agency"],
+        "ship": ["expert_discussion", "report_task_result"],
+        "consult": ["consult_the_agency"]
+      }
+    },
+    {
+      "hostId": "codex",
+      "policyMode": "enforced",
+      "instructionPriority": ["runtime-snippet", "project-doc", "user-directive"],
+      "toolRouting": {
+        "preferredTools": ["consult_the_agency", "expert_discussion", "find_experts"],
+        "blockedTools": [],
+        "fallbackTools": ["consult_the_agency"]
+      },
+      "stageRecommendations": {
+        "brainstorm": ["find_experts", "consult_the_agency"],
+        "review": ["expert_discussion", "report_task_result"],
+        "debug": ["expert_discussion", "consult_the_agency"],
+        "ship": ["expert_discussion", "report_task_result"],
+        "consult": ["consult_the_agency"]
+      }
+    },
+    {
+      "hostId": "gemini",
+      "policyMode": "advisory",
+      "instructionPriority": ["project-doc", "runtime-snippet", "user-directive"],
+      "toolRouting": {
+        "preferredTools": ["consult_the_agency"],
+        "blockedTools": ["expert_discussion"],
+        "fallbackTools": ["consult_the_agency"]
+      },
+      "stageRecommendations": {
+        "brainstorm": ["consult_the_agency"],
+        "review": ["consult_the_agency"],
+        "debug": ["consult_the_agency"],
+        "ship": ["consult_the_agency"],
+        "consult": ["consult_the_agency"]
+      }
+    }
+  ]
+}
