@@ -396,3 +396,30 @@ test('execution detail renders retryable error state for backend failures', asyn
   await expect(page.getByText('Execution detail service failed')).toBeVisible();
   await expect(page.getByRole('button', { name: '重试加载' })).toBeVisible();
 });
+
+test('execution detail surfaces failed execution reasons from the backend payload', async ({ page }) => {
+  await page.route('**/api/executions/execution-failed', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        execution: {
+          id: 'execution-failed',
+          taskId: 'task-1',
+          status: 'failed',
+          executor: 'codex',
+          outputSummary: 'Execution stopped before completion',
+          errorMessage: 'Codex CLI exited with code 1 after the workspace bootstrap step.',
+          startedAt: '2026-03-24T00:00:00.000Z',
+          completedAt: '2026-03-24T00:01:00.000Z',
+        },
+      }),
+    });
+  });
+
+  await page.goto('/executions/execution-failed');
+  await expect(page.getByRole('heading', { name: '执行详情' })).toBeVisible();
+  await expect(page.getByText('failed')).toBeVisible();
+  await expect(page.getByText('失败原因')).toBeVisible();
+  await expect(page.getByText('Codex CLI exited with code 1 after the workspace bootstrap step.')).toBeVisible();
+});

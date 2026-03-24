@@ -104,6 +104,13 @@ export default function ExecutionDetailPage() {
             </div>
           )}
 
+          {execution?.errorMessage && (
+            <div className="mt-4 rounded-[1.2rem] border border-rose-400/30 bg-rose-500/10 p-4">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-rose-200">失败原因</p>
+              <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-rose-50">{execution.errorMessage}</p>
+            </div>
+          )}
+
           {execution?.memoryContextExcerpt && (
             <div className="mt-4 rounded-[1.2rem] border border-white/10 bg-[#0d1118]/85 p-4">
               <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">执行上下文摘录</p>

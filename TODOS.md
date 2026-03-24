@@ -26,4 +26,18 @@
 **Priority:** P2
 **Depends on:** Participant-level failure modeling being implemented and the degraded result shape settling.
 
+## Persistence
+
+### Replace sync-compatible Postgres caching with true read-after-write repositories
+
+**What:** Refactor the task, approval, and execution persistence seam so Postgres-backed repositories use async read/write contracts instead of returning synchronously from an in-process cache.
+
+**Why:** The current Postgres implementation preserves API compatibility by queueing SQL work in the background and serving reads from local memory. That means cold reads can be empty or stale after restart, and multiple app instances can diverge until each one refreshes its own cache.
+
+**Context:** During the 2026-03-24 post-PR diff review for `codex/staffai-platform-sprint1`, we confirmed this is not a missing `await` bug. It is a seam mismatch between synchronous repository/store contracts and async database IO. A correct fix needs an async persistence refactor across the backend call sites.
+
+**Effort:** L
+**Priority:** P1
+**Depends on:** Async repository/store interface redesign and route/service adoption.
+
 ## Completed
