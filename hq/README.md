@@ -4,15 +4,17 @@
 
 The Agency HQ 是一个面向 AI 专家小队的指挥台。它现在有两条主要使用路径：
 
-1. Web UI 里的多代理讨论控制台，适合直接操作、编组、执行和复用专家阵容。
+1. Web UI 里的多代理指挥台，既能组织专家讨论，也能管理任务、审批和执行历史。
 2. MCP 工具链，适合在 Codex / Cursor 等客户端里调用同一套专家能力。
 
 ## 现在可直接用的能力
 
 - 多代理讨论控制台已经集成到 Web 页面主视图中，不再只是角落里的聊天挂件。
 - 可以在页面里完成专家搜索、挑选、雇佣、任务分配、执行和结论汇总。
+- 新增任务、审批、执行历史三个工作区页面，支持查看空态、错误态、降级态和重试入口。
 - 支持把当前专家阵容保存成模板，并一键复用到新的讨论会话。
 - 讨论执行层支持本地 CLI 执行器路线，推荐优先使用 Claude Code / Codex CLI，避免把讨论能力强绑定在 OpenAI API 上。
+- 执行记录现在支持 richer history、字段投影和非文件持久化后端适配。
 
 ## 快速开始
 
@@ -65,7 +67,7 @@ cat hq/generated/registry/hosts.json
 
 ### Web 讨论 API
 
-后端提供两类接口：
+后端提供三类接口：
 
 讨论接口：
 - `POST /api/discussions/search`
@@ -73,6 +75,18 @@ cat hq/generated/registry/hosts.json
 - `POST /api/discussions/run`
 - `GET /api/startup-check`
 - `GET /startup-check`
+
+任务工作区接口：
+- `GET /api/tasks`
+- `POST /api/tasks`
+- `GET /api/tasks/:id`
+- `POST /api/tasks/:id/execute`
+- `GET /api/approvals`
+- `POST /api/approvals/:id/approve`
+- `POST /api/approvals/:id/reject`
+- `GET /api/executions`
+- `GET /api/executions/:id`
+- `GET /api/task-events`
 
 runtime foundation 接口：
 - `GET /api/runtime/hosts`
@@ -140,18 +154,25 @@ hq/
 ├── start.sh                          # 启动前后端
 ├── backend/
 │   └── src/
-│       ├── host-adapters.ts          # 显式 host adapter 层
-│       ├── runtime-state.ts          # 统一状态目录与 snapshot 读写
-│       ├── capability-registry.ts    # runtime capability registry
-│       ├── recommendation-engine.ts  # stage detection + next action recommendation
-│       ├── degradation-policy.ts     # graceful degradation
-│       ├── server.ts                 # Express + runtime/discussion API
+│       ├── api/                      # task / approval / execution / runtime / discussion routes
+│       ├── governance/               # approval policy and records
+│       ├── memory/                   # memory retrieval and summary write-back
+│       ├── observability/            # dashboard and task/discussion event publishers
+│       ├── orchestration/            # consult, discussion, staffing, task workflows
+│       ├── persistence/              # file / memory / postgres repository seams
+│       ├── runtime/                  # execution services and executor adapters
+│       ├── shared/                   # shared task/execution types
+│       ├── server.ts                 # composition root for HQ web server
 │       └── ...
 └── frontend/
     └── src/
         ├── app/page.tsx              # 三栏指挥台布局
+        ├── app/tasks/                # task workspace and task detail
+        ├── app/approvals/            # approval queue
+        ├── app/executions/           # execution detail workspace
         ├── components/DiscussionControlPanel.tsx
         ├── hooks/useRuntimeFoundation.ts
+        ├── hooks/useTaskEventFeed.ts
         └── ...
 ```
 

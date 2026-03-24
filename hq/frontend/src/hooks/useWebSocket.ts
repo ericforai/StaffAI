@@ -8,6 +8,18 @@ export type WsStatus = 'connecting' | 'connected' | 'disconnected';
 
 export interface WsMessage {
   type: string;
+  taskEventType?:
+    | 'task_created'
+    | 'approval_requested'
+    | 'approval_resolved'
+    | 'execution_started'
+    | 'execution_completed'
+    | 'execution_failed'
+    | 'execution_degraded';
+  taskId?: string;
+  approvalId?: string;
+  executionId?: string;
+  timestamp?: string;
   agentId?: string;
   agentName?: string;
   task?: string;

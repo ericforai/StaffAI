@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import Link from 'next/link';
 import { ChevronLeft, FolderHeart, Save, Search, Sparkles, TerminalSquare } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -18,6 +19,7 @@ import { useExpertDiscussionAction } from '../hooks/useExpertDiscussionAction';
 import { useConsultAgencyAction } from '../hooks/useConsultAgencyAction';
 import { useReportTaskResultAction } from '../hooks/useReportTaskResultAction';
 import { useRuntimeFoundation } from '../hooks/useRuntimeFoundation';
+import { useTaskEventFeed } from '../hooks/useTaskEventFeed';
 
 import { DEPT_MAP, API_CONFIG } from '../utils/constants';
 
@@ -32,6 +34,21 @@ interface ToolProgressState {
   progress: number;
   status: 'idle' | 'started' | 'running' | 'completed' | 'failed';
   executor?: 'claude' | 'codex' | 'openai';
+}
+
+function taskEventToneClass(tone: 'neutral' | 'info' | 'success' | 'warning' | 'danger') {
+  switch (tone) {
+    case 'success':
+      return 'text-emerald-200';
+    case 'warning':
+      return 'text-amber-200';
+    case 'danger':
+      return 'text-rose-200';
+    case 'info':
+      return 'text-cyan-200';
+    default:
+      return 'text-slate-400';
+  }
 }
 
 export default function Dashboard() {
@@ -65,6 +82,12 @@ export default function Dashboard() {
   const consultAgencyAction = useConsultAgencyAction();
   const reportTaskResultAction = useReportTaskResultAction();
   const runtimeFoundation = useRuntimeFoundation(expertDiscussionAction.topic, activeIds);
+  const {
+    latestTaskWorkspaceSummary,
+    latestApprovalWorkspaceSummary,
+    latestExecutionWorkspaceSummary,
+    loading: taskEventFeedLoading,
+  } = useTaskEventFeed();
 
   const { status: wsStatus } = useWebSocket({
     onMessage: handleWsMessage,
@@ -115,7 +138,7 @@ export default function Dashboard() {
       timestamp: new Date(),
       agentName: data.agentName || (data.type === 'CONNECTED' ? '系统中心' : '指挥部'),
       type: data.type as ActivityLogType['type'],
-      task: data.type === 'TOOL_PROGRESS' ? data.message : data.task,
+      task: data.type === 'TOOL_PROGRESS' || data.type === 'TASK_EVENT' ? data.message : data.task,
     };
 
     if (data.type === 'AGENT_WORKING' || data.type === 'AGENT_ASSIGNED') {
@@ -134,6 +157,7 @@ export default function Dashboard() {
         'DISCUSSION_STARTED',
         'DISCUSSION_COMPLETED',
         'TOOL_PROGRESS',
+        'TASK_EVENT',
       ].includes(data.type)
     ) {
       setActivities((prev) => [newLog, ...prev].slice(0, 20));
@@ -331,6 +355,30 @@ export default function Dashboard() {
     await reportTaskResultAction.reportTaskResult();
   }, [reportTaskResultAction]);
 
+  const workspaceCards = useMemo(
+    () => [
+      {
+        href: '/tasks',
+        label: '任务工作区',
+        detail: '查看任务列表、状态与详情',
+        summary: latestTaskWorkspaceSummary,
+      },
+      {
+        href: '/approvals',
+        label: '审批队列',
+        detail: '查看高风险任务审批状态',
+        summary: latestApprovalWorkspaceSummary,
+      },
+      {
+        href: '/tasks',
+        label: '执行入口',
+        detail: '后续这里将承接 execution 工作区',
+        summary: latestExecutionWorkspaceSummary,
+      },
+    ],
+    [latestApprovalWorkspaceSummary, latestExecutionWorkspaceSummary, latestTaskWorkspaceSummary]
+  );
+
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(28,117,188,0.18),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(17,212,185,0.12),transparent_28%),#070b12] text-slate-100">
       <div className="mx-auto flex min-h-screen max-w-[1800px] flex-col px-4 py-4 xl:px-6">
@@ -363,6 +411,27 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
+        </div>
+
+        <div className="mb-4 grid gap-3 rounded-[1.8rem] border border-white/10 bg-white/[0.025] p-4 md:grid-cols-3">
+          {workspaceCards.map((item) => (
+            <Link
+              key={item.href + item.label}
+              href={item.href}
+              className="rounded-[1.4rem] border border-white/10 bg-[#0d1118]/85 px-4 py-4 transition-all hover:border-cyan-400/30 hover:bg-cyan-400/6"
+            >
+              <p className="text-sm font-black text-white">{item.label}</p>
+              <p className="mt-2 text-xs leading-relaxed text-slate-500">{item.detail}</p>
+              {item.summary && (
+                <p className={`mt-2 text-[11px] leading-relaxed ${taskEventToneClass(item.summary.tone)}`}>
+                  最新事件：{item.summary.label} · {item.summary.detail}
+                </p>
+              )}
+              {!taskEventFeedLoading && !item.summary && (
+                <p className="mt-2 text-[11px] leading-relaxed text-slate-600">暂无任务事件</p>
+              )}
+            </Link>
+          ))}
         </div>
 
         <div className="grid min-h-0 flex-1 gap-4 xl:grid-cols-[22rem_minmax(0,1fr)_32rem]">

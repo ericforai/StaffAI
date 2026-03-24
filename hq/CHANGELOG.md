@@ -2,6 +2,36 @@
 
 > 记录 The Agency HQ 的已交付能力、架构变化和暂缓事项。
 
+## 2026-03-24 - StaffAI 平台硬化与任务工作区落地
+
+### 已交付
+
+- Web UI 新增任务、审批、执行历史三个工作区页面，主仪表盘可直接跳转并查看实时摘要。
+- 后端新增任务、审批、执行、运行时与任务事件 API，并补齐 richer execution history 查询与字段投影。
+- 执行持久化抽象拆分为 file / memory / postgres 三种模式，为非文件后端存储打通适配层。
+- discussion pipeline 拆分为 orchestration、runtime、observability 等清晰边界，并补齐更完整的自动化测试。
+- startup check 现在会展示真实执行器偏好、生效默认值与回退顺序，便于排查本地 CLI 执行路径。
+
+### 设计变化
+
+- HQ 从“讨论控制台”继续演进为“任务执行指挥台”，讨论、任务和审批工作流共享统一事件投影。
+- 讨论执行从单一路径升级为带回退链路的运行时模型，并显式暴露 degraded / failed participant 状态。
+- `server.ts` 进一步收敛为 composition root，路由、编排、运行时和持久化职责不再混在一个入口文件里。
+
+### 修复与硬化
+
+- 加强执行详情页、任务工作区和审批队列的空态、错误态、重试态展示，避免 smoke-only 覆盖。
+- 讨论收集流程支持有限并发和 participant 级失败建模，不再 silent skip 专家失败。
+- codex discussion runtime 复用 schema 文件，减少多次执行时的临时文件抖动。
+- 运行时与 dashboard 事件映射从业务编排逻辑中拆出，降低 transport/domain mixing。
+
+### 暂缓事项
+
+- startup-check parity tests 仍作为后续补充项保留在根目录 `TODOS.md`。
+- discussion failure-matrix 的扩展测试暂缓到下一轮覆盖。
+
+---
+
 ## 2026-03-19 - HQ 多代理讨论控制台落地
 
 ### 已交付

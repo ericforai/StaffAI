@@ -118,6 +118,15 @@ function mockRuntimeApi(page: Page) {
       return;
     }
 
+    if (pathname === '/api/task-events' && method === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ events: [] }),
+      });
+      return;
+    }
+
     if (pathname === '/api/mcp/capabilities' && method === 'GET') {
       await route.fulfill({
         status: 200,

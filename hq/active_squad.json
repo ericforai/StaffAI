@@ -1,23 +1,5 @@
 {
   "activeAgentIds": [
-    "xiaohongshu-specialist",
-    "tool-evaluator",
-    "sales-data-extraction-agent",
-    "test-results-analyzer",
-    "api-tester",
-    "frontend-developer",
-    "performance-benchmarker",
-    "jira-workflow-steward",
-    "git-workflow-master",
-    "workflow-optimizer",
-    "executive-summary-generator",
-    "bilibili-content-strategist",
-    "content-creator",
-    "linkedin-content-creator",
-    "tiktok-strategist",
-    "supply-chain-strategist",
-    "technical-writer",
-    "programmatic-display-buyer",
-    "growth-hacker"
+    "seo-specialist"
   ]
 }

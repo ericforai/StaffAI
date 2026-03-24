@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **The Agency** is a collection of AI agent specialists organized by domain (engineering, design, marketing, etc.). Each agent is a Markdown file with frontmatter metadata and structured content defining personality, workflows, and deliverables.
 
-**The Agency HQ** (`hq/`) is a web dashboard for managing these agents via MCP (Model Context Protocol).
+**The Agency HQ** (`hq/`) is a web dashboard for managing these agents via MCP (Model Context Protocol). It now includes both the multi-agent discussion deck and task/approval/execution workspaces.
 
 ---
 
@@ -82,20 +82,30 @@ vibe: Personality hook
 hq/
 ├── backend/
 │   └── src/
-│       ├── mcp.ts           # MCP protocol, smart routing, agent task execution
-│       ├── web-server.ts    # Express API for dashboard
-│       ├── store.ts         # JSON file persistence (squad, templates, knowledge)
+│       ├── api/             # Express routes for tasks, approvals, executions, runtime, discussions
+│       ├── governance/      # Approval policy and approval records
+│       ├── memory/          # Memory retrieval and execution summary write-back
+│       ├── observability/   # Dashboard, task, and discussion event publishers
+│       ├── orchestration/   # Consult, discussion, staffing, and task workflows
+│       ├── persistence/     # File/memory/postgres repository seams
+│       ├── runtime/         # Execution services and executor adapters
+│       ├── shared/          # Shared task/execution types
+│       ├── mcp.ts           # MCP protocol and orchestration tools
+│       ├── server.ts        # Composition root for Express + WebSocket dashboard server
+│       ├── store.ts         # Squad/template/knowledge persistence facade
 │       ├── scanner.ts       # Scans agent directories, builds agent registry
-│       ├── translations.ts  # Chinese translations for agent names/descriptions
 │       └── types.ts         # Shared TypeScript interfaces
 │
 └── frontend/
     └── src/
         ├── app/page.tsx             # Main dashboard
-        ├── components/              # AgentCard, ChatPanel, ActivityLog, etc.
-        ├── hooks/                   # useAgents, useWebSocket, useChat
-        ├── utils/constants.ts        # WS_CONFIG, API_CONFIG, DEPT_MAP
-        └── lib/messageParser.ts      # @mention parsing
+        ├── app/tasks/               # Task workspace and task detail
+        ├── app/approvals/           # Approval queue
+        ├── app/executions/          # Execution detail workspace
+        ├── components/              # AgentCard, ActivityLog, DiscussionControlPanel, etc.
+        ├── hooks/                   # useAgents, useWebSocket, task/approval/execution hooks
+        ├── lib/                     # Event projection helpers
+        └── utils/constants.ts       # WS_CONFIG, API_CONFIG, DEPT_MAP
 ```
 
 ### Smart Routing Algorithm
@@ -163,4 +173,8 @@ Available tools:
 - `consult_the_agency` - Smart routing to best expert
 - `manage_staff` - Hire/fire agents
 - `report_task_result` - Save to knowledge base
+- `find_experts` - Discover ranked experts for a topic
+- `hire_experts` - Activate shortlisted experts
+- `assign_expert_tasks` - Assign work to a selected expert set
+- `expert_discussion` - Run the multi-expert discussion workflow
 - `consult_<agent_id>` - Direct expert access

@@ -2,10 +2,41 @@ import fs from 'fs';
 import path from 'path';
 import { EventEmitter } from 'events';
 import { SquadState } from './types';
+import { ApprovalRecord, ExecutionRecord, TaskRecord } from './shared/task-types';
+import {
+  ApprovalRepository,
+  createFileApprovalRepository,
+  createFileExecutionRepository,
+  createFileTaskRepository,
+  createInMemoryApprovalRepository,
+  createInMemoryExecutionRepository,
+  createInMemoryTaskRepository,
+  ExecutionRepository,
+  TaskRepository,
+} from './persistence/file-repositories';
+import {
+  createPostgresApprovalRepository,
+  createPostgresExecutionRepository,
+  createPostgresTaskRepository,
+} from './persistence/postgres-repositories';
 
 const STORE_FILE = path.join(__dirname, '../../active_squad.json');
 const TEMPLATES_FILE = path.join(__dirname, '../../templates.json');
 const KNOWLEDGE_FILE = path.join(__dirname, '../../company_knowledge.json');
+const APPROVALS_FILE = process.env.AGENCY_APPROVALS_FILE || path.join(__dirname, '../../approvals.json');
+const EXECUTIONS_FILE = process.env.AGENCY_EXECUTIONS_FILE || path.join(__dirname, '../../executions.json');
+
+function getTasksFilePath() {
+  return process.env.AGENCY_TASKS_FILE || path.join(__dirname, '../../tasks.json');
+}
+
+function getApprovalsFilePath() {
+  return process.env.AGENCY_APPROVALS_FILE || APPROVALS_FILE;
+}
+
+function getExecutionsFilePath() {
+  return process.env.AGENCY_EXECUTIONS_FILE || EXECUTIONS_FILE;
+}
 
 export interface Template {
   name: string;
@@ -19,11 +50,70 @@ export interface KnowledgeEntry {
   timestamp?: number;
 }
 
+interface StorePersistenceDependencies {
+  taskRepository?: TaskRepository;
+  approvalRepository?: ApprovalRepository;
+  executionRepository?: ExecutionRepository;
+}
+
+function getPersistenceMode(): 'file' | 'memory' | 'postgres' {
+  const raw = (process.env.AGENCY_PERSISTENCE_MODE || 'file').toLowerCase();
+  if (raw === 'postgres') {
+    return 'postgres';
+  }
+  return raw === 'memory' ? 'memory' : 'file';
+}
+
+function getPostgresConnectionString(): string {
+  const value = process.env.AGENCY_POSTGRES_URL || process.env.DATABASE_URL;
+  if (!value) {
+    throw new Error(
+      'Postgres persistence requires AGENCY_POSTGRES_URL or DATABASE_URL when AGENCY_PERSISTENCE_MODE=postgres'
+    );
+  }
+  return value;
+}
+
 export class Store extends EventEmitter {
   private state: SquadState = { activeAgentIds: [] };
+  private taskRepository: TaskRepository;
+  private approvalRepository: ApprovalRepository;
+  private executionRepository: ExecutionRepository;
 
-  constructor() {
+  constructor(dependencies: StorePersistenceDependencies = {}) {
     super();
+    const mode = getPersistenceMode();
+    const postgresOptions =
+      mode === 'postgres'
+        ? {
+            connectionString: getPostgresConnectionString(),
+            schema: process.env.AGENCY_POSTGRES_SCHEMA || 'public',
+            taskTable: process.env.AGENCY_POSTGRES_TASKS_TABLE,
+            approvalTable: process.env.AGENCY_POSTGRES_APPROVALS_TABLE,
+            executionTable: process.env.AGENCY_POSTGRES_EXECUTIONS_TABLE,
+          }
+        : null;
+    this.taskRepository =
+      dependencies.taskRepository ??
+      (mode === 'memory'
+        ? createInMemoryTaskRepository()
+        : mode === 'postgres'
+          ? createPostgresTaskRepository(postgresOptions!)
+          : createFileTaskRepository(getTasksFilePath()));
+    this.approvalRepository =
+      dependencies.approvalRepository ??
+      (mode === 'memory'
+        ? createInMemoryApprovalRepository()
+        : mode === 'postgres'
+          ? createPostgresApprovalRepository(postgresOptions!)
+          : createFileApprovalRepository(getApprovalsFilePath()));
+    this.executionRepository =
+      dependencies.executionRepository ??
+      (mode === 'memory'
+        ? createInMemoryExecutionRepository()
+        : mode === 'postgres'
+          ? createPostgresExecutionRepository(postgresOptions!)
+          : createFileExecutionRepository(getExecutionsFilePath()));
     this.load();
   }
 
@@ -170,5 +260,87 @@ export class Store extends EventEmitter {
 
     // 返回得分最高的 N 条
     return scored.slice(0, limit).map(item => item.entry);
+  }
+
+  // --- Task Logic ---
+
+  public async getTasks(): Promise<TaskRecord[]> {
+    try {
+      return await this.taskRepository.list();
+    } catch (err) {
+      console.error('Failed to load tasks:', err);
+    }
+
+    return [];
+  }
+
+  public async saveTask(task: TaskRecord): Promise<void> {
+    await this.taskRepository.save(task);
+  }
+
+  public async getTaskById(taskId: string): Promise<TaskRecord | null> {
+    return await this.taskRepository.getById(taskId);
+  }
+
+  public async updateTask(taskId: string, updater: (task: TaskRecord) => TaskRecord): Promise<TaskRecord | null> {
+    return await this.taskRepository.update(taskId, updater);
+  }
+
+  // --- Approval Logic ---
+
+  public async getApprovals(): Promise<ApprovalRecord[]> {
+    try {
+      return await this.approvalRepository.list();
+    } catch (err) {
+      console.error('Failed to load approvals:', err);
+    }
+
+    return [];
+  }
+
+  public async saveApproval(approval: ApprovalRecord): Promise<void> {
+    await this.approvalRepository.save(approval);
+  }
+
+  public async updateApprovalStatus(
+    approvalId: string,
+    status: ApprovalRecord['status']
+  ): Promise<ApprovalRecord | null> {
+    return await this.approvalRepository.updateStatus(approvalId, status);
+  }
+
+  public async getApprovalsByTaskId(taskId: string): Promise<ApprovalRecord[]> {
+    return await this.approvalRepository.listByTaskId(taskId);
+  }
+
+  // --- Execution Logic ---
+
+  public async getExecutions(): Promise<ExecutionRecord[]> {
+    try {
+      return await this.executionRepository.list();
+    } catch (err) {
+      console.error('Failed to load executions:', err);
+    }
+
+    return [];
+  }
+
+  public async saveExecution(execution: ExecutionRecord): Promise<void> {
+    await this.executionRepository.save(execution);
+  }
+
+  public async updateExecution(
+    executionId: string,
+    updater: (execution: ExecutionRecord) => ExecutionRecord
+  ): Promise<ExecutionRecord | null> {
+    return await this.executionRepository.update(executionId, updater);
+  }
+
+  public async getExecutionById(executionId: string): Promise<ExecutionRecord | null> {
+    return await this.executionRepository.getById(executionId);
+  }
+
+  public async getExecutionsByTaskId(taskId: string): Promise<ExecutionRecord[]> {
+    return await this.executionRepository.listByTaskId(taskId);
   }
 }

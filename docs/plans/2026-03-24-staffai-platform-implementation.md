@@ -10,6 +10,70 @@
 
 ---
 
+## Execution Status
+
+### Snapshot
+
+- [x] Sprint 1 started and largely completed
+- [x] Sprint 2 task + approval core loop implemented
+- [x] Sprint 3 lightweight execution path implemented
+- [x] Sprint 4 multi-page workspace MVP implemented
+- [x] Sprint 5 memory + observability started, first baseline landed
+- [x] PostgreSQL-backed persistence adapter implemented (`pg` repositories landed)
+- [x] Full discussion-service slimming completed to thin orchestration facade
+
+### Completed So Far
+
+- [x] Shared task vocabulary and execution modes
+- [x] Thin API seams for tasks / approvals / executions
+- [x] Task creation, list, detail, and newest-first ordering
+- [x] Approval generation, listing, approve, reject
+- [x] Execution creation and execution detail retrieval
+- [x] Advanced discussion mode wired into task execution flow
+- [x] Task read models for task list and task detail
+- [x] Multi-page frontend workspace (`/tasks`, `/tasks/[id]`, `/approvals`, `/executions/[id]`)
+- [x] Task creation from frontend workspace
+- [x] Task execution from frontend workspace
+- [x] Approval queue actions from frontend workspace
+- [x] Backend test suite green
+- [x] Frontend lint green
+- [x] Task workspace smoke E2E green
+- [x] `.ai/` memory retrieval + execution summary writeback baseline
+- [x] `task-events` observability helper baseline
+- [x] `GET /api/task-events` event feed endpoint (recent ring buffer)
+- [x] Task Detail page wired to task-scoped event timeline (API snapshot + refresh)
+- [x] Task Detail task-events upgraded to API snapshot + WS incremental realtime updates
+- [x] Task List page shows per-task latest event summary (feed projection)
+- [x] Approval Queue page shows task-event summary for pending and listed approvals
+- [x] Persistence seam introduced (`Task/Approval/Execution` repositories + file adapters)
+- [x] Expert ranking seam extracted from `discussion-service.ts` into orchestration module
+- [x] Backend full suite expanded and remains green (109 tests)
+- [x] `AGENCY_PERSISTENCE_MODE=memory` baseline landed (non-file-backed runtime mode)
+- [x] Execution history list endpoint added: `GET /api/executions` (supports `taskId` filter)
+- [x] `DashboardEvent` transport type extracted from `discussion-service.ts` into `observability`
+- [x] Discussion executor/runtime boundary extracted via `runtime/discussion-runtime.ts`
+- [x] PostgreSQL persistence adapter landed (`persistence/postgres-repositories.ts`, env-configurable)
+- [x] Executions API no longer returns sprint skeleton stage (`stage: production`)
+- [x] Backend suite now 117 tests green after seam + skeleton + runtime extraction
+- [x] Discussion execution prompt/runtime calls extracted from `discussion-service.ts` into `runtime/discussion-execution-facade.ts`
+- [x] Dashboard-wide task-event projection helper rollout landed (Dashboard / Tasks / Approvals)
+- [x] Backend suite now 128 tests green after discussion-service seam completion
+
+### Recently Closed
+
+- [x] Continue extracting seams from `discussion-service.ts` (completed in current branch)
+- [x] Continue hardening workspace UX beyond smoke coverage
+- [x] Continue reducing transport/domain mixing in backend modules
+
+### Additional Milestones
+
+- [x] `.ai/` memory indexing and retrieval hardening (weighted ranking + fallback + truncation landed)
+- [x] `task-events` / observability helper layer hardening (dashboard-wide rollout landed with shared projection helper)
+- [x] richer execution history and non-file-backed persistence (history API projections + postgres adapter landed)
+- [x] full `discussion-service` reduction to thin orchestration facade
+
+---
+
 ## Implementation Rules
 
 - Use TDD for every new core path: failing test first, then minimal implementation, then refactor.
@@ -21,6 +85,17 @@
   - database-backed model design now: `Task`, `Approval`
   - lightweight/in-memory-or-file-backed for now: `Assignment`, `Execution`
 - Full naming migration from `discussion-first` to `task/orchestration/execution-first` is in scope.
+
+## Architecture Defense Rules
+
+- `api/` owns request/response mapping, validation, and route composition only.
+- `orchestration/` owns task planning, routing, state progression, and synthesis only.
+- `runtime/` owns executor interaction, timeout handling, degradation, and execution results only.
+- `governance/` owns risk policy, approval decisions, and audit hooks only.
+- `memory/` owns context retrieval and writeback only.
+- `observability/` owns logging, event emission, and trace helpers only.
+- No bounded context may directly mutate another context's primary state without going through an explicit interface.
+- If a file approaches 500 lines or mixes transport + domain + persistence concerns, split it before adding more behavior.
 
 ## ASCII Architecture Map
 
@@ -137,7 +212,11 @@ UI Pages
 
 ## Sprint 1: Platform Skeleton + Naming Reset
 
+Status: `[x] Mostly complete`
+
 ### Epic 1.1: Lock the new language and boundaries
+
+Status: `[x] Complete enough for current branch`
 
 **Files:**
 - Modify: `hq/backend/src/server.ts`
@@ -170,6 +249,8 @@ Expected: PASS for new naming/boundary tests.
 
 ### Epic 1.2: Add architecture defense rules to docs and plan
 
+Status: `[x] Complete`
+
 **Files:**
 - Modify: `ai员工管理系统开发计划.md`
 - Modify: `docs/plans/2026-03-24-staffai-platform-implementation.md`
@@ -187,7 +268,11 @@ Expected: PASS for new naming/boundary tests.
 
 ## Sprint 2: Task + Approval Core Loop
 
+Status: `[x] Core loop complete on file-backed persistence`
+
 ### Epic 2.1: Create the first Task model and task routes
+
+Status: `[x] Complete`
 
 **Files:**
 - Create: `hq/backend/src/api/tasks.ts`
@@ -219,6 +304,8 @@ Run: `cd /Users/user/agency-agents/hq/backend && npm test`
 Expected: PASS with task creation and route tests green.
 
 ### Epic 2.2: Create the Approval core
+
+Status: `[x] Complete`
 
 **Files:**
 - Create: `hq/backend/src/api/approvals.ts`
@@ -253,7 +340,11 @@ Expected: PASS with approvals green.
 
 ## Sprint 3: Runtime + Lightweight Execution
 
+Status: `[x] Core runtime path complete`
+
 ### Epic 3.1: Extract runtime interface from current discussion flow
+
+Status: `[x] Core path complete`
 
 **Files:**
 - Create: `hq/backend/src/runtime/runtime-adapter.ts`
@@ -286,6 +377,8 @@ Expected: PASS with execution and compatibility coverage.
 
 ### Epic 3.2: Add failure-path coverage
 
+Status: `[x] Core failure paths covered`
+
 **Files:**
 - Modify: `hq/backend/src/__tests__/task-orchestrator.test.ts`
 - Modify: `hq/backend/src/__tests__/approval-service.test.ts`
@@ -306,7 +399,11 @@ Expected: PASS with no silent-failure behavior.
 
 ## Sprint 4: Multi-Page Frontend + Read Models
 
+Status: `[x] MVP in place`
+
 ### Epic 4.1: Move from dashboard-first to multi-page workflow
+
+Status: `[x] MVP complete`
 
 **Files:**
 - Create: `hq/frontend/src/app/tasks/page.tsx`
@@ -334,6 +431,8 @@ Expected: PASS with no silent-failure behavior.
 
 ### Epic 4.2: Add page-specific read models
 
+Status: `[x] Task + approval + execution read models present`
+
 **Files:**
 - Create: `hq/frontend/src/hooks/useTasks.ts`
 - Create: `hq/frontend/src/hooks/useTaskDetail.ts`
@@ -356,6 +455,8 @@ Expected: PASS with no silent-failure behavior.
 
 ### Epic 4.3: Add required E2E
 
+Status: `[x] Smoke E2E complete`
+
 **Files:**
 - Create: `hq/frontend/tests/e2e/tasks.spec.ts`
 - Create: `hq/frontend/tests/e2e/approvals.spec.ts`
@@ -375,7 +476,11 @@ Expected: PASS for critical user flows.
 
 ## Sprint 5: Memory + Observability + Review Cleanup
 
+Status: `[x] Started with baseline complete`
+
 ### Epic 5.1: Introduce `.ai/` memory loading and writeback
+
+Status: `[x] Baseline complete`
 
 **Files:**
 - Create: `hq/backend/src/memory/memory-indexer.ts`
@@ -397,6 +502,8 @@ Expected: PASS for critical user flows.
 - write summary after execution
 
 ### Epic 5.2: Keep logs simple but visible
+
+Status: `[x] Baseline complete`
 
 **Files:**
 - Create: `hq/backend/src/observability/task-events.ts`
