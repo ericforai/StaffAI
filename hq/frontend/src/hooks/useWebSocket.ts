@@ -2,7 +2,7 @@
  * WebSocket 连接管理 Hook
  */
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { WS_CONFIG } from '../utils/constants';
+import { WS_CONFIG, getWsUrl } from '../utils/constants';
 
 export type WsStatus = 'connecting' | 'connected' | 'disconnected';
 
@@ -44,6 +44,8 @@ export function useWebSocket({ onMessage, onError }: UseWebSocketOptions) {
   const [status, setWsStatus] = useState<WsStatus>('connecting');
   const ws = useRef<WebSocket | null>(null);
   const reconnectTimer = useRef<NodeJS.Timeout | null>(null);
+  const lastWsUrlRef = useRef<string>(getWsUrl());
+  const hasConnectedRef = useRef(false);
   // 使用 ref 存储 callbacks以避免依赖变化
   const callbacksRef = useRef({ onMessage, onError });
 
@@ -64,9 +66,12 @@ export function useWebSocket({ onMessage, onError }: UseWebSocketOptions) {
     setWsStatus('connecting');
 
     try {
-      const socket = new WebSocket(WS_CONFIG.URL);
+      const wsUrl = getWsUrl();
+      lastWsUrlRef.current = wsUrl;
+      const socket = new WebSocket(wsUrl);
 
       socket.onopen = () => {
+        hasConnectedRef.current = true;
         setWsStatus('connected');
       };
 
@@ -81,12 +86,15 @@ export function useWebSocket({ onMessage, onError }: UseWebSocketOptions) {
 
       socket.onclose = () => {
         setWsStatus('disconnected');
+        if (hasConnectedRef.current) {
+          console.warn(`WebSocket disconnected; retrying in ${WS_CONFIG.RECONNECT_DELAY}ms.`);
+        }
         // 3秒后重连
         reconnectTimer.current = setTimeout(connectSocket, WS_CONFIG.RECONNECT_DELAY);
       };
 
       socket.onerror = (error) => {
-        console.error('WebSocket error:', error);
+        console.warn(`WebSocket connection failed for ${lastWsUrlRef.current}; waiting for reconnect.`);
         callbacksRef.current.onError?.(error);
       };
 

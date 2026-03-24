@@ -18,15 +18,53 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
+function getBrowserBackendHost() {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  return window.location.hostname || 'localhost';
+}
+
+function getDefaultWsUrl() {
+  const host = getBrowserBackendHost();
+
+  if (!host) {
+    return 'ws://127.0.0.1:3333';
+  }
+
+  const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+  return `${protocol}://${host}:3333`;
+}
+
+function getDefaultApiUrl() {
+  const host = getBrowserBackendHost();
+
+  if (!host) {
+    return 'http://localhost:3333/api';
+  }
+
+  const protocol = window.location.protocol === 'https:' ? 'https' : 'http';
+  return `${protocol}://${host}:3333/api`;
+}
+
+export function getWsUrl() {
+  return process.env.NEXT_PUBLIC_WS_URL || getDefaultWsUrl();
+}
+
+export function getApiBaseUrl() {
+  return process.env.NEXT_PUBLIC_API_URL || getDefaultApiUrl();
+}
+
 // WebSocket 配置
 export const WS_CONFIG = {
-  URL: process.env.NEXT_PUBLIC_WS_URL || 'ws://127.0.0.1:3333',
+  URL: getWsUrl(),
   RECONNECT_DELAY: 3000,
 } as const;
 
 // API 配置
 export const API_CONFIG = {
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333/api',
+  BASE_URL: getApiBaseUrl(),
 } as const;
 
 // UI 配置
