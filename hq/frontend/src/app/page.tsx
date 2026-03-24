@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, FolderHeart, Save, Search, Sparkles, TerminalSquare } from 'lucide-react';
+import { ChevronLeft, FolderHeart, Save, Search, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 import { AgentCard } from '../components/AgentCard';
@@ -39,15 +39,15 @@ interface ToolProgressState {
 function taskEventToneClass(tone: 'neutral' | 'info' | 'success' | 'warning' | 'danger') {
   switch (tone) {
     case 'success':
-      return 'text-emerald-200';
+      return 'text-emerald-700';
     case 'warning':
-      return 'text-amber-200';
+      return 'text-amber-700';
     case 'danger':
-      return 'text-rose-200';
+      return 'text-rose-700';
     case 'info':
-      return 'text-cyan-200';
+      return 'text-sky-700';
     default:
-      return 'text-slate-400';
+      return 'text-slate-600';
   }
 }
 
@@ -380,22 +380,17 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(28,117,188,0.18),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(17,212,185,0.12),transparent_28%),#070b12] text-slate-100">
-      <div className="mx-auto flex min-h-screen max-w-[1800px] flex-col px-4 py-4 xl:px-6">
-        <div className="mb-4 grid gap-4 rounded-[2rem] border border-white/10 bg-white/[0.03] px-6 py-6 shadow-[0_25px_80px_rgba(0,0,0,0.28)] xl:grid-cols-[1.2fr_0.8fr]">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(181,210,222,0.45),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(229,206,181,0.38),transparent_22%),linear-gradient(180deg,#f8f5ef_0%,#f4efe6_48%,#f1ece3_100%)] text-slate-800">
+      <div className="mx-auto flex min-h-screen max-w-[1680px] flex-col px-4 py-5 xl:px-6">
+        <div className="mb-5 grid gap-4 rounded-[2.3rem] border border-[#dfd5c8] bg-[#fffdfa]/92 px-7 py-7 shadow-[0_24px_70px_rgba(128,110,82,0.10)] xl:grid-cols-[1.28fr_0.72fr]">
           <div>
-            <div className="mb-4 flex items-center gap-4">
-              <div className="rounded-[1.7rem] bg-gradient-to-br from-cyan-400 to-blue-600 p-4 shadow-[0_15px_40px_rgba(34,211,238,0.28)]">
-                <TerminalSquare className="h-8 w-8 text-white" />
-              </div>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.38em] text-cyan-300/80">The Agency HQ</p>
-                <h1 className="text-4xl font-black tracking-tight text-white md:text-5xl">Multi-Agent Command Deck</h1>
-              </div>
-            </div>
+            <p className="text-[11px] font-black tracking-[0.28em] text-[#8c7560]">AGENCY 指挥台</p>
+            <h1 className="mt-3 max-w-4xl text-4xl font-black tracking-tight text-slate-950 md:text-5xl">
+              更安静、更清楚的多专家工作台
+            </h1>
 
-            <p className="max-w-3xl text-sm leading-relaxed text-slate-400 md:text-base">
-              这里不是传统的工具堆叠页，而是一块为专家编组、任务分配和讨论综合而设计的指挥台。左侧管理组织和日志，中间挑选人才与查看阵容，右侧驱动真实多代理讨论。
+            <p className="mt-4 max-w-3xl text-[17px] leading-8 text-slate-600">
+              这次把整个界面往“工作台”而不是“后台工具”推进了一步。信息仍然完整，但层级更轻、阅读更顺，左侧看阵容，中间选专家，右侧推进讨论，不需要在一屏里和太多边框与深色块对抗。
             </p>
           </div>
 
@@ -405,47 +400,47 @@ export default function Dashboard() {
               ['模板存档', String(templates.length)],
               ['活跃部门', String(Object.keys(deptStats).length)],
             ].map(([label, value]) => (
-              <div key={label} className="rounded-[1.6rem] border border-white/10 bg-[#0d1118]/85 px-4 py-4">
-                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">{label}</p>
-                <p className="mt-3 text-3xl font-black tracking-tight text-white">{value}</p>
+              <div key={label} className="rounded-[1.5rem] border border-[#e6ddd2] bg-[#fbf7f1] px-4 py-5">
+                <p className="text-[11px] font-black tracking-[0.16em] text-slate-500">{label}</p>
+                <p className="mt-2 text-3xl font-black tracking-tight text-slate-950">{value}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="mb-4 grid gap-3 rounded-[1.8rem] border border-white/10 bg-white/[0.025] p-4 md:grid-cols-3">
+        <div className="mb-5 grid gap-3 rounded-[2rem] border border-[#dfd5c8] bg-[#fffdfa]/88 p-4 md:grid-cols-3">
           {workspaceCards.map((item) => (
             <Link
               key={item.href + item.label}
               href={item.href}
-              className="rounded-[1.4rem] border border-white/10 bg-[#0d1118]/85 px-4 py-4 transition-all hover:border-cyan-400/30 hover:bg-cyan-400/6"
+              className="rounded-[1.55rem] border border-[#ebe2d7] bg-[#fcf9f4] px-5 py-5 transition-all hover:border-[#cfbfac] hover:bg-[#f7f1e8]"
             >
-              <p className="text-sm font-black text-white">{item.label}</p>
-              <p className="mt-2 text-xs leading-relaxed text-slate-500">{item.detail}</p>
+              <p className="text-lg font-black tracking-tight text-slate-900">{item.label}</p>
+              <p className="mt-2 text-sm leading-7 text-slate-600">{item.detail}</p>
               {item.summary && (
-                <p className={`mt-2 text-[11px] leading-relaxed ${taskEventToneClass(item.summary.tone)}`}>
+                <p className={`mt-4 text-xs leading-6 ${taskEventToneClass(item.summary.tone)}`}>
                   最新事件：{item.summary.label} · {item.summary.detail}
                 </p>
               )}
               {!taskEventFeedLoading && !item.summary && (
-                <p className="mt-2 text-[11px] leading-relaxed text-slate-600">暂无任务事件</p>
+                <p className="mt-3 text-xs leading-6 text-slate-500">暂无任务事件</p>
               )}
             </Link>
           ))}
         </div>
 
-        <div className="grid min-h-0 flex-1 gap-4 xl:grid-cols-[22rem_minmax(0,1fr)_32rem]">
+        <div className="grid min-h-0 flex-1 gap-5 xl:grid-cols-[19rem_minmax(0,1.16fr)_23.5rem]">
           <aside className="flex min-h-0 flex-col gap-4">
-            <section className="rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(16,21,32,0.96),rgba(10,14,22,0.96))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.24)]">
+            <section className="rounded-[2rem] border border-[#dfd5c8] bg-[#fffdfa]/94 p-5 shadow-[0_14px_44px_rgba(128,110,82,0.08)]">
               <div className="mb-4 flex items-center justify-between">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.28em] text-cyan-300/70">Squad Storage</p>
-                  <h2 className="mt-1 text-lg font-black tracking-tight text-white">公司预设存档</h2>
+                  <p className="text-[11px] font-black tracking-[0.22em] text-slate-500">小队存档</p>
+                  <h2 className="mt-1 text-xl font-black tracking-tight text-slate-900">常用阵容</h2>
                 </div>
                 {activeIds.length > 0 && (
                   <button
                     onClick={() => setShowSaveInput(true)}
-                    className="rounded-full border border-white/10 bg-white/[0.04] p-2 text-slate-300 transition-all hover:border-cyan-400/40 hover:text-white"
+                    className="rounded-full border border-[#ddd3c7] bg-[#f7f2ea] p-2 text-slate-600 transition-all hover:border-[#b7a894] hover:text-slate-900"
                   >
                     <Save className="h-4 w-4" />
                   </button>
@@ -468,34 +463,34 @@ export default function Dashboard() {
                   <button
                     key={template.name}
                     onClick={() => applyTemplate(template)}
-                    className="flex w-full items-center justify-between rounded-[1.4rem] border border-white/10 bg-white/[0.04] px-4 py-4 text-left transition-all hover:border-cyan-400/30 hover:bg-cyan-400/8"
+                    className="flex w-full items-center justify-between rounded-[1.2rem] border border-[#e5ddd2] bg-[#f7f3ed] px-4 py-4 text-left transition-all hover:border-[#c6b9a8] hover:bg-[#f1ebe2]"
                   >
                     <div className="flex items-center gap-3">
-                      <FolderHeart className="h-4 w-4 text-rose-300" />
-                      <span className="text-sm font-black text-white">{template.name}</span>
+                      <FolderHeart className="h-4 w-4 text-[#b16f6f]" />
+                      <span className="text-sm font-black text-slate-900">{template.name}</span>
                     </div>
-                    <span className="rounded-full bg-[#0d1118] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                    <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-black text-slate-500">
                       {template.activeAgentIds.length}
                     </span>
                   </button>
                 ))}
 
                 {templates.length === 0 && (
-                  <div className="rounded-[1.4rem] border border-dashed border-white/10 bg-[#0d1118] px-4 py-4 text-sm text-slate-500">
+                  <div className="rounded-[1.2rem] border border-dashed border-[#d9d0c4] bg-[#f7f3ed] px-4 py-4 text-sm leading-7 text-slate-600">
                     还没有保存的小队模板。先在左侧或讨论控制台保存一组阵容。
                   </div>
                 )}
               </div>
             </section>
 
-            <section className="flex min-h-0 flex-1 flex-col rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(13,17,24,0.96),rgba(10,14,22,0.94))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.24)]">
+            <section className="flex min-h-0 flex-1 flex-col rounded-[2rem] border border-[#dfd5c8] bg-[#fffdfa]/94 p-5 shadow-[0_14px_44px_rgba(128,110,82,0.08)]">
               <div className="mb-4 flex items-center justify-between">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.28em] text-cyan-300/70">Active Roster</p>
-                  <h2 className="mt-1 text-lg font-black tracking-tight text-white">在职专家名单</h2>
+                  <p className="text-[11px] font-black tracking-[0.22em] text-slate-500">当前阵容</p>
+                  <h2 className="mt-1 text-xl font-black tracking-tight text-slate-900">在岗专家</h2>
                 </div>
-                <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">
-                  {activeIds.length} online
+                <div className="rounded-full border border-[#ddd3c7] bg-[#f7f2ea] px-3 py-1 text-[11px] font-black text-slate-600">
+                  {activeIds.length} 位在岗
                 </div>
               </div>
 
@@ -512,23 +507,23 @@ export default function Dashboard() {
                 ))}
 
                 {activeAgents.length === 0 && (
-                  <div className="rounded-[1.4rem] border border-dashed border-white/10 bg-[#0d1118] px-4 py-5 text-sm text-slate-500">
+                  <div className="rounded-[1.2rem] border border-dashed border-[#d9d0c4] bg-[#f7f3ed] px-4 py-5 text-sm leading-7 text-slate-600">
                     当前没有在职专家。你可以从中间人才池加入，或者直接在右侧讨论控制台搜索并雇佣。
                   </div>
                 )}
               </div>
             </section>
 
-            <section className="rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(13,17,24,0.96),rgba(10,14,22,0.94))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.24)]">
+            <section className="rounded-[2rem] border border-[#dfd5c8] bg-[#fffdfa]/94 p-5 shadow-[0_14px_44px_rgba(128,110,82,0.08)]">
               <ActivityLog activities={activities} wsStatus={wsStatus} />
             </section>
           </aside>
 
           <main className="flex min-h-0 flex-col gap-4">
-            <section className="rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(15,20,30,0.96),rgba(10,14,22,0.94))] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.24)]">
+            <section className="rounded-[2rem] border border-[#dfd5c8] bg-[#fffdfa]/94 p-5 shadow-[0_14px_44px_rgba(128,110,82,0.08)]">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-cyan-300/70">Talent Pool</p>
+                  <p className="text-[11px] font-black tracking-[0.22em] text-slate-500">人才池</p>
                   <div className="mt-2 flex items-center gap-4">
                     <div
                       onClick={() => {
@@ -537,29 +532,29 @@ export default function Dashboard() {
                       }}
                       className="cursor-pointer"
                     >
-                      <h2 className={`text-3xl font-black tracking-tight md:text-4xl ${!currentDept ? 'text-white' : 'text-slate-600 hover:text-slate-400'}`}>
-                        Expert Discovery Board
+                      <h2 className={`text-3xl font-black tracking-tight md:text-4xl ${!currentDept ? 'text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}>
+                        专家发现板
                       </h2>
                     </div>
 
                     {currentDept && (
-                      <div className="flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2">
+                      <div className="flex items-center gap-3 rounded-full border border-[#ddd3c7] bg-[#f7f2ea] px-4 py-2">
                         <ChevronLeft
-                          className="h-4 w-4 cursor-pointer text-slate-500 transition-colors hover:text-cyan-300"
+                          className="h-4 w-4 cursor-pointer text-slate-500 transition-colors hover:text-slate-800"
                           onClick={() => setCurrentDept(null)}
                         />
-                        <span className="text-sm font-black text-white">{DEPT_MAP[currentDept]?.label}</span>
+                        <span className="text-sm font-black text-slate-900">{DEPT_MAP[currentDept]?.label}</span>
                       </div>
                     )}
                   </div>
                 </div>
 
                 <div className="relative w-full max-w-md">
-                  <Search className="pointer-events-none absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-600" />
+                  <Search className="pointer-events-none absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   <input
                     type="text"
                     placeholder="搜索专家能力、角色、领域..."
-                    className="w-full rounded-full border border-white/10 bg-white/[0.04] py-3 pl-12 pr-5 text-sm text-white outline-none transition-all focus:border-cyan-400/40 focus:bg-white/[0.06]"
+                    className="w-full rounded-full border border-[#ddd3c7] bg-[#f7f2ea] py-3 pl-12 pr-5 text-base text-slate-800 outline-none transition-all focus:border-[#b7a894] focus:bg-white"
                     value={search}
                     onChange={(event) => {
                       setSearch(event.target.value);
@@ -576,18 +571,18 @@ export default function Dashboard() {
                   const Icon = dept.icon;
                   return (
                     <motion.button
-                      whileHover={{ y: -4, scale: 1.01 }}
+                      whileHover={{ y: -2, scale: 1.01 }}
                       whileTap={{ scale: 0.99 }}
                       key={key}
                       onClick={() => setCurrentDept(key)}
-                      className={`relative overflow-hidden rounded-[1.8rem] border border-white/10 bg-gradient-to-br ${dept.gradient} p-6 text-left shadow-[0_18px_50px_rgba(0,0,0,0.2)] transition-all hover:border-cyan-400/30`}
+                    className="relative overflow-hidden rounded-[1.7rem] border border-[#e6ddd2] bg-[#fffaf5] p-6 text-left shadow-[0_12px_30px_rgba(128,110,82,0.08)] transition-all hover:border-[#cfbfac] hover:bg-[#f8f1e8]"
                     >
-                      <Icon className="absolute right-[-10px] top-[-10px] h-20 w-20 text-white/[0.03]" />
-                      <div className={`mb-5 inline-flex rounded-2xl bg-white/[0.08] p-3 ${dept.color}`}>
+                      <Icon className="absolute right-[-10px] top-[-10px] h-20 w-20 text-[#ede5d9]" />
+                      <div className="mb-6 inline-flex rounded-[1.35rem] bg-[#f1e9df] p-3 text-slate-700">
                         <Icon className="h-6 w-6" />
                       </div>
-                      <p className="text-xl font-black tracking-tight text-white">{dept.label}</p>
-                      <p className="mt-2 text-sm text-slate-400">{deptStats[key] || 0} 位专家待命</p>
+                      <p className="text-xl font-black tracking-tight text-slate-900">{dept.label}</p>
+                      <p className="mt-2 text-base leading-7 text-slate-600">{deptStats[key] || 0} 位专家待命</p>
                     </motion.button>
                   );
                 })}
@@ -606,7 +601,7 @@ export default function Dashboard() {
             </section>
 
             {(currentDept || search) && filteredAgents.length === 0 && (
-              <section className="rounded-[2rem] border border-dashed border-white/10 bg-[#0d1118]/85 px-6 py-10 text-center text-slate-500">
+              <section className="rounded-[2rem] border border-dashed border-[#d9d0c4] bg-[#f7f3ed] px-6 py-10 text-center text-slate-600">
                 当前筛选下没有匹配专家。试试切换部门，或换一种更具体的能力关键词。
               </section>
             )}
@@ -674,12 +669,12 @@ export default function Dashboard() {
           </aside>
         </div>
 
-        <div className="mt-4 flex items-center justify-between rounded-[1.5rem] border border-white/10 bg-white/[0.03] px-5 py-4 text-xs text-slate-500">
+        <div className="mt-5 flex items-center justify-between rounded-[1.8rem] border border-[#dfd5c8] bg-[#fffdfa]/88 px-5 py-4 text-sm text-slate-600">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-cyan-300" />
-            现在的布局把专家池、组织状态和讨论执行拆成三块主区域，避免控制台像悬浮挂件一样挤在角落。
+            <Sparkles className="h-4 w-4 text-[#9b8164]" />
+            现在的信息流更接近真实工作顺序，而不是把所有能力都堆成一个后台面板。
           </div>
-          <div className="font-black uppercase tracking-[0.24em] text-slate-600">HQ Layout v3</div>
+          <div className="font-black tracking-[0.2em] text-slate-500">精修版布局</div>
         </div>
       </div>
     </div>

@@ -10,20 +10,20 @@ export default function ExecutionDetailPage() {
   const { execution, loading, error, notFound, reload } = useExecutionDetail(executionId);
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(96,165,250,0.12),transparent_26%),#070b12] px-6 py-8 text-slate-100">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(190,214,227,0.5),transparent_26%),linear-gradient(180deg,#f7f2ea_0%,#f2eee7_100%)] px-6 py-8 text-slate-800">
       <div className="mx-auto max-w-5xl">
         <div className="mb-8 flex items-end justify-between gap-6">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-sky-300/80">Execution Detail</p>
-            <h1 className="mt-2 text-4xl font-black tracking-tight text-white">执行详情</h1>
+            <p className="text-[11px] font-black tracking-[0.2em] text-slate-500">执行详情</p>
+            <h1 className="mt-2 text-4xl font-black tracking-tight text-slate-900">执行详情</h1>
           </div>
-          <Link href="/tasks" className="rounded-full border border-white/10 px-4 py-2 text-sm font-bold text-slate-300 hover:border-sky-400/40 hover:text-white">
+          <Link href="/tasks" className="rounded-full border border-[#ddd3c7] bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:border-[#b7a894] hover:text-slate-900">
             返回任务工作区
           </Link>
         </div>
 
-        <div className="rounded-[1.8rem] border border-white/10 bg-white/[0.03] p-6">
-          {loading && <p className="text-sm text-slate-400">正在加载执行详情...</p>}
+        <div className="rounded-[1.8rem] border border-[#d9d0c4] bg-[#fffdfa]/94 p-6">
+          {loading && <p className="text-sm text-slate-600">正在加载执行详情…</p>}
           {error && (
             <div
               data-testid="execution-detail-error-state"
@@ -71,36 +71,36 @@ export default function ExecutionDetailPage() {
           {execution && (
             <>
               <div className="grid gap-4 sm:grid-cols-3">
-                <div className="rounded-[1.2rem] border border-white/10 bg-[#0d1118]/85 p-4">
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">状态</p>
-                  <p className="mt-2 text-sm font-black text-white">{execution.status}</p>
+                <div className="rounded-[1.2rem] border border-[#ddd3c7] bg-white p-4">
+                  <p className="text-[11px] tracking-[0.16em] text-slate-500">状态</p>
+                  <p className="mt-2 text-sm font-black text-slate-900">{execution.status}</p>
                 </div>
-                <div className="rounded-[1.2rem] border border-white/10 bg-[#0d1118]/85 p-4">
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">执行器</p>
-                  <p className="mt-2 text-sm font-black text-white">{execution.executor || 'unknown'}</p>
+                <div className="rounded-[1.2rem] border border-[#ddd3c7] bg-white p-4">
+                  <p className="text-[11px] tracking-[0.16em] text-slate-500">执行器</p>
+                  <p className="mt-2 text-sm font-black text-slate-900">{execution.executor || '未知'}</p>
                 </div>
-                <div className="rounded-[1.2rem] border border-white/10 bg-[#0d1118]/85 p-4">
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Task ID</p>
-                  <p className="mt-2 text-sm font-black text-white">{execution.taskId}</p>
+                <div className="rounded-[1.2rem] border border-[#ddd3c7] bg-white p-4">
+                  <p className="text-[11px] tracking-[0.16em] text-slate-500">任务编号</p>
+                  <p className="mt-2 text-sm font-black text-slate-900">{execution.taskId}</p>
                 </div>
               </div>
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-[1.2rem] border border-white/10 bg-[#0d1118]/85 p-4">
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">开始时间</p>
-                  <p className="mt-2 text-sm font-black text-white">{execution.startedAt || 'unknown'}</p>
+                <div className="rounded-[1.2rem] border border-[#ddd3c7] bg-white p-4">
+                  <p className="text-[11px] tracking-[0.16em] text-slate-500">开始时间</p>
+                  <p className="mt-2 text-sm font-black text-slate-900">{execution.startedAt || '未知'}</p>
                 </div>
-                <div className="rounded-[1.2rem] border border-white/10 bg-[#0d1118]/85 p-4">
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">完成时间</p>
-                  <p className="mt-2 text-sm font-black text-white">{execution.completedAt || '尚未完成'}</p>
+                <div className="rounded-[1.2rem] border border-[#ddd3c7] bg-white p-4">
+                  <p className="text-[11px] tracking-[0.16em] text-slate-500">完成时间</p>
+                  <p className="mt-2 text-sm font-black text-slate-900">{execution.completedAt || '尚未完成'}</p>
                 </div>
               </div>
             </>
           )}
 
           {execution?.outputSummary && (
-            <div className="mt-4 rounded-[1.2rem] border border-white/10 bg-[#0d1118]/85 p-4">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">输出摘要</p>
-              <p className="mt-2 text-sm leading-relaxed text-slate-300">{execution.outputSummary}</p>
+            <div className="mt-4 rounded-[1.2rem] border border-[#ddd3c7] bg-white p-4">
+              <p className="text-[11px] tracking-[0.16em] text-slate-500">输出摘要</p>
+              <p className="mt-2 text-sm leading-7 text-slate-700">{execution.outputSummary}</p>
             </div>
           )}
 
@@ -112,9 +112,9 @@ export default function ExecutionDetailPage() {
           )}
 
           {execution?.memoryContextExcerpt && (
-            <div className="mt-4 rounded-[1.2rem] border border-white/10 bg-[#0d1118]/85 p-4">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">执行上下文摘录</p>
-              <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-300">
+            <div className="mt-4 rounded-[1.2rem] border border-[#ddd3c7] bg-white p-4">
+              <p className="text-[11px] tracking-[0.16em] text-slate-500">执行上下文摘录</p>
+              <p className="mt-2 whitespace-pre-wrap text-sm leading-7 text-slate-700">
                 {execution.memoryContextExcerpt}
               </p>
             </div>

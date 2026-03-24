@@ -59,32 +59,32 @@ export function ActivityLog({ activities, wsStatus }: ActivityLogProps) {
   };
 
   return (
-    <div className="mt-10 pt-10 border-t border-white/5">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.3em] flex items-center gap-3">
-          <Activity className="w-4 h-4 text-cyan-500" /> 实时作战日志
+    <div className="border-t border-[#e9dfd3] pt-6">
+      <div className="mb-5 flex items-center justify-between">
+        <h2 className="flex items-center gap-3 text-sm font-black tracking-[0.18em] text-slate-700">
+          <Activity className="h-4 w-4 text-[#9b8164]" /> 现场动态
         </h2>
-        <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
-          wsStatus === 'connected' ? 'bg-cyan-500/10 text-cyan-500' : 'bg-rose-500/10 text-rose-500'
+        <div className={`rounded-full px-3 py-1 text-[11px] font-black ${
+          wsStatus === 'connected' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
         }`}>
-          {wsStatus === 'connected' ? 'Link Stable' : 'Offline'}
+          {wsStatus === 'connected' ? '连接正常' : '连接中断'}
         </div>
       </div>
-      <div className="space-y-4 max-h-48 overflow-y-auto custom-scrollbar pr-2">
+      <div className="max-h-64 space-y-3 overflow-y-auto pr-2 custom-scrollbar">
         <AnimatePresence mode="popLayout">
           {activities.map(log => (
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               key={log.id}
-              className="text-xs flex gap-4 leading-relaxed p-3 bg-white/[0.02] border border-white/5 rounded-xl"
+              className="flex gap-3 rounded-[1.1rem] border border-[#ebe2d7] bg-[#fcf8f2] p-3 text-sm leading-6"
             >
-              <span className="text-slate-600 font-mono font-bold">
+              <span className="font-mono text-xs font-bold text-slate-500">
                 {log.timestamp.toLocaleTimeString([], { hour12: false })}
               </span>
-              <span className="text-slate-300">
-                <span className="font-black text-white">{log.agentName}</span>{' '}
-                <span className="opacity-60 italic text-[11px]">
+              <span className="text-slate-700">
+                <span className="font-black text-slate-900">{log.agentName}</span>{' '}
+                <span className="text-sm text-slate-600">
                   {log.type === 'AGENT_WORKING' && `// 执行任务: ${log.task?.substring(0, 25)}...`}
                   {(log.type === 'TOOL_PROGRESS' || log.type === 'TASK_EVENT') &&
                     `${log.task || formatLogType(log.type)}`}

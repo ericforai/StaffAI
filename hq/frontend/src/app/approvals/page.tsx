@@ -20,7 +20,7 @@ const formatApprovalDate = (value?: string) => {
     return null;
   }
 
-  return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return parsed.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' });
 };
 
 export default function ApprovalsPage() {
@@ -46,15 +46,15 @@ export default function ApprovalsPage() {
     { pending: 0, approved: 0, rejected: 0 },
   );
   const statusCardData = [
-    { key: 'pending', label: 'Pending review', note: 'Needs action', accent: 'text-emerald-200' },
-    { key: 'approved', label: 'Approved', note: 'Ready for execution', accent: 'text-cyan-200' },
-    { key: 'rejected', label: 'Rejected', note: 'Revisit if needed', accent: 'text-rose-200' },
+    { key: 'pending', label: '待处理', note: '需要决策', accent: 'text-emerald-700' },
+    { key: 'approved', label: '已批准', note: '可继续执行', accent: 'text-sky-700' },
+    { key: 'rejected', label: '已拒绝', note: '需要重新评估', accent: 'text-rose-700' },
   ];
   const filterOptions: Array<{ key: FilterStatus; label: string }> = [
-    { key: 'all', label: 'All statuses' },
-    { key: 'pending', label: 'Pending only' },
-    { key: 'approved', label: 'Approved only' },
-    { key: 'rejected', label: 'Rejected only' },
+    { key: 'all', label: '全部状态' },
+    { key: 'pending', label: '只看待处理' },
+    { key: 'approved', label: '只看已批准' },
+    { key: 'rejected', label: '只看已拒绝' },
   ];
   const visibleApprovals = useMemo(
     () =>
@@ -65,20 +65,20 @@ export default function ApprovalsPage() {
   );
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(244,63,94,0.10),transparent_24%),#070b12] px-6 py-8 text-slate-100">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(227,212,196,0.45),transparent_24%),linear-gradient(180deg,#f7f2ea_0%,#f2eee7_100%)] px-6 py-8 text-slate-800">
       <div className="mx-auto max-w-5xl">
         <div className="mb-8 flex items-end justify-between gap-6">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-rose-300/80">Approval Queue</p>
-            <h1 className="mt-2 text-4xl font-black tracking-tight text-white">审批列表</h1>
+            <p className="text-[11px] font-black tracking-[0.2em] text-slate-500">审批队列</p>
+            <h1 className="mt-2 text-4xl font-black tracking-tight text-slate-900">审批列表</h1>
           </div>
-          <Link href="/" className="rounded-full border border-white/10 px-4 py-2 text-sm font-bold text-slate-300 hover:border-rose-400/40 hover:text-white">
+          <Link href="/" className="rounded-full border border-[#ddd3c7] bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:border-[#b7a894] hover:text-slate-900">
             返回指挥台
           </Link>
         </div>
 
-        <div className="rounded-[1.8rem] border border-white/10 bg-white/[0.03] p-6">
-          {loading && <p className="text-sm text-slate-400">正在加载审批队列...</p>}
+        <div className="rounded-[1.8rem] border border-[#d9d0c4] bg-[#fffdfa]/94 p-6">
+          {loading && <p className="text-sm text-slate-600">正在加载审批队列…</p>}
           {error && (
             <div
               data-testid="approvals-error-state"
@@ -124,20 +124,20 @@ export default function ApprovalsPage() {
             <>
               <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Approvals overview</p>
-                  <h2 className="mt-2 text-2xl font-black tracking-tight text-white">Queue snapshot</h2>
+                  <p className="text-[11px] font-black tracking-[0.2em] text-slate-500">审批概览</p>
+                  <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-900">队列快照</h2>
                 </div>
                 <div className="flex items-center gap-3">
-                  <p className="text-sm font-bold tracking-[0.3em] text-slate-500">{totalApprovals} approvals total</p>
+                  <p className="text-sm font-bold tracking-[0.16em] text-slate-500">共 {totalApprovals} 条审批</p>
                   <button
                     type="button"
                     onClick={() => {
                       void reload();
                     }}
                     disabled={loading}
-                    className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[10px] font-black uppercase tracking-[0.3em] text-slate-200 transition hover:border-cyan-300 hover:text-white disabled:border-white/5 disabled:text-slate-500"
+                    className="rounded-full border border-[#ddd3c7] bg-white px-4 py-2 text-[10px] font-black tracking-[0.18em] text-slate-700 transition hover:border-[#b7a894] hover:text-slate-900 disabled:border-[#e5ddd2] disabled:text-slate-500"
                   >
-                    {loading ? 'Refreshing...' : 'Refresh queue'}
+                    {loading ? '刷新中…' : '刷新队列'}
                   </button>
                 </div>
               </div>
@@ -145,10 +145,10 @@ export default function ApprovalsPage() {
                 {statusCardData.map((status) => (
                   <div
                     key={status.key}
-                    className="rounded-2xl border border-white/10 bg-white/[0.02] p-4"
+                    className="rounded-2xl border border-[#e5ddd2] bg-[#f7f3ed] p-4"
                   >
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">{status.label}</p>
-                    <p className="mt-2 text-3xl font-black text-white">{statusCounts[status.key] ?? 0}</p>
+                    <p className="text-[11px] font-black tracking-[0.18em] text-slate-500">{status.label}</p>
+                    <p className="mt-2 text-3xl font-black text-slate-900">{statusCounts[status.key] ?? 0}</p>
                     <p className={`mt-1 text-xs font-semibold ${status.accent}`}>{status.note}</p>
                   </div>
                 ))}
@@ -161,15 +161,15 @@ export default function ApprovalsPage() {
                     onClick={() => setFilterStatus(option.key)}
                     className={`rounded-full border px-3 py-1 font-black uppercase tracking-[0.3em] transition ${
                       filterStatus === option.key
-                        ? 'border-cyan-300 bg-white/10 text-white'
-                        : 'border-white/10 text-slate-400 hover:border-white/40 hover:text-white'
+                        ? 'border-[#b8c9d2] bg-[#e9f0f3] text-slate-800'
+                        : 'border-[#ddd3c7] text-slate-500 hover:border-[#b7a894] hover:text-slate-900'
                     }`}
                   >
                     {option.label}
                   </button>
                 ))}
-                <span className="ml-auto text-[10px] uppercase tracking-[0.3em] text-slate-500">
-                  Showing {visibleApprovals.length} of {totalApprovals}
+                <span className="ml-auto text-[10px] tracking-[0.18em] text-slate-500">
+                  当前显示 {visibleApprovals.length} / {totalApprovals}
                 </span>
               </div>
               {visibleApprovals.length === 0 && actionApprovals.length > 0 && (
@@ -177,28 +177,28 @@ export default function ApprovalsPage() {
                   data-testid="approvals-filter-empty-state"
                   className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-[1.2rem] border border-white/10 bg-[#0d1118]/70 p-4"
                 >
-                  <p className="text-sm text-rose-200">No approvals match the selected filter.</p>
+                  <p className="text-sm text-slate-600">当前筛选下没有匹配的审批记录。</p>
                   <button
                     type="button"
                     onClick={() => setFilterStatus('all')}
-                    className="rounded-full border border-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-slate-300 transition-all hover:border-white/25 hover:text-white"
+                    className="rounded-full border border-[#ddd3c7] px-4 py-2 text-xs font-black tracking-[0.18em] text-slate-700 transition-all hover:border-[#b7a894] hover:text-slate-900"
                   >
-                    Reset filter
+                    重置筛选
                   </button>
                 </div>
               )}
-              <div className="mb-6 rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+              <div className="mb-6 rounded-2xl border border-[#e5ddd2] bg-[#f7f3ed] p-5">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Next pending approval</p>
-                  <p className="text-xs text-slate-500">Prioritize now</p>
+                  <p className="text-[11px] font-black tracking-[0.18em] text-slate-500">下一条待处理审批</p>
+                  <p className="text-xs text-slate-500">建议优先处理</p>
                 </div>
-                <p className="mt-3 text-xl font-black text-white">
-                  {nextPendingApproval ? nextPendingApproval.taskId : 'No pending approvals'}
+                <p className="mt-3 text-xl font-black text-slate-900">
+                  {nextPendingApproval ? nextPendingApproval.taskId : '当前没有待处理审批'}
                 </p>
-                <p className="text-sm text-slate-400">
+                <p className="text-sm text-slate-600">
                   {nextPendingApproval
-                    ? `Requested by ${nextPendingApproval.requestedBy}${formattedNextRequestedAt ? ` · ${formattedNextRequestedAt}` : ''}`
-                    : 'Looks like everything has been reviewed.'}
+                    ? `${nextPendingApproval.requestedBy} 发起${formattedNextRequestedAt ? ` · ${formattedNextRequestedAt}` : ''}`
+                    : '当前队列已经处理完毕。'}
                 </p>
                 {nextPendingApproval && latestSummaryByTaskId.get(nextPendingApproval.taskId) && (
                   <p className="mt-2 text-xs text-slate-500">
@@ -208,9 +208,9 @@ export default function ApprovalsPage() {
                 {nextPendingApproval && (
                   <Link
                     href={`/tasks/${nextPendingApproval.taskId}`}
-                    className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-slate-100 transition hover:border-cyan-300 hover:text-white"
+                    className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#ddd3c7] bg-white px-4 py-2 text-xs font-black tracking-[0.18em] text-slate-700 transition hover:border-[#b7a894] hover:text-slate-900"
                   >
-                    Jump to task
+                    查看任务
                   </Link>
                 )}
               </div>
@@ -219,13 +219,13 @@ export default function ApprovalsPage() {
 
           <div className="grid gap-4">
             {visibleApprovals.map((approval) => (
-              <div key={approval.id} className="rounded-[1.4rem] border border-white/10 bg-[#0d1118]/85 px-5 py-5">
+              <div key={approval.id} className="rounded-[1.4rem] border border-[#ddd3c7] bg-white px-5 py-5">
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <Link href={`/tasks/${approval.taskId}`} className="text-sm font-black text-white hover:text-cyan-200">
+                    <Link href={`/tasks/${approval.taskId}`} className="text-sm font-black text-slate-900 hover:text-slate-700">
                       {approval.taskId}
                     </Link>
-                    <p className="mt-2 text-xs uppercase tracking-[0.18em] text-slate-500">{approval.requestedBy}</p>
+                    <p className="mt-2 text-xs tracking-[0.14em] text-slate-500">{approval.requestedBy}</p>
                     {latestSummaryByTaskId.get(approval.taskId) && (
                       <p className="mt-2 text-xs text-slate-500">
                         最新事件：{latestSummaryByTaskId.get(approval.taskId)?.detail}
@@ -233,7 +233,7 @@ export default function ApprovalsPage() {
                     )}
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-black text-white">{approval.status}</p>
+                    <p className="text-sm font-black text-slate-900">{approval.status}</p>
                     <p className="mt-1 text-xs text-slate-500">{approval.requestedAt}</p>
                   </div>
                 </div>
