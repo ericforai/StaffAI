@@ -16,7 +16,8 @@ export interface ActivityLog {
     | 'AGENT_TASK_COMPLETED'
     | 'DISCUSSION_STARTED'
     | 'DISCUSSION_COMPLETED'
-    | 'TOOL_PROGRESS';
+    | 'TOOL_PROGRESS'
+    | 'TASK_EVENT';
   agentName: string;
   task?: string;
   timestamp: Date;
@@ -50,6 +51,8 @@ export function ActivityLog({ activities, wsStatus }: ActivityLogProps) {
         return '## 专家讨论已完成';
       case 'TOOL_PROGRESS':
         return '~~ 工具执行阶段更新';
+      case 'TASK_EVENT':
+        return ':: 任务状态事件';
       default:
         return '';
     }
@@ -83,8 +86,12 @@ export function ActivityLog({ activities, wsStatus }: ActivityLogProps) {
                 <span className="font-black text-white">{log.agentName}</span>{' '}
                 <span className="opacity-60 italic text-[11px]">
                   {log.type === 'AGENT_WORKING' && `// 执行任务: ${log.task?.substring(0, 25)}...`}
-                  {log.type === 'TOOL_PROGRESS' && `${log.task || formatLogType(log.type)}`}
-                  {log.type !== 'AGENT_WORKING' && log.type !== 'TOOL_PROGRESS' && formatLogType(log.type)}
+                  {(log.type === 'TOOL_PROGRESS' || log.type === 'TASK_EVENT') &&
+                    `${log.task || formatLogType(log.type)}`}
+                  {log.type !== 'AGENT_WORKING' &&
+                    log.type !== 'TOOL_PROGRESS' &&
+                    log.type !== 'TASK_EVENT' &&
+                    formatLogType(log.type)}
                 </span>
               </span>
             </motion.div>
