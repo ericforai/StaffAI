@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "node -e \"const fs=require('fs');try{fs.rmSync('dist',{recursive:true});}catch(e){if(e&&e.code!=='ENOENT')throw e;}\" && tsc",
     "test": "npm run build && AGENCY_UNDER_NODE_TEST=1 node --test --test-concurrency=1 dist/**/*.test.js",
     "start:web": "node dist/web-server.js",
     "start:mcp": "node dist/mcp-server.js",

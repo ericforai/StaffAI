@@ -1,24 +1,21 @@
 import { z } from 'zod';
-import { BaseTool, ToolContext, ToolResult } from './base-tool';
+import { BaseTool } from './base-tool';
 
-const RuntimeExecutorSchema = z.object({
-  command: z.string(),
-});
+export class RuntimeExecutorTool extends BaseTool<{ task: string; executor?: string }> {
+  name = 'runtime_executor';
+  description = 'Run executor-backed implementation work.';
+  category = 'runtime' as const;
+  riskLevel = 'high' as const;
+  allowedRoles = ['software-architect', 'backend-developer'];
+  schema = z.object({
+    task: z.string().describe('Implementation task description.'),
+    executor: z.string().optional().describe('Prefered executor (claude, codex).'),
+  });
 
-type RuntimeExecutorInput = z.infer<typeof RuntimeExecutorSchema>;
-
-export class RuntimeExecutorTool extends BaseTool<RuntimeExecutorInput> {
-  public readonly name = 'runtime_executor';
-  public readonly description = 'Execute system commands in the runtime environment.';
-  public readonly category = 'runtime';
-  public readonly riskLevel = 'high' as const;
-  public readonly allowedRoles = ['software-architect', 'backend-developer', 'dispatcher'];
-  public readonly schema = RuntimeExecutorSchema;
-
-  public async execute(input: RuntimeExecutorInput, context: ToolContext): Promise<ToolResult> {
+  async run(input: { task: string; executor?: string }) {
     return {
-      summary: `Executed command in runtime: ${input.command}`,
-      payload: { status: 'mocked' },
+      summary: `Scheduled runtime execution for: ${input.task}.`,
+      payload: { task: input.task, executor: input.executor || 'claude' },
     };
   }
 }

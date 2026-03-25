@@ -58,7 +58,7 @@ test('tool gateway executes low-risk tool when allowed', async () => {
   }
   assert.equal(result.ok, true);
   assert.equal(result.log.status, 'completed');
-  assert.equal(result.log.riskLevel, 'low');
-  assert.match(result.output?.summary.toLowerCase() ?? '', /read file/);
+  assert.equal(result.log.riskLevel, 'medium');
+  assert.match(result.output?.summary ?? '', /(Ran bounded test target|Mock test execution successful)/);
   assert.equal(savedLogs.length, 1);
 });

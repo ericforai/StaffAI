@@ -1,5 +1,5 @@
-import { promises as fs } from 'fs';
-import path from 'path';
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
 import type { HostId } from '../runtime/host-adapters';
 
 export type WorkflowStage = 'brainstorm' | 'review' | 'debug' | 'ship' | 'consult';
@@ -29,6 +29,7 @@ export interface HostPolicyValidation {
 }
 
 const defaultPolicyPath = path.resolve(__dirname, '../../../config/host-policy.json');
+const REQUIRED_STAGES: WorkflowStage[] = ['brainstorm', 'review', 'debug', 'ship', 'consult'];
 
 export async function loadHostPolicyConfig(configPath: string = defaultPolicyPath): Promise<HostPolicyConfig> {
   const raw = await fs.readFile(configPath, 'utf-8');
@@ -57,37 +58,7 @@ export async function validateHostPolicyConfig(
 
   const seen = new Set<string>();
   for (const host of config.hosts) {
-    if (seen.has(host.hostId)) {
-      errors.push(`duplicate host policy: ${host.hostId}`);
-      continue;
-    }
-    seen.add(host.hostId);
-
-    if (!knownHostIds.includes(host.hostId)) {
-      errors.push(`host policy references unknown host: ${host.hostId}`);
-    }
-
-    if (!Array.isArray(host.instructionPriority) || host.instructionPriority.length === 0) {
-      errors.push(`host policy ${host.hostId} must define instructionPriority`);
-    }
-
-    if (!host.toolRouting) {
-      errors.push(`host policy ${host.hostId} must define toolRouting`);
-    } else {
-      if (!Array.isArray(host.toolRouting.preferredTools) || host.toolRouting.preferredTools.length === 0) {
-        warnings.push(`host policy ${host.hostId} has no preferredTools`);
-      }
-      if (!Array.isArray(host.toolRouting.fallbackTools) || host.toolRouting.fallbackTools.length === 0) {
-        warnings.push(`host policy ${host.hostId} has no fallbackTools`);
-      }
-    }
-
-    const requiredStages: WorkflowStage[] = ['brainstorm', 'review', 'debug', 'ship', 'consult'];
-    for (const stage of requiredStages) {
-      if (!Array.isArray(host.stageRecommendations?.[stage])) {
-        errors.push(`host policy ${host.hostId} missing stageRecommendations.${stage}`);
-      }
-    }
+    validateSingleHostPolicy(host, knownHostIds, seen, errors, warnings);
   }
 
   for (const hostId of knownHostIds) {
@@ -101,4 +72,49 @@ export async function validateHostPolicyConfig(
     errors,
     warnings,
   };
+}
+
+function validateSingleHostPolicy(
+  host: HostPolicy,
+  knownHostIds: string[],
+  seen: Set<string>,
+  errors: string[],
+  warnings: string[]
+): void {
+  if (seen.has(host.hostId)) {
+    errors.push(`duplicate host policy: ${host.hostId}`);
+    return;
+  }
+  seen.add(host.hostId);
+
+  if (!knownHostIds.includes(host.hostId)) {
+    errors.push(`host policy references unknown host: ${host.hostId}`);
+  }
+
+  if (!Array.isArray(host.instructionPriority) || host.instructionPriority.length === 0) {
+    errors.push(`host policy ${host.hostId} must define instructionPriority`);
+  }
+
+  validateToolRouting(host, errors, warnings);
+
+  for (const stage of REQUIRED_STAGES) {
+    if (!Array.isArray(host.stageRecommendations?.[stage])) {
+      errors.push(`host policy ${host.hostId} missing stageRecommendations.${stage}`);
+    }
+  }
+}
+
+function validateToolRouting(host: HostPolicy, errors: string[], warnings: string[]): void {
+  if (!host.toolRouting) {
+    errors.push(`host policy ${host.hostId} must define toolRouting`);
+    return;
+  }
+
+  if (!Array.isArray(host.toolRouting.preferredTools) || host.toolRouting.preferredTools.length === 0) {
+    warnings.push(`host policy ${host.hostId} has no preferredTools`);
+  }
+
+  if (!Array.isArray(host.toolRouting.fallbackTools) || host.toolRouting.fallbackTools.length === 0) {
+    warnings.push(`host policy ${host.hostId} has no fallbackTools`);
+  }
 }

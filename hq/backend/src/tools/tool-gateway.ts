@@ -1,10 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import type { Store } from '../store';
 import type { ToolCallLog, ToolDefinition } from '../shared/task-types';
-import { BaseTool, ToolContext, ToolResult } from './base-tool';
+import { BaseTool } from './base-tool';
 import { FileReadTool } from './file-read-tool';
 import { FileWriteTool } from './file-write-tool';
-import { GitReadTool, GitDiffTool } from './git-tools';
 import { TestRunnerTool } from './test-runner-tool';
 import { DocsSearchTool } from './docs-search-tool';
 import { RuntimeExecutorTool } from './runtime-executor-tool';
@@ -29,20 +28,18 @@ export class ToolGateway {
   private registerDefaultTools(): void {
     this.registerTool(new FileReadTool());
     this.registerTool(new FileWriteTool());
-    this.registerTool(new GitReadTool());
-    this.registerTool(new GitDiffTool());
     this.registerTool(new TestRunnerTool());
     this.registerTool(new DocsSearchTool());
     this.registerTool(new RuntimeExecutorTool());
   }
 
   public registerTool(tool: BaseTool): void {
-    this.tools.set(tool.definition.name, tool);
+    this.tools.set(tool.name, tool);
   }
 
   public listTools(actorRole: string): ToolDefinition[] {
     return Array.from(this.tools.values())
-      .filter((tool) => tool.definition.allowedRoles.includes(actorRole))
+      .filter((tool) => tool.allowedRoles.includes(actorRole))
       .map((tool) => tool.definition);
   }
 
@@ -53,15 +50,15 @@ export class ToolGateway {
   public checkPermission(
     actorRole: string,
     toolName: string,
-    context: Pick<ToolContext, 'approvalGranted'> = {}
+    context: Pick<ToolActorContext, 'approvalGranted'> = {}
   ): { allowed: boolean; tool: BaseTool | null; reason?: string } {
     const tool = this.getTool(toolName);
     if (!tool) {
       return { allowed: false, tool: null, reason: 'tool not found' };
     }
 
-    if (!tool.definition.allowedRoles.includes(actorRole)) {
-      return { allowed: false, tool, reason: `role '${actorRole}' is not allowed to use tool '${toolName}'` };
+    if (!tool.allowedRoles.includes(actorRole)) {
+      return { allowed: false, tool, reason: 'role is not allowed' };
     }
 
     if (tool.definition.riskLevel === 'high' && !context.approvalGranted) {
@@ -82,7 +79,7 @@ export class ToolGateway {
     const createdAt = new Date().toISOString();
 
     if (!permission.tool) {
-      const log = this.createBaseLog(toolName, context, 'failed', 'low', input, createdAt);
+      const log = this.createBaseLog(toolName, context, createdAt, 'failed', 'low', input);
       log.errorMessage = permission.reason;
       await this.store.saveToolCallLog(log);
       return {
@@ -96,58 +93,41 @@ export class ToolGateway {
     const tool = permission.tool;
 
     if (!permission.allowed) {
-      const log = this.createBaseLog(tool.definition.name, context, 'blocked', tool.definition.riskLevel, input, createdAt);
+      const log = this.createBaseLog(permission.tool.name, context, createdAt, 'blocked', permission.tool.riskLevel, input);
       log.errorMessage = permission.reason;
       await this.store.saveToolCallLog(log);
-      return { ok: false, tool: tool.definition, log, error: permission.reason };
+      return { ok: false, tool: permission.tool.definition, log, error: permission.reason };
     }
 
     try {
-      // 1. Validate Input
-      const validatedInput = tool.validate(input);
+      const validatedInput = permission.tool.validate(input || {});
+      const output = await permission.tool.run(validatedInput);
 
-      // 2. Execute
-      const output = await tool.execute(validatedInput, context);
-
-      const status = output.error ? 'failed' : 'completed';
-      const log = this.createBaseLog(tool.name, context, status, tool.riskLevel, input, createdAt);
-
+      const log = this.createBaseLog(permission.tool.name, context, createdAt, 'completed', permission.tool.riskLevel, input);
       log.outputSummary = output.summary;
-      log.errorMessage = output.error;
-      log.fullInput = validatedInput;
-      log.fullOutput = output.payload;
-      log.updatedAt = new Date().toISOString();
-
       await this.store.saveToolCallLog(log);
 
       return {
-        ok: status === 'completed',
-        tool: tool.definition,
+        ok: true,
+        tool: permission.tool.definition,
         log,
         output,
-        error: output.error,
       };
     } catch (error: any) {
-      const log = this.createBaseLog(tool.definition.name, context, 'failed', tool.definition.riskLevel, input, createdAt);
-      log.errorMessage = `Validation or Execution error: ${error.message}`;
+      const log = this.createBaseLog(permission.tool.name, context, createdAt, 'failed', permission.tool.riskLevel, input);
+      log.errorMessage = error.message;
       await this.store.saveToolCallLog(log);
-      
-      return {
-        ok: false,
-        tool: tool.definition,
-        log,
-        error: error.message,
-      };
+      return { ok: false, tool: permission.tool.definition, log, error: error.message };
     }
   }
 
   private createBaseLog(
     toolName: string,
-    context: ToolContext,
+    context: ToolActorContext,
+    createdAt: string,
     status: ToolCallLog['status'],
     riskLevel: ToolCallLog['riskLevel'],
-    input: unknown,
-    createdAt: string
+    input: any
   ): ToolCallLog {
     return {
       id: randomUUID(),
@@ -164,13 +144,9 @@ export class ToolGateway {
   }
 
   private summarizeInput(input: unknown): string {
-    if (input === undefined) return '';
-    try {
-      const serialized = JSON.stringify(input);
-      return serialized.length > 240 ? `${serialized.slice(0, 237)}...` : serialized;
-    } catch {
-      return String(input);
-    }
+    if (!input) return '';
+    const serialized = JSON.stringify(input);
+    return serialized.length > 200 ? serialized.slice(0, 197) + '...' : serialized;
   }
 }
 

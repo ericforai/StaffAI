@@ -13,15 +13,14 @@ export async function updateAssignmentExecutionStatus(
   assignmentId: string,
   status: TaskAssignmentStatus
 ): Promise<void> {
+  const timestamps = buildAssignmentTimestamps(status);
   await store.updateTaskAssignment(assignmentId, (current) => ({
     ...current,
     status,
-    updatedAt: new Date().toISOString(),
-    ...(status === 'running' && !current.startedAt ? { startedAt: new Date().toISOString() } : {}),
-    ...(status === 'completed' || status === 'failed' || status === 'skipped'
-      ? { endedAt: new Date().toISOString() }
-      : {}),
-    ...(status === 'completed' ? { completedAt: new Date().toISOString() } : {}),
+    updatedAt: timestamps.updatedAt,
+    ...(!current.startedAt && timestamps.startedAt ? { startedAt: timestamps.startedAt } : {}),
+    ...(timestamps.endedAt ? { endedAt: timestamps.endedAt } : {}),
+    ...(timestamps.completedAt ? { completedAt: timestamps.completedAt } : {}),
   }));
 }
 
@@ -98,4 +97,34 @@ async function getTaskIdForAssignment(
   // We can't get task ID from the current store interface without additional methods
   // Return undefined and let the execution record use a placeholder
   return undefined;
+}
+
+function buildAssignmentTimestamps(status: TaskAssignmentStatus): {
+  updatedAt: string;
+  startedAt?: string;
+  endedAt?: string;
+  completedAt?: string;
+} {
+  const now = new Date().toISOString();
+
+  if (status === 'running') {
+    return { updatedAt: now, startedAt: now };
+  }
+
+  if (status === 'completed') {
+    return {
+      updatedAt: now,
+      endedAt: now,
+      completedAt: now,
+    };
+  }
+
+  if (status === 'failed' || status === 'skipped') {
+    return {
+      updatedAt: now,
+      endedAt: now,
+    };
+  }
+
+  return { updatedAt: now };
 }

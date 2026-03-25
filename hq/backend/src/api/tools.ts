@@ -10,7 +10,7 @@ function readBoolean(value: unknown): boolean {
   return value === true;
 }
 
-/** High-risk tools must not trust approvalGranted unless an ApprovalRecord exists for the task. */
+/** High-risk tools: do not trust approvalGranted without a matching approved record. */
 export async function resolveToolApprovalClaim(
   store: Pick<Store, 'getApprovalsByTaskId'>,
   gateway: ToolGateway,
@@ -19,7 +19,7 @@ export async function resolveToolApprovalClaim(
   approvalClaimed: boolean,
 ): Promise<boolean> {
   const tool = gateway.getTool(toolName);
-  if (!tool || tool.definition.riskLevel !== 'high') {
+  if (!tool || tool.riskLevel !== 'high') {
     return approvalClaimed;
   }
   if (!approvalClaimed) {

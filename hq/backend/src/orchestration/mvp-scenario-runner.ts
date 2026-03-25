@@ -95,7 +95,7 @@ export async function runMvpScenario(
     throw new PresetNotFoundError(presetName);
   }
 
-  // 2. Activate preset (idempotent hire) — use canonical registry key
+  // 2. Activate preset (idempotent hire)
   activatePreset(preset.name, store, scanner);
 
   // 3. Build agent profiles from scanner for routing

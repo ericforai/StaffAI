@@ -1,7 +1,8 @@
-import type { WorkflowPlan, TaskAssignment, TaskAssignmentStatus } from '../shared/task-types';
+import type { WorkflowPlan, TaskAssignment } from '../shared/task-types';
 import type { Store } from '../store';
 import type { AssignmentExecutor } from './assignment-executor';
 import type { RunningWorkflow } from './workflow-execution-engine';
+import { updateAssignmentExecutionStatus } from './assignment-status-updater';
 
 /**
  * Cancel a running workflow
@@ -48,7 +49,7 @@ export async function cancelWorkflow(
 
   for (const assignment of assignments) {
     await assignmentExecutor.cancel(assignment.id);
-    await updateAssignmentStatus(store, assignment.id, 'skipped');
+    await updateAssignmentExecutionStatus(store, assignment.id, 'skipped');
   }
 
   await store.updateWorkflowPlan(workflow.taskId, (current) => ({
@@ -84,24 +85,4 @@ export async function findWorkflowPlan(
 ): Promise<WorkflowPlan | null> {
   const allPlans = await store.getWorkflowPlans();
   return allPlans.find((p: WorkflowPlan) => p.id === workflowPlanId) ?? null;
-}
-
-/**
- * Update assignment status via store
- */
-async function updateAssignmentStatus(
-  store: Pick<Store, 'updateTaskAssignment'>,
-  assignmentId: string,
-  status: TaskAssignmentStatus
-): Promise<void> {
-  await store.updateTaskAssignment(assignmentId, (current) => ({
-    ...current,
-    status,
-    updatedAt: new Date().toISOString(),
-    ...(status === 'running' && !current.startedAt ? { startedAt: new Date().toISOString() } : {}),
-    ...(status === 'completed' || status === 'failed' || status === 'skipped'
-      ? { endedAt: new Date().toISOString() }
-      : {}),
-    ...(status === 'completed' ? { completedAt: new Date().toISOString() } : {}),
-  }));
 }

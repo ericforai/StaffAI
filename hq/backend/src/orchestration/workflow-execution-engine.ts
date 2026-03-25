@@ -1,4 +1,3 @@
-import * as path from 'node:path';
 import type { WorkflowPlan, TaskAssignment, TaskRecord } from '../shared/task-types';
 import type { AuditLogger, AuditEvent } from '../governance/audit-logger';
 import type { Store } from '../store';
@@ -81,7 +80,7 @@ export interface WorkflowExecutionEngine {
  */
 export interface RunningWorkflow {
   workflowPlanId: string;
-  status: 'running' | 'paused' | 'skipped';
+  status: 'running' | 'skipped' | 'completed' | 'failed';
   startedAt: string;
   completedSteps: Set<string>;
   currentStep?: string;
@@ -396,47 +395,19 @@ export class DefaultWorkflowExecutionEngine implements WorkflowExecutionEngine {
       }));
     }
 
-    this.runningWorkflows.delete(workflowPlan.id);
-    if (result.status === 'completed' || result.status === 'failed' || result.status === 'skipped') {
-      this.terminalWorkflowStatus.set(workflowPlan.id, {
-        status: result.status,
-        completedSteps: result.completedSteps,
-      });
-    }
-
-    const existingState = await this.executionStore.load(workflowPlan.id);
-    const startedAt = existingState?.startedAt ?? new Date().toISOString();
-    const executor = existingState?.executor ?? 'claude';
-
-    if (result.status === 'completed') {
-      await this.executionStore.save({
-        executionId: workflowPlan.id,
-        status: 'completed',
-        taskId: workflowPlan.taskId,
-        executor,
-        startedAt,
-        completedAt: new Date().toISOString(),
-        checkpointData: { completedSteps: result.completedSteps },
-      });
-    } else if (result.status === 'failed') {
-      await this.executionStore.save({
-        executionId: workflowPlan.id,
-        status: 'failed',
-        taskId: workflowPlan.taskId,
-        executor,
-        startedAt,
-        completedAt: new Date().toISOString(),
-        checkpointData: { completedSteps: result.completedSteps },
-      });
-    } else if (result.status === 'skipped') {
-      await this.executionStore.save({
-        executionId: workflowPlan.id,
-        status: 'cancelled',
-        taskId: workflowPlan.taskId,
-        executor,
-        startedAt,
-        cancelledAt: new Date().toISOString(),
-        checkpointData: { completedSteps: result.completedSteps },
+    const running = this.runningWorkflows.get(workflowPlan.id);
+    if (running) {
+      const nextStatus: RunningWorkflow['status'] =
+        result.status === 'skipped'
+          ? 'skipped'
+          : result.status === 'completed'
+            ? 'completed'
+            : result.status === 'failed'
+              ? 'failed'
+              : running.status;
+      this.runningWorkflows.set(workflowPlan.id, {
+        ...running,
+        status: nextStatus,
       });
     }
 

@@ -21,8 +21,8 @@ import {
   TASK_STATUSES,
   TASK_TYPES,
 } from '../shared/task-types';
-import { createApprovalRecord, evaluateApprovalRequirement } from '../governance/approval-service';
 import { evaluateApprovalRequirement as evaluateApprovalRequirementV2 } from '../governance/approval-service-v2';
+import { createDefaultRiskAssessmentEngine } from '../governance/risk-assessment';
 import { recommendTaskRoute } from './task-routing';
 
 export interface TaskDraftInput {
@@ -106,19 +106,19 @@ export function buildAssignmentRoleSequence(routeDecision: TaskRouteDecision): R
     case 'frontend_implementation':
       if (routeDecision.executionMode === 'serial' || routeDecision.executionMode === 'advanced_discussion') {
         return [
-          { role: 'dispatcher', assignmentRole: 'dispatcher', title: 'Analyze requirements and dispatch implementation tasks', order: 1 },
-          { role: 'software-architect', assignmentRole: 'secondary', title: 'Design architecture and technical approach', order: 2 },
-          { role: routeDecision.recommendedAgentRole, assignmentRole: 'primary', title: 'Implement the requested delivery slice', order: 3 },
-          { role: 'code-reviewer', assignmentRole: 'reviewer', title: 'Review implementation for risks and regressions', order: 4 },
-          { role: 'technical-writer', assignmentRole: 'secondary', title: 'Produce documentation for the implementation', order: 5 },
+          { role: 'dispatcher', assignmentRole: 'dispatcher', title: 'Analyze requirements and dispatch implementation tasks' },
+          { role: 'software-architect', assignmentRole: 'secondary', title: 'Design architecture and technical approach' },
+          { role: routeDecision.recommendedAgentRole, assignmentRole: 'primary', title: 'Implement the requested delivery slice' },
+          { role: 'code-reviewer', assignmentRole: 'reviewer', title: 'Review implementation for risks and regressions' },
+          { role: 'technical-writer', assignmentRole: 'secondary', title: 'Produce documentation for the implementation' },
         ];
       }
       return [
-        { role: routeDecision.recommendedAgentRole, assignmentRole: 'primary', title: 'Implement the requested delivery slice', order: 1 },
-        { role: 'code-reviewer', assignmentRole: 'reviewer', title: 'Review implementation for risks and regressions', order: 2 },
+        { role: routeDecision.recommendedAgentRole, assignmentRole: 'primary', title: 'Implement the requested delivery slice' },
+        { role: 'code-reviewer', assignmentRole: 'reviewer', title: 'Review implementation for risks and regressions' },
       ];
-    case 'code-review':
-      return [{ role: routeDecision.recommendedAgentRole, assignmentRole: 'reviewer', title: '执行专项代码评审与合规检查', order: 1 }];
+    case 'code_review':
+      return [{ role: routeDecision.recommendedAgentRole, assignmentRole: 'reviewer', title: 'Perform a focused code review' }];
     case 'documentation':
       return [{ role: routeDecision.recommendedAgentRole, assignmentRole: 'primary', title: 'Produce the requested documentation deliverable', order: 1 }];
     case 'workflow_dispatch':
@@ -344,7 +344,28 @@ export async function createTask(
   await store.saveWorkflowPlan(assignedPlan.workflowPlan);
 
   if (approvalDecision.approvalRequired) {
-    await createApprovalRecord(task.id, store);
+    const riskEngine = createDefaultRiskAssessmentEngine();
+    const riskAssessment = riskEngine.assess({
+      title: task.title,
+      description: task.description,
+      taskType: task.taskType,
+      executionMode: task.executionMode,
+      priority: task.priority,
+    });
+
+    await store.saveApproval({
+      id: randomUUID(),
+      taskId: task.id,
+      taskTitle: task.title,
+      status: 'pending',
+      requestedBy,
+      requestedAt: now,
+      riskLevel: riskAssessment.riskLevel,
+      decisionContext: {
+        factors: riskAssessment.factors,
+        confidence: riskAssessment.confidence,
+      },
+    });
   }
 
   return {

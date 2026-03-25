@@ -37,29 +37,26 @@ export interface PresetActivationResult {
 // Preset definitions
 // ---------------------------------------------------------------------------
 
-/** Normalize legacy keys (e.g. code_review) to registry keys (code-review). */
-export function canonicalMvpPresetKey(name: string): string {
-  return name.trim().replace(/_/g, '-');
-}
-
-/** Maps normalized keys that don't match a registry id (e.g. architecture-analysis → architecture). */
+/** Maps legacy/normalized keys to registry ids (e.g. architecture-analysis → architecture). */
 const PRESET_KEY_ALIASES: Readonly<Record<string, string>> = {
   'architecture-analysis': 'architecture',
 };
 
-function getPresetFromRegistry(name: string): MvpPreset | undefined {
+export function canonicalMvpPresetKey(name: string): string {
+  return name.trim().replace(/_/g, '-');
+}
+
+function resolvePresetRegistryKey(name: string): string | undefined {
   const trimmed = name.trim();
-  const direct = MVP_PRESETS.get(trimmed);
-  if (direct) {
-    return direct;
+  if (MVP_PRESETS.has(trimmed)) {
+    return trimmed;
   }
   const canonical = canonicalMvpPresetKey(trimmed);
-  const fromCanonical = MVP_PRESETS.get(canonical);
-  if (fromCanonical) {
-    return fromCanonical;
+  if (MVP_PRESETS.has(canonical)) {
+    return canonical;
   }
-  const aliasTarget = PRESET_KEY_ALIASES[canonical] ?? PRESET_KEY_ALIASES[trimmed];
-  return aliasTarget ? MVP_PRESETS.get(aliasTarget) : undefined;
+  const alias = PRESET_KEY_ALIASES[canonical] ?? PRESET_KEY_ALIASES[trimmed];
+  return alias && MVP_PRESETS.has(alias) ? alias : undefined;
 }
 
 const MVP_PRESETS: ReadonlyMap<string, MvpPreset> = new Map([
@@ -100,6 +97,11 @@ const MVP_PRESETS: ReadonlyMap<string, MvpPreset> = new Map([
     },
   ],
 ]);
+
+function getPresetFromRegistry(name: string): MvpPreset | undefined {
+  const key = resolvePresetRegistryKey(name);
+  return key ? MVP_PRESETS.get(key) : undefined;
+}
 
 // ---------------------------------------------------------------------------
 // Public API

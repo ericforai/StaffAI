@@ -13,19 +13,30 @@ function useDiscussionStubRuntime(): boolean {
   return (
     process.env.NODE_ENV === 'test' ||
     process.env.AGENCY_DISCUSSION_STUB === '1' ||
+    process.env.AGENCY_UNDER_NODE_TEST === '1' ||
     process.argv.includes('--test')
   );
 }
 
+/** Fast path for `node --test` / CI so `/api/discussions/run` does not shell out to CLIs. */
 function createStubDiscussionRuntime(): DiscussionRuntime {
   return {
     async getStartupCheck(): Promise<StartupCheckResult> {
       return {
         preferredExecutor: 'auto',
         effectiveDefaultExecutor: 'codex',
-        discussionTimeoutMs: 60_000,
+        executorAttemptOrder: ['codex'],
+        discussionTimeoutMs: 30_000,
         overallReady: true,
-        checks: [],
+        checks: [
+          {
+            name: 'codex',
+            configured: true,
+            available: true,
+            status: 'ready',
+            detail: 'stub',
+          },
+        ],
       };
     },
     async generateText(_systemPrompt: string, userPrompt: string): Promise<{ text: string; executor: ExecutorName }> {
@@ -41,7 +52,7 @@ export function createDiscussionService(
   scanner: Scanner,
   _skillScanner: SkillScanner,
   store: Store,
-  publish: EventPublisher
+  publish: EventPublisher,
 ) {
   const discussionRuntime = useDiscussionStubRuntime()
     ? createStubDiscussionRuntime()

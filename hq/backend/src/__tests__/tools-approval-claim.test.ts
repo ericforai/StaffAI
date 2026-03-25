@@ -33,14 +33,14 @@ test('resolveToolApprovalClaim passes through non-high-risk tools unchanged', as
   assert.equal(ok, true);
 });
 
-test('resolveToolApprovalClaim requires approved ApprovalRecord for file_write', async () => {
+test('resolveToolApprovalClaim requires approved ApprovalRecord for high-risk tools', async () => {
   const gateway = makeGateway();
   const storeEmpty = {
     async getApprovalsByTaskId(): Promise<ApprovalRecord[]> {
       return [];
     },
   };
-  const denied = await resolveToolApprovalClaim(storeEmpty, gateway, 'file_write', 'task-1', true);
+  const denied = await resolveToolApprovalClaim(storeEmpty, gateway, 'runtime_executor', 'task-1', true);
   assert.equal(denied, false);
 
   const storeOk = {
@@ -49,7 +49,7 @@ test('resolveToolApprovalClaim requires approved ApprovalRecord for file_write',
       return [approvedRecord(tid)];
     },
   };
-  const allowed = await resolveToolApprovalClaim(storeOk, gateway, 'file_write', 'task-1', true);
+  const allowed = await resolveToolApprovalClaim(storeOk, gateway, 'runtime_executor', 'task-1', true);
   assert.equal(allowed, true);
 });
 
@@ -60,6 +60,6 @@ test('resolveToolApprovalClaim rejects high-risk claim without taskId', async ()
       return [approvedRecord('task-1')];
     },
   };
-  const denied = await resolveToolApprovalClaim(store, gateway, 'file_write', undefined, true);
+  const denied = await resolveToolApprovalClaim(store, gateway, 'runtime_executor', undefined, true);
   assert.equal(denied, false);
 });

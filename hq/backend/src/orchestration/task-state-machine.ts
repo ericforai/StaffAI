@@ -7,8 +7,9 @@ import type { TaskRecord, TaskStatus } from '../shared/task-types';
  * Maps current status to array of allowed events
  */
 export const TASK_STATE_TRANSITIONS: Record<TaskStatus, string[]> = {
-  created: ['route', 'request_approval', 'enqueue', 'start_execution', 'cancel'],
-  routed: ['request_approval', 'enqueue', 'start_execution', 'cancel'],
+  created: ['route', 'request_approval', 'start_execution', 'cancel'],
+  routed: ['request_approval', 'enqueue_task', 'start_execution', 'cancel'],
+  queued: ['start_execution', 'cancel'],
   waiting_approval: ['approve', 'reject', 'cancel'],
   queued: ['start_execution', 'fail_execution', 'cancel'],
   running: ['complete_execution', 'fail_execution', 'cancel'],
@@ -30,7 +31,11 @@ const EVENT_TO_STATUS: Record<TaskStatus, Record<string, TaskStatus>> = {
   },
   routed: {
     request_approval: 'waiting_approval',
-    enqueue: 'queued',
+    enqueue_task: 'queued',
+    start_execution: 'running',
+    cancel: 'cancelled',
+  },
+  queued: {
     start_execution: 'running',
     cancel: 'cancelled',
   },
@@ -64,7 +69,7 @@ export type TaskEvent =
   | 'approve'
   | 'reject'
   | 'cancel_approval'
-  | 'enqueue'
+  | 'enqueue_task'
   | 'start_execution'
   | 'complete_execution'
   | 'fail_execution'
@@ -167,7 +172,7 @@ export class TaskStateMachine {
         request_approval: 'waiting_approval',
         approve: 'routed',
         reject: 'failed',
-        enqueue: 'queued',
+        enqueue_task: 'queued',
         start_execution: 'running',
         complete_execution: 'completed',
         fail_execution: 'failed',

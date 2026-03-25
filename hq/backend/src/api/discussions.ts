@@ -79,7 +79,7 @@ export function registerDiscussionRoutes(app: express.Application, dependencies:
         entityId: discussionRunId,
         action: 'discussion_completed',
         actor: 'system',
-        newState: { topic, synthesisPreview: result.synthesis?.slice(0, 120) },
+        newState: { topic, synthesisPreview: typeof result.synthesis === 'string' ? result.synthesis.slice(0, 120) : '' },
       });
 
       return res.json({ ...result, discussionRunId });

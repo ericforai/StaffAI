@@ -20,10 +20,8 @@ import { createTaskLifecycleService } from '../../orchestration/task-lifecycle-s
 import { createTaskStateMachine } from '../../orchestration/task-state-machine';
 import {
   createWorkflowExecutionEngine,
-  type WorkflowExecutionResult,
-  type WorkflowExecutionStatus,
 } from '../../orchestration/workflow-execution-engine';
-import { createAssignmentExecutor, type AssignmentExecutor } from '../../orchestration/assignment-executor';
+import type { AssignmentExecutor } from '../../orchestration/assignment-executor';
 import { AuditLogger, type AuditEvent } from '../../governance/audit-logger';
 import { createFileAuditLogRepository } from '../../persistence/audit-log-repositories';
 import type {
@@ -42,6 +40,7 @@ let lifecycleService: ReturnType<typeof createTaskLifecycleService>;
 let stateMachine: ReturnType<typeof createTaskStateMachine>;
 let workflowEngine: ReturnType<typeof createWorkflowExecutionEngine>;
 let mockAssignmentExecutor: AssignmentExecutor;
+const alphabeticalSort = (left: string, right: string) => left.localeCompare(right);
 
 async function setupTestEnvironment() {
   tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'agency-workflow-execution-'));
@@ -105,6 +104,13 @@ after(async () => {
  */
 function createMockAssignmentExecutor(): AssignmentExecutor {
   const runningAssignments = new Map<string, 'running' | 'completed' | 'failed'>();
+  let storeWriteChain = Promise.resolve();
+
+  const serializeStoreWrites = (fn: () => Promise<void>): Promise<void> => {
+    const run = storeWriteChain.then(fn);
+    storeWriteChain = run.catch(() => {});
+    return run;
+  };
 
   return {
     async execute(assignment: TaskAssignment, input: {
@@ -120,24 +126,24 @@ function createMockAssignmentExecutor(): AssignmentExecutor {
       outputSnapshot?: Record<string, unknown>;
       error?: string;
     }> {
-      runningAssignments.set(assignment.id, 'running');
+      await serializeStoreWrites(async () => {
+        runningAssignments.set(assignment.id, 'running');
 
-      // Update assignment status via store
-      await store.updateTaskAssignment(assignment.id, (current) => ({
-        ...current,
-        status: 'running',
-        startedAt: new Date().toISOString(),
-      }));
+        await store.updateTaskAssignment(assignment.id, (current) => ({
+          ...current,
+          status: 'running',
+          startedAt: new Date().toISOString(),
+        }));
 
-      // Simulate successful execution
-      runningAssignments.set(assignment.id, 'completed');
-      await store.updateTaskAssignment(assignment.id, (current) => ({
-        ...current,
-        status: 'completed',
-        completedAt: new Date().toISOString(),
-        endedAt: new Date().toISOString(),
-        resultSummary: `Executed: ${input.description}`,
-      }));
+        runningAssignments.set(assignment.id, 'completed');
+        await store.updateTaskAssignment(assignment.id, (current) => ({
+          ...current,
+          status: 'completed',
+          completedAt: new Date().toISOString(),
+          endedAt: new Date().toISOString(),
+          resultSummary: `Executed: ${input.description}`,
+        }));
+      });
 
       return {
         assignmentId: assignment.id,
@@ -255,7 +261,10 @@ test('serial workflow: tracks completed steps', async () => {
   const result = await workflowEngine.execute(workflowPlan);
 
   assert.equal(result.status, 'completed');
-  assert.deepEqual(result.completedSteps.sort(), workflowPlan.steps.map((s) => s.id).sort());
+  assert.deepEqual(
+    [...result.completedSteps].sort(alphabeticalSort),
+    workflowPlan.steps.map((step) => step.id).sort(alphabeticalSort),
+  );
 });
 
 // ============================================================================
@@ -455,7 +464,7 @@ test('assignment sync: result summary preserved', async () => {
 // ============================================================================
 
 test('failure handling: workflow failure sets task status to failed', async () => {
-  const { task, workflowPlan } = await createWorkflowSetup(1, 'serial');
+  const { task } = await createWorkflowSetup(1, 'serial');
 
   // Manually set workflow to failed
   await store.updateWorkflowPlan(task.id, (current) => ({
@@ -490,13 +499,13 @@ test('failure handling: cancelled workflow stops execution', async () => {
 // Test Suite 6: Workflow Resume and Recovery
 // ============================================================================
 
-test('workflow resume: is a no-op when there is no paused execution state', async () => {
-  const { workflowPlan } = await createWorkflowSetup(2, 'serial');
+test('workflow resume: no-op when engine has no skipped execution for plan', async () => {
+  const { workflowPlan } = await createWorkflowSetup(1, 'serial');
 
   await workflowEngine.resume(workflowPlan.id);
 
-  const statusAfterResume = workflowEngine.getStatus(workflowPlan.id);
-  assert.equal(statusAfterResume.status, 'planned');
+  const status = workflowEngine.getStatus(workflowPlan.id);
+  assert.equal(status.status, 'planned');
 });
 
 test('workflow resume: non-existent workflow handled gracefully', async () => {
@@ -585,7 +594,7 @@ test('edge case: workflow for non-existent task returns error', async () => {
 // ============================================================================
 
 test('audit logging: workflow execution creates audit events', async () => {
-  const { task, workflowPlan } = await createWorkflowSetup(1, 'serial');
+  const { workflowPlan } = await createWorkflowSetup(1, 'serial');
 
   await workflowEngine.execute(workflowPlan);
 

@@ -100,7 +100,7 @@ export function registerApprovalRoutes(
   dependencies: ApprovalRouteDependencies = {}
 ) {
   // Use ApprovalServiceV2 if provided, otherwise use legacy functions
-  const approvalService = dependencies.approvalService || null;
+  const approvalService = dependencies.approvalService ?? null;
 
   app.get('/api/approvals', async (_req, res) => {
     const approvals = await store.getApprovals();
@@ -130,7 +130,7 @@ export function registerApprovalRoutes(
 
     return res.json({
       approvals: enrichedApprovals,
-      summary: buildApprovalSummary(orderedApprovals),
+      summary: buildApprovalSummary(enrichedApprovals),
     });
   });
 

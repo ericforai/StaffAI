@@ -26,7 +26,7 @@ const ROUTE_RULES: RouteRule[] = [
     candidateAgentRoles: [
       'dispatcher',
       'software-architect',
-      'backend-architect', // Assuming 'backend-architect' is the 'primary-developer' for backend
+      'backend-architect',
       'code-reviewer',
       'technical-writer',
     ],

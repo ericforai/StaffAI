@@ -20,54 +20,24 @@ export interface BoundAgentCapabilities {
   capabilities: string[];
 }
 
+const CAPABILITY_DEFINITIONS = [
+  ['discussion.orchestrate', 'Discussion Orchestration', 'Coordinate multi-agent discussions and syntheses.'],
+  ['discussion.consult', 'Single Expert Consult', 'Route a task to the best matching expert.'],
+  ['host.inject', 'Host Injection', 'Generate and apply host-specific instruction snippets.'],
+  ['agent.discover', 'Agent Discovery', 'Scan and index local agency experts.'],
+  ['skill.discover', 'Skill Discovery', 'Scan and index local skills and capabilities.'],
+  ['executor.claude', 'Claude Executor', 'Run work through the local Claude executor.'],
+  ['executor.codex', 'Codex Executor', 'Run work through the local Codex executor.'],
+  ['executor.openai', 'OpenAI Executor', 'Fallback to OpenAI API execution when configured.'],
+  ['workflow.recommend', 'Workflow Recommendation', 'Recommend next actions based on task stage and runtime state.'],
+] as const satisfies ReadonlyArray<readonly [CapabilityDefinition['id'], string, string]>;
+
 export function createCapabilityRegistry(): CapabilityDefinition[] {
-  return [
-    {
-      id: 'discussion.orchestrate',
-      label: 'Discussion Orchestration',
-      description: 'Coordinate multi-agent discussions and syntheses.',
-    },
-    {
-      id: 'discussion.consult',
-      label: 'Single Expert Consult',
-      description: 'Route a task to the best matching expert.',
-    },
-    {
-      id: 'host.inject',
-      label: 'Host Injection',
-      description: 'Generate and apply host-specific instruction snippets.',
-    },
-    {
-      id: 'agent.discover',
-      label: 'Agent Discovery',
-      description: 'Scan and index local agency experts.',
-    },
-    {
-      id: 'skill.discover',
-      label: 'Skill Discovery',
-      description: 'Scan and index local skills and capabilities.',
-    },
-    {
-      id: 'executor.claude',
-      label: 'Claude Executor',
-      description: 'Run work through the local Claude executor.',
-    },
-    {
-      id: 'executor.codex',
-      label: 'Codex Executor',
-      description: 'Run work through the local Codex executor.',
-    },
-    {
-      id: 'executor.openai',
-      label: 'OpenAI Executor',
-      description: 'Fallback to OpenAI API execution when configured.',
-    },
-    {
-      id: 'workflow.recommend',
-      label: 'Workflow Recommendation',
-      description: 'Recommend next actions based on task stage and runtime state.',
-    },
-  ];
+  return CAPABILITY_DEFINITIONS.map(([id, label, description]) => ({
+    id,
+    label,
+    description,
+  }));
 }
 
 export function bindAgentCapabilities(agent: Agent): BoundAgentCapabilities {
