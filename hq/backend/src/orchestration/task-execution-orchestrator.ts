@@ -1,12 +1,12 @@
-import { randomUUID } from 'node:crypto';
 import type { Store } from '../store';
 import type { ExecutionLifecycleRecord } from '../runtime/execution-service';
-import { buildSerialWorkflowPlan, runTaskExecution } from '../runtime/execution-service';
+import { runTaskExecution } from '../runtime/execution-service';
 import { runAdvancedDiscussionExecution } from '../runtime/advanced-discussion-runner';
 import { buildDispatcherDirective } from '../runtime/dispatcher-runtime';
 import type { TaskAssignment, TaskExecutionMode, TaskRecord, WorkflowPlan } from '../shared/task-types';
 import { resolveExecutionDecision, type SessionCapabilities } from '../execution-strategy';
 import { createAssignmentExecutor } from './assignment-executor';
+import { rebuildWorkflowBundleForSerialExecution } from './task-orchestrator';
 
 interface ExecuteTaskInput {
   executor: 'claude' | 'codex' | 'openai';
@@ -35,6 +35,7 @@ type TaskExecutionStore = Pick<Store, 'saveExecution' | 'updateExecution' | 'upd
       | 'saveWorkflowPlan'
       | 'updateWorkflowPlan'
       | 'logAudit'
+      | 'getTaskAssignmentById'
     >
   >;
 
@@ -88,28 +89,39 @@ async function runWorkflowPlanWithAssignments(input: {
 
   let failed = false;
   if (workflowPlan.mode === 'parallel') {
-    const results = await Promise.all(
-      steps.map(async (step) => {
-        const assignment = input.assignments.find((a) => a.id === step.assignmentId);
-        if (!assignment) {
-          failed = true;
-          return;
-        }
-        const result = await assignmentExecutor.execute(assignment, {
-          taskId: task.id,
-          title: task.title,
-          description: step.description ?? step.title,
-          executor,
-          timeoutMs,
-          maxRetries,
-          memoryContextExcerpt,
-        });
-        if (result.status === 'failed') {
-          failed = true;
-        }
-      })
-    );
-    void results;
+    const stepsByOrder = new Map<number, WorkflowPlan['steps']>();
+    for (const step of steps) {
+      const ord = step.order ?? 1;
+      const group = stepsByOrder.get(ord) ?? [];
+      group.push(step);
+      stepsByOrder.set(ord, group);
+    }
+    const sortedOrders = Array.from(stepsByOrder.keys()).sort((a, b) => a - b);
+    phaseLoop: for (const order of sortedOrders) {
+      const group = stepsByOrder.get(order)!;
+      const results = await Promise.all(
+        group.map(async (step) => {
+          const assignment = input.assignments.find((a) => a.id === step.assignmentId);
+          if (!assignment) {
+            return false;
+          }
+          const result = await assignmentExecutor.execute(assignment, {
+            taskId: task.id,
+            title: task.title,
+            description: step.description ?? step.title,
+            executor,
+            timeoutMs,
+            maxRetries,
+            memoryContextExcerpt,
+          });
+          return result.status !== 'failed';
+        }),
+      );
+      if (results.some((ok) => !ok)) {
+        failed = true;
+        break phaseLoop;
+      }
+    }
   } else {
     for (const step of steps) {
       const assignment = input.assignments.find((a) => a.id === step.assignmentId);
@@ -160,90 +172,67 @@ async function runWorkflowPlanWithAssignments(input: {
   };
 }
 
+async function ensureWorkflowBundlePersisted(
+  store: TaskExecutionStore,
+  task: TaskRecord,
+  bundle: { workflowPlan: WorkflowPlan; assignments: TaskAssignment[] },
+): Promise<void> {
+  if (!store.saveWorkflowPlan || !store.saveTaskAssignment || !store.getTaskAssignmentById) {
+    return;
+  }
+
+  if (store.updateWorkflowPlan && store.getWorkflowPlanByTaskId) {
+    const previous = await store.getWorkflowPlanByTaskId(task.id);
+    if (previous) {
+      await store.updateWorkflowPlan(task.id, () => ({
+        ...bundle.workflowPlan,
+        createdAt: bundle.workflowPlan.createdAt ?? previous.createdAt,
+        updatedAt: new Date().toISOString(),
+      }));
+    } else {
+      await store.saveWorkflowPlan(bundle.workflowPlan);
+    }
+  } else {
+    await store.saveWorkflowPlan(bundle.workflowPlan);
+  }
+
+  for (const assignment of bundle.assignments) {
+    const existing = await store.getTaskAssignmentById(assignment.id);
+    if (!existing) {
+      await store.saveTaskAssignment(assignment);
+    }
+  }
+}
+
 function upgradeToSerialBundle(
   task: TaskRecord,
   workflowPlan: WorkflowPlan | null,
-  assignments: TaskAssignment[]
+  assignments: TaskAssignment[],
 ): {
   workflowPlan: WorkflowPlan;
   assignments: TaskAssignment[];
+  bundleWasRebuilt: boolean;
 } {
-  if (workflowPlan?.mode === 'serial' && assignments.length > 0) {
+  const planCoherent =
+    Boolean(workflowPlan) &&
+    workflowPlan!.mode === 'serial' &&
+    assignments.length > 0 &&
+    assignments.length === workflowPlan!.steps.length &&
+    workflowPlan!.steps.every((step) => assignments.some((a) => a.id === step.assignmentId));
+
+  if (planCoherent && workflowPlan) {
     return {
       workflowPlan,
       assignments,
+      bundleWasRebuilt: false,
     };
   }
 
-  const fallbackBundle = buildSerialWorkflowPlan({
-    id: task.id,
-    title: task.title,
-    description: task.description,
-    executionMode: 'serial',
-    recommendedAgentRole: task.recommendedAgentRole,
-  });
-
-  const now = new Date().toISOString();
-  const primaryAssignment = assignments[0];
-  const dispatcherAssignment = assignments.find((assignment) => assignment.assignmentRole === 'dispatcher');
-  const firstStepId = workflowPlan?.steps[0]?.id ?? primaryAssignment?.stepId ?? randomUUID();
-  const secondStepId = dispatcherAssignment?.stepId ?? randomUUID();
-  const workflowPlanId = workflowPlan?.id ?? fallbackBundle.workflowPlan.id;
-
+  const rebuilt = rebuildWorkflowBundleForSerialExecution(task, []);
   return {
-    workflowPlan: {
-      id: workflowPlanId,
-      taskId: task.id,
-      mode: 'serial' as const,
-      synthesisRequired: true,
-      status: 'planned' as const,
-      createdAt: workflowPlan?.createdAt ?? now,
-      updatedAt: now,
-      steps: [
-        {
-          id: firstStepId,
-          order: 1,
-          title: `Draft ${task.title}`,
-          assignmentId: primaryAssignment?.id ?? fallbackBundle.assignments[0].id,
-          agentId: task.recommendedAgentRole,
-          assignmentRole: 'primary' as const,
-          status: 'pending' as const,
-        },
-        {
-          id: secondStepId,
-          order: 2,
-          title: `Review and finalize ${task.title}`,
-          assignmentId: dispatcherAssignment?.id ?? fallbackBundle.assignments[1].id,
-          agentId: 'dispatcher',
-          assignmentRole: 'dispatcher' as const,
-          status: 'pending' as const,
-        },
-      ],
-    },
-    assignments: [
-      {
-        ...(primaryAssignment ?? fallbackBundle.assignments[0]),
-        taskId: task.id,
-        workflowPlanId,
-        stepId: firstStepId,
-        agentId: task.recommendedAgentRole,
-        assignmentRole: 'primary' as const,
-        status: 'pending' as const,
-        createdAt: primaryAssignment?.createdAt ?? now,
-        updatedAt: now,
-      },
-      {
-        ...(dispatcherAssignment ?? fallbackBundle.assignments[1]),
-        taskId: task.id,
-        workflowPlanId,
-        stepId: secondStepId,
-        agentId: 'dispatcher',
-        assignmentRole: 'dispatcher' as const,
-        status: 'pending' as const,
-        createdAt: dispatcherAssignment?.createdAt ?? now,
-        updatedAt: now,
-      },
-    ],
+    workflowPlan: rebuilt.workflowPlan,
+    assignments: rebuilt.assignments,
+    bundleWasRebuilt: true,
   };
 }
 
@@ -315,6 +304,12 @@ export async function executeTaskRecord(
       ? await store.getTaskAssignmentsByTaskId(task.id)
       : [];
     const serialBundle = upgradeToSerialBundle(task, existingWorkflowPlan, existingAssignments);
+    if (serialBundle.bundleWasRebuilt) {
+      await ensureWorkflowBundlePersisted(store, task, {
+        workflowPlan: serialBundle.workflowPlan,
+        assignments: serialBundle.assignments,
+      });
+    }
     const result = await runTaskExecution(
       {
         taskId: task.id,

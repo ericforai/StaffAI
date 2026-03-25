@@ -6,7 +6,7 @@ import { useTaskDetail } from '../../../hooks/useTaskDetail';
 import { useTaskActions } from '../../../hooks/useTaskActions';
 import { useTaskEvents } from '../../../hooks/useTaskEvents';
 import { useWebSocket, type WsMessage } from '../../../hooks/useWebSocket';
-import type { TaskEvent } from '../../../types';
+import type { TaskEvent, WorkflowPlanMode } from '../../../types';
 
 function formatTaskStatus(status: string) {
   switch (status) {
@@ -39,6 +39,21 @@ function formatExecutionMode(executionMode: string) {
       return '自动';
     default:
       return executionMode;
+  }
+}
+
+function formatWorkflowPlanMode(mode: WorkflowPlanMode) {
+  switch (mode) {
+    case 'single':
+      return '单任务';
+    case 'serial':
+      return '串行';
+    case 'parallel':
+      return '并行';
+    default: {
+      const exhaustive: never = mode;
+      return exhaustive;
+    }
   }
 }
 
@@ -280,7 +295,7 @@ export default function TaskDetailPage() {
                     <div className="mt-3 space-y-3">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="rounded-full bg-sky-50 px-3 py-1 text-[10px] font-black tracking-[0.18em] text-sky-700">
-                          {formatExecutionMode(workflowPlan.mode)}
+                          {formatWorkflowPlanMode(workflowPlan.mode)}
                         </span>
                         <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-black tracking-[0.18em] text-slate-600">
                           {workflowPlan.steps.length} 步骤

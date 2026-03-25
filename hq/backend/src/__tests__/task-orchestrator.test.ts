@@ -6,6 +6,7 @@ import {
   advanceAssignmentState,
   advanceTaskState,
   createTaskDraft,
+  rebuildWorkflowBundleForSerialExecution,
   validateTaskDraft,
 } from '../orchestration/task-orchestrator';
 
@@ -69,6 +70,47 @@ test('createTaskDraft builds a routed task and persists it via store', async () 
   assert.equal(savedApprovals.length, 1);
   assert.equal(savedWorkflowPlans.length, 1);
   assert.equal(savedTaskAssignments.length, 2);
+});
+
+test('rebuildWorkflowBundleForSerialExecution builds dispatcher-to-writer chain for backend work', () => {
+  const task: TaskRecord = {
+    id: 'task-backend',
+    title: 'Add user API',
+    description: 'Implement REST API with PostgreSQL repository and service layer',
+    taskType: 'backend_implementation',
+    priority: 'medium',
+    status: 'routed',
+    executionMode: 'parallel',
+    approvalRequired: false,
+    riskLevel: 'low',
+    requestedBy: 'system',
+    requestedAt: '2026-03-25T00:00:00.000Z',
+    recommendedAgentRole: 'backend-architect',
+    candidateAgentRoles: [
+      'dispatcher',
+      'software-architect',
+      'backend-architect',
+      'code-reviewer',
+      'technical-writer',
+    ],
+    routeReason: 'backend',
+    routingStatus: 'matched',
+    createdAt: '2026-03-25T00:00:00.000Z',
+    updatedAt: '2026-03-25T00:00:00.000Z',
+  };
+
+  const { workflowPlan, assignments } = rebuildWorkflowBundleForSerialExecution(task, []);
+
+  assert.equal(workflowPlan.mode, 'serial');
+  assert.equal(assignments.length, 5);
+  assert.deepEqual(
+    assignments.map((a) => a.agentId),
+    ['dispatcher', 'software-architect', 'backend-architect', 'code-reviewer', 'technical-writer'],
+  );
+  assert.deepEqual(
+    workflowPlan.steps.map((s) => s.order),
+    [1, 2, 3, 4, 5],
+  );
 });
 
 test('advanceTaskState enforces task state transitions', () => {

@@ -19,10 +19,14 @@ export interface SquadState {
 
 export type TaskExecutionMode = 'single' | 'serial' | 'parallel' | 'advanced_discussion';
 
+/** Matches backend `WORKFLOW_PLAN_MODES` — plans do not use `advanced_discussion`. */
+export type WorkflowPlanMode = 'single' | 'serial' | 'parallel';
+
 export interface WorkflowPlanStep {
   id: string;
   title: string;
   description?: string;
+  agentId?: string;
   assignmentRole?: string;
   assignmentId?: string;
   status?: string;
@@ -32,7 +36,7 @@ export interface WorkflowPlanStep {
 export interface WorkflowPlanSummary {
   id: string;
   taskId: string;
-  mode: TaskExecutionMode;
+  mode: WorkflowPlanMode;
   synthesisRequired: boolean;
   steps: WorkflowPlanStep[];
 }

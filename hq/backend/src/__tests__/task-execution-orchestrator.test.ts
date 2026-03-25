@@ -199,7 +199,7 @@ test('executeTaskRecord emits serial workflow plan and assignments for serial ta
   assert.equal(result.mode, 'serial');
   assert.equal(result.execution.status, 'completed');
   assert.equal(result.workflowPlan?.mode, 'serial');
-  assert.equal(result.assignments?.length, 2);
+  assert.equal(result.assignments?.length, 1);
   assert.equal(result.execution.workflowPlan?.mode, 'serial');
   assert.equal(result.execution.assignments?.[0]?.status, 'completed');
   assert.equal(result.execution.inputSnapshot?.requestedMode, 'serial');
