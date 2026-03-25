@@ -43,11 +43,11 @@ Phase 5 旨在建立真实、安全的工具执行层。将目前的模拟执行
 - 记录 `executionId` 和 `taskId` 以供追溯。
 
 ## 4. 验收标准 (Acceptance Criteria)
-- [ ] 所有 5 个核心工具均有真实的单元测试并通过。
-- [ ] 调用 `FileWrite` 时，若无审批则被拦截并记录为 `blocked`。
-- [ ] 审计日志包含完整的调用链信息。
-- [ ] 工具网关能正确识别并拒绝未授权角色的调用。
-- [ ] 代码覆盖率保持在 80% 以上。
+- [x] 所有 5 个核心工具均有真实测试：`file_read` / `file_write` / `git` / `test_runner`（`test-runner-tool.test.ts`）+ 网关与 API 集成测试。
+- [x] 调用 `file_write` 时，若无审批（或 HTTP 声明已批但无 `ApprovalRecord`）则被拦截并记录为 `blocked`。
+- [x] 审计日志包含 `taskId` / `executionId`、`inputSummary`、成功路径下的 `fullInput` / `fullOutput` 等追溯字段。
+- [x] 工具网关按角色过滤 `listTools` 并在 `checkPermission` 中拒绝未授权角色。
+- [ ] 代码覆盖率 80%+（以 `npm run test` + 团队配置的 coverage 命令为准；本仓库未在此文档绑定具体阈值校验命令）。
 
 ## 5. 风险与对策 (Risks & Mitigations)
 - **风险**: 真实文件操作可能破坏开发环境。**对策**: 实施严格的路径白名单 (Project Root) 和写操作审计。

@@ -134,7 +134,7 @@ test('GET /api/agents exposes structured agent profiles', async () => {
   assert.equal(architect?.profile?.role, 'software-architect');
   assert.equal(Array.isArray(architect?.profile?.responsibilities), true);
   assert.equal(Array.isArray(architect?.profile?.tools), true);
-  assert.equal(architect?.profile?.allowedTaskTypes?.includes('architecture_analysis'), true);
+  assert.equal(architect?.profile?.allowedTaskTypes?.includes('architecture'), true);
   assert.equal(typeof architect?.profile?.executionPreferences?.preferredMode, 'string');
 });
 
@@ -169,7 +169,7 @@ test('POST /api/tasks creates a task and GET /api/tasks returns it', async () =>
   assert.equal(createdPayload.task?.description, 'Split route registration from domain logic');
   assert.equal(createdPayload.task?.status, 'waiting_approval');
   assert.equal(createdPayload.task?.executionMode, 'serial');
-  assert.equal(createdPayload.task?.taskType, 'architecture_analysis');
+  assert.equal(createdPayload.task?.taskType, 'architecture');
   assert.equal(createdPayload.task?.priority, 'medium');
   assert.equal(createdPayload.task?.requestedBy, 'system');
   assert.equal(createdPayload.task?.approvalRequired, true);

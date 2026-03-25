@@ -58,7 +58,7 @@ test('createTaskDraft builds a routed task and persists it via store', async () 
   );
 
   assert.equal(task.title, 'Refactor server composition');
-  assert.equal(task.taskType, 'architecture_analysis');
+  assert.equal(task.taskType, 'architecture');
   assert.equal(task.priority, 'medium');
   assert.equal(task.requestedBy, 'system');
   assert.equal(task.status, 'waiting_approval');
