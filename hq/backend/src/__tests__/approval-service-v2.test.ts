@@ -38,11 +38,7 @@ class MockStore {
     approval.status = status;
     approval.approver = actor;
     approval.approvedAt = new Date().toISOString();
-    if (status === 'cancelled') {
-      approval.resolvedAt = new Date().toISOString();
-    } else {
-      approval.resolvedAt = new Date().toISOString();
-    }
+    approval.resolvedAt = new Date().toISOString();
     return { ...approval };
   }
 

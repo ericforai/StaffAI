@@ -341,7 +341,7 @@ export class TaskLifecycleService {
         entityId: task.id,
         action: decision === 'approved' ? 'approval_approved' : 'approval_rejected',
         actor: approver,
-        previousState: { status: decision === 'approved' ? 'waiting_approval' : 'waiting_approval' },
+        previousState: { status: 'waiting_approval' },
         newState: { status: task.status },
         reason,
       });

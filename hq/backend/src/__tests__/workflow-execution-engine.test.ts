@@ -57,6 +57,105 @@ class MockAuditLogger {
   }
 }
 
+interface WorkflowFixtureOptions {
+  planOverrides?: Partial<WorkflowPlan>;
+  updateTaskAssignment?: MockStore['updateTaskAssignment'];
+  getWorkflowPlanByTaskId?: MockStore['getWorkflowPlanByTaskId'];
+  getWorkflowPlans?: MockStore['getWorkflowPlans'];
+  getTaskAssignmentsByTaskId?: MockStore['getTaskAssignmentsByTaskId'];
+  getTaskById?: MockStore['getTaskById'];
+  updateWorkflowPlan?: MockStore['updateWorkflowPlan'];
+  updateTask?: MockStore['updateTask'];
+  getTaskAssignments?: MockStore['getTaskAssignments'];
+}
+
+function createWorkflowFixture(options: WorkflowFixtureOptions = {}) {
+  const workflowPlan = createMockWorkflowPlan(options.planOverrides);
+  const assignments = createMockTaskAssignments(workflowPlan);
+  const task = createMockTask(workflowPlan.taskId);
+  const auditLogger = new MockAuditLogger() as any;
+
+  const store: MockStore = {
+    async getWorkflowPlanByTaskId(taskId) {
+      return taskId === workflowPlan.taskId ? workflowPlan : null;
+    },
+    async getWorkflowPlans() {
+      return [workflowPlan];
+    },
+    async getTaskAssignmentsByTaskId(taskId) {
+      return taskId === workflowPlan.taskId ? assignments : [];
+    },
+    async getTaskById(taskId) {
+      return taskId === workflowPlan.taskId ? task : null;
+    },
+    async updateWorkflowPlan(taskId, updater) {
+      return taskId === workflowPlan.taskId ? updater(workflowPlan) : null;
+    },
+    async updateTaskAssignment(assignmentId, updater) {
+      const assignment = assignments.find((item) => item.id === assignmentId);
+      return assignment ? updater(assignment) : null;
+    },
+    async updateTask(taskId, updater) {
+      return taskId === workflowPlan.taskId ? updater(task) : null;
+    },
+    async saveExecution() {},
+    async logAudit() {},
+  };
+
+  return {
+    workflowPlan,
+    assignments,
+    task,
+    auditLogger,
+    store: {
+      ...store,
+      ...options,
+    } satisfies MockStore,
+  };
+}
+
+function createAssignmentExecutorDouble(
+  execute: AssignmentExecutor['execute']
+): AssignmentExecutor {
+  return {
+    execute,
+    async resume() {},
+    async cancel() {},
+    getStatus() {
+      return 'idle';
+    },
+  };
+}
+
+function createEmptyStore(overrides: Partial<MockStore> = {}): MockStore {
+  return {
+    async getWorkflowPlanByTaskId() {
+      return null;
+    },
+    async getWorkflowPlans() {
+      return [];
+    },
+    async getTaskAssignmentsByTaskId() {
+      return [];
+    },
+    async getTaskById() {
+      return null;
+    },
+    async updateWorkflowPlan() {
+      return null;
+    },
+    async updateTaskAssignment() {
+      return null;
+    },
+    async updateTask() {
+      return null;
+    },
+    async saveExecution() {},
+    async logAudit() {},
+    ...overrides,
+  };
+}
+
 function createMockWorkflowPlan(overrides?: Partial<WorkflowPlan>): WorkflowPlan {
   const id = randomUUID();
   const taskId = randomUUID();
@@ -136,37 +235,9 @@ function createMockTask(taskId: string): TaskRecord {
 }
 
 test('WorkflowExecutionEngine executes serial workflow plan successfully', async () => {
-  const workflowPlan = createMockWorkflowPlan({ mode: 'serial' });
-  const assignments = createMockTaskAssignments(workflowPlan);
-  const task = createMockTask(workflowPlan.taskId);
-  const auditLogger = new MockAuditLogger() as any;
-
-  const store: MockStore = {
-    async getWorkflowPlanByTaskId(taskId) {
-      return taskId === workflowPlan.taskId ? workflowPlan : null;
-    },
-    async getWorkflowPlans() {
-      return [workflowPlan];
-    },
-    async getTaskAssignmentsByTaskId(taskId) {
-      return taskId === workflowPlan.taskId ? assignments : [];
-    },
-    async getTaskById(taskId) {
-      return taskId === workflowPlan.taskId ? task : null;
-    },
-    async updateWorkflowPlan(taskId, updater) {
-      return taskId === workflowPlan.taskId ? updater(workflowPlan) : null;
-    },
-    async updateTaskAssignment(assignmentId, updater) {
-      const assignment = assignments.find((a) => a.id === assignmentId);
-      return assignment ? updater(assignment) : null;
-    },
-    async updateTask(taskId, updater) {
-      return taskId === workflowPlan.taskId ? updater(task) : null;
-    },
-    async saveExecution() {},
-    async logAudit(event) {},
-  };
+  const { workflowPlan, assignments, store, auditLogger } = createWorkflowFixture({
+    planOverrides: { mode: 'serial' },
+  });
 
   const assignmentResults: AssignmentResult[] = [
     {
@@ -182,16 +253,9 @@ test('WorkflowExecutionEngine executes serial workflow plan successfully', async
   ];
 
   let assignmentIndex = 0;
-  const mockAssignmentExecutor: AssignmentExecutor = {
-    async execute(assignment) {
-      return assignmentResults[assignmentIndex++];
-    },
-    async resume() {},
-    async cancel() {},
-    getStatus() {
-      return 'idle';
-    },
-  };
+  const mockAssignmentExecutor = createAssignmentExecutorDouble(async (assignment) => {
+    return assignmentResults[assignmentIndex++];
+  });
 
   const engine = createWorkflowExecutionEngine({
     store,
@@ -208,52 +272,17 @@ test('WorkflowExecutionEngine executes serial workflow plan successfully', async
 });
 
 test('WorkflowExecutionEngine handles assignment failure', async () => {
-  const workflowPlan = createMockWorkflowPlan({ mode: 'serial' });
-  const assignments = createMockTaskAssignments(workflowPlan);
-  const task = createMockTask(workflowPlan.taskId);
-  const auditLogger = new MockAuditLogger() as any;
+  const { workflowPlan, assignments, store, auditLogger } = createWorkflowFixture({
+    planOverrides: { mode: 'serial' },
+  });
 
-  const store: MockStore = {
-    async getWorkflowPlanByTaskId(taskId) {
-      return taskId === workflowPlan.taskId ? workflowPlan : null;
-    },
-    async getWorkflowPlans() {
-      return [workflowPlan];
-    },
-    async getTaskAssignmentsByTaskId(taskId) {
-      return taskId === workflowPlan.taskId ? assignments : [];
-    },
-    async getTaskById(taskId) {
-      return taskId === workflowPlan.taskId ? task : null;
-    },
-    async updateWorkflowPlan(taskId, updater) {
-      return taskId === workflowPlan.taskId ? updater(workflowPlan) : null;
-    },
-    async updateTaskAssignment(assignmentId, updater) {
-      const assignment = assignments.find((a) => a.id === assignmentId);
-      return assignment ? updater(assignment) : null;
-    },
-    async updateTask(taskId, updater) {
-      return taskId === workflowPlan.taskId ? updater(task) : null;
-    },
-    async saveExecution() {},
-    async logAudit(event) {},
-  };
-
-  const mockAssignmentExecutor: AssignmentExecutor = {
-    async execute() {
+  const mockAssignmentExecutor = createAssignmentExecutorDouble(async () => {
       return {
         assignmentId: assignments[0].id,
         status: 'failed',
         error: 'Assignment execution failed',
       };
-    },
-    async resume() {},
-    async cancel() {},
-    getStatus() {
-      return 'idle';
-    },
-  };
+    });
 
   const engine = createWorkflowExecutionEngine({
     store,
@@ -269,53 +298,18 @@ test('WorkflowExecutionEngine handles assignment failure', async () => {
 });
 
 test('WorkflowExecutionEngine executes parallel workflow plan', async () => {
-  const workflowPlan = createMockWorkflowPlan({ mode: 'parallel' });
-  const assignments = createMockTaskAssignments(workflowPlan);
-  const task = createMockTask(workflowPlan.taskId);
-  const auditLogger = new MockAuditLogger() as any;
+  const { workflowPlan, store, auditLogger } = createWorkflowFixture({
+    planOverrides: { mode: 'parallel' },
+  });
 
-  const store: MockStore = {
-    async getWorkflowPlanByTaskId(taskId) {
-      return taskId === workflowPlan.taskId ? workflowPlan : null;
-    },
-    async getWorkflowPlans() {
-      return [workflowPlan];
-    },
-    async getTaskAssignmentsByTaskId(taskId) {
-      return taskId === workflowPlan.taskId ? assignments : [];
-    },
-    async getTaskById(taskId) {
-      return taskId === workflowPlan.taskId ? task : null;
-    },
-    async updateWorkflowPlan(taskId, updater) {
-      return taskId === workflowPlan.taskId ? updater(workflowPlan) : null;
-    },
-    async updateTaskAssignment(assignmentId, updater) {
-      const assignment = assignments.find((a) => a.id === assignmentId);
-      return assignment ? updater(assignment) : null;
-    },
-    async updateTask(taskId, updater) {
-      return taskId === workflowPlan.taskId ? updater(task) : null;
-    },
-    async saveExecution() {},
-    async logAudit(event) {},
-  };
-
-  const mockAssignmentExecutor: AssignmentExecutor = {
-    async execute(assignment) {
-      await new Promise((resolve) => setTimeout(resolve, 10));
-      return {
-        assignmentId: assignment.id,
-        status: 'completed',
-        outputSummary: `Assignment ${assignment.id} completed`,
-      };
-    },
-    async resume() {},
-    async cancel() {},
-    getStatus() {
-      return 'idle';
-    },
-  };
+  const mockAssignmentExecutor = createAssignmentExecutorDouble(async (assignment) => {
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    return {
+      assignmentId: assignment.id,
+      status: 'completed',
+      outputSummary: `Assignment ${assignment.id} completed`,
+    };
+  });
 
   const engine = createWorkflowExecutionEngine({
     store,
@@ -331,32 +325,7 @@ test('WorkflowExecutionEngine executes parallel workflow plan', async () => {
 
 test('WorkflowExecutionEngine returns workflow plan not found', async () => {
   const auditLogger = new MockAuditLogger() as any;
-
-  const store: MockStore = {
-    async getWorkflowPlanByTaskId() {
-      return null;
-    },
-    async getWorkflowPlans() {
-      return [];
-    },
-    async getTaskAssignmentsByTaskId() {
-      return [];
-    },
-    async getTaskById() {
-      return null;
-    },
-    async updateWorkflowPlan() {
-      return null;
-    },
-    async updateTaskAssignment() {
-      return null;
-    },
-    async updateTask() {
-      return null;
-    },
-    async saveExecution() {},
-    async logAudit(event) {},
-  };
+  const store = createEmptyStore();
 
   const engine = createWorkflowExecutionEngine({
     store,
@@ -377,32 +346,13 @@ test('WorkflowExecutionEngine returns workflow plan not found', async () => {
 });
 
 test('WorkflowExecutionEngine cancels running workflow', async () => {
-  const workflowPlan = createMockWorkflowPlan({ mode: 'serial', status: 'running' });
-  const assignments = createMockTaskAssignments(workflowPlan);
-  const task = createMockTask(workflowPlan.taskId);
-  const auditLogger = new MockAuditLogger() as any;
-
   let cancelledAssignments: string[] = [];
   let updateAssignmentCalls = 0;
-  const store: MockStore = {
-    async getWorkflowPlanByTaskId(taskId) {
-      return taskId === workflowPlan.taskId ? workflowPlan : null;
-    },
-    async getWorkflowPlans() {
-      return [workflowPlan];
-    },
-    async getTaskAssignmentsByTaskId(taskId) {
-      return taskId === workflowPlan.taskId ? assignments : [];
-    },
-    async getTaskById(taskId) {
-      return taskId === workflowPlan.taskId ? task : null;
-    },
-    async updateWorkflowPlan(taskId, updater) {
-      return taskId === workflowPlan.taskId ? updater(workflowPlan) : null;
-    },
-    async updateTaskAssignment(assignmentId, updater) {
+  const fixture = createWorkflowFixture({
+    planOverrides: { mode: 'serial', status: 'running' },
+    updateTaskAssignment: async (assignmentId, updater) => {
       updateAssignmentCalls++;
-      const assignment = assignments.find((a) => a.id === assignmentId);
+      const assignment = fixture.assignments.find((item) => item.id === assignmentId);
       if (assignment) {
         const updated = updater(assignment);
         if (updated.status === 'skipped') {
@@ -412,24 +362,14 @@ test('WorkflowExecutionEngine cancels running workflow', async () => {
       }
       return null;
     },
-    async updateTask(taskId, updater) {
-      return taskId === workflowPlan.taskId ? updater(task) : null;
-    },
-    async saveExecution() {},
-    async logAudit(event) {},
-  };
+  });
+  const { workflowPlan, auditLogger, store } = fixture;
 
-  const mockAssignmentExecutor: AssignmentExecutor = {
-    async execute() {
-      return { assignmentId: '', status: 'completed' };
-    },
-    async resume() {},
-    async cancel(assignmentId) {
+  const mockAssignmentExecutor = createAssignmentExecutorDouble(async () => {
+    return { assignmentId: '', status: 'completed' };
+  });
+  mockAssignmentExecutor.cancel = async (assignmentId) => {
       cancelledAssignments.push(assignmentId);
-    },
-    getStatus() {
-      return 'idle';
-    },
   };
 
   const engine = createWorkflowExecutionEngine({
@@ -496,12 +436,8 @@ test('WorkflowExecutionEngine getStatus returns current status', async () => {
 
 // Assignment Executor Tests
 test('AssignmentExecutor executes assignment successfully', async () => {
-  const workflowPlan = createMockWorkflowPlan();
-  const assignments = createMockTaskAssignments(workflowPlan);
-  const task = createMockTask(workflowPlan.taskId);
-  const auditLogger = new MockAuditLogger() as any;
-
-  const store: MockStore = {
+  const { workflowPlan, assignments, task, auditLogger } = createWorkflowFixture();
+  const store = createEmptyStore({
     async getWorkflowPlanByTaskId() {
       return workflowPlan;
     },
@@ -514,22 +450,14 @@ test('AssignmentExecutor executes assignment successfully', async () => {
     async getTaskById() {
       return task;
     },
-    async updateWorkflowPlan() {
-      return null;
-    },
     async updateTaskAssignment(assignmentId, updater) {
-      const assignment = assignments.find((a) => a.id === assignmentId);
+      const assignment = assignments.find((item) => item.id === assignmentId);
       return assignment ? updater(assignment) : null;
     },
-    async updateTask() {
-      return null;
-    },
-    async saveExecution() {},
     async getTaskAssignments() {
       return assignments;
     },
-    async logAudit() {},
-  };
+  });
 
   const executor = createAssignmentExecutor({
     store,
@@ -551,13 +479,9 @@ test('AssignmentExecutor executes assignment successfully', async () => {
 });
 
 test('AssignmentExecutor updates assignment status during execution', async () => {
-  const workflowPlan = createMockWorkflowPlan();
-  const assignments = createMockTaskAssignments(workflowPlan);
-  const task = createMockTask(workflowPlan.taskId);
-  const auditLogger = new MockAuditLogger() as any;
-
+  const { workflowPlan, assignments, task, auditLogger } = createWorkflowFixture();
   const statusHistory: string[] = [];
-  const store: MockStore = {
+  const store = createEmptyStore({
     async getWorkflowPlanByTaskId() {
       return workflowPlan;
     },
@@ -570,11 +494,8 @@ test('AssignmentExecutor updates assignment status during execution', async () =
     async getTaskById() {
       return task;
     },
-    async updateWorkflowPlan() {
-      return null;
-    },
     async updateTaskAssignment(assignmentId, updater) {
-      const assignment = assignments.find((a) => a.id === assignmentId);
+      const assignment = assignments.find((item) => item.id === assignmentId);
       if (assignment) {
         const updated = updater(assignment);
         statusHistory.push(updated.status);
@@ -582,15 +503,10 @@ test('AssignmentExecutor updates assignment status during execution', async () =
       }
       return null;
     },
-    async updateTask() {
-      return null;
-    },
-    async saveExecution() {},
     async getTaskAssignments() {
       return assignments;
     },
-    async logAudit() {},
-  };
+  });
 
   const executor = createAssignmentExecutor({
     store,
@@ -612,34 +528,11 @@ test('AssignmentExecutor updates assignment status during execution', async () =
 
 test('AssignmentExecutor returns status', async () => {
   const auditLogger = new MockAuditLogger() as any;
-  const store: MockStore = {
-    async getWorkflowPlanByTaskId() {
-      return null;
-    },
-    async getWorkflowPlans() {
-      return [];
-    },
-    async getTaskAssignmentsByTaskId() {
-      return [];
-    },
-    async getTaskById() {
-      return null;
-    },
-    async updateWorkflowPlan() {
-      return null;
-    },
-    async updateTaskAssignment() {
-      return null;
-    },
-    async updateTask() {
-      return null;
-    },
-    async saveExecution() {},
+  const store = createEmptyStore({
     async getTaskAssignments() {
       return [];
     },
-    async logAudit(event) {},
-  };
+  });
 
   const executor = createAssignmentExecutor({
     store,
@@ -654,12 +547,8 @@ test('AssignmentExecutor returns status', async () => {
 });
 
 test('AssignmentExecutor handles execution timeout', async () => {
-  const workflowPlan = createMockWorkflowPlan();
-  const assignments = createMockTaskAssignments(workflowPlan);
-  const task = createMockTask(workflowPlan.taskId);
-  const auditLogger = new MockAuditLogger() as any;
-
-  const store: MockStore = {
+  const { workflowPlan, assignments, task, auditLogger } = createWorkflowFixture();
+  const store = createEmptyStore({
     async getWorkflowPlanByTaskId() {
       return workflowPlan;
     },
@@ -672,22 +561,14 @@ test('AssignmentExecutor handles execution timeout', async () => {
     async getTaskById() {
       return task;
     },
-    async updateWorkflowPlan() {
-      return null;
-    },
     async updateTaskAssignment(assignmentId, updater) {
-      const assignment = assignments.find((a) => a.id === assignmentId);
+      const assignment = assignments.find((item) => item.id === assignmentId);
       return assignment ? updater(assignment) : null;
     },
-    async updateTask() {
-      return null;
-    },
-    async saveExecution() {},
     async getTaskAssignments() {
       return assignments;
     },
-    async logAudit() {},
-  };
+  });
 
   const executor = createAssignmentExecutor({
     store,

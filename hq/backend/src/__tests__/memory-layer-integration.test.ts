@@ -33,6 +33,27 @@ function nonTemplateNotes(documents: MemoryDocument[]): MemoryDocument[] {
   );
 }
 
+function withMemoryRoot(
+  prefix: string,
+  run: (context: { root: string; memoryRootDir: string }) => void
+): void {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), prefix));
+  const memoryRootDir = path.join(root, '.ai');
+  initializeAiDirectory({ rootDir: root, force: false, templates: true });
+
+  try {
+    run({ root, memoryRootDir });
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+}
+
+function writeMemoryFile(memoryRootDir: string, relativePath: string, content: string): void {
+  const filePath = path.join(memoryRootDir, relativePath);
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, content, 'utf8');
+}
+
 test('Memory Layer Integration: end-to-end workflow', () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'agency-integration-'));
   const memoryRootDir = path.join(root, '.ai');
@@ -103,65 +124,31 @@ test('Memory Layer Integration: task execution summary workflow', () => {
 });
 
 test('Memory Layer Integration: project context aggregation', () => {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'agency-project-ctx-'));
-  const memoryRootDir = path.join(root, '.ai');
+  withMemoryRoot('agency-project-ctx-', ({ memoryRootDir }) => {
+    writeMemoryFile(memoryRootDir, 'notes/tech-stack.md', '# Tech Stack\nNode.js, TypeScript, PostgreSQL.\n');
+    writeMemoryFile(memoryRootDir, 'decisions/database.md', '# Database\nPostgreSQL chosen for ACID compliance.\n');
+    writeMemoryFile(memoryRootDir, 'playbooks/deployment.md', '# Deployment\nDocker containers with Kubernetes.\n');
 
-  initializeAiDirectory({ rootDir: root, force: false, templates: true });
+    const projectContext = retrieveProjectContext({
+      memoryRootDir,
+      limit: 10,
+    });
 
-  fs.writeFileSync(
-    path.join(memoryRootDir, 'notes', 'tech-stack.md'),
-    '# Tech Stack\nNode.js, TypeScript, PostgreSQL.\n',
-    'utf8'
-  );
-  fs.writeFileSync(
-    path.join(memoryRootDir, 'decisions', 'database.md'),
-    '# Database\nPostgreSQL chosen for ACID compliance.\n',
-    'utf8'
-  );
-  fs.writeFileSync(
-    path.join(memoryRootDir, 'playbooks', 'deployment.md'),
-    '# Deployment\nDocker containers with Kubernetes.\n',
-    'utf8'
-  );
-
-  const projectContext = retrieveProjectContext({
-    memoryRootDir,
-    limit: 10,
+    assert.ok(projectContext.entries.length >= 3);
   });
-
-  assert.ok(projectContext.entries.length >= 3);
-
-  fs.rmSync(root, { recursive: true, force: true });
 });
 
 test('Memory Layer Integration: decision filtering and retrieval', () => {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'agency-decisions-integration-'));
-  const memoryRootDir = path.join(root, '.ai');
+  withMemoryRoot('agency-decisions-integration-', ({ memoryRootDir }) => {
+    writeMemoryFile(memoryRootDir, 'decisions/api-design.md', '# API Design\nREST vs GraphQL decision.\nChose REST for simplicity.\n');
+    writeMemoryFile(memoryRootDir, 'decisions/auth-strategy.md', '# Auth Strategy\nJWT vs Sessions decision.\nChose JWT for scalability.\n');
+    writeMemoryFile(memoryRootDir, 'notes/random.md', '# Random\nNot a decision.\n');
 
-  initializeAiDirectory({ rootDir: root, force: false, templates: true });
+    const allDocs = indexMemoryDocuments(memoryRootDir);
+    const decisionsOnly = filterDocumentsByType(allDocs, 'decisions');
 
-  fs.writeFileSync(
-    path.join(memoryRootDir, 'decisions', 'api-design.md'),
-    '# API Design\nREST vs GraphQL decision.\nChose REST for simplicity.\n',
-    'utf8'
-  );
-  fs.writeFileSync(
-    path.join(memoryRootDir, 'decisions', 'auth-strategy.md'),
-    '# Auth Strategy\nJWT vs Sessions decision.\nChose JWT for scalability.\n',
-    'utf8'
-  );
-  fs.writeFileSync(
-    path.join(memoryRootDir, 'notes', 'random.md'),
-    '# Random\nNot a decision.\n',
-    'utf8'
-  );
-
-  const allDocs = indexMemoryDocuments(memoryRootDir);
-  const decisionsOnly = filterDocumentsByType(allDocs, 'decisions');
-
-  assert.ok(decisionsOnly.length >= 2);
-
-  fs.rmSync(root, { recursive: true, force: true });
+    assert.ok(decisionsOnly.length >= 2);
+  });
 });
 
 test('Memory Layer Integration: deduplication workflow', () => {
@@ -261,38 +248,21 @@ test('Memory Layer Integration: cache invalidation after write', () => {
 });
 
 test('Memory Layer Integration: multi-language content handling', () => {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'agency-multilang-'));
-  const memoryRootDir = path.join(root, '.ai');
+  withMemoryRoot('agency-multilang-', ({ memoryRootDir }) => {
+    writeMemoryFile(memoryRootDir, 'notes/chinese.md', '# 中文文档\n这是一个中文文档。\n');
+    writeMemoryFile(memoryRootDir, 'notes/japanese.md', '# 日本語\nこれは日本語のドキュメントです。\n');
+    writeMemoryFile(memoryRootDir, 'notes/english.md', '# English\nThis is an English document.\n');
 
-  initializeAiDirectory({ rootDir: root, force: false, templates: true });
+    const documents = nonTemplateNotes(indexMemoryDocuments(memoryRootDir));
+    assert.equal(documents.length, 3);
 
-  fs.writeFileSync(
-    path.join(memoryRootDir, 'notes', 'chinese.md'),
-    '# 中文文档\n这是一个中文文档。\n',
-    'utf8'
-  );
-  fs.writeFileSync(
-    path.join(memoryRootDir, 'notes', 'japanese.md'),
-    '# 日本語\nこれは日本語のドキュメントです。\n',
-    'utf8'
-  );
-  fs.writeFileSync(
-    path.join(memoryRootDir, 'notes', 'english.md'),
-    '# English\nThis is an English document.\n',
-    'utf8'
-  );
+    const mixedQuery = retrieveMemoryContext('中文 日本語 English', {
+      memoryRootDir,
+      limit: 3,
+    });
 
-  const documents = nonTemplateNotes(indexMemoryDocuments(memoryRootDir));
-  assert.equal(documents.length, 3);
-
-  const mixedQuery = retrieveMemoryContext('中文 日本語 English', {
-    memoryRootDir,
-    limit: 3,
+    assert.ok(mixedQuery.entries.length >= 1);
   });
-
-  assert.ok(mixedQuery.entries.length >= 1);
-
-  fs.rmSync(root, { recursive: true, force: true });
 });
 
 test('Memory Layer Integration: large scale document handling', () => {
