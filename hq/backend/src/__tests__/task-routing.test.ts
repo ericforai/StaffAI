@@ -10,7 +10,7 @@ test('architecture-oriented work routes to software-architect', () => {
 
   assert.equal(decision.recommendedAgentRole, 'software-architect');
   assert.equal(decision.routingStatus, 'matched');
-  assert.equal(decision.executionMode, 'single');
+  assert.equal(decision.executionMode, 'serial');
 });
 
 test('documentation-oriented work routes to technical-writer', () => {

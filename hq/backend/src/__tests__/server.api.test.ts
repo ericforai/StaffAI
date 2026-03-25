@@ -14,6 +14,7 @@ let tempDir = '';
 const originalTasksFile = process.env.AGENCY_TASKS_FILE;
 const originalApprovalsFile = process.env.AGENCY_APPROVALS_FILE;
 const originalExecutionsFile = process.env.AGENCY_EXECUTIONS_FILE;
+const originalToolCallLogsFile = process.env.AGENCY_TOOL_CALL_LOGS_FILE;
 const originalMemoryDir = process.env.AGENCY_MEMORY_DIR;
 
 function getTasksFilePath() {
@@ -25,6 +26,7 @@ before(async () => {
   process.env.AGENCY_TASKS_FILE = path.join(tempDir, 'tasks.json');
   process.env.AGENCY_APPROVALS_FILE = path.join(tempDir, 'approvals.json');
   process.env.AGENCY_EXECUTIONS_FILE = path.join(tempDir, 'executions.json');
+  process.env.AGENCY_TOOL_CALL_LOGS_FILE = path.join(tempDir, 'tool-call-logs.json');
   process.env.AGENCY_MEMORY_DIR = path.join(tempDir, '.ai');
 
   const scanner = new Scanner();
@@ -46,6 +48,7 @@ beforeEach(() => {
   fs.rmSync(getTasksFilePath(), { force: true });
   fs.rmSync(process.env.AGENCY_APPROVALS_FILE as string, { force: true });
   fs.rmSync(process.env.AGENCY_EXECUTIONS_FILE as string, { force: true });
+  fs.rmSync(process.env.AGENCY_TOOL_CALL_LOGS_FILE as string, { force: true });
   fs.rmSync(process.env.AGENCY_MEMORY_DIR as string, { recursive: true, force: true });
 });
 
@@ -74,6 +77,12 @@ after(async () => {
     process.env.AGENCY_EXECUTIONS_FILE = originalExecutionsFile;
   }
 
+  if (originalToolCallLogsFile === undefined) {
+    delete process.env.AGENCY_TOOL_CALL_LOGS_FILE;
+  } else {
+    process.env.AGENCY_TOOL_CALL_LOGS_FILE = originalToolCallLogsFile;
+  }
+
   if (originalMemoryDir === undefined) {
     delete process.env.AGENCY_MEMORY_DIR;
   } else {
@@ -86,11 +95,36 @@ test('GET /api/tasks returns an empty task collection placeholder', async () => 
   assert.equal(response.status, 200);
   const payload = (await response.json()) as {
     tasks?: unknown[];
-    stage?: string;
+    summary?: { totalTasks?: number; readyForExecutionTasks?: number };
   };
 
   assert.deepEqual(payload.tasks, []);
-  assert.equal(payload.stage, 'sprint-1-skeleton');
+  assert.equal(payload.summary?.totalTasks, 0);
+  assert.equal(payload.summary?.readyForExecutionTasks, 0);
+});
+
+test('GET /api/agents exposes structured agent profiles', async () => {
+  const response = await fetch(`${baseUrl}/api/agents`);
+  assert.equal(response.status, 200);
+  const payload = (await response.json()) as Array<{
+    id?: string;
+    name?: string;
+    profile?: {
+      role?: string;
+      responsibilities?: string[];
+      tools?: string[];
+      allowedTaskTypes?: string[];
+      executionPreferences?: { preferredMode?: string };
+    };
+  }>;
+
+  const architect = payload.find((agent) => agent.id === 'software-architect');
+  assert.equal(typeof architect?.name, 'string');
+  assert.equal(architect?.profile?.role, 'software-architect');
+  assert.equal(Array.isArray(architect?.profile?.responsibilities), true);
+  assert.equal(Array.isArray(architect?.profile?.tools), true);
+  assert.equal(architect?.profile?.allowedTaskTypes?.includes('architecture_analysis'), true);
+  assert.equal(typeof architect?.profile?.executionPreferences?.preferredMode, 'string');
 });
 
 test('POST /api/tasks creates a task and GET /api/tasks returns it', async () => {
@@ -111,6 +145,9 @@ test('POST /api/tasks creates a task and GET /api/tasks returns it', async () =>
       description?: string;
       status?: string;
       executionMode?: string;
+      taskType?: string;
+      priority?: string;
+      requestedBy?: string;
       approvalRequired?: boolean;
       recommendedAgentRole?: string;
       routingStatus?: string;
@@ -119,8 +156,11 @@ test('POST /api/tasks creates a task and GET /api/tasks returns it', async () =>
 
   assert.equal(createdPayload.task?.title, 'Refactor server composition');
   assert.equal(createdPayload.task?.description, 'Split route registration from domain logic');
-  assert.equal(createdPayload.task?.status, 'created');
-  assert.equal(createdPayload.task?.executionMode, 'single');
+  assert.equal(createdPayload.task?.status, 'routed');
+  assert.equal(createdPayload.task?.executionMode, 'serial');
+  assert.equal(createdPayload.task?.taskType, 'architecture_analysis');
+  assert.equal(createdPayload.task?.priority, 'medium');
+  assert.equal(createdPayload.task?.requestedBy, 'system');
   assert.equal(createdPayload.task?.approvalRequired, false);
   assert.equal(createdPayload.task?.recommendedAgentRole, 'software-architect');
   assert.equal(createdPayload.task?.routingStatus, 'matched');
@@ -129,13 +169,26 @@ test('POST /api/tasks creates a task and GET /api/tasks returns it', async () =>
   const listResponse = await fetch(`${baseUrl}/api/tasks`);
   assert.equal(listResponse.status, 200);
   const listPayload = (await listResponse.json()) as {
-    tasks?: Array<{ id: string; title: string; status: string }>;
+    tasks?: Array<{
+      id: string;
+      title: string;
+      status: string;
+      canExecute?: boolean;
+      latestApproval?: unknown;
+      latestExecution?: unknown;
+    }>;
+    summary?: { totalTasks?: number; statusCounts?: { routed?: number } };
   };
 
   assert.equal(listPayload.tasks?.length, 1);
   assert.equal(listPayload.tasks?.[0]?.id, createdPayload.task?.id);
   assert.equal(listPayload.tasks?.[0]?.title, 'Refactor server composition');
-  assert.equal(listPayload.tasks?.[0]?.status, 'created');
+  assert.equal(listPayload.tasks?.[0]?.status, 'routed');
+  assert.equal(listPayload.tasks?.[0]?.canExecute, true);
+  assert.equal(listPayload.tasks?.[0]?.latestApproval, null);
+  assert.equal(listPayload.tasks?.[0]?.latestExecution, null);
+  assert.equal(listPayload.summary?.totalTasks, 1);
+  assert.equal(listPayload.summary?.statusCounts?.routed, 1);
 
   const detailResponse = await fetch(`${baseUrl}/api/tasks/${createdPayload.task?.id}`);
   assert.equal(detailResponse.status, 200);
@@ -147,7 +200,7 @@ test('POST /api/tasks creates a task and GET /api/tasks returns it', async () =>
     };
     approvals?: Array<{ status: string }>;
     executions?: Array<{ status: string; outputSummary?: string }>;
-    stage?: string;
+    summary?: { approvalCounts?: { pending?: number }; executionCount?: number };
   };
 
   assert.equal(detailPayload.task?.id, createdPayload.task?.id);
@@ -155,7 +208,8 @@ test('POST /api/tasks creates a task and GET /api/tasks returns it', async () =>
   assert.equal(detailPayload.task?.routingStatus, 'matched');
   assert.deepEqual(detailPayload.approvals, []);
   assert.deepEqual(detailPayload.executions, []);
-  assert.equal(detailPayload.stage, 'sprint-1-skeleton');
+  assert.equal(detailPayload.summary?.approvalCounts?.pending, 0);
+  assert.equal(detailPayload.summary?.executionCount, 0);
 });
 
 test('GET /api/tasks returns newest tasks first', async () => {
@@ -210,12 +264,10 @@ test('GET /api/tasks/:id returns not found for unknown tasks', async () => {
   const payload = (await response.json()) as {
     error?: string;
     taskId?: string;
-    stage?: string;
   };
 
   assert.equal(payload.error, 'task not found');
   assert.equal(payload.taskId, 'missing-task');
-  assert.equal(payload.stage, 'sprint-1-skeleton');
 });
 
 test('POST /api/tasks accepts advanced discussion as an execution mode', async () => {
@@ -343,6 +395,188 @@ test('POST /api/tasks/:id/execute creates an execution and updates task state', 
   assert.equal(taskDetailPayload.executions?.[0]?.id, executePayload.execution?.id);
   assert.equal(taskDetailPayload.executions?.[0]?.status, 'completed');
   assert.equal(taskDetailPayload.executions?.[0]?.outputSummary, 'Execution finished cleanly');
+
+  const taskListResponse = await fetch(`${baseUrl}/api/tasks`);
+  assert.equal(taskListResponse.status, 200);
+  const taskListPayload = (await taskListResponse.json()) as {
+    tasks?: Array<{
+      id?: string;
+      latestExecution?: { id?: string; status?: string; outputSummary?: string } | null;
+      canExecute?: boolean;
+    }>;
+  };
+  const listedTask = taskListPayload.tasks?.find((task) => task.id === taskId);
+  assert.equal(listedTask?.latestExecution?.id, executePayload.execution?.id);
+  assert.equal(listedTask?.latestExecution?.status, 'completed');
+  assert.equal(listedTask?.latestExecution?.outputSummary, 'Execution finished cleanly');
+  assert.equal(listedTask?.canExecute, false);
+});
+
+test('POST /api/tasks/:id/execute exposes serial workflow plans and assignments', async () => {
+  const taskResponse = await fetch(`${baseUrl}/api/tasks`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      title: 'Execute a serial workflow',
+      description: 'Run a serial workflow plan with assignment-aware output',
+    }),
+  });
+  assert.equal(taskResponse.status, 201);
+  const taskPayload = (await taskResponse.json()) as {
+    task?: { id?: string; status?: string };
+  };
+  const taskId = taskPayload.task?.id;
+  assert.equal(typeof taskId, 'string');
+
+  const executeResponse = await fetch(`${baseUrl}/api/tasks/${taskId}/execute`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      executor: 'codex',
+      executionMode: 'serial',
+      summary: 'Serial execution completed',
+    }),
+  });
+
+  assert.equal(executeResponse.status, 201);
+  const executePayload = (await executeResponse.json()) as {
+    mode?: string;
+    workflowPlan?: { mode?: string; steps?: Array<{ assignmentId?: string; status?: string }> };
+    assignments?: Array<{ id?: string; assignmentRole?: string; status?: string }>;
+    execution?: { id?: string; status?: string; workflowPlan?: { mode?: string }; assignments?: Array<{ id?: string; status?: string }> };
+    task?: { status?: string };
+  };
+
+  assert.equal(executePayload.mode, 'serial');
+  assert.equal(executePayload.workflowPlan?.mode, 'serial');
+  assert.equal(executePayload.workflowPlan?.steps?.length, 2);
+  assert.equal(executePayload.assignments?.length, 2);
+  assert.equal(executePayload.assignments?.[0]?.status, 'completed');
+  assert.equal(executePayload.assignments?.[1]?.status, 'completed');
+  assert.equal(executePayload.execution?.workflowPlan?.mode, 'serial');
+  assert.equal(executePayload.execution?.assignments?.length, 2);
+  assert.equal(executePayload.task?.status, 'completed');
+
+  const executionDetailResponse = await fetch(`${baseUrl}/api/executions/${executePayload.execution?.id}`);
+  assert.equal(executionDetailResponse.status, 200);
+  const executionDetailPayload = (await executionDetailResponse.json()) as {
+    execution?: {
+      id?: string;
+      status?: string;
+      workflowPlan?: { mode?: string; steps?: Array<{ assignmentId?: string }> };
+      assignments?: Array<{ id?: string; assignmentRole?: string; status?: string }>;
+    };
+  };
+
+  assert.equal(executionDetailPayload.execution?.workflowPlan?.mode, 'serial');
+  assert.equal(executionDetailPayload.execution?.assignments?.length, 2);
+  assert.equal(executionDetailPayload.execution?.assignments?.[0]?.status, 'completed');
+
+  const taskDetailResponse = await fetch(`${baseUrl}/api/tasks/${taskId}`);
+  assert.equal(taskDetailResponse.status, 200);
+  const taskDetailPayload = (await taskDetailResponse.json()) as {
+    workflowPlan?: { mode?: string; steps?: Array<{ assignmentId?: string }> };
+    assignments?: Array<{ id?: string; assignmentRole?: string; status?: string }>;
+    executions?: Array<{ id?: string; status?: string; workflowPlan?: { mode?: string }; assignments?: Array<{ id?: string }> }>;
+  };
+
+  assert.equal(taskDetailPayload.workflowPlan?.mode, 'serial');
+  assert.equal(taskDetailPayload.workflowPlan?.steps?.length, 2);
+  assert.equal(taskDetailPayload.assignments?.length, 2);
+  assert.equal(taskDetailPayload.executions?.[0]?.workflowPlan?.mode, 'serial');
+});
+
+test('GET /api/tools filters visible tools by role', async () => {
+  const response = await fetch(`${baseUrl}/api/tools?role=reviewer`);
+  assert.equal(response.status, 200);
+  const payload = (await response.json()) as {
+    tools?: Array<{ name?: string }>;
+    actorRole?: string;
+  };
+
+  assert.equal(payload.actorRole, 'reviewer');
+  assert.equal(payload.tools?.some((tool) => tool.name === 'docs_search'), true);
+  assert.equal(payload.tools?.some((tool) => tool.name === 'runtime_executor'), false);
+});
+
+test('POST /api/tools/execute blocks high-risk tools without approval', async () => {
+  const response = await fetch(`${baseUrl}/api/tools/execute`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      toolName: 'runtime_executor',
+      actorRole: 'backend-developer',
+      taskId: 'task-high-risk',
+      executionId: 'execution-high-risk',
+      input: { task: 'Deploy production hotfix' },
+    }),
+  });
+
+  assert.equal(response.status, 403);
+  const payload = (await response.json()) as {
+    error?: string;
+    log?: { status?: string; riskLevel?: string };
+  };
+
+  assert.equal(payload.error, 'high-risk tool requires approval');
+  assert.equal(payload.log?.status, 'blocked');
+  assert.equal(payload.log?.riskLevel, 'high');
+});
+
+test('GET /api/executions/:id includes tool call logs for the execution', async () => {
+  const taskResponse = await fetch(`${baseUrl}/api/tasks`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      title: 'Inspect tool call logs',
+      description: 'Create an execution that later records tool call logs',
+    }),
+  });
+  assert.equal(taskResponse.status, 201);
+  const taskPayload = (await taskResponse.json()) as { task?: { id?: string } };
+  const taskId = taskPayload.task?.id;
+
+  const executeResponse = await fetch(`${baseUrl}/api/tasks/${taskId}/execute`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      executor: 'codex',
+      summary: 'Execution for tool call log visibility',
+    }),
+  });
+  assert.equal(executeResponse.status, 201);
+  const executePayload = (await executeResponse.json()) as { execution?: { id?: string } };
+  const executionId = executePayload.execution?.id;
+  assert.equal(typeof executionId, 'string');
+
+  const toolResponse = await fetch(`${baseUrl}/api/tools/execute`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      toolName: 'test_runner',
+      actorRole: 'backend-developer',
+      taskId,
+      executionId,
+      input: { target: 'backend' },
+    }),
+  });
+  assert.equal(toolResponse.status, 201);
+
+  const executionDetailResponse = await fetch(`${baseUrl}/api/executions/${executionId}`);
+  assert.equal(executionDetailResponse.status, 200);
+  const executionDetailPayload = (await executionDetailResponse.json()) as {
+    execution?: {
+      id?: string;
+      toolCalls?: Array<{ toolName?: string; status?: string; riskLevel?: string; actorRole?: string }>;
+    };
+  };
+
+  assert.equal(executionDetailPayload.execution?.id, executionId);
+  assert.equal(executionDetailPayload.execution?.toolCalls?.length, 1);
+  assert.equal(executionDetailPayload.execution?.toolCalls?.[0]?.toolName, 'test_runner');
+  assert.equal(executionDetailPayload.execution?.toolCalls?.[0]?.status, 'completed');
+  assert.equal(executionDetailPayload.execution?.toolCalls?.[0]?.riskLevel, 'medium');
+  assert.equal(executionDetailPayload.execution?.toolCalls?.[0]?.actorRole, 'backend-developer');
 });
 
 test('GET /api/task-events returns emitted task and execution events', async () => {
@@ -412,6 +646,71 @@ test('task execution writes summary into memory directory', async () => {
   assert.match(content, /Memory summary check/);
 });
 
+test('tool calls are exposed through execution detail payloads', async () => {
+  const taskResponse = await fetch(`${baseUrl}/api/tasks`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      title: 'Capture tool call logs',
+      description: 'Record a tool call on a completed execution',
+    }),
+  });
+  assert.equal(taskResponse.status, 201);
+  const taskPayload = (await taskResponse.json()) as { task?: { id?: string } };
+  const taskId = taskPayload.task?.id;
+  assert.equal(typeof taskId, 'string');
+
+  const executeResponse = await fetch(`${baseUrl}/api/tasks/${taskId}/execute`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      executor: 'codex',
+      summary: 'tool logging baseline',
+    }),
+  });
+  assert.equal(executeResponse.status, 201);
+  const executePayload = (await executeResponse.json()) as {
+    execution?: { id?: string };
+  };
+  const executionId = executePayload.execution?.id;
+  assert.equal(typeof executionId, 'string');
+
+  const toolResponse = await fetch(`${baseUrl}/api/tools/execute`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      executionId,
+      taskId,
+      actorRole: 'backend-developer',
+      toolName: 'test_runner',
+      input: {
+        target: 'backend',
+      },
+    }),
+  });
+  assert.equal(toolResponse.status, 201);
+  const toolPayload = (await toolResponse.json()) as {
+    log?: { status?: string; toolName?: string; riskLevel?: string };
+  };
+  assert.equal(toolPayload.log?.status, 'completed');
+  assert.equal(toolPayload.log?.toolName, 'test_runner');
+  assert.equal(toolPayload.log?.riskLevel, 'medium');
+
+  const executionDetailResponse = await fetch(`${baseUrl}/api/executions/${executionId}`);
+  assert.equal(executionDetailResponse.status, 200);
+  const executionDetailPayload = (await executionDetailResponse.json()) as {
+    execution?: {
+      id?: string;
+      toolCalls?: Array<{ toolName?: string; status?: string; riskLevel?: string }>;
+    };
+  };
+
+  assert.equal(executionDetailPayload.execution?.id, executionId);
+  assert.equal(executionDetailPayload.execution?.toolCalls?.length, 1);
+  assert.equal(executionDetailPayload.execution?.toolCalls?.[0]?.toolName, 'test_runner');
+  assert.equal(executionDetailPayload.execution?.toolCalls?.[0]?.status, 'completed');
+});
+
 test('tasks waiting for approval cannot be executed', async () => {
   const taskResponse = await fetch(`${baseUrl}/api/tasks`, {
     method: 'POST',
@@ -442,11 +741,12 @@ test('GET /api/approvals returns an empty approval collection placeholder', asyn
   assert.equal(response.status, 200);
   const payload = (await response.json()) as {
     approvals?: unknown[];
-    stage?: string;
+    summary?: { total?: number; statusCounts?: { pending?: number } };
   };
 
   assert.deepEqual(payload.approvals, []);
-  assert.equal(payload.stage, 'sprint-1-skeleton');
+  assert.equal(payload.summary?.total, 0);
+  assert.equal(payload.summary?.statusCounts?.pending, 0);
 });
 
 test('high-risk task creation generates an approval record', async () => {
@@ -489,6 +789,20 @@ test('high-risk task creation generates an approval record', async () => {
   assert.equal(approvalsPayload.approvals?.[0]?.status, 'pending');
   assert.equal(approvalsPayload.approvals?.[0]?.requestedBy, 'system');
 
+  const tasksResponse = await fetch(`${baseUrl}/api/tasks`);
+  assert.equal(tasksResponse.status, 200);
+  const tasksPayload = (await tasksResponse.json()) as {
+    tasks?: Array<{
+      id?: string;
+      latestApproval?: { taskId?: string; status?: string } | null;
+      canExecute?: boolean;
+    }>;
+  };
+  const riskyTask = tasksPayload.tasks?.find((task) => task.id === createdPayload.task?.id);
+  assert.equal(riskyTask?.latestApproval?.taskId, createdPayload.task?.id);
+  assert.equal(riskyTask?.latestApproval?.status, 'pending');
+  assert.equal(riskyTask?.canExecute, false);
+
   const taskDetailResponse = await fetch(`${baseUrl}/api/tasks/${createdPayload.task?.id}`);
   assert.equal(taskDetailResponse.status, 200);
   const taskDetailPayload = (await taskDetailResponse.json()) as {
@@ -527,7 +841,7 @@ test('approvals can be approved and rejected', async () => {
     task?: { status?: string; approvalRequired?: boolean };
   };
   assert.equal(approvedPayload.approval?.status, 'approved');
-  assert.equal(approvedPayload.task?.status, 'created');
+  assert.equal(approvedPayload.task?.status, 'routed');
   assert.equal(approvedPayload.task?.approvalRequired, false);
 
   const createSecondResponse = await fetch(`${baseUrl}/api/tasks`, {

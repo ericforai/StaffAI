@@ -8,6 +8,46 @@ export interface AgentFrontmatter {
   [key: string]: string | number | boolean | string[] | undefined;
 }
 
+export type AgentTaskType =
+  | 'architecture_analysis'
+  | 'backend_implementation'
+  | 'code_review'
+  | 'documentation'
+  | 'workflow_dispatch'
+  | 'frontend_implementation'
+  | 'quality_assurance'
+  | 'general';
+
+export type AgentRiskScope = 'low' | 'medium' | 'high';
+
+export interface AgentExecutionPreference {
+  preferredMode: 'single' | 'serial' | 'parallel' | 'advanced_discussion';
+  preferredExecutor: 'claude' | 'codex' | 'openai' | 'auto';
+  supportsParallelWork: boolean;
+  discussionCapable: boolean;
+}
+
+export interface AgentOutputContract {
+  primaryFormat: 'markdown' | 'json' | 'checklist' | 'code' | 'mixed';
+  sections: string[];
+}
+
+export interface AgentCapability {
+  role: string;
+  responsibilities: string[];
+  tools: string[];
+  allowedTaskTypes: AgentTaskType[];
+  riskScope: AgentRiskScope;
+  executionPreferences: AgentExecutionPreference;
+  outputContract: AgentOutputContract;
+}
+
+export interface AgentProfile extends AgentCapability {
+  id: string;
+  name: string;
+  department: string;
+}
+
 export interface Agent {
   id: string; // The slug, e.g., 'frontend-developer'
   filePath: string;
@@ -15,6 +55,7 @@ export interface Agent {
   frontmatter: AgentFrontmatter;
   content: string; // The full body
   systemPrompt: string; // Extracted identity and critical rules
+  profile?: AgentProfile;
 }
 
 export interface SquadState {

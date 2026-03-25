@@ -44,11 +44,17 @@ function makeTask(id: string, createdAt: string): TaskRecord {
     id,
     title: id,
     description: 'description',
-    status: 'created',
+    taskType: 'general',
+    priority: 'medium',
+    status: 'routed',
     executionMode: 'single',
     approvalRequired: false,
     riskLevel: 'low',
+    requestedBy: 'system',
+    requestedAt: createdAt,
     recommendedAgentRole: 'software-architect',
+    candidateAgentRoles: ['software-architect'],
+    routeReason: 'matched by default',
     routingStatus: 'matched',
     createdAt,
     updatedAt: createdAt,
@@ -124,7 +130,13 @@ test('workspace read routes await async store methods', async () => {
 
   const tasksList = await invoke(app.handlers, 'GET', '/api/tasks');
   assert.equal(tasksList.statusCode, 200);
-  assert.equal((tasksList.payload as { tasks?: TaskRecord[] }).tasks?.[0]?.id, 'task-newer');
+  const tasksListPayload = tasksList.payload as {
+    tasks?: TaskRecord[];
+    summary?: { totalTasks?: number; statusCounts?: { routed?: number } };
+  };
+  assert.equal(tasksListPayload.tasks?.[0]?.id, 'task-newer');
+  assert.equal(tasksListPayload.summary?.totalTasks, 2);
+  assert.equal(tasksListPayload.summary?.statusCounts?.routed, 2);
 
   const taskDetail = await invoke(app.handlers, 'GET', '/api/tasks/:id', { params: { id: 'task-newer' } });
   assert.equal(taskDetail.statusCode, 200);
@@ -132,14 +144,25 @@ test('workspace read routes await async store methods', async () => {
     task?: TaskRecord;
     approvals?: ApprovalRecord[];
     executions?: ExecutionRecord[];
+    workflowPlan?: { mode?: string };
+    assignments?: Array<{ id?: string; status?: string }>;
+    summary?: { approvalCounts?: { pending?: number }; executionCount?: number };
   };
   assert.equal(taskDetailPayload.task?.id, 'task-newer');
   assert.equal(taskDetailPayload.approvals?.length, 1);
   assert.equal(taskDetailPayload.executions?.length, 1);
+  assert.equal(taskDetailPayload.summary?.approvalCounts?.pending, 1);
+  assert.equal(taskDetailPayload.summary?.executionCount, 1);
 
   const approvalsList = await invoke(app.handlers, 'GET', '/api/approvals');
   assert.equal(approvalsList.statusCode, 200);
-  assert.equal((approvalsList.payload as { approvals?: ApprovalRecord[] }).approvals?.[0]?.id, 'approval-1');
+  const approvalsListPayload = approvalsList.payload as {
+    approvals?: ApprovalRecord[];
+    summary?: { total?: number; statusCounts?: { pending?: number } };
+  };
+  assert.equal(approvalsListPayload.approvals?.[0]?.id, 'approval-1');
+  assert.equal(approvalsListPayload.summary?.total, 1);
+  assert.equal(approvalsListPayload.summary?.statusCounts?.pending, 1);
 
   const executionsList = await invoke(app.handlers, 'GET', '/api/executions');
   assert.equal(executionsList.statusCode, 200);

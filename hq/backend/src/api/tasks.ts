@@ -1,12 +1,18 @@
 import type express from 'express';
+import type { AgentProfile } from '../types';
 import type { Store } from '../store';
 import { createTaskDraft, validateTaskDraft } from '../orchestration/task-orchestrator';
 import { executeTaskRecord } from '../orchestration/task-execution-orchestrator';
-import { buildTaskDetailReadModel, buildTaskListReadModel } from '../orchestration/task-read-model';
+import {
+  buildTaskDetailReadModel,
+  buildTaskListReadModel,
+  buildTaskWorkspaceSummary,
+} from '../orchestration/task-read-model';
 import type { ExecutionLifecycleRecord } from '../runtime/execution-service';
-import type { TaskRecord } from '../shared/task-types';
+import { TASK_EXECUTION_MODES, type TaskExecutionMode, type TaskRecord } from '../shared/task-types';
 
 interface TaskRouteDependencies {
+  getAgentProfiles?: () => AgentProfile[];
   runAdvancedDiscussion?: (topic: string) => Promise<{ summary: string }>;
   onTaskCreated?: (task: TaskRecord) => void;
   onApprovalRequested?: (taskId: string) => Promise<void> | void;
@@ -16,6 +22,41 @@ interface TaskRouteDependencies {
   writeExecutionSummary?: (task: TaskRecord, execution: ExecutionLifecycleRecord) => Promise<void> | void;
 }
 
+function readExecutionMode(value: unknown): TaskExecutionMode | undefined {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+
+  return (TASK_EXECUTION_MODES as readonly string[]).includes(value) ? (value as TaskExecutionMode) : undefined;
+}
+
+function pickLatestExecution(executions: ExecutionLifecycleRecord[]): ExecutionLifecycleRecord | undefined {
+  return executions.slice().sort((left, right) => {
+    const leftTime = Date.parse(left.completedAt || left.startedAt || '1970-01-01T00:00:00.000Z');
+    const rightTime = Date.parse(right.completedAt || right.startedAt || '1970-01-01T00:00:00.000Z');
+    return rightTime - leftTime;
+  })[0];
+}
+
+function pickWorkflowArtifacts(detail: Awaited<ReturnType<typeof buildTaskDetailReadModel>>) {
+  if (!detail) {
+    return {};
+  }
+
+  if (detail.workflowPlan || detail.assignments.length > 0) {
+    return {
+      workflowPlan: detail.workflowPlan,
+      assignments: detail.assignments,
+    };
+  }
+
+  const latestExecution = pickLatestExecution(detail.executions as ExecutionLifecycleRecord[]);
+  return {
+    ...(latestExecution?.workflowPlan ? { workflowPlan: latestExecution.workflowPlan } : {}),
+    ...(latestExecution?.assignments ? { assignments: latestExecution.assignments } : {}),
+  };
+}
+
 export function registerTaskRoutes(
   app: express.Application,
   store: Store,
@@ -23,10 +64,8 @@ export function registerTaskRoutes(
 ) {
   app.get('/api/tasks', async (_req, res) => {
     const tasks = await buildTaskListReadModel(store);
-    return res.json({
-      tasks,
-      stage: 'sprint-1-skeleton',
-    });
+    const summary = await buildTaskWorkspaceSummary(tasks);
+    return res.json({ tasks, summary });
   });
 
   app.get('/api/tasks/:id', async (req, res) => {
@@ -35,13 +74,12 @@ export function registerTaskRoutes(
       return res.status(404).json({
         error: 'task not found',
         taskId: req.params.id,
-        stage: 'sprint-1-skeleton',
       });
     }
 
     return res.json({
       ...detail,
-      stage: 'sprint-1-skeleton',
+      ...pickWorkflowArtifacts(detail),
     });
   });
 
@@ -51,19 +89,18 @@ export function registerTaskRoutes(
       return res.status(404).json({
         error: 'task not found',
         taskId: req.params.id,
-        stage: 'sprint-1-skeleton',
       });
     }
 
-    if (task.status !== 'created') {
+    if (task.status !== 'created' && task.status !== 'routed') {
       return res.status(409).json({
         error: 'task is not executable in its current state',
         taskId: req.params.id,
-        stage: 'sprint-1-skeleton',
       });
     }
 
     const executor = req.body?.executor === 'claude' || req.body?.executor === 'openai' ? req.body.executor : 'codex';
+    const executionMode = readExecutionMode(req.body?.executionMode);
     const summary =
       typeof req.body?.summary === 'string' && req.body.summary.trim()
         ? req.body.summary.trim()
@@ -79,7 +116,7 @@ export function registerTaskRoutes(
       executor,
     });
 
-    const result = await executeTaskRecord(task, { executor, summary }, store, {
+    const result = await executeTaskRecord(task, { executor, summary, ...(executionMode ? { executionMode } : {}) }, store, {
       runAdvancedDiscussion: dependencies.runAdvancedDiscussion
         ? async () => dependencies.runAdvancedDiscussion?.(topic) ?? { summary }
         : undefined,
@@ -91,21 +128,29 @@ export function registerTaskRoutes(
 
     return res.status(201).json({
       ...result,
-      stage: 'sprint-1-skeleton',
     });
   });
 
   app.post('/api/tasks', async (req, res) => {
     const title = typeof req.body?.title === 'string' ? req.body.title : '';
     const description = typeof req.body?.description === 'string' ? req.body.description : '';
+    const taskType = typeof req.body?.taskType === 'string' ? req.body.taskType : undefined;
+    const priority = typeof req.body?.priority === 'string' ? req.body.priority : undefined;
+    const requestedBy = typeof req.body?.requestedBy === 'string' ? req.body.requestedBy : undefined;
     const executionMode = typeof req.body?.executionMode === 'string' ? req.body.executionMode : undefined;
-    const validation = validateTaskDraft({ title, description });
+    const validation = validateTaskDraft({ title, description, taskType, priority, requestedBy, executionMode });
 
     if (!validation.valid) {
       return res.status(400).json({ error: validation.error });
     }
 
-    const task = await createTaskDraft({ title, description, executionMode }, store);
+    const task = await createTaskDraft(
+      { title, description, taskType, priority, requestedBy, executionMode },
+      store,
+      {
+        getAgentProfiles: dependencies.getAgentProfiles,
+      },
+    );
     dependencies.onTaskCreated?.(task);
 
     if (task.approvalRequired) {
@@ -114,7 +159,6 @@ export function registerTaskRoutes(
 
     return res.status(201).json({
       task,
-      stage: 'sprint-1-skeleton',
     });
   });
 }

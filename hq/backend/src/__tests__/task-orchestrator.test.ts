@@ -1,7 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import type { Store } from '../store';
-import { createTaskDraft, validateTaskDraft } from '../orchestration/task-orchestrator';
+import type { TaskAssignment, TaskRecord } from '../shared/task-types';
+import {
+  advanceAssignmentState,
+  advanceTaskState,
+  createTaskDraft,
+  validateTaskDraft,
+} from '../orchestration/task-orchestrator';
 
 test('validateTaskDraft accepts non-empty title and description', () => {
   const validation = validateTaskDraft({
@@ -26,6 +32,8 @@ test('validateTaskDraft rejects empty fields', () => {
 test('createTaskDraft builds a routed task and persists it via store', async () => {
   const savedTasks: unknown[] = [];
   const savedApprovals: unknown[] = [];
+  const savedWorkflowPlans: unknown[] = [];
+  const savedTaskAssignments: unknown[] = [];
   const store = {
     async saveTask(task) {
       savedTasks.push(task);
@@ -33,7 +41,13 @@ test('createTaskDraft builds a routed task and persists it via store', async () 
     async saveApproval(approval) {
       savedApprovals.push(approval);
     },
-  } as Pick<Store, 'saveTask' | 'saveApproval'>;
+    async saveWorkflowPlan(plan) {
+      savedWorkflowPlans.push(plan);
+    },
+    async saveTaskAssignment(assignment) {
+      savedTaskAssignments.push(assignment);
+    },
+  } as Pick<Store, 'saveTask' | 'saveApproval' | 'saveWorkflowPlan' | 'saveTaskAssignment'>;
 
   const task = await createTaskDraft(
     {
@@ -44,9 +58,62 @@ test('createTaskDraft builds a routed task and persists it via store', async () 
   );
 
   assert.equal(task.title, 'Refactor server composition');
-  assert.equal(task.status, 'created');
+  assert.equal(task.taskType, 'architecture_analysis');
+  assert.equal(task.priority, 'medium');
+  assert.equal(task.requestedBy, 'system');
+  assert.equal(task.status, 'routed');
   assert.equal(task.recommendedAgentRole, 'software-architect');
+  assert.deepEqual(task.candidateAgentRoles, ['software-architect', 'dispatcher']);
   assert.equal(task.routingStatus, 'matched');
   assert.equal(savedTasks.length, 1);
   assert.equal(savedApprovals.length, 0);
+  assert.equal(savedWorkflowPlans.length, 1);
+  assert.equal(savedTaskAssignments.length, 2);
+});
+
+test('advanceTaskState enforces task state transitions', () => {
+  const task: TaskRecord = {
+    id: 'task-1',
+    title: 'Test task',
+    description: 'description',
+    taskType: 'general',
+    priority: 'medium',
+    status: 'routed',
+    executionMode: 'single',
+    approvalRequired: false,
+    riskLevel: 'low',
+    requestedBy: 'system',
+    requestedAt: '2026-03-25T00:00:00.000Z',
+    recommendedAgentRole: 'dispatcher',
+    candidateAgentRoles: ['dispatcher'],
+    routeReason: 'triage',
+    routingStatus: 'manual_review',
+    createdAt: '2026-03-25T00:00:00.000Z',
+    updatedAt: '2026-03-25T00:00:00.000Z',
+  };
+
+  const running = advanceTaskState(task, 'running');
+  assert.equal(running.status, 'running');
+  assert.throws(() => advanceTaskState(task, 'completed'));
+});
+
+test('advanceAssignmentState enforces assignment state transitions', () => {
+  const assignment: TaskAssignment = {
+    id: 'assignment-1',
+    taskId: 'task-1',
+    agentId: 'dispatcher',
+    assignmentRole: 'dispatcher',
+    status: 'pending',
+    createdAt: '2026-03-25T00:00:00.000Z',
+    updatedAt: '2026-03-25T00:00:00.000Z',
+  };
+
+  const running = advanceAssignmentState(assignment, 'running');
+  assert.equal(running.status, 'running');
+  assert.equal(typeof running.startedAt, 'string');
+
+  const completed = advanceAssignmentState(running, 'completed');
+  assert.equal(completed.status, 'completed');
+  assert.equal(typeof completed.completedAt, 'string');
+  assert.throws(() => advanceAssignmentState(completed, 'pending'));
 });
