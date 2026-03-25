@@ -28,6 +28,15 @@ import {
   createPostgresExecutionRepository,
   createPostgresTaskRepository,
 } from './persistence/postgres-repositories';
+import {
+  KnowledgeAdapter,
+  createKnowledgeAdapter,
+} from './legacy/knowledge-adapter';
+import type {
+  KnowledgeAdapterConfig,
+  JsonKnowledgeEntry,
+  UnifiedKnowledgeEntry,
+} from './legacy/knowledge-types';
 
 const STORE_FILE = path.join(__dirname, '../../active_squad.json');
 const TEMPLATES_FILE = path.join(__dirname, '../../templates.json');
@@ -81,6 +90,7 @@ interface StorePersistenceDependencies {
   taskAssignmentRepository?: TaskAssignmentRepository;
   workflowPlanRepository?: WorkflowPlanRepository;
   toolCallLogRepository?: ToolCallLogRepository;
+  knowledgeAdapter?: KnowledgeAdapter;
 }
 
 function getPersistenceMode(): 'file' | 'memory' | 'postgres' {
@@ -109,6 +119,7 @@ export class Store extends EventEmitter {
   private taskAssignmentRepository: TaskAssignmentRepository;
   private workflowPlanRepository: WorkflowPlanRepository;
   private toolCallLogRepository: ToolCallLogRepository;
+  private knowledgeAdapter: KnowledgeAdapter | null;
 
   constructor(dependencies: StorePersistenceDependencies = {}) {
     super();
@@ -159,6 +170,17 @@ export class Store extends EventEmitter {
       (mode === 'memory'
         ? createInMemoryToolCallLogRepository()
         : createFileToolCallLogRepository(getToolCallLogsFilePath()));
+
+    // Initialize knowledge adapter (optional - backward compatible)
+    this.knowledgeAdapter =
+      dependencies.knowledgeAdapter ??
+      (mode !== 'memory'
+        ? createKnowledgeAdapter(
+            process.env.AGENCY_MEMORY_ROOT_DIR || path.join(__dirname, '../../.ai'),
+            KNOWLEDGE_FILE
+          )
+        : null);
+
     this.load();
   }
 
@@ -221,7 +243,23 @@ export class Store extends EventEmitter {
 
   // --- Knowledge Base Logic ---
 
+  /**
+   * Get all knowledge entries (legacy format)
+   * Falls back to JSON file if adapter is not available
+   */
   public getKnowledge(): KnowledgeEntry[] {
+    // Use adapter if available
+    if (this.knowledgeAdapter) {
+      const unified = this.knowledgeAdapter.getAll();
+      return unified.map((entry) => ({
+        task: entry.task,
+        agentId: entry.agentId,
+        resultSummary: entry.resultSummary,
+        timestamp: entry.timestamp,
+      }));
+    }
+
+    // Legacy fallback: read from JSON file
     try {
       if (fs.existsSync(KNOWLEDGE_FILE)) {
         return JSON.parse(fs.readFileSync(KNOWLEDGE_FILE, 'utf-8'));
@@ -232,7 +270,18 @@ export class Store extends EventEmitter {
     return [];
   }
 
-  public saveKnowledge(entry: KnowledgeEntry) {
+  /**
+   * Save a knowledge entry
+   * Uses adapter if available, otherwise falls back to JSON file
+   */
+  public async saveKnowledge(entry: KnowledgeEntry): Promise<void> {
+    // Use adapter if available
+    if (this.knowledgeAdapter) {
+      await this.knowledgeAdapter.save(entry as JsonKnowledgeEntry);
+      return;
+    }
+
+    // Legacy fallback: write to JSON file
     const knowledge = this.getKnowledge();
     knowledge.push({ ...entry, timestamp: Date.now() });
 
@@ -247,6 +296,7 @@ export class Store extends EventEmitter {
 
   /**
    * 特征提取：支持中文字符和英文单词
+   * @deprecated Use KnowledgeAdapter for feature extraction
    */
   private getFeatures(text: string): Map<string, number> {
     const features = new Map<string, number>();
@@ -266,6 +316,7 @@ export class Store extends EventEmitter {
   /**
    * 计算知识条目与查询的相关性得分
    * 使用与专家匹配相同的语义匹配算法
+   * @deprecated Use KnowledgeAdapter for scoring
    */
   private calculateKnowledgeScore(entry: KnowledgeEntry, query: string): number {
     const queryFeatures = this.getFeatures(query);
@@ -288,11 +339,25 @@ export class Store extends EventEmitter {
 
   /**
    * 语义搜索知识库
-   * 返回最相关的 3 条记录
+   * 返回最相关的 N 条记录
+   * Uses adapter if available, otherwise falls back to JSON file
    */
   public searchKnowledge(query: string, limit: number = 3): KnowledgeEntry[] {
-    const knowledge = this.getKnowledge();
     if (!query) return [];
+
+    // Use adapter if available
+    if (this.knowledgeAdapter) {
+      const unified = this.knowledgeAdapter.search(query, limit);
+      return unified.map((entry) => ({
+        task: entry.task,
+        agentId: entry.agentId,
+        resultSummary: entry.resultSummary,
+        timestamp: entry.timestamp,
+      }));
+    }
+
+    // Legacy fallback: search in JSON file
+    const knowledge = this.getKnowledge();
 
     // 计算每条记录的相关性得分
     const scored = knowledge
@@ -305,6 +370,14 @@ export class Store extends EventEmitter {
 
     // 返回得分最高的 N 条
     return scored.slice(0, limit).map(item => item.entry);
+  }
+
+  /**
+   * Get the knowledge adapter instance
+   * Useful for migration operations
+   */
+  public getKnowledgeAdapter(): KnowledgeAdapter | null {
+    return this.knowledgeAdapter;
   }
 
   // --- Task Logic ---
