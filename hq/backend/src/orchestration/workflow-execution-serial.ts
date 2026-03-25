@@ -29,7 +29,9 @@ export async function executeSerialWorkflow(
       };
     }
 
-    updateWorkflowTracking(workflowPlan.id, step.id, new Set(), runningWorkflows);
+    const runningPrev = runningWorkflows.get(workflowPlan.id);
+    const mergedCompleted = new Set(runningPrev?.completedSteps ?? []);
+    updateWorkflowTracking(workflowPlan.id, step.id, mergedCompleted, runningWorkflows);
 
     const result = await assignmentExecutor.execute(assignment, {
       taskId: task.id,
@@ -52,12 +54,8 @@ export async function executeSerialWorkflow(
     }
 
     completedSteps.push(step.id);
+    mergedCompleted.add(step.id);
     await updateStepStatus(workflowPlan.id, step.id, 'completed', assignment);
-
-    const running = runningWorkflows.get(workflowPlan.id);
-    if (running) {
-      running.completedSteps.add(step.id);
-    }
   }
 
   return {

@@ -165,6 +165,27 @@ export function routeTask(input: TaskDraftInput): TaskRouteDecision {
   });
 }
 
+/**
+ * Rebuild workflow plan + assignments for serial execution from the task's routing metadata.
+ * Used when persisted plans are missing, parallel, or inconsistent (e.g. parallel degraded to serial).
+ */
+export function rebuildWorkflowBundleForSerialExecution(
+  task: TaskRecord,
+  profiles: AgentProfile[] = [],
+): AssignmentPlan {
+  const routeDecision = routeTask({
+    title: task.title,
+    description: task.description,
+    taskType: task.taskType,
+    priority: task.priority,
+    requestedBy: task.requestedBy,
+    executionMode: 'serial',
+  });
+  const taskForPlan: TaskRecord = { ...task, executionMode: 'serial' };
+  const structuredPlan = buildPlan(taskForPlan, routeDecision);
+  return assignAgents(structuredPlan, routeDecision, profiles);
+}
+
 export function buildPlan(task: TaskRecord, routeDecision: TaskRouteDecision): AssignmentPlan {
   const now = new Date().toISOString();
   const workflowPlanId = randomUUID();

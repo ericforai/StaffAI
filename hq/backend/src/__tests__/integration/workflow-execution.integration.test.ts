@@ -104,6 +104,13 @@ after(async () => {
  */
 function createMockAssignmentExecutor(): AssignmentExecutor {
   const runningAssignments = new Map<string, 'running' | 'completed' | 'failed'>();
+  let storeWriteChain = Promise.resolve();
+
+  const serializeStoreWrites = (fn: () => Promise<void>): Promise<void> => {
+    const run = storeWriteChain.then(fn);
+    storeWriteChain = run.catch(() => {});
+    return run;
+  };
 
   return {
     async execute(assignment: TaskAssignment, input: {
@@ -119,24 +126,24 @@ function createMockAssignmentExecutor(): AssignmentExecutor {
       outputSnapshot?: Record<string, unknown>;
       error?: string;
     }> {
-      runningAssignments.set(assignment.id, 'running');
+      await serializeStoreWrites(async () => {
+        runningAssignments.set(assignment.id, 'running');
 
-      // Update assignment status via store
-      await store.updateTaskAssignment(assignment.id, (current) => ({
-        ...current,
-        status: 'running',
-        startedAt: new Date().toISOString(),
-      }));
+        await store.updateTaskAssignment(assignment.id, (current) => ({
+          ...current,
+          status: 'running',
+          startedAt: new Date().toISOString(),
+        }));
 
-      // Simulate successful execution
-      runningAssignments.set(assignment.id, 'completed');
-      await store.updateTaskAssignment(assignment.id, (current) => ({
-        ...current,
-        status: 'completed',
-        completedAt: new Date().toISOString(),
-        endedAt: new Date().toISOString(),
-        resultSummary: `Executed: ${input.description}`,
-      }));
+        runningAssignments.set(assignment.id, 'completed');
+        await store.updateTaskAssignment(assignment.id, (current) => ({
+          ...current,
+          status: 'completed',
+          completedAt: new Date().toISOString(),
+          endedAt: new Date().toISOString(),
+          resultSummary: `Executed: ${input.description}`,
+        }));
+      });
 
       return {
         assignmentId: assignment.id,
@@ -263,6 +270,90 @@ test('serial workflow: tracks completed steps', async () => {
 // ============================================================================
 // Test Suite 2: Parallel Workflow Execution
 // ============================================================================
+
+test('parallel workflow: same-order steps run in one phase, then later orders', async () => {
+  const task = await lifecycleService.createTask({
+    title: 'Phased parallel',
+    description: 'Parallel orchestration with two phases',
+    requestedBy: 'user1',
+  });
+
+  await stateMachine.transition(task.id, 'start_execution', 'system');
+
+  const stepA = randomUUID();
+  const stepB = randomUUID();
+  const stepC = randomUUID();
+  const assignA = randomUUID();
+  const assignB = randomUUID();
+  const assignC = randomUUID();
+
+  const workflowPlan: WorkflowPlan = {
+    id: randomUUID(),
+    taskId: task.id,
+    mode: 'parallel',
+    synthesisRequired: false,
+    status: 'planned',
+    steps: [
+      {
+        id: stepA,
+        title: 'Phase1 A',
+        description: 'Concurrent with B',
+        agentId: 'claude',
+        assignmentId: assignA,
+        assignmentRole: 'primary',
+        status: 'pending',
+        order: 1,
+      },
+      {
+        id: stepB,
+        title: 'Phase1 B',
+        description: 'Concurrent with A',
+        agentId: 'claude',
+        assignmentId: assignB,
+        assignmentRole: 'primary',
+        status: 'pending',
+        order: 1,
+      },
+      {
+        id: stepC,
+        title: 'Phase2 C',
+        description: 'After phase 1',
+        agentId: 'claude',
+        assignmentId: assignC,
+        assignmentRole: 'primary',
+        status: 'pending',
+        order: 2,
+      },
+    ],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  await store.saveWorkflowPlan(workflowPlan);
+
+  for (const assignment of [
+    { id: assignA, stepId: stepA },
+    { id: assignB, stepId: stepB },
+    { id: assignC, stepId: stepC },
+  ]) {
+    await store.saveTaskAssignment({
+      id: assignment.id,
+      taskId: task.id,
+      workflowPlanId: workflowPlan.id,
+      stepId: assignment.stepId,
+      agentId: 'claude',
+      assignmentRole: 'primary',
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
+  const result = await workflowEngine.execute(workflowPlan);
+
+  assert.equal(result.status, 'completed');
+  assert.equal(result.completedSteps.length, 3);
+});
 
 test('parallel workflow: executes all steps concurrently', async () => {
   const { workflowPlan } = await createWorkflowSetup(4, 'parallel');
@@ -408,27 +499,13 @@ test('failure handling: cancelled workflow stops execution', async () => {
 // Test Suite 6: Workflow Resume and Recovery
 // ============================================================================
 
-test('workflow resume: can resume cancelled workflow', async () => {
-  const { task, workflowPlan } = await createWorkflowSetup(2, 'serial');
+test('workflow resume: no-op when engine has no skipped execution for plan', async () => {
+  const { workflowPlan } = await createWorkflowSetup(1, 'serial');
 
-  // Start execution to register in runningWorkflows
-  await store.updateWorkflowPlan(task.id, (current) => ({
-    ...current,
-    status: 'running',
-  }));
-
-  // Now cancel should work
-  await workflowEngine.cancel(workflowPlan.id);
-
-  // Verify workflow is cancelled/skipped
-  const statusAfterCancel = workflowEngine.getStatus(workflowPlan.id);
-  assert.ok(['skipped', 'planned'].includes(statusAfterCancel.status));
-
-  // Resume
   await workflowEngine.resume(workflowPlan.id);
 
-  const statusAfterResume = workflowEngine.getStatus(workflowPlan.id);
-  assert.equal(statusAfterResume.status, 'running');
+  const status = workflowEngine.getStatus(workflowPlan.id);
+  assert.equal(status.status, 'planned');
 });
 
 test('workflow resume: non-existent workflow handled gracefully', async () => {

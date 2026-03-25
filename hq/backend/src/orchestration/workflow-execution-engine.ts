@@ -62,7 +62,7 @@ export interface WorkflowExecutionEngine {
  */
 export interface RunningWorkflow {
   workflowPlanId: string;
-  status: 'running' | 'skipped';
+  status: 'running' | 'skipped' | 'completed' | 'failed';
   startedAt: string;
   completedSteps: Set<string>;
   currentStep?: string;
@@ -259,9 +259,17 @@ export class DefaultWorkflowExecutionEngine implements WorkflowExecutionEngine {
 
     const running = this.runningWorkflows.get(workflowPlan.id);
     if (running) {
+      const nextStatus: RunningWorkflow['status'] =
+        result.status === 'skipped'
+          ? 'skipped'
+          : result.status === 'completed'
+            ? 'completed'
+            : result.status === 'failed'
+              ? 'failed'
+              : running.status;
       this.runningWorkflows.set(workflowPlan.id, {
         ...running,
-        status: result.status === 'skipped' ? 'skipped' : running.status,
+        status: nextStatus,
       });
     }
 
