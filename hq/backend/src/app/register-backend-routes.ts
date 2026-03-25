@@ -10,7 +10,8 @@ import { registerStartupRoutes } from '../api/startup';
 import { registerTaskEventRoutes } from '../api/task-events';
 import { registerTaskRoutes } from '../api/tasks';
 import { registerToolRoutes } from '../api/tools';
-import { retrieveMemoryContext, writeExecutionSummaryToMemory } from '../memory/memory-retriever';
+import { retrieveMemoryContext } from '../memory/memory-retriever';
+import { createWriteBackService } from '../memory/write-back-service';
 import {
   createTaskEventPublisher,
   type TaskDashboardEvent,
@@ -52,6 +53,16 @@ export function registerBackendRoutes({
     process.env.AGENCY_RUNTIME_SAMPLING === 'true';
   const memoryRootDir =
     process.env.AGENCY_MEMORY_DIR || path.resolve(process.cwd(), '.ai');
+
+  // Initialize enhanced write-back service
+  const writeBackService = createWriteBackService({
+    memoryRootDir,
+    enableSuccessFailureCategorization: true,
+    enableDecisionRecords: true,
+    retainLegacyTaskSummaries: true,
+    markdownTemplateFormat: 'frontmatter',
+  });
+
   const taskEventFeed: Array<TaskDashboardEvent & { timestamp: string }> = [];
   const taskEvents = createTaskEventPublisher((event) => {
     const eventWithTimestamp = {
@@ -137,9 +148,7 @@ export function registerBackendRoutes({
       return retrieved.context || undefined;
     },
     writeExecutionSummary: (task, execution) => {
-      writeExecutionSummaryToMemory(task, execution, {
-        memoryRootDir,
-      });
+      writeBackService.writeExecutionSummary(task, execution);
     },
     sessionCapabilities: {
       sampling: samplingEnabled,

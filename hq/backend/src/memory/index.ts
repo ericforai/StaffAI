@@ -5,6 +5,7 @@
  * - Type definitions for the MemoryRetriever interface
  * - FileMemoryRetriever implementation
  * - Legacy memory-retriever functions for backward compatibility
+ * - Enhanced write-back service with categorization
  */
 
 // Type definitions
@@ -50,3 +51,50 @@ export {
   retrieveAgentContext,
   retrieveKnowledge,
 } from './memory-retriever.js';
+
+// Write-back service and types
+export type {
+  ExecutionOutcome,
+  WriteBackCategory,
+  WriteBackFrontmatter,
+  ExecutionSummaryData,
+  DecisionRecordData,
+  WriteBackResult,
+  WriteBackConfig,
+  WriteExecutionSummaryOptions,
+  WriteDecisionRecordOptions,
+} from './write-back-types.js';
+
+export {
+  classifyExecutionOutcome,
+  extractSuccessFactors,
+  extractIssuesEncountered,
+  determineStorageCategory,
+  generateExecutionFilename,
+  generateDecisionFilename,
+  WriteBackService,
+  createWriteBackService,
+  DEFAULT_WRITE_BACK_CONFIG,
+} from './write-back-service.js';
+
+export {
+  serializeFrontmatter,
+  generateTaskSummaryMarkdown,
+  generateDecisionRecordMarkdown,
+  generateLegacyTaskSummaryMarkdown,
+} from './write-back-templates.js';
+
+// Re-export from memory-layout for convenience
+export type { MemoryDirectoryLayout } from './memory-layout.js';
+export {
+  createMemoryLayout,
+  MEMORY_DOCUMENT_TYPES,
+  MEMORY_SUBDIRS,
+  MEMORY_FILE_NAMES,
+  PROJECT_TEMPLATE,
+  CURRENT_TASK_TEMPLATE,
+  formatTemplate,
+  isValidDocumentType,
+  getSubdirectoryForType,
+  inferDocumentType,
+} from './memory-layout.js';

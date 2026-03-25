@@ -20054,5 +20054,915 @@
         "order": 1
       }
     ]
+  },
+  {
+    "id": "6db2c8bd-d937-43f9-a2be-5479eec2648e",
+    "taskId": "ffcdb0ff-6bc6-4278-bd28-b61aef90758b",
+    "mode": "serial",
+    "synthesisRequired": true,
+    "status": "planned",
+    "createdAt": "2026-03-25T06:55:52.554Z",
+    "updatedAt": "2026-03-25T06:55:52.555Z",
+    "steps": [
+      {
+        "id": "5ef6c195-1f1e-4e6e-9ee4-226bec31af65",
+        "title": "Analyze architecture and produce recommendation",
+        "description": "software-architect owns step 1 for Refactor server composition",
+        "assignmentId": "9a87f429-a964-4164-874e-5947b5aeec51",
+        "agentId": "software-architect",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      },
+      {
+        "id": "2f1d4bf1-79a6-47d3-a1c0-efae5673f336",
+        "title": "Consolidate architecture decisions and next steps",
+        "description": "dispatcher owns step 2 for Refactor server composition",
+        "assignmentId": "c8c3ac91-abfa-44aa-8826-ffd544791d55",
+        "agentId": "brand-guardian",
+        "assignmentRole": "dispatcher",
+        "status": "pending",
+        "order": 2
+      }
+    ]
+  },
+  {
+    "id": "078de763-c693-494b-a47c-d982a1d28721",
+    "taskId": "53396795-57e8-4026-8316-3f222c7af6ba",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-03-25T06:55:52.575Z",
+    "updatedAt": "2026-03-25T06:55:52.576Z",
+    "steps": [
+      {
+        "id": "e7cd1c7b-94fb-4334-8d82-7673ddb98a47",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Older task",
+        "assignmentId": "0c68c4a9-4947-4e78-b48a-f55a078e7712",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "0f906ee3-1fd6-4899-b437-694c0aeb15d6",
+    "taskId": "b3d10f76-e54d-4deb-a959-079d085466d8",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-03-25T06:55:52.583Z",
+    "updatedAt": "2026-03-25T06:55:52.583Z",
+    "steps": [
+      {
+        "id": "d6a23afb-6b0a-40b4-a481-3fc1e9019cd5",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Newer task",
+        "assignmentId": "17d7c186-7d41-47cd-b3bc-f7817cf12555",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "2a13c5b0-4ed0-4ea3-86c3-1d0c6e5b91a7",
+    "taskId": "84e0ea31-d5ba-4dbe-9f07-1a07442a9613",
+    "mode": "single",
+    "synthesisRequired": true,
+    "status": "planned",
+    "createdAt": "2026-03-25T06:55:52.596Z",
+    "updatedAt": "2026-03-25T06:55:52.596Z",
+    "steps": [
+      {
+        "id": "2fa537af-b639-415c-97f1-55c640586b88",
+        "title": "Analyze architecture and produce recommendation",
+        "description": "software-architect owns step 1 for Run a multi-expert architecture review",
+        "assignmentId": "0ab9b21e-f1bf-4827-8803-da31b8995aed",
+        "agentId": "software-architect",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      },
+      {
+        "id": "1bb20008-4ff3-4afa-87b6-258dc6307a20",
+        "title": "Consolidate architecture decisions and next steps",
+        "description": "dispatcher owns step 2 for Run a multi-expert architecture review",
+        "assignmentId": "bbcbbc83-81b6-4542-8a20-6fcb28e27a84",
+        "agentId": "brand-guardian",
+        "assignmentRole": "dispatcher",
+        "status": "pending",
+        "order": 2
+      }
+    ]
+  },
+  {
+    "id": "d784cdef-7226-4933-9156-f14d9fb1039e",
+    "taskId": "3537f406-e6d0-45f2-a73b-2cb45efec8c6",
+    "mode": "single",
+    "synthesisRequired": true,
+    "status": "planned",
+    "createdAt": "2026-03-25T06:55:52.606Z",
+    "updatedAt": "2026-03-25T06:55:52.606Z",
+    "steps": [
+      {
+        "id": "02979b18-a869-4420-8b72-8c668143b67d",
+        "title": "Analyze architecture and produce recommendation",
+        "description": "software-architect owns step 1 for Run a multi-expert architecture review",
+        "assignmentId": "ef034a32-c928-4dbd-aab7-a1cd9f9e5dcb",
+        "agentId": "software-architect",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      },
+      {
+        "id": "29eb56b5-aa32-451a-8a31-a1bfbdcf29b9",
+        "title": "Consolidate architecture decisions and next steps",
+        "description": "dispatcher owns step 2 for Run a multi-expert architecture review",
+        "assignmentId": "c928417b-906e-4204-add9-6ef7a6f4353e",
+        "agentId": "brand-guardian",
+        "assignmentRole": "dispatcher",
+        "status": "pending",
+        "order": 2
+      }
+    ]
+  },
+  {
+    "id": "be314778-8df6-4b4e-958b-0dc1a6403f26",
+    "taskId": "d1d9b025-f284-4ca5-bf58-9ba7ecc01b8b",
+    "mode": "serial",
+    "synthesisRequired": true,
+    "status": "completed",
+    "createdAt": "2026-03-25T06:55:52.621Z",
+    "updatedAt": "2026-03-25T06:55:52.634Z",
+    "steps": [
+      {
+        "id": "32a4e020-dda6-43b0-b82f-c1bf9ebc3639",
+        "title": "Implement the requested delivery slice",
+        "description": "backend-architect owns step 1 for Execute a single task",
+        "assignmentId": "82ff8734-3c93-47ae-a2f9-f90f1f3b2b13",
+        "agentId": "backend-architect",
+        "assignmentRole": "primary",
+        "status": "completed",
+        "order": 1
+      },
+      {
+        "id": "12cd8b51-7724-4ec2-8b54-33de58a50fd1",
+        "title": "Review implementation for risks and regressions",
+        "description": "code-reviewer owns step 2 for Execute a single task",
+        "assignmentId": "80d42082-c4ad-4add-92fb-220259c9bcc2",
+        "agentId": "code-reviewer",
+        "assignmentRole": "reviewer",
+        "status": "completed",
+        "order": 2
+      }
+    ]
+  },
+  {
+    "id": "74b388f3-0ad5-452a-b691-52985f35b2d0",
+    "taskId": "7181b3ad-5aee-4a85-a2f3-c18c75bbdb85",
+    "mode": "serial",
+    "synthesisRequired": true,
+    "status": "completed",
+    "createdAt": "2026-03-25T06:55:52.650Z",
+    "updatedAt": "2026-03-25T06:55:52.661Z",
+    "steps": [
+      {
+        "id": "0793b20a-76d0-4818-ad0f-c838e55bcdec",
+        "order": 1,
+        "title": "Draft Execute a serial workflow",
+        "assignmentId": "2020cf3f-40aa-4d44-b4ec-7429a83c28b1",
+        "agentId": "dispatcher",
+        "assignmentRole": "primary",
+        "status": "completed"
+      },
+      {
+        "id": "14c48cd6-0f17-411c-a396-4d6213d20f43",
+        "order": 2,
+        "title": "Review and finalize Execute a serial workflow",
+        "assignmentId": "2020cf3f-40aa-4d44-b4ec-7429a83c28b1",
+        "agentId": "dispatcher",
+        "assignmentRole": "dispatcher",
+        "status": "completed"
+      }
+    ]
+  },
+  {
+    "id": "e77c3682-4aa4-458c-b638-4368d60270e6",
+    "taskId": "a3d57a18-1264-4bd2-8f92-70e08ae9a8d3",
+    "mode": "serial",
+    "synthesisRequired": true,
+    "status": "completed",
+    "createdAt": "2026-03-25T06:55:52.676Z",
+    "updatedAt": "2026-03-25T06:55:52.687Z",
+    "steps": [
+      {
+        "id": "6ed2d4a2-703e-41d2-b839-e3335c45ef16",
+        "order": 1,
+        "title": "Draft Execute a degraded parallel workflow",
+        "assignmentId": "76b160c4-c78f-457b-91bb-a91fa997001d",
+        "agentId": "dispatcher",
+        "assignmentRole": "primary",
+        "status": "completed"
+      },
+      {
+        "id": "a79c2009-dcdf-4972-9fb2-76b3f608197a",
+        "order": 2,
+        "title": "Review and finalize Execute a degraded parallel workflow",
+        "assignmentId": "76b160c4-c78f-457b-91bb-a91fa997001d",
+        "agentId": "dispatcher",
+        "assignmentRole": "dispatcher",
+        "status": "completed"
+      }
+    ]
+  },
+  {
+    "id": "0b4a452f-7156-48ca-badd-8e97a1ae8db9",
+    "taskId": "fba4f39b-ce20-473f-a386-2a7dd3b87fd5",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "completed",
+    "createdAt": "2026-03-25T06:55:52.700Z",
+    "updatedAt": "2026-03-25T06:55:52.709Z",
+    "steps": [
+      {
+        "id": "4aa47770-8485-422b-870a-50c7b39f4e08",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Inspect tool call logs",
+        "assignmentId": "45a4e013-6202-4022-a1c6-4321a5e1e8f4",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "completed",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "ef52ad78-0476-4001-bc93-ce9976d895ff",
+    "taskId": "4f516e83-5ed9-4cfe-9b1b-bd64c609b6c3",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "completed",
+    "createdAt": "2026-03-25T06:55:52.718Z",
+    "updatedAt": "2026-03-25T06:55:52.727Z",
+    "steps": [
+      {
+        "id": "bb3ce604-e3cd-4f24-a394-085ce22c64c5",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Emit task events",
+        "assignmentId": "d87cdcfb-7e14-4655-90ec-c4d01027b8b4",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "completed",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "68f21ccb-01bd-4f37-bbbf-9a84f41c2b15",
+    "taskId": "169c8942-797b-46f4-a3ab-b7a8586698de",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "completed",
+    "createdAt": "2026-03-25T06:55:52.735Z",
+    "updatedAt": "2026-03-25T06:55:52.743Z",
+    "steps": [
+      {
+        "id": "b016ac87-9c65-43d0-ac96-257f73d739d0",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Document execution memory",
+        "assignmentId": "a252febb-279b-4baf-ae90-454c67c0a738",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "completed",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "44c0af15-3789-4d5b-a141-34ba19c585d8",
+    "taskId": "614736e2-c4c7-4513-bd1d-07347b353d04",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "completed",
+    "createdAt": "2026-03-25T06:55:52.750Z",
+    "updatedAt": "2026-03-25T06:55:52.758Z",
+    "steps": [
+      {
+        "id": "7b75b355-7cbe-49a5-80c9-cb172ca67791",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Capture tool call logs",
+        "assignmentId": "737cc472-4b3b-4b39-873b-6eb143d355eb",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "completed",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "06533c4c-38da-4f31-9549-4db125bb61c5",
+    "taskId": "44bafaf4-e2a9-4950-8197-f500ab7ee3a7",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-03-25T06:55:52.767Z",
+    "updatedAt": "2026-03-25T06:55:52.767Z",
+    "steps": [
+      {
+        "id": "e3eef740-cacf-4988-99b4-d78145284d0c",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Delete core configuration",
+        "assignmentId": "26a5c976-b0fe-44fd-9dcf-1c2a708fba9d",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "fc0d4ba0-a159-41fe-b105-477869397e80",
+    "taskId": "86d41d3d-19b0-4e7c-98ae-687c4c01309d",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-03-25T06:55:52.775Z",
+    "updatedAt": "2026-03-25T06:55:52.775Z",
+    "steps": [
+      {
+        "id": "a91cb2e4-eff8-47bc-b116-284f1916e82a",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Delete core configuration",
+        "assignmentId": "7a166f43-c6f5-4af0-a885-9decd1d0983f",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "47e0091f-ab40-4c5e-a135-27bb24b3985c",
+    "taskId": "1e44a5ad-4b38-43fe-a3bb-031da0c9cc68",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-03-25T06:55:52.785Z",
+    "updatedAt": "2026-03-25T06:55:52.785Z",
+    "steps": [
+      {
+        "id": "bb2bec72-62ff-47a5-b042-13e6a496b0f6",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Delete protected data",
+        "assignmentId": "d0fe4233-3694-4d19-b17d-70dcc3546822",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "f88d7efa-3d8d-40f6-be35-3b1a5ed8f4b4",
+    "taskId": "5d092935-fd09-4a1e-ab45-278dcb74e68b",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-03-25T06:55:52.794Z",
+    "updatedAt": "2026-03-25T06:55:52.794Z",
+    "steps": [
+      {
+        "id": "a131b4d1-cc05-4247-a38a-891da2cc6b90",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Delete user access",
+        "assignmentId": "70674747-cc69-4891-9252-72f208ab7c52",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "127f778b-e830-4122-9e16-ee2584ab0bc0",
+    "taskId": "bf9fd876-ab13-455a-9006-29c4a3652112",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "completed",
+    "createdAt": "2026-03-25T06:55:52.801Z",
+    "updatedAt": "2026-03-25T06:55:52.816Z",
+    "steps": [
+      {
+        "id": "ed2328c8-519b-4b70-a961-ec590180a375",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Execution history task A",
+        "assignmentId": "954c5e63-2d08-404e-9ea6-52b216cb1867",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "completed",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "f48f45ed-e135-4abb-8a9e-3bea35c68391",
+    "taskId": "0cae5671-a601-41f3-81c1-2d469e088644",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "completed",
+    "createdAt": "2026-03-25T06:55:52.808Z",
+    "updatedAt": "2026-03-25T06:55:52.826Z",
+    "steps": [
+      {
+        "id": "fe119626-4fc5-4192-9481-21d7b3898a73",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Execution history task B",
+        "assignmentId": "b3ec0559-a514-4006-9b76-9d51e3fcd9e0",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "completed",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "6a086e1b-b5b5-49f0-9362-b8f0be89cc53",
+    "taskId": "c2f276f5-3f78-4e4e-ac23-2956723fceae",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "completed",
+    "createdAt": "2026-03-25T06:55:52.835Z",
+    "updatedAt": "2026-03-25T06:55:52.845Z",
+    "steps": [
+      {
+        "id": "71e39c3c-3f6c-4625-a87e-36f0017a29c6",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Execution projection task",
+        "assignmentId": "cbe33a18-5084-45c7-9209-5b1cbec43f49",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "completed",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "337669da-4c22-4129-b6de-eadf2af95083",
+    "taskId": "f5cfd3a8-0652-4a96-b5e1-7892c311fb08",
+    "mode": "serial",
+    "synthesisRequired": true,
+    "status": "planned",
+    "createdAt": "2026-03-25T08:06:41.602Z",
+    "updatedAt": "2026-03-25T08:06:41.602Z",
+    "steps": [
+      {
+        "id": "be2a1190-d2d5-41f8-b9d8-e21ed747d62e",
+        "title": "Analyze architecture and produce recommendation",
+        "description": "software-architect owns step 1 for Refactor server composition",
+        "assignmentId": "4704dcbc-429d-4451-97ee-9ef81b5a6104",
+        "agentId": "software-architect",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      },
+      {
+        "id": "f446ee69-b8e2-4ce7-8253-7976668cc268",
+        "title": "Consolidate architecture decisions and next steps",
+        "description": "dispatcher owns step 2 for Refactor server composition",
+        "assignmentId": "ecafd11d-5a43-4d23-84a4-df40a9cf62a0",
+        "agentId": "brand-guardian",
+        "assignmentRole": "dispatcher",
+        "status": "pending",
+        "order": 2
+      }
+    ]
+  },
+  {
+    "id": "865853d6-3e4e-4154-9f7d-aa77aafa98fc",
+    "taskId": "6ef34faf-e7fe-4461-b96b-ee317df40f48",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-03-25T08:06:41.623Z",
+    "updatedAt": "2026-03-25T08:06:41.623Z",
+    "steps": [
+      {
+        "id": "ce56702c-dec4-4d68-9a62-17024c8f4691",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Older task",
+        "assignmentId": "70458cd8-65dc-4ff3-9873-d6ab86ebd1a1",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "c6cc1d2c-5e2e-4887-9423-ced98e3d99dd",
+    "taskId": "3d713fa6-fa07-40e8-9279-530eac814750",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-03-25T08:06:41.630Z",
+    "updatedAt": "2026-03-25T08:06:41.630Z",
+    "steps": [
+      {
+        "id": "4bf31a36-b4fb-4923-8f90-c9a2ac887cec",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Newer task",
+        "assignmentId": "3237eabf-cc73-4e24-84cb-d87f4c19d5d6",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "bc30d36b-9e01-4c75-b0f6-f16c89596938",
+    "taskId": "33b60af2-d3a4-4de3-8b45-447c501d5179",
+    "mode": "single",
+    "synthesisRequired": true,
+    "status": "planned",
+    "createdAt": "2026-03-25T08:06:41.643Z",
+    "updatedAt": "2026-03-25T08:06:41.643Z",
+    "steps": [
+      {
+        "id": "dcdd740c-2f19-41ad-8486-a744f7f95406",
+        "title": "Analyze architecture and produce recommendation",
+        "description": "software-architect owns step 1 for Run a multi-expert architecture review",
+        "assignmentId": "edd39bc1-6abc-4346-9cfa-5daebfbc7a6a",
+        "agentId": "software-architect",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      },
+      {
+        "id": "92f9089d-f405-42cd-9774-567743e896cb",
+        "title": "Consolidate architecture decisions and next steps",
+        "description": "dispatcher owns step 2 for Run a multi-expert architecture review",
+        "assignmentId": "0a53e2af-a573-4ab3-8f65-2e6e62e4ea5a",
+        "agentId": "brand-guardian",
+        "assignmentRole": "dispatcher",
+        "status": "pending",
+        "order": 2
+      }
+    ]
+  },
+  {
+    "id": "a085b67e-5ed2-41c0-8481-00f9b4007452",
+    "taskId": "e3f33bd9-7c7d-49ef-b525-644995c2fa89",
+    "mode": "single",
+    "synthesisRequired": true,
+    "status": "planned",
+    "createdAt": "2026-03-25T08:06:41.652Z",
+    "updatedAt": "2026-03-25T08:06:41.652Z",
+    "steps": [
+      {
+        "id": "105a1886-5a89-491f-867d-59aa7694e733",
+        "title": "Analyze architecture and produce recommendation",
+        "description": "software-architect owns step 1 for Run a multi-expert architecture review",
+        "assignmentId": "22014c9c-8ec5-4163-86ea-30931712b689",
+        "agentId": "software-architect",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      },
+      {
+        "id": "0714463d-9bc7-450e-93bd-145f758607f1",
+        "title": "Consolidate architecture decisions and next steps",
+        "description": "dispatcher owns step 2 for Run a multi-expert architecture review",
+        "assignmentId": "93e418f5-83c9-440a-a914-8a16995fd2f1",
+        "agentId": "brand-guardian",
+        "assignmentRole": "dispatcher",
+        "status": "pending",
+        "order": 2
+      }
+    ]
+  },
+  {
+    "id": "10dcd21c-1405-4975-a271-7275ba35106f",
+    "taskId": "f8022722-e441-4299-95cf-adcb72eb5879",
+    "mode": "serial",
+    "synthesisRequired": true,
+    "status": "completed",
+    "createdAt": "2026-03-25T08:06:41.665Z",
+    "updatedAt": "2026-03-25T08:06:41.677Z",
+    "steps": [
+      {
+        "id": "3fc5c545-3e5c-4eff-922a-4b5f1857cbd1",
+        "title": "Implement the requested delivery slice",
+        "description": "backend-architect owns step 1 for Execute a single task",
+        "assignmentId": "208370b5-ef06-41cd-bebf-48c99fc7724b",
+        "agentId": "backend-architect",
+        "assignmentRole": "primary",
+        "status": "completed",
+        "order": 1
+      },
+      {
+        "id": "8eee41aa-0dd9-4217-beb4-28710ca59c79",
+        "title": "Review implementation for risks and regressions",
+        "description": "code-reviewer owns step 2 for Execute a single task",
+        "assignmentId": "eb999e64-e32a-4ba0-b061-6c1c284a71e2",
+        "agentId": "code-reviewer",
+        "assignmentRole": "reviewer",
+        "status": "completed",
+        "order": 2
+      }
+    ]
+  },
+  {
+    "id": "d2367867-a80a-4819-aa7e-73ed1459f57d",
+    "taskId": "3164b572-d846-4059-9be5-e90f6d4d47b3",
+    "mode": "serial",
+    "synthesisRequired": true,
+    "status": "completed",
+    "createdAt": "2026-03-25T08:06:41.691Z",
+    "updatedAt": "2026-03-25T08:06:41.701Z",
+    "steps": [
+      {
+        "id": "b4799307-8f9f-43e3-95f9-4b8c169e5573",
+        "order": 1,
+        "title": "Draft Execute a serial workflow",
+        "assignmentId": "985742b1-5571-4e19-8042-1272ac462afd",
+        "agentId": "dispatcher",
+        "assignmentRole": "primary",
+        "status": "completed"
+      },
+      {
+        "id": "19433081-a651-4e80-bab9-2444eb37ae06",
+        "order": 2,
+        "title": "Review and finalize Execute a serial workflow",
+        "assignmentId": "985742b1-5571-4e19-8042-1272ac462afd",
+        "agentId": "dispatcher",
+        "assignmentRole": "dispatcher",
+        "status": "completed"
+      }
+    ]
+  },
+  {
+    "id": "10f20d02-9bbc-42db-b2a7-b535cc263277",
+    "taskId": "4f0757d6-ac82-4244-9a4f-353b7bf41fcc",
+    "mode": "serial",
+    "synthesisRequired": true,
+    "status": "completed",
+    "createdAt": "2026-03-25T08:06:41.715Z",
+    "updatedAt": "2026-03-25T08:06:41.726Z",
+    "steps": [
+      {
+        "id": "bb801790-acee-4d3f-aea8-f0baf687f671",
+        "order": 1,
+        "title": "Draft Execute a degraded parallel workflow",
+        "assignmentId": "905be1e6-73cd-49d5-81d7-c5545ea2caee",
+        "agentId": "dispatcher",
+        "assignmentRole": "primary",
+        "status": "completed"
+      },
+      {
+        "id": "370d3f4a-2a92-4b26-94d2-215dfdc56f9d",
+        "order": 2,
+        "title": "Review and finalize Execute a degraded parallel workflow",
+        "assignmentId": "905be1e6-73cd-49d5-81d7-c5545ea2caee",
+        "agentId": "dispatcher",
+        "assignmentRole": "dispatcher",
+        "status": "completed"
+      }
+    ]
+  },
+  {
+    "id": "9d51ba31-98f4-459c-b67a-8caf16d27e32",
+    "taskId": "2445a8bc-fa40-4c21-adf3-d2f410a9a01e",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "completed",
+    "createdAt": "2026-03-25T08:06:41.738Z",
+    "updatedAt": "2026-03-25T08:06:41.746Z",
+    "steps": [
+      {
+        "id": "a7219d2b-d95f-41fe-b8a4-864918a4b2d3",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Inspect tool call logs",
+        "assignmentId": "3c73e60a-b308-486b-8222-b97fe14d515e",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "completed",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "e23b351d-d461-4ebc-a28d-9a76dfa520db",
+    "taskId": "59e7be6f-ccf8-4610-84e6-7a62777d802f",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "completed",
+    "createdAt": "2026-03-25T08:06:41.755Z",
+    "updatedAt": "2026-03-25T08:06:41.763Z",
+    "steps": [
+      {
+        "id": "668779c0-8b3b-436e-b518-59e755e793d0",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Emit task events",
+        "assignmentId": "004f226e-131c-4629-a52e-dd0f0735841e",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "completed",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "7271af9e-7296-464c-83b1-d68f2fc7883a",
+    "taskId": "3a7f9e39-a9f9-4ec3-8c34-edfad997a14d",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "completed",
+    "createdAt": "2026-03-25T08:06:41.770Z",
+    "updatedAt": "2026-03-25T08:06:41.778Z",
+    "steps": [
+      {
+        "id": "38615724-a35c-4dba-b845-39e4eec2ac9e",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Document execution memory",
+        "assignmentId": "219a044d-3d1d-4d8f-af24-7650aa8d00d8",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "completed",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "d4f28518-8675-4842-8449-33d6b8ccbc49",
+    "taskId": "6ecd5588-e40b-4a55-b26d-a302c19aeb49",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "completed",
+    "createdAt": "2026-03-25T08:06:41.785Z",
+    "updatedAt": "2026-03-25T08:06:41.794Z",
+    "steps": [
+      {
+        "id": "0ecf950d-c80f-432a-9622-d8c228f51604",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Capture tool call logs",
+        "assignmentId": "1f71f8a0-84ec-4d70-9ce5-87f8b32d5eda",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "completed",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "993211b0-cbfa-43b2-a50f-b7b26df99900",
+    "taskId": "0f5f9485-c5c7-4af8-af10-f239b482ff92",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-03-25T08:06:41.802Z",
+    "updatedAt": "2026-03-25T08:06:41.802Z",
+    "steps": [
+      {
+        "id": "4220d10c-d697-4715-8b04-8a10dc79b483",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Delete core configuration",
+        "assignmentId": "e7232f15-902f-4a31-9922-e8f7279460cb",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "cc54f2ca-b527-47e9-b9b8-3423ed759775",
+    "taskId": "f2b4ec7a-d5fc-4c79-92a0-7598cb3783a3",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-03-25T08:06:41.809Z",
+    "updatedAt": "2026-03-25T08:06:41.809Z",
+    "steps": [
+      {
+        "id": "892a2913-5616-4cc4-b60a-021674e7091e",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Delete core configuration",
+        "assignmentId": "6428efb2-7428-4cb7-afe8-c97b74f4647b",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "3d175e99-0510-4e3c-9572-180260d781e0",
+    "taskId": "eb164a95-e0ff-4957-83ff-79f5972ecbec",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-03-25T08:06:41.820Z",
+    "updatedAt": "2026-03-25T08:06:41.820Z",
+    "steps": [
+      {
+        "id": "fbae27fd-367b-4d67-848f-b938b50d77d0",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Delete protected data",
+        "assignmentId": "120ca66a-7d2d-4f40-9c8e-9fa77ed1f1ff",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "23e0d990-f1ca-4d73-b503-9eff69a68710",
+    "taskId": "f3c16530-8239-480b-be99-b35315445ce0",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-03-25T08:06:41.827Z",
+    "updatedAt": "2026-03-25T08:06:41.827Z",
+    "steps": [
+      {
+        "id": "d8272a5e-77cf-4c78-9e9c-849ba0d3df85",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Delete user access",
+        "assignmentId": "21dd71ed-3023-47ce-a56d-5bc618f6c3c3",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "2339ef31-4a69-4946-85ec-3726f5cebde5",
+    "taskId": "50919f60-6e3a-4185-9de9-8aea8186f3bc",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "completed",
+    "createdAt": "2026-03-25T08:06:41.834Z",
+    "updatedAt": "2026-03-25T08:06:41.847Z",
+    "steps": [
+      {
+        "id": "18fb1e10-8794-4d96-aea1-f693fedaceae",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Execution history task A",
+        "assignmentId": "eea9009b-a48d-4d86-ab3d-c1e62bf55066",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "completed",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "1a99dbba-c7ab-46d8-b880-77f4a2be80c3",
+    "taskId": "0994fb62-1456-403e-8474-6683deca74a6",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "completed",
+    "createdAt": "2026-03-25T08:06:41.839Z",
+    "updatedAt": "2026-03-25T08:06:41.856Z",
+    "steps": [
+      {
+        "id": "08af9be0-7709-49c5-8ace-679e01b8b1d3",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Execution history task B",
+        "assignmentId": "60987268-d7cd-46b6-9010-da16f329f6d8",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "completed",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "01d474e6-6209-4c9a-9456-3e935255c131",
+    "taskId": "ff0aceb5-29bd-47f6-a791-8154c8826400",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "completed",
+    "createdAt": "2026-03-25T08:06:41.865Z",
+    "updatedAt": "2026-03-25T08:06:41.873Z",
+    "steps": [
+      {
+        "id": "6cc33975-a7be-4814-83db-17be808e57ac",
+        "title": "Execute the requested task",
+        "description": "dispatcher owns step 1 for Execution projection task",
+        "assignmentId": "39b9617c-dbf6-46c4-8dbf-af13b536c4a0",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "completed",
+        "order": 1
+      }
+    ]
   }
 ]

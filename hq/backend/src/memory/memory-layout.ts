@@ -43,9 +43,13 @@ export interface MemoryDirectoryLayout {
   decisionsDir: string;
   /** Knowledge base directory */
   knowledgeDir: string;
+  /** Knowledge successes subdirectory (for categorized outcomes) */
+  knowledgeSuccessesDir: string;
+  /** Knowledge failures subdirectory (for categorized outcomes) */
+  knowledgeFailuresDir: string;
   /** Agent-specific memory directory */
   agentsDir: string;
-  /** Task summaries directory */
+  /** Task summaries directory (legacy format) */
   taskSummariesDir: string;
 }
 
@@ -106,6 +110,8 @@ export const MEMORY_SUBDIRS = [
   'tasks',
   'decisions',
   'knowledge',
+  'knowledge/successes',
+  'knowledge/failures',
   'agents',
   'task-summaries',
 ] as const;
@@ -139,6 +145,8 @@ export function createMemoryLayout(memoryRootDir: string): MemoryDirectoryLayout
     tasksDir: path.join(memoryRootDir, 'tasks'),
     decisionsDir: path.join(memoryRootDir, 'decisions'),
     knowledgeDir: path.join(memoryRootDir, 'knowledge'),
+    knowledgeSuccessesDir: path.join(memoryRootDir, 'knowledge', 'successes'),
+    knowledgeFailuresDir: path.join(memoryRootDir, 'knowledge', 'failures'),
     agentsDir: path.join(memoryRootDir, 'agents'),
     taskSummariesDir: path.join(memoryRootDir, 'task-summaries'),
   };
