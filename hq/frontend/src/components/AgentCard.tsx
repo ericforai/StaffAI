@@ -2,7 +2,7 @@
  * 专家卡片组件（侧边栏和主区域通用）
  */
 import { motion } from 'framer-motion';
-import { UserMinus, Loader2, Zap } from 'lucide-react';
+import { UserMinus, Loader2, Zap, BriefcaseBusiness } from 'lucide-react';
 import { DEPT_MAP } from '../utils/constants';
 import { Agent } from '../types';
 
@@ -23,44 +23,43 @@ export function AgentCard({ agent, isActive, isWorking, variant, onToggle, onCli
     return (
       <motion.div
         layout
-        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, x: -50 }}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, x: -20 }}
         key={agent.id}
-        className={`rounded-[1.7rem] border p-4 transition-all group relative overflow-hidden ${
+        className={`rounded-lg border p-3 transition-all duration-200 group relative ${
           isWorking
-            ? 'border-[#b8c9d2] bg-[#eef4f6] shadow-[0_10px_24px_rgba(112,143,160,0.14)]'
-            : 'border-[#e8dfd4] bg-[#fcf8f2] hover:border-[#cfbfac]'
+            ? 'border-sky-200 bg-sky-50/60 shadow-sm'
+            : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'
         }`}
       >
-        <div className="flex items-center justify-between relative z-10">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-[1rem] bg-white text-2xl shadow-sm">
-              {agent.frontmatter.emoji || '🤖'}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-slate-50 border border-slate-100">
+              {DeptIcon ? (
+                <DeptIcon className="h-4 w-4 text-slate-600" />
+              ) : (
+                <BriefcaseBusiness className="h-4 w-4 text-slate-600" />
+              )}
             </div>
             <div>
-              <div className="text-base font-black tracking-tight text-slate-900">{agent.frontmatter.name}</div>
-              <div className="mt-1 flex items-center gap-2 text-[11px] font-black tracking-[0.18em] text-slate-500">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#9b8164]" />
+              <div className="text-sm font-semibold text-slate-900 leading-tight">{agent.frontmatter.name}</div>
+              <div className="mt-0.5 flex items-center gap-1.5 text-[10px] font-medium tracking-wide text-slate-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-sky-500" />
                 {department?.label}
               </div>
             </div>
           </div>
           {isWorking ? (
-            <div className="relative h-10 w-10 flex items-center justify-center">
-              <motion.div
-                animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
-                transition={{ repeat: Infinity, duration: 2 }}
-                className="absolute inset-0 rounded-full bg-[#dce8ee]"
-              />
-              <Loader2 className="h-6 w-6 animate-spin text-[#708fa0]" />
+            <div className="flex h-8 w-8 items-center justify-center">
+              <Loader2 className="h-4 w-4 animate-spin text-sky-500" />
             </div>
           ) : (
             <button
               onClick={() => onToggle?.(agent.id)}
-              className="rounded-2xl bg-white p-3 text-[#9b8164] opacity-0 shadow-sm transition-all group-hover:opacity-100 hover:bg-[#efe7dc] hover:text-slate-900"
+              className="rounded-md p-1.5 text-slate-400 opacity-0 transition-all duration-200 group-hover:opacity-100 hover:bg-slate-100 hover:text-slate-600 cursor-pointer"
             >
-              <UserMinus className="w-6 h-6" />
+              <UserMinus className="w-4 h-4" />
             </button>
           )}
         </div>
@@ -72,37 +71,41 @@ export function AgentCard({ agent, isActive, isWorking, variant, onToggle, onCli
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
       key={agent.id}
       onClick={() => onClick?.(agent.id)}
-      className={`group relative cursor-pointer overflow-hidden rounded-[1.8rem] border p-6 transition-all duration-300 ${
+      className={`group relative cursor-pointer rounded-lg border p-4 transition-all duration-200 ${
         isActive
-          ? 'border-[#b8c9d2] bg-[#f2f7f8] shadow-[0_14px_32px_rgba(112,143,160,0.14)]'
-          : 'border-[#e8dfd4] bg-[#fffaf5] hover:border-[#cfbfac] hover:bg-[#faf4eb] shadow-[0_10px_26px_rgba(128,110,82,0.06)]'
-      } ${isWorking ? 'ring-4 ring-[#d7e5ea]' : ''}`}
+          ? 'border-sky-200 bg-sky-50/40 shadow-sm'
+          : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-md'
+      } ${isWorking ? 'ring-2 ring-sky-100' : ''}`}
     >
-      <div className="mb-6 flex items-start justify-between">
-        <div className="flex h-14 w-14 items-center justify-center rounded-[1.15rem] bg-white text-3xl shadow-sm">
-          {agent.frontmatter.emoji || '🤖'}
+      <div className="mb-3 flex items-start justify-between">
+        <div className="flex h-10 w-10 items-center justify-center rounded-md bg-slate-50 border border-slate-100">
+          {DeptIcon ? (
+            <DeptIcon className="h-5 w-5 text-slate-600" />
+          ) : (
+            <BriefcaseBusiness className="h-5 w-5 text-slate-600" />
+          )}
         </div>
-        <div className={`flex items-center gap-2 rounded-full px-4 py-2 text-[11px] font-black tracking-[0.15em] ${
-          isActive ? 'bg-[#dce8ee] text-slate-700' : 'bg-[#f1ebe2] text-slate-500'
+        <div className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[10px] font-semibold tracking-wide ${
+          isActive ? 'bg-sky-50 text-sky-700 border border-sky-100' : 'bg-slate-50 text-slate-500 border border-slate-100'
         }`}>
-          {DeptIcon ? <DeptIcon className="w-4 h-4" /> : null}
+          {DeptIcon ? <DeptIcon className="w-3 h-3" /> : null}
           {department?.label}
         </div>
       </div>
-      <h3 className="mb-3 text-[1.6rem] font-black leading-tight tracking-tight text-slate-900">
+      <h3 className="mb-1.5 text-sm font-bold leading-snug text-slate-900">
         {agent.frontmatter.name}
       </h3>
-      <p className="line-clamp-4 text-[15px] font-medium leading-7 text-slate-600 transition-colors group-hover:text-slate-800">
+      <p className="line-clamp-2 text-xs leading-relaxed text-slate-500 transition-colors duration-200 group-hover:text-slate-600">
         {agent.frontmatter.description}
       </p>
 
       {isActive && (
-        <div className="absolute bottom-5 right-5">
-          <Zap className={`h-7 w-7 ${isWorking ? 'animate-pulse text-[#708fa0] fill-[#708fa0]' : 'text-[#d8ccc0]'}`} />
+        <div className="absolute bottom-3 right-3">
+          <Zap className={`h-4 w-4 ${isWorking ? 'animate-pulse text-sky-500 fill-sky-500' : 'text-slate-300'}`} />
         </div>
       )}
     </motion.div>

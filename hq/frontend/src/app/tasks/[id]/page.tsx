@@ -27,12 +27,39 @@ function formatTaskStatus(status: string) {
 
 function formatExecutionMode(executionMode: string) {
   switch (executionMode) {
+    case 'single':
+      return '单任务';
+    case 'serial':
+      return '串行';
+    case 'parallel':
+      return '并行';
     case 'advanced_discussion':
       return '高级讨论';
     case 'auto':
       return '自动';
     default:
       return executionMode;
+  }
+}
+
+function formatWorkflowStepStatus(status?: string) {
+  if (!status) {
+    return '待确认';
+  }
+
+  switch (status) {
+    case 'pending':
+      return '待处理';
+    case 'running':
+      return '进行中';
+    case 'completed':
+      return '已完成';
+    case 'failed':
+      return '失败';
+    case 'skipped':
+      return '已跳过';
+    default:
+      return status;
   }
 }
 
@@ -52,6 +79,7 @@ function formatApprovalStatus(status: string) {
 function formatExecutionStatus(status: string) {
   switch (status) {
     case 'succeeded':
+    case 'completed':
       return '成功';
     case 'failed':
       return '失败';
@@ -102,6 +130,10 @@ export default function TaskDetailPage() {
   const { data, loading, error, setData, reload } = useTaskDetail(taskId);
   const { executeTask, submitting, error: actionError } = useTaskActions(taskId, setData);
   const { events, loading: eventsLoading, error: eventsError, refresh: refreshEvents, pushEvent } = useTaskEvents(taskId);
+  const workflowPlan = data?.workflowPlan ?? data?.task.workflowPlan ?? null;
+  const assignments = data?.assignments ?? data?.task.assignments ?? [];
+  const latestExecution = data?.executions[0] ?? null;
+  const taskStatusMessage = data ? getTaskStatusMessage(data.task.status, data.task.executionMode) : null;
 
   useWebSocket({
     onMessage: (message: WsMessage) => {
@@ -206,13 +238,10 @@ export default function TaskDetailPage() {
               </div>
 
               <div
-                className={`mt-6 rounded-[1.4rem] border px-4 py-4 ${getTaskStatusMessage(
-                  data.task.status,
-                  data.task.executionMode,
-                ).tone}`}
+                className={`mt-6 rounded-[1.4rem] border px-4 py-4 ${taskStatusMessage?.tone ?? ''}`}
               >
-                <p className="text-xs font-black tracking-[0.2em]">{getTaskStatusMessage(data.task.status, data.task.executionMode).title}</p>
-                <p className="mt-2 text-sm leading-7">{getTaskStatusMessage(data.task.status, data.task.executionMode).body}</p>
+                <p className="text-xs font-black tracking-[0.2em]">{taskStatusMessage?.title}</p>
+                <p className="mt-2 text-sm leading-7">{taskStatusMessage?.body}</p>
               </div>
 
               <div className="mt-6 flex flex-wrap gap-3">
@@ -244,26 +273,112 @@ export default function TaskDetailPage() {
                 </Link>
               </div>
 
-              {data.executions.length > 0 && (
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-[1.4rem] border border-slate-200 bg-[#fcfaf5] p-4">
+                  <p className="text-[11px] tracking-[0.2em] text-slate-500">工作计划</p>
+                  {workflowPlan ? (
+                    <div className="mt-3 space-y-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="rounded-full bg-sky-50 px-3 py-1 text-[10px] font-black tracking-[0.18em] text-sky-700">
+                          {formatExecutionMode(workflowPlan.mode)}
+                        </span>
+                        <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-black tracking-[0.18em] text-slate-600">
+                          {workflowPlan.steps.length} 步骤
+                        </span>
+                        <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-black tracking-[0.18em] text-slate-600">
+                          {workflowPlan.synthesisRequired ? '需要综合' : '无需综合'}
+                        </span>
+                      </div>
+
+                      <div className="space-y-2">
+                        {workflowPlan.steps.length === 0 && (
+                          <p className="text-sm text-slate-500">当前计划还没有拆出步骤。</p>
+                        )}
+                        {workflowPlan.steps.map((step, index) => (
+                          <div key={step.id} className="rounded-[1.1rem] border border-slate-200 bg-white px-3 py-3">
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <p className="text-sm font-black text-slate-900">
+                                  {index + 1}. {step.title}
+                                </p>
+                                {step.description && <p className="mt-1 text-xs leading-6 text-slate-600">{step.description}</p>}
+                              </div>
+                              <span className="text-[10px] font-black tracking-[0.16em] text-slate-500">
+                                {formatWorkflowStepStatus(step.status)}
+                              </span>
+                            </div>
+                            <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-black tracking-[0.16em] text-slate-500">
+                              {step.assignmentRole && (
+                                <span className="rounded-full bg-slate-100 px-2 py-1">{step.assignmentRole}</span>
+                              )}
+                              {step.assignmentId && <span className="rounded-full bg-slate-100 px-2 py-1">{step.assignmentId}</span>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-sm text-slate-500">
+                      这个任务还没有生成工作计划，创建或执行后会在这里展示。
+                    </p>
+                  )}
+                </div>
+
+                <div className="rounded-[1.4rem] border border-slate-200 bg-[#fcfaf5] p-4">
+                  <p className="text-[11px] tracking-[0.2em] text-slate-500">任务分配</p>
+                  {assignments.length > 0 ? (
+                    <div className="mt-3 space-y-2">
+                      {assignments.map((assignment) => (
+                        <div key={assignment.id} className="rounded-[1.1rem] border border-slate-200 bg-white px-3 py-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="text-sm font-black text-slate-900">
+                                {assignment.agentName || assignment.agentId}
+                              </p>
+                              <p className="mt-1 text-xs text-slate-600">
+                                {assignment.assignmentRole || '未命名角色'}
+                              </p>
+                            </div>
+                            <span className="text-[10px] font-black tracking-[0.16em] text-slate-500">
+                              {formatWorkflowStepStatus(assignment.status)}
+                            </span>
+                          </div>
+                          {assignment.resultSummary && (
+                            <p className="mt-2 text-xs leading-6 text-slate-600">{assignment.resultSummary}</p>
+                          )}
+                          <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-black tracking-[0.16em] text-slate-500">
+                            {assignment.startedAt && <span className="rounded-full bg-slate-100 px-2 py-1">开始 {assignment.startedAt}</span>}
+                            {assignment.endedAt && <span className="rounded-full bg-slate-100 px-2 py-1">结束 {assignment.endedAt}</span>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-sm text-slate-500">
+                      当前没有可展示的任务分配记录，系统会在生成 workflow plan 后补充。
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {latestExecution && (
                 <div className="mt-6 rounded-[1.4rem] border border-slate-200 bg-[#fcfaf5] p-4">
                   <p className="text-[11px] tracking-[0.2em] text-slate-500">最新执行</p>
                   <div className="mt-2 flex flex-col gap-1 text-sm text-slate-700">
-                    <p className="text-xs tracking-[0.2em] text-slate-500">{formatExecutionStatus(data.executions[0].status)}</p>
-                    <p className="leading-relaxed">
-                      {data.executions[0].outputSummary || '尚未记录执行输出摘要。'}
-                    </p>
+                    <p className="text-xs tracking-[0.2em] text-slate-500">{formatExecutionStatus(latestExecution.status)}</p>
+                    <p className="leading-relaxed">{latestExecution.outputSummary || '尚未记录执行输出摘要。'}</p>
+                    {(latestExecution.assignmentRole || latestExecution.assignmentId || latestExecution.workflowStepId) && (
+                      <div className="mt-1 flex flex-wrap gap-2 text-[10px] font-black tracking-[0.16em] text-slate-500">
+                        {latestExecution.assignmentRole && <span className="rounded-full bg-slate-100 px-2 py-1">{latestExecution.assignmentRole}</span>}
+                        {latestExecution.assignmentId && <span className="rounded-full bg-slate-100 px-2 py-1">{latestExecution.assignmentId}</span>}
+                        {latestExecution.workflowStepId && <span className="rounded-full bg-slate-100 px-2 py-1">{latestExecution.workflowStepId}</span>}
+                      </div>
+                    )}
                     <div className="mt-2 flex flex-wrap items-center gap-3">
-                      <Link
-                        href={`/executions/${data.executions[0].id}`}
-                        className="text-[11px] font-black tracking-[0.2em] text-sky-700 hover:text-sky-900"
-                      >
+                      <Link href={`/executions/${latestExecution.id}`} className="text-[11px] font-black tracking-[0.2em] text-sky-700 hover:text-sky-900">
                         查看最新执行
                       </Link>
-                      {data.executions[0].executor && (
-                        <span className="text-[11px] tracking-[0.2em] text-slate-500">
-                          执行器：{data.executions[0].executor}
-                        </span>
-                      )}
+                      {latestExecution.executor && <span className="text-[11px] tracking-[0.2em] text-slate-500">执行器：{latestExecution.executor}</span>}
                     </div>
                   </div>
                 </div>

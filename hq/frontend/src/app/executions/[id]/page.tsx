@@ -3,11 +3,64 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useExecutionDetail } from '../../../hooks/useExecutionDetail';
+import type { ToolCallSummary } from '../../../types';
+
+function formatToolCallStatus(status: string) {
+  switch (status) {
+    case 'pending':
+      return '待处理';
+    case 'running':
+      return '进行中';
+    case 'completed':
+      return '已完成';
+    case 'failed':
+      return '失败';
+    case 'blocked':
+      return '已阻断';
+    case 'skipped':
+      return '已跳过';
+    default:
+      return status;
+  }
+}
+
+function formatRiskLevel(riskLevel?: string) {
+  if (!riskLevel) {
+    return '未标注';
+  }
+
+  switch (riskLevel) {
+    case 'low':
+      return '低风险';
+    case 'medium':
+      return '中风险';
+    case 'high':
+      return '高风险';
+    default:
+      return riskLevel;
+  }
+}
+
+function normalizeToolCalls(execution: ReturnType<typeof useExecutionDetail>['execution']) {
+  if (!execution) {
+    return [];
+  }
+
+  const candidates = [execution.toolCalls, execution.toolCallLogs, execution.toolCallLog];
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate)) {
+      return candidate;
+    }
+  }
+
+  return [];
+}
 
 export default function ExecutionDetailPage() {
   const params = useParams<{ id: string }>();
   const executionId = Array.isArray(params.id) ? params.id[0] : params.id;
   const { execution, loading, error, notFound, reload } = useExecutionDetail(executionId);
+  const toolCalls = normalizeToolCalls(execution);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(190,214,227,0.5),transparent_26%),linear-gradient(180deg,#f7f2ea_0%,#f2eee7_100%)] px-6 py-8 text-slate-800">
@@ -117,6 +170,50 @@ export default function ExecutionDetailPage() {
               <p className="mt-2 whitespace-pre-wrap text-sm leading-7 text-slate-700">
                 {execution.memoryContextExcerpt}
               </p>
+            </div>
+          )}
+
+          {toolCalls.length > 0 && (
+            <div className="mt-4 rounded-[1.2rem] border border-[#ddd3c7] bg-white p-4">
+              <p className="text-[11px] tracking-[0.16em] text-slate-500">工具调用</p>
+              <div className="mt-4 space-y-3">
+                {toolCalls.map((toolCall: ToolCallSummary) => (
+                  <div key={toolCall.id} className="rounded-[1.1rem] border border-slate-200 bg-[#fcfaf5] p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-black text-slate-900">{toolCall.toolName}</p>
+                        <p className="mt-1 text-xs tracking-[0.16em] text-slate-500">
+                          {toolCall.actorRole || '未知角色'}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-2 text-[10px] font-black tracking-[0.16em] text-slate-500">
+                        <span className="rounded-full bg-slate-100 px-2 py-1">{formatToolCallStatus(toolCall.status)}</span>
+                        <span className="rounded-full bg-slate-100 px-2 py-1">{formatRiskLevel(toolCall.riskLevel)}</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-[1rem] border border-slate-200 bg-white p-3">
+                        <p className="text-[10px] font-black tracking-[0.16em] text-slate-500">输入摘要</p>
+                        <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">
+                          {toolCall.inputSummary || '暂无输入摘要'}
+                        </p>
+                      </div>
+                      <div className="rounded-[1rem] border border-slate-200 bg-white p-3">
+                        <p className="text-[10px] font-black tracking-[0.16em] text-slate-500">输出摘要</p>
+                        <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">
+                          {toolCall.outputSummary || '暂无输出摘要'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex flex-wrap items-center gap-3 text-[11px] tracking-[0.16em] text-slate-500">
+                      {(toolCall.timestamp || toolCall.createdAt) && <span>{toolCall.timestamp || toolCall.createdAt}</span>}
+                      {toolCall.id && <span>ID: {toolCall.id}</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>

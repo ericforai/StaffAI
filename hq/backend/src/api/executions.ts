@@ -1,6 +1,6 @@
 import type express from 'express';
 import type { Store } from '../store';
-import type { ExecutionRecord } from '../shared/task-types';
+import type { ExecutionRecord, ToolCallLog } from '../shared/task-types';
 
 const EXECUTIONS_API_STAGE = 'production';
 const EXECUTION_FIELDS = [
@@ -95,6 +95,23 @@ function projectExecution(
   return projected;
 }
 
+type ExecutionDetailRecord = ExecutionRecord & {
+  toolCalls?: ToolCallLog[];
+};
+
+async function loadExecutionToolCalls(store: Store, execution: ExecutionRecord): Promise<ToolCallLog[] | undefined> {
+  const storeWithToolCalls = store as Store & Partial<{
+    getToolCallLogsByExecutionId: (executionId: string) => Promise<ToolCallLog[]>;
+  }>;
+
+  if (typeof storeWithToolCalls.getToolCallLogsByExecutionId === 'function') {
+    return await storeWithToolCalls.getToolCallLogsByExecutionId(execution.id);
+  }
+
+  const executionWithToolCalls = execution as ExecutionDetailRecord;
+  return executionWithToolCalls.toolCalls;
+}
+
 export function registerExecutionRoutes(app: express.Application, store: Store) {
   app.get('/api/executions', async (req, res) => {
     const taskId = readStringQuery(req.query.taskId);
@@ -149,8 +166,13 @@ export function registerExecutionRoutes(app: express.Application, store: Store) 
       });
     }
 
+    const toolCalls = await loadExecutionToolCalls(store, execution);
+
     return res.json({
-      execution,
+      execution: {
+        ...execution,
+        ...(toolCalls ? { toolCalls } : {}),
+      },
       stage: EXECUTIONS_API_STAGE,
     });
   });

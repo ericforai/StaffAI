@@ -1,5 +1,12 @@
 import fs from 'node:fs';
-import type { ApprovalRecord, ExecutionRecord, TaskRecord } from '../shared/task-types';
+import type {
+  ApprovalRecord,
+  ExecutionRecord,
+  TaskAssignment,
+  TaskRecord,
+  ToolCallLog,
+  WorkflowPlan,
+} from '../shared/task-types';
 
 function readJsonFile<T>(filePath: string, fallback: T): T {
   if (!fs.existsSync(filePath)) {
@@ -35,6 +42,33 @@ export interface ExecutionRepository {
     executionId: string,
     updater: (execution: ExecutionRecord) => ExecutionRecord
   ): Promise<ExecutionRecord | null>;
+}
+
+export interface TaskAssignmentRepository {
+  list(): Promise<TaskAssignment[]>;
+  getById(assignmentId: string): Promise<TaskAssignment | null>;
+  listByTaskId(taskId: string): Promise<TaskAssignment[]>;
+  save(assignment: TaskAssignment): Promise<void>;
+  update(
+    assignmentId: string,
+    updater: (assignment: TaskAssignment) => TaskAssignment
+  ): Promise<TaskAssignment | null>;
+}
+
+export interface WorkflowPlanRepository {
+  list(): Promise<WorkflowPlan[]>;
+  getByTaskId(taskId: string): Promise<WorkflowPlan | null>;
+  save(plan: WorkflowPlan): Promise<void>;
+  update(taskId: string, updater: (plan: WorkflowPlan) => WorkflowPlan): Promise<WorkflowPlan | null>;
+}
+
+export interface ToolCallLogRepository {
+  list(): Promise<ToolCallLog[]>;
+  getById(toolCallLogId: string): Promise<ToolCallLog | null>;
+  listByTaskId(taskId: string): Promise<ToolCallLog[]>;
+  listByExecutionId(executionId: string): Promise<ToolCallLog[]>;
+  save(toolCallLog: ToolCallLog): Promise<void>;
+  update(toolCallLogId: string, updater: (toolCallLog: ToolCallLog) => ToolCallLog): Promise<ToolCallLog | null>;
 }
 
 export function createFileTaskRepository(filePath: string): TaskRepository {
@@ -193,6 +227,177 @@ export function createInMemoryExecutionRepository(seed: ExecutionRecord[] = []):
       }
       executions[index] = updater(executions[index]);
       return executions[index];
+    },
+  };
+}
+
+export function createFileTaskAssignmentRepository(filePath: string): TaskAssignmentRepository {
+  return {
+    async list() {
+      return readJsonFile<TaskAssignment[]>(filePath, []);
+    },
+    async getById(assignmentId) {
+      return (await this.list()).find((assignment) => assignment.id === assignmentId) || null;
+    },
+    async listByTaskId(taskId) {
+      return (await this.list()).filter((assignment) => assignment.taskId === taskId);
+    },
+    async save(assignment) {
+      const assignments = await this.list();
+      assignments.push(assignment);
+      writeJsonFile(filePath, assignments);
+    },
+    async update(assignmentId, updater) {
+      const assignments = await this.list();
+      const index = assignments.findIndex((assignment) => assignment.id === assignmentId);
+      if (index < 0) {
+        return null;
+      }
+
+      const updated = updater(assignments[index]);
+      assignments[index] = updated;
+      writeJsonFile(filePath, assignments);
+      return updated;
+    },
+  };
+}
+
+export function createFileWorkflowPlanRepository(filePath: string): WorkflowPlanRepository {
+  return {
+    async list() {
+      return readJsonFile<WorkflowPlan[]>(filePath, []);
+    },
+    async getByTaskId(taskId) {
+      return (await this.list()).find((plan) => plan.taskId === taskId) || null;
+    },
+    async save(plan) {
+      const plans = await this.list();
+      plans.push(plan);
+      writeJsonFile(filePath, plans);
+    },
+    async update(taskId, updater) {
+      const plans = await this.list();
+      const index = plans.findIndex((plan) => plan.taskId === taskId);
+      if (index < 0) {
+        return null;
+      }
+
+      const updated = updater(plans[index]);
+      plans[index] = updated;
+      writeJsonFile(filePath, plans);
+      return updated;
+    },
+  };
+}
+
+export function createInMemoryTaskAssignmentRepository(seed: TaskAssignment[] = []): TaskAssignmentRepository {
+  const assignments = [...seed];
+  return {
+    async list() {
+      return [...assignments];
+    },
+    async getById(assignmentId) {
+      return assignments.find((assignment) => assignment.id === assignmentId) || null;
+    },
+    async listByTaskId(taskId) {
+      return assignments.filter((assignment) => assignment.taskId === taskId);
+    },
+    async save(assignment) {
+      assignments.push(assignment);
+    },
+    async update(assignmentId, updater) {
+      const index = assignments.findIndex((assignment) => assignment.id === assignmentId);
+      if (index < 0) {
+        return null;
+      }
+      assignments[index] = updater(assignments[index]);
+      return assignments[index];
+    },
+  };
+}
+
+export function createInMemoryWorkflowPlanRepository(seed: WorkflowPlan[] = []): WorkflowPlanRepository {
+  const plans = [...seed];
+  return {
+    async list() {
+      return [...plans];
+    },
+    async getByTaskId(taskId) {
+      return plans.find((plan) => plan.taskId === taskId) || null;
+    },
+    async save(plan) {
+      plans.push(plan);
+    },
+    async update(taskId, updater) {
+      const index = plans.findIndex((plan) => plan.taskId === taskId);
+      if (index < 0) {
+        return null;
+      }
+      plans[index] = updater(plans[index]);
+      return plans[index];
+    },
+  };
+}
+
+export function createFileToolCallLogRepository(filePath: string): ToolCallLogRepository {
+  return {
+    async list() {
+      return readJsonFile<ToolCallLog[]>(filePath, []);
+    },
+    async getById(toolCallLogId) {
+      return (await this.list()).find((toolCallLog) => toolCallLog.id === toolCallLogId) || null;
+    },
+    async listByTaskId(taskId) {
+      return (await this.list()).filter((toolCallLog) => toolCallLog.taskId === taskId);
+    },
+    async listByExecutionId(executionId) {
+      return (await this.list()).filter((toolCallLog) => toolCallLog.executionId === executionId);
+    },
+    async save(toolCallLog) {
+      const toolCallLogs = await this.list();
+      toolCallLogs.push(toolCallLog);
+      writeJsonFile(filePath, toolCallLogs);
+    },
+    async update(toolCallLogId, updater) {
+      const toolCallLogs = await this.list();
+      const index = toolCallLogs.findIndex((toolCallLog) => toolCallLog.id === toolCallLogId);
+      if (index < 0) {
+        return null;
+      }
+
+      const updated = updater(toolCallLogs[index]);
+      toolCallLogs[index] = updated;
+      writeJsonFile(filePath, toolCallLogs);
+      return updated;
+    },
+  };
+}
+
+export function createInMemoryToolCallLogRepository(seed: ToolCallLog[] = []): ToolCallLogRepository {
+  const toolCallLogs = [...seed];
+  return {
+    async list() {
+      return [...toolCallLogs];
+    },
+    async getById(toolCallLogId) {
+      return toolCallLogs.find((toolCallLog) => toolCallLog.id === toolCallLogId) || null;
+    },
+    async listByTaskId(taskId) {
+      return toolCallLogs.filter((toolCallLog) => toolCallLog.taskId === taskId);
+    },
+    async listByExecutionId(executionId) {
+      return toolCallLogs.filter((toolCallLog) => toolCallLog.executionId === executionId);
+    },
+    async save(toolCallLog) {
+      toolCallLogs.push(toolCallLog);
+    },
+    async update(toolCallLogId, updater) {
+      const index = toolCallLogs.findIndex((toolCallLog) => toolCallLog.id === toolCallLogId);
+      if (index < 0) {
+        return null;
+      }
+      toolCallLogs[index] = updater(toolCallLogs[index]);
+      return toolCallLogs[index];
     },
   };
 }

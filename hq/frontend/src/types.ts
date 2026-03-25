@@ -17,18 +17,55 @@ export interface SquadState {
   activeAgentIds: string[];
 }
 
+export type TaskExecutionMode = 'single' | 'serial' | 'parallel' | 'advanced_discussion';
+
+export interface WorkflowPlanStep {
+  id: string;
+  title: string;
+  description?: string;
+  assignmentRole?: string;
+  assignmentId?: string;
+  status?: string;
+  order?: number;
+}
+
+export interface WorkflowPlanSummary {
+  id: string;
+  taskId: string;
+  mode: TaskExecutionMode;
+  synthesisRequired: boolean;
+  steps: WorkflowPlanStep[];
+}
+
+export interface TaskAssignmentSummary {
+  id: string;
+  taskId: string;
+  agentId: string;
+  agentName?: string;
+  assignmentRole?: string;
+  status: string;
+  startedAt?: string;
+  endedAt?: string;
+  resultSummary?: string;
+}
+
 export interface TaskSummary {
   id: string;
   title: string;
   description: string;
   status: string;
-  executionMode: string;
+  executionMode: TaskExecutionMode | string;
   approvalRequired: boolean;
   riskLevel: string;
   recommendedAgentRole: string;
   routingStatus: string;
   createdAt: string;
   updatedAt: string;
+  latestApproval?: ApprovalSummary | null;
+  latestExecution?: ExecutionSummary | null;
+  canExecute?: boolean;
+  workflowPlan?: WorkflowPlanSummary | null;
+  assignments?: TaskAssignmentSummary[];
 }
 
 export interface ApprovalSummary {
@@ -50,12 +87,34 @@ export interface ExecutionSummary {
   memoryContextExcerpt?: string;
   startedAt?: string;
   completedAt?: string;
+  assignmentId?: string;
+  assignmentRole?: string;
+  workflowStepId?: string;
+  workflowPlanId?: string;
+  toolCalls?: ToolCallSummary[];
+  toolCallLogs?: ToolCallSummary[];
+  toolCallLog?: ToolCallSummary[];
+}
+
+export interface ToolCallSummary {
+  id: string;
+  toolName: string;
+  status: string;
+  riskLevel?: string;
+  actorRole?: string;
+  inputSummary?: string;
+  outputSummary?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  timestamp?: string;
 }
 
 export interface TaskDetailPayload {
   task: TaskSummary;
   approvals: ApprovalSummary[];
   executions: ExecutionSummary[];
+  workflowPlan?: WorkflowPlanSummary | null;
+  assignments?: TaskAssignmentSummary[];
 }
 
 export interface TaskEvent {

@@ -2,17 +2,26 @@ import fs from 'fs';
 import path from 'path';
 import { EventEmitter } from 'events';
 import { SquadState } from './types';
-import { ApprovalRecord, ExecutionRecord, TaskRecord } from './shared/task-types';
+import { ApprovalRecord, ExecutionRecord, TaskAssignment, TaskRecord, ToolCallLog, WorkflowPlan } from './shared/task-types';
 import {
   ApprovalRepository,
   createFileApprovalRepository,
   createFileExecutionRepository,
+  createFileTaskAssignmentRepository,
   createFileTaskRepository,
+  createFileToolCallLogRepository,
+  createFileWorkflowPlanRepository,
   createInMemoryApprovalRepository,
   createInMemoryExecutionRepository,
+  createInMemoryTaskAssignmentRepository,
   createInMemoryTaskRepository,
+  createInMemoryToolCallLogRepository,
+  createInMemoryWorkflowPlanRepository,
   ExecutionRepository,
+  TaskAssignmentRepository,
   TaskRepository,
+  ToolCallLogRepository,
+  WorkflowPlanRepository,
 } from './persistence/file-repositories';
 import {
   createPostgresApprovalRepository,
@@ -25,6 +34,9 @@ const TEMPLATES_FILE = path.join(__dirname, '../../templates.json');
 const KNOWLEDGE_FILE = path.join(__dirname, '../../company_knowledge.json');
 const APPROVALS_FILE = process.env.AGENCY_APPROVALS_FILE || path.join(__dirname, '../../approvals.json');
 const EXECUTIONS_FILE = process.env.AGENCY_EXECUTIONS_FILE || path.join(__dirname, '../../executions.json');
+const ASSIGNMENTS_FILE = process.env.AGENCY_TASK_ASSIGNMENTS_FILE || path.join(__dirname, '../../task_assignments.json');
+const WORKFLOW_PLANS_FILE = process.env.AGENCY_WORKFLOW_PLANS_FILE || path.join(__dirname, '../../workflow_plans.json');
+const TOOL_CALL_LOGS_FILE = process.env.AGENCY_TOOL_CALL_LOGS_FILE || path.join(__dirname, '../../tool_call_logs.json');
 
 function getTasksFilePath() {
   return process.env.AGENCY_TASKS_FILE || path.join(__dirname, '../../tasks.json');
@@ -36,6 +48,18 @@ function getApprovalsFilePath() {
 
 function getExecutionsFilePath() {
   return process.env.AGENCY_EXECUTIONS_FILE || EXECUTIONS_FILE;
+}
+
+function getTaskAssignmentsFilePath() {
+  return process.env.AGENCY_TASK_ASSIGNMENTS_FILE || ASSIGNMENTS_FILE;
+}
+
+function getWorkflowPlansFilePath() {
+  return process.env.AGENCY_WORKFLOW_PLANS_FILE || WORKFLOW_PLANS_FILE;
+}
+
+function getToolCallLogsFilePath() {
+  return process.env.AGENCY_TOOL_CALL_LOGS_FILE || TOOL_CALL_LOGS_FILE;
 }
 
 export interface Template {
@@ -54,6 +78,9 @@ interface StorePersistenceDependencies {
   taskRepository?: TaskRepository;
   approvalRepository?: ApprovalRepository;
   executionRepository?: ExecutionRepository;
+  taskAssignmentRepository?: TaskAssignmentRepository;
+  workflowPlanRepository?: WorkflowPlanRepository;
+  toolCallLogRepository?: ToolCallLogRepository;
 }
 
 function getPersistenceMode(): 'file' | 'memory' | 'postgres' {
@@ -79,6 +106,9 @@ export class Store extends EventEmitter {
   private taskRepository: TaskRepository;
   private approvalRepository: ApprovalRepository;
   private executionRepository: ExecutionRepository;
+  private taskAssignmentRepository: TaskAssignmentRepository;
+  private workflowPlanRepository: WorkflowPlanRepository;
+  private toolCallLogRepository: ToolCallLogRepository;
 
   constructor(dependencies: StorePersistenceDependencies = {}) {
     super();
@@ -114,6 +144,21 @@ export class Store extends EventEmitter {
         : mode === 'postgres'
           ? createPostgresExecutionRepository(postgresOptions!)
           : createFileExecutionRepository(getExecutionsFilePath()));
+    this.taskAssignmentRepository =
+      dependencies.taskAssignmentRepository ??
+      (mode === 'memory'
+        ? createInMemoryTaskAssignmentRepository()
+        : createFileTaskAssignmentRepository(getTaskAssignmentsFilePath()));
+    this.workflowPlanRepository =
+      dependencies.workflowPlanRepository ??
+      (mode === 'memory'
+        ? createInMemoryWorkflowPlanRepository()
+        : createFileWorkflowPlanRepository(getWorkflowPlansFilePath()));
+    this.toolCallLogRepository =
+      dependencies.toolCallLogRepository ??
+      (mode === 'memory'
+        ? createInMemoryToolCallLogRepository()
+        : createFileToolCallLogRepository(getToolCallLogsFilePath()));
     this.load();
   }
 
@@ -342,5 +387,87 @@ export class Store extends EventEmitter {
 
   public async getExecutionsByTaskId(taskId: string): Promise<ExecutionRecord[]> {
     return await this.executionRepository.listByTaskId(taskId);
+  }
+
+  // --- Assignment Logic ---
+
+  public async getTaskAssignments(): Promise<TaskAssignment[]> {
+    return await this.taskAssignmentRepository.list();
+  }
+
+  public async saveTaskAssignment(taskAssignment: TaskAssignment): Promise<void> {
+    await this.taskAssignmentRepository.save(taskAssignment);
+  }
+
+  public async getTaskAssignmentById(assignmentId: string): Promise<TaskAssignment | null> {
+    return await this.taskAssignmentRepository.getById(assignmentId);
+  }
+
+  public async getTaskAssignmentsByTaskId(taskId: string): Promise<TaskAssignment[]> {
+    return await this.taskAssignmentRepository.listByTaskId(taskId);
+  }
+
+  public async updateTaskAssignment(
+    assignmentId: string,
+    updater: (assignment: TaskAssignment) => TaskAssignment
+  ): Promise<TaskAssignment | null> {
+    return await this.taskAssignmentRepository.update(assignmentId, updater);
+  }
+
+  // --- Workflow Plan Logic ---
+
+  public async getWorkflowPlans(): Promise<WorkflowPlan[]> {
+    return await this.workflowPlanRepository.list();
+  }
+
+  public async saveWorkflowPlan(workflowPlan: WorkflowPlan): Promise<void> {
+    await this.workflowPlanRepository.save(workflowPlan);
+  }
+
+  public async getWorkflowPlanByTaskId(taskId: string): Promise<WorkflowPlan | null> {
+    return await this.workflowPlanRepository.getByTaskId(taskId);
+  }
+
+  public async updateWorkflowPlan(
+    taskId: string,
+    updater: (plan: WorkflowPlan) => WorkflowPlan
+  ): Promise<WorkflowPlan | null> {
+    return await this.workflowPlanRepository.update(taskId, updater);
+  }
+
+  // --- Tool Call Log Logic ---
+
+  public async getToolCallLogs(): Promise<ToolCallLog[]> {
+    return await this.toolCallLogRepository.list();
+  }
+
+  public async saveToolCallLog(toolCallLog: ToolCallLog): Promise<void> {
+    await this.toolCallLogRepository.save(toolCallLog);
+  }
+
+  public async getToolCallLogById(toolCallLogId: string): Promise<ToolCallLog | null> {
+    return await this.toolCallLogRepository.getById(toolCallLogId);
+  }
+
+  public async getToolCallLogsByTaskId(taskId: string): Promise<ToolCallLog[]> {
+    return await this.toolCallLogRepository.listByTaskId(taskId);
+  }
+
+  public async getToolCallLogsByExecutionId(executionId: string): Promise<ToolCallLog[]> {
+    const toolCallLogs = await this.toolCallLogRepository.listByExecutionId(executionId);
+    if (toolCallLogs.length > 0) {
+      return toolCallLogs;
+    }
+
+    const execution = await this.executionRepository.getById(executionId);
+    const executionWithToolCalls = execution as ExecutionRecord & { toolCalls?: ToolCallLog[] } | null;
+    return executionWithToolCalls?.toolCalls ?? [];
+  }
+
+  public async updateToolCallLog(
+    toolCallLogId: string,
+    updater: (toolCallLog: ToolCallLog) => ToolCallLog
+  ): Promise<ToolCallLog | null> {
+    return await this.toolCallLogRepository.update(toolCallLogId, updater);
   }
 }

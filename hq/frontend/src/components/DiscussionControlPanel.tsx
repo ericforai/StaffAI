@@ -156,7 +156,7 @@ function getStepTone(stepIndex: number, activeIndex: number, status: ToolProgres
     return 'border-[#c7d6dd] bg-[#eef4f6] text-slate-800 shadow-[0_10px_24px_rgba(112,143,160,0.12)]';
   }
 
-  return 'border-[#e4dbcf] bg-white text-slate-500';
+  return 'border-[#dbe3ef] bg-white text-slate-500';
 }
 
 function renderProgressBoard(
@@ -171,7 +171,7 @@ function renderProgressBoard(
   const activeIndex = getCurrentStepIndex(steps, progress.stage, progress.status);
 
   return (
-    <div className="mb-4 rounded-[1.4rem] border border-[#e4dbcf] bg-[#f7f3ed] px-4 py-4">
+    <div className="mb-4 rounded-[1.4rem] border border-[#dbe3ef] bg-[#f1f5f9] px-4 py-4">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
           <p className="text-[11px] font-black tracking-[0.18em] text-slate-500">{label}</p>
@@ -183,7 +183,7 @@ function renderProgressBoard(
         </div>
       </div>
 
-      <div className="h-2 overflow-hidden rounded-full bg-[#e7ddd2]">
+      <div className="h-2 overflow-hidden rounded-full bg-[#dbe3ef]">
         <div
           className="h-full rounded-full bg-[#8ca6b4] transition-all duration-500"
           style={{ width: `${progress.progress}%` }}
@@ -270,11 +270,11 @@ export function DiscussionControlPanel({
   onSelectHost,
 }: DiscussionControlPanelProps) {
   return (
-    <section className="flex h-full min-h-0 flex-col rounded-[2rem] border border-[#dfd5c8] bg-[#fffdfa]/94 shadow-[0_14px_44px_rgba(128,110,82,0.08)]">
-      <div className="border-b border-[#ebe2d7] px-5 py-5">
+    <section className="flex h-full min-h-0 flex-col rounded-[2rem] border border-[#cbd5e1] bg-[#f8fafc]/94 shadow-[0_14px_44px_rgba(30,41,59,0.08)]">
+      <div className="border-b border-[#dbe3ef] px-5 py-5">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="rounded-[1.1rem] border border-[#e3d9cc] bg-white p-3 shadow-sm">
+            <div className="rounded-[1.1rem] border border-[#dbe3ef] bg-white p-3 shadow-sm">
               <BrainCircuit className="h-5 w-5 text-slate-700" />
             </div>
             <div>
@@ -285,26 +285,26 @@ export function DiscussionControlPanel({
             </div>
           </div>
 
-          <div className="rounded-full border border-[#e5ddd2] bg-[#fbf7f1] px-3 py-1 text-[11px] font-black text-slate-600">
+          <div className="rounded-full border border-[#dbe3ef] bg-[#f8fafc] px-3 py-1 text-[11px] font-black text-slate-600">
             已选 {selectedAgentIds.length} 位
           </div>
         </div>
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-5 py-5 custom-scrollbar">
-        <div className="rounded-[1.6rem] border border-[#ebe2d7] bg-[#fbf8f3] p-4">
+        <div className="rounded-[1.6rem] border border-[#dbe3ef] bg-[#f8fafc] p-4">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <p className="text-[11px] font-black tracking-[0.18em] text-slate-500">运行环境</p>
               <h4 className="mt-1 text-base font-black tracking-tight text-slate-900">宿主能力与降级状态</h4>
             </div>
-            <div className="rounded-full border border-[#ddd3c7] bg-white px-3 py-1 text-[10px] font-black tracking-[0.18em] text-slate-500">
+            <div className="rounded-full border border-[#cbd5e1] bg-white px-3 py-1 text-[10px] font-black tracking-[0.18em] text-slate-500">
               {runtimeLoading ? '同步中' : selectedHostId}
             </div>
           </div>
 
           <div className="grid gap-3 lg:grid-cols-[1.2fr_0.8fr]">
-            <div className="rounded-[1.3rem] border border-[#ebe2d7] bg-white p-4">
+            <div className="rounded-[1.3rem] border border-[#dbe3ef] bg-white p-4">
               <p className="text-[10px] font-black tracking-[0.18em] text-slate-500">宿主切换</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {runtimeHosts.map((host) => (
@@ -314,7 +314,7 @@ export function DiscussionControlPanel({
                     className={`rounded-full border px-3 py-2 text-[11px] font-black tracking-[0.12em] transition-all ${
                       selectedHostId === host.id
                         ? 'border-[#b8c9d2] bg-[#eef4f6] text-slate-800'
-                        : 'border-[#ebe2d7] bg-[#fbf7f1] text-slate-500 hover:text-slate-800'
+                        : 'border-[#dbe3ef] bg-[#f8fafc] text-slate-500 hover:text-slate-800'
                     }`}
                   >
                     {host.id}
@@ -323,12 +323,12 @@ export function DiscussionControlPanel({
               </div>
 
               <div className="mt-4 grid gap-3 md:grid-cols-2">
-                <div className="rounded-2xl border border-[#eee4d8] bg-[#fcfaf5] px-4 py-3">
+                <div className="rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] px-4 py-3">
                   <p className="text-[10px] font-black tracking-[0.18em] text-slate-500">能力等级</p>
                   <p className="mt-2 text-sm font-black text-slate-900">{runtimeHost?.capabilityLevel || '未知'}</p>
                   <p className="mt-2 text-xs leading-6 text-slate-600">{runtimeHost?.degradation.manualFallback || '等待运行环境返回状态。'}</p>
                 </div>
-                <div className="rounded-2xl border border-[#eee4d8] bg-[#fcfaf5] px-4 py-3">
+                <div className="rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] px-4 py-3">
                   <p className="text-[10px] font-black tracking-[0.18em] text-slate-500">状态目录</p>
                   <p className="mt-2 break-all text-sm font-black text-slate-900">{runtimeStateDir}</p>
                   <p className="mt-2 text-xs text-slate-600">
@@ -338,17 +338,17 @@ export function DiscussionControlPanel({
               </div>
             </div>
 
-            <div className="rounded-[1.3rem] border border-[#ebe2d7] bg-white p-4">
+            <div className="rounded-[1.3rem] border border-[#dbe3ef] bg-white p-4">
               <p className="text-[10px] font-black tracking-[0.18em] text-slate-500">建议动作</p>
               <div className="mt-3 space-y-2">
                 {runtimeRecommendations.slice(0, 3).map((item) => (
-                  <div key={item.action} className="rounded-2xl border border-[#eee4d8] bg-[#fcfaf5] px-3 py-3">
+                  <div key={item.action} className="rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] px-3 py-3">
                     <p className="text-xs font-black tracking-[0.14em] text-slate-800">{item.label}</p>
                     <p className="mt-2 text-xs leading-6 text-slate-600">{item.reason}</p>
                   </div>
                 ))}
                 {runtimeRecommendations.length === 0 && (
-                  <div className="rounded-2xl border border-dashed border-[#e4dbcf] bg-[#faf7f2] px-3 py-3 text-xs text-slate-500">
+                  <div className="rounded-2xl border border-dashed border-[#dbe3ef] bg-[#f8fafc] px-3 py-3 text-xs text-slate-500">
                     当前还没有推荐动作。
                   </div>
                 )}
@@ -356,7 +356,7 @@ export function DiscussionControlPanel({
             </div>
           </div>
 
-          <div className="mt-4 rounded-[1.3rem] border border-[#ebe2d7] bg-white p-4">
+          <div className="mt-4 rounded-[1.3rem] border border-[#dbe3ef] bg-white p-4">
             <div className="mb-3 flex items-center justify-between gap-3">
               <p className="text-[10px] font-black tracking-[0.18em] text-slate-500">能力列表</p>
               <span className="text-[10px] font-black tracking-[0.18em] text-slate-500">已加载 {runtimeCapabilities.length} 项</span>
@@ -365,7 +365,7 @@ export function DiscussionControlPanel({
               {runtimeCapabilities.slice(0, 8).map((capability) => (
                 <span
                   key={capability.id}
-                  className="rounded-full border border-[#ebe2d7] bg-[#fbf7f1] px-3 py-2 text-[11px] font-black text-slate-700"
+                  className="rounded-full border border-[#dbe3ef] bg-[#f8fafc] px-3 py-2 text-[11px] font-black text-slate-700"
                 >
                   {capability.id}
                 </span>
@@ -375,9 +375,9 @@ export function DiscussionControlPanel({
           </div>
         </div>
 
-        <div className="rounded-[1.6rem] border border-[#ebe2d7] bg-[#fbf8f3] p-4">
+        <div className="rounded-[1.6rem] border border-[#dbe3ef] bg-[#f8fafc] p-4">
           <div className="mb-3 flex items-center gap-2">
-            <WandSparkles className="h-4 w-4 text-[#9b8164]" />
+            <WandSparkles className="h-4 w-4 text-[#0369a1]" />
             <p className="text-[11px] font-black tracking-[0.18em] text-slate-500">讨论简报</p>
           </div>
 
@@ -385,7 +385,7 @@ export function DiscussionControlPanel({
             value={topic}
             onChange={(event) => setTopic(event.target.value)}
             placeholder="描述你希望这场专家讨论解决的问题、目标和限制。"
-            className="h-32 w-full resize-none rounded-[1.2rem] border border-[#ddd3c7] bg-white px-4 py-4 text-base leading-7 text-slate-800 outline-none transition-all focus:border-[#b7a894]"
+            className="h-32 w-full resize-none rounded-[1.2rem] border border-[#cbd5e1] bg-white px-4 py-4 text-base leading-7 text-slate-800 outline-none transition-all focus:border-[#64748b]"
           />
 
           <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_1fr_auto]">
@@ -399,7 +399,7 @@ export function DiscussionControlPanel({
                     className={`h-10 w-10 rounded-2xl border text-sm font-black transition-all ${
                       participantCount === count
                         ? 'border-[#b8c9d2] bg-[#eef4f6] text-slate-800'
-                        : 'border-[#e5ddd2] bg-white text-slate-500 hover:border-[#cfbfac] hover:text-slate-800'
+                        : 'border-[#dbe3ef] bg-white text-slate-500 hover:border-[#94a3b8] hover:text-slate-800'
                     }`}
                   >
                     {count}
@@ -411,11 +411,11 @@ export function DiscussionControlPanel({
             <div>
               <p className="mb-2 text-[11px] font-black tracking-[0.18em] text-slate-500">执行模式</p>
               <div className="grid gap-2">
-                <div className="rounded-xl border border-[#e5ddd2] bg-white px-3 py-2 text-xs font-black tracking-[0.16em] text-slate-700">
+                <div className="rounded-xl border border-[#dbe3ef] bg-white px-3 py-2 text-xs font-black tracking-[0.16em] text-slate-700">
                   采样能力：
                   {capabilitiesLoading ? '检测中' : samplingEnabled === null ? '未知' : samplingEnabled ? '可用' : '不可用'}
                 </div>
-                <div className="rounded-xl border border-[#e5ddd2] bg-white px-3 py-2">
+                <div className="rounded-xl border border-[#dbe3ef] bg-white px-3 py-2">
                   <select
                     value={executionMode}
                     onChange={(event) => setExecutionMode(event.target.value as ExecutionMode)}
@@ -433,7 +433,7 @@ export function DiscussionControlPanel({
               <button
                 onClick={onSearchExperts}
                 disabled={searching}
-                className="flex items-center justify-center gap-2 rounded-2xl border border-[#e5ddd2] bg-white px-4 py-3 text-sm font-black text-slate-800 transition-all hover:border-[#cfbfac] hover:bg-[#fbf4ea] disabled:opacity-60"
+                className="flex items-center justify-center gap-2 rounded-2xl border border-[#dbe3ef] bg-white px-4 py-3 text-sm font-black text-slate-800 transition-all hover:border-[#94a3b8] hover:bg-[#f1f5f9] disabled:opacity-60"
               >
                 {searching ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <FileSearch className="h-4 w-4" />}
                 搜索专家
@@ -441,7 +441,7 @@ export function DiscussionControlPanel({
               <button
                 onClick={onRunDiscussion}
                 disabled={running}
-                className="flex items-center justify-center gap-2 rounded-2xl bg-[#8aa4b1] px-4 py-3 text-sm font-black text-white shadow-[0_10px_22px_rgba(138,164,177,0.18)] transition-all hover:opacity-90 disabled:opacity-60"
+                className="flex items-center justify-center gap-2 rounded-2xl bg-[#0369a1] px-4 py-3 text-sm font-black text-white shadow-[0_10px_22px_rgba(138,164,177,0.18)] transition-all hover:opacity-90 disabled:opacity-60"
               >
                 {running ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
                 运行讨论
@@ -458,7 +458,7 @@ export function DiscussionControlPanel({
           onCancel={onCancelSaveTemplate}
         />
 
-        <div className="rounded-[1.6rem] border border-[#ebe2d7] bg-[#fbf8f3] p-4">
+        <div className="rounded-[1.6rem] border border-[#dbe3ef] bg-[#f8fafc] p-4">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <p className="text-[11px] font-black tracking-[0.18em] text-slate-500">常用阵容</p>
@@ -467,7 +467,7 @@ export function DiscussionControlPanel({
             <button
               onClick={onSaveCurrentSelection}
               disabled={selectedAgentIds.length === 0}
-              className="inline-flex items-center gap-2 rounded-full border border-[#ddd3c7] bg-white px-3 py-2 text-xs font-black text-slate-800 transition-all hover:border-[#b7a894] hover:bg-[#f7f2ea] disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-full border border-[#cbd5e1] bg-white px-3 py-2 text-xs font-black text-slate-800 transition-all hover:border-[#64748b] hover:bg-[#eff6ff] disabled:opacity-50"
             >
               <Save className="h-3.5 w-3.5" />
               保存阵容
@@ -476,7 +476,7 @@ export function DiscussionControlPanel({
 
           <div className="flex flex-wrap gap-2">
             {templates.length === 0 && (
-              <div className="rounded-2xl border border-dashed border-[#ddd3c7] bg-white px-4 py-3 text-sm text-slate-600">
+              <div className="rounded-2xl border border-dashed border-[#cbd5e1] bg-white px-4 py-3 text-sm text-slate-600">
                 还没有讨论模板。先选一组专家，再保存成可复用的小队。
               </div>
             )}
@@ -485,7 +485,7 @@ export function DiscussionControlPanel({
               <button
                 key={template.name}
                 onClick={() => onApplyTemplate(template)}
-                className="inline-flex items-center gap-2 rounded-full border border-[#ddd3c7] bg-white px-3 py-2 text-xs font-black text-slate-700 transition-all hover:border-[#b7a894] hover:text-slate-900"
+                className="inline-flex items-center gap-2 rounded-full border border-[#cbd5e1] bg-white px-3 py-2 text-xs font-black text-slate-700 transition-all hover:border-[#64748b] hover:text-slate-900"
               >
                 <FolderHeart className="h-3.5 w-3.5 text-rose-300" />
                 {template.name}
@@ -495,21 +495,21 @@ export function DiscussionControlPanel({
           </div>
         </div>
 
-        <div className="rounded-[1.6rem] border border-[#ebe2d7] bg-[#fbf8f3] p-4">
+        <div className="rounded-[1.6rem] border border-[#dbe3ef] bg-[#f8fafc] p-4">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <p className="text-[11px] font-black tracking-[0.18em] text-slate-500">候选专家</p>
               <h4 className="mt-1 text-base font-black tracking-tight text-slate-900">搜索结果与编组选择</h4>
             </div>
 
-            <div className="rounded-full border border-[#ddd3c7] bg-white px-3 py-1 text-[11px] font-black text-slate-600">
+            <div className="rounded-full border border-[#cbd5e1] bg-white px-3 py-1 text-[11px] font-black text-slate-600">
               匹配 {experts.length} 位
             </div>
           </div>
 
           <div className="space-y-3">
             {experts.length === 0 && (
-              <div className="rounded-[1.3rem] border border-dashed border-[#ddd3c7] bg-white px-4 py-5 text-sm leading-7 text-slate-600">
+              <div className="rounded-[1.3rem] border border-dashed border-[#cbd5e1] bg-white px-4 py-5 text-sm leading-7 text-slate-600">
                 搜索后会在这里看到匹配专家。模板载入的专家也会自动出现在这里，方便你立即复用。
               </div>
             )}
@@ -525,7 +525,7 @@ export function DiscussionControlPanel({
                   className={`w-full rounded-[1.35rem] border px-4 py-4 text-left transition-all ${
                     selected
                       ? 'border-[#b8c9d2] bg-[#f2f7f8] shadow-[0_10px_24px_rgba(112,143,160,0.12)]'
-                      : 'border-[#e5ddd2] bg-white hover:border-[#cfbfac] hover:bg-[#fcfaf5]'
+                      : 'border-[#dbe3ef] bg-white hover:border-[#94a3b8] hover:bg-[#f8fafc]'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-4">
@@ -542,8 +542,8 @@ export function DiscussionControlPanel({
                     </div>
 
                     <div className="text-right">
-                      <div className="inline-flex items-center gap-1.5 rounded-full bg-[#f1ebe2] px-2.5 py-1 text-[11px] font-black text-slate-700">
-                        <Crosshair className="h-3 w-3 text-[#9b8164]" />
+                      <div className="inline-flex items-center gap-1.5 rounded-full bg-[#e2e8f0] px-2.5 py-1 text-[11px] font-black text-slate-700">
+                        <Crosshair className="h-3 w-3 text-[#0369a1]" />
                         {expert.score}
                       </div>
                       <p className="mt-2 text-[10px] font-black tracking-[0.18em] text-slate-500">
@@ -560,14 +560,14 @@ export function DiscussionControlPanel({
             <button
               onClick={onHireSelected}
               disabled={hiring || selectedAgentIds.length === 0}
-            className="flex items-center justify-center gap-2 rounded-2xl border border-[#e5ddd2] bg-white px-4 py-3 text-sm font-black text-slate-800 transition-all hover:border-[#cfbfac] hover:bg-[#fbf4ea] disabled:opacity-50"
+            className="flex items-center justify-center gap-2 rounded-2xl border border-[#dbe3ef] bg-white px-4 py-3 text-sm font-black text-slate-800 transition-all hover:border-[#94a3b8] hover:bg-[#f1f5f9] disabled:opacity-50"
             >
               {hiring ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
               雇佣已选
             </button>
 
-            <div className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#ddd3c7] bg-[#f7f3ed] px-4 py-3 text-sm font-black text-slate-700">
-              <Users className="h-4 w-4 text-[#9b8164]" />
+            <div className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#cbd5e1] bg-[#f1f5f9] px-4 py-3 text-sm font-black text-slate-700">
+              <Users className="h-4 w-4 text-[#0369a1]" />
               当前阵容 {selectedAgentIds.length} 位
             </div>
           </div>
@@ -599,14 +599,14 @@ export function DiscussionControlPanel({
           </div>
         )}
 
-        <div className="rounded-[1.6rem] border border-[#ebe2d7] bg-[#fbf8f3] p-4">
+        <div className="rounded-[1.6rem] border border-[#dbe3ef] bg-[#f8fafc] p-4">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <p className="text-[11px] font-black tracking-[0.18em] text-slate-500">快捷顾问</p>
               <h4 className="mt-1 text-base font-black tracking-tight text-slate-900">快速顾问咨询</h4>
             </div>
             {consultResult?.executor && (
-              <div className="rounded-full border border-[#ddd3c7] bg-white px-3 py-1 text-[10px] font-black tracking-[0.18em] text-slate-600">
+              <div className="rounded-full border border-[#cbd5e1] bg-white px-3 py-1 text-[10px] font-black tracking-[0.18em] text-slate-600">
                 通过 {consultResult.executor}
               </div>
             )}
@@ -617,13 +617,13 @@ export function DiscussionControlPanel({
           <button
             onClick={onConsultAgency}
             disabled={consulting || !topic.trim()}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#e5ddd2] bg-white px-4 py-3 text-sm font-black text-slate-800 transition-all hover:border-[#cfbfac] hover:bg-[#fbf4ea] disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#dbe3ef] bg-white px-4 py-3 text-sm font-black text-slate-800 transition-all hover:border-[#94a3b8] hover:bg-[#f1f5f9] disabled:opacity-50"
           >
             {consulting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Bot className="h-4 w-4" />}
             调用顾问
           </button>
 
-          <div className="mt-4 rounded-2xl border border-[#e4dbcf] bg-white px-4 py-4">
+          <div className="mt-4 rounded-2xl border border-[#dbe3ef] bg-white px-4 py-4">
             {!consultResult ? (
               <p className="text-sm leading-7 text-slate-600">
                 这里会基于当前主题快速选择一位最合适的顾问，直接返回可执行建议。
@@ -646,7 +646,7 @@ export function DiscussionControlPanel({
           </div>
         </div>
 
-        <div className="rounded-[1.6rem] border border-[#ebe2d7] bg-[#fbf8f3] p-4">
+        <div className="rounded-[1.6rem] border border-[#dbe3ef] bg-[#f8fafc] p-4">
           <div className="mb-4">
             <p className="text-[11px] font-black tracking-[0.18em] text-slate-500">结果记录</p>
             <h4 className="mt-1 text-base font-black tracking-tight text-slate-900">写入知识库</h4>
@@ -657,10 +657,10 @@ export function DiscussionControlPanel({
               value={reportTask}
               onChange={(event) => setReportTask(event.target.value)}
               placeholder="任务名称"
-              className="w-full rounded-2xl border border-[#ddd3c7] bg-white px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#b7a894]"
+              className="w-full rounded-2xl border border-[#cbd5e1] bg-white px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#64748b]"
             />
 
-            <div className="rounded-2xl border border-[#ddd3c7] bg-white px-3 py-2">
+            <div className="rounded-2xl border border-[#cbd5e1] bg-white px-3 py-2">
               <select
                 value={reportAgentId}
                 onChange={(event) => setReportAgentId(event.target.value)}
@@ -679,13 +679,13 @@ export function DiscussionControlPanel({
               value={reportSummary}
               onChange={(event) => setReportSummary(event.target.value)}
               placeholder="结果摘要"
-              className="h-28 w-full resize-none rounded-2xl border border-[#ddd3c7] bg-white px-4 py-3 text-sm leading-7 text-slate-800 outline-none transition-all focus:border-[#b7a894]"
+              className="h-28 w-full resize-none rounded-2xl border border-[#cbd5e1] bg-white px-4 py-3 text-sm leading-7 text-slate-800 outline-none transition-all focus:border-[#64748b]"
             />
 
             <button
               onClick={onReportTaskResult}
               disabled={reporting}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#e5ddd2] bg-white px-4 py-3 text-sm font-black text-slate-800 transition-all hover:border-[#cfbfac] hover:bg-[#fbf4ea] disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#dbe3ef] bg-white px-4 py-3 text-sm font-black text-slate-800 transition-all hover:border-[#94a3b8] hover:bg-[#f1f5f9] disabled:opacity-50"
             >
               {reporting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               写入知识库
@@ -699,7 +699,7 @@ export function DiscussionControlPanel({
           </div>
         </div>
 
-        <div className="rounded-[1.6rem] border border-[#ebe2d7] bg-[#fbf8f3] p-4">
+        <div className="rounded-[1.6rem] border border-[#dbe3ef] bg-[#f8fafc] p-4">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <p className="text-[11px] font-black tracking-[0.18em] text-slate-500">讨论结果</p>
@@ -712,11 +712,11 @@ export function DiscussionControlPanel({
                 </div>
               )}
               {result?.executor && (
-                <div className="rounded-full border border-[#ddd3c7] bg-white px-3 py-1 text-[10px] font-black text-slate-600">
+                <div className="rounded-full border border-[#cbd5e1] bg-white px-3 py-1 text-[10px] font-black text-slate-600">
                   通过 {result.executor}
                 </div>
               )}
-              <Sparkles className="h-4 w-4 text-[#9b8164]" />
+              <Sparkles className="h-4 w-4 text-[#0369a1]" />
             </div>
           </div>
 
@@ -737,14 +737,14 @@ export function DiscussionControlPanel({
                   ['分配', '每位专家都收到独立任务'],
                   ['综合', '汇总为统一行动方案'],
                 ].map(([title, description]) => (
-                  <div key={title} className="rounded-2xl border border-[#e4dbcf] bg-white px-4 py-4">
+                  <div key={title} className="rounded-2xl border border-[#dbe3ef] bg-white px-4 py-4">
                     <p className="text-sm font-black text-slate-900">{title}</p>
                     <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
                   </div>
                 ))}
               </div>
 
-              <div className="rounded-2xl border border-[#e4dbcf] bg-white px-4 py-4">
+              <div className="rounded-2xl border border-[#dbe3ef] bg-white px-4 py-4">
                 <p className="text-xs font-black tracking-[0.18em] text-slate-500">当前已选专家</p>
                 <div className="mt-3 space-y-2">
                   {selectedAgentIds.length === 0 && (
@@ -754,7 +754,7 @@ export function DiscussionControlPanel({
                   {experts
                     .filter((expert) => selectedAgentIds.includes(expert.id))
                     .map((expert) => (
-                      <div key={expert.id} className="flex items-center justify-between gap-3 rounded-xl bg-[#f7f3ed] px-3 py-3">
+                      <div key={expert.id} className="flex items-center justify-between gap-3 rounded-xl bg-[#f1f5f9] px-3 py-3">
                         <div>
                           <p className="text-sm font-black text-slate-900">{expert.name}</p>
                           <p className="mt-1 text-xs text-slate-600">{expert.description}</p>
@@ -779,10 +779,10 @@ export function DiscussionControlPanel({
               </div>
 
               {result.participants.map((participant) => (
-                <div key={participant.id} className="rounded-[1.35rem] border border-[#e4dbcf] bg-white px-4 py-4">
+                <div key={participant.id} className="rounded-[1.35rem] border border-[#dbe3ef] bg-white px-4 py-4">
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
-                      <Bot className="h-4 w-4 text-[#9b8164]" />
+                      <Bot className="h-4 w-4 text-[#0369a1]" />
                       <p className="text-sm font-black text-slate-900">{participant.name}</p>
                     </div>
                     <span className="text-[10px] font-black tracking-[0.18em] text-slate-500">
@@ -792,7 +792,7 @@ export function DiscussionControlPanel({
 
                   <p className="mt-3 text-xs leading-6 text-slate-600">{participant.assignment}</p>
 
-                  <div className="mt-4 rounded-2xl border border-[#e4dbcf] bg-[#f7f3ed] px-4 py-4">
+                  <div className="mt-4 rounded-2xl border border-[#dbe3ef] bg-[#f1f5f9] px-4 py-4">
                     <div className="mb-3 flex items-center gap-2 text-[11px] font-black tracking-[0.18em] text-slate-600">
                       <ChevronRight className="h-3 w-3" />
                       独立回复

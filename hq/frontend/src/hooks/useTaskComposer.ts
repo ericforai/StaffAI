@@ -31,8 +31,10 @@ export function useTaskComposer(onTaskCreated?: (task: TaskSummary) => void) {
       onTaskCreated?.(payload.task);
       setTitle('');
       setDescription('');
+      return payload.task;
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : '任务创建失败。');
+      return null;
     } finally {
       setSubmitting(false);
     }

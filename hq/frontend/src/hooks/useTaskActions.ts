@@ -34,8 +34,10 @@ export function useTaskActions(taskId: string, onTaskUpdated?: (payload: TaskDet
         throw new Error(payload.error || '任务执行失败。');
       }
       await refreshTask();
+      return true;
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : '任务执行失败。');
+      return false;
     } finally {
       setSubmitting(false);
     }
