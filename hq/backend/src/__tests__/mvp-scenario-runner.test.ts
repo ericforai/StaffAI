@@ -71,6 +71,22 @@ function makeMockStore() {
   } as any;
 }
 
+async function runScenarioWithAgents(
+  input: {
+    title: string;
+    description: string;
+    presetName?: string;
+    executionMode?: 'single' | 'serial' | 'parallel';
+  },
+  agentIds: string[]
+) {
+  const agents = agentIds.map((id) => makeMockAgent(id));
+  const store = makeMockStore();
+  const scanner = makeMockScanner(agents);
+  const result = await runMvpScenario(input, store, scanner);
+  return { result, store };
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -112,41 +128,24 @@ test('runMvpScenario creates task, builds plan, and generates audit event', asyn
 });
 
 test('runMvpScenario auto-selects code-review preset for review tasks', async () => {
-  const agents = [
-    makeMockAgent('software-architect'),
-    makeMockAgent('code-reviewer'),
-  ];
-  const store = makeMockStore();
-  const scanner = makeMockScanner(agents);
-
-  const result = await runMvpScenario(
+  const { result } = await runScenarioWithAgents(
     {
       title: 'Code review for PR #42',
       description: 'Please review the authentication module changes',
     },
-    store,
-    scanner,
+    ['software-architect', 'code-reviewer']
   );
 
   assert.equal(result.presetUsed.name, 'code-review');
 });
 
 test('runMvpScenario auto-selects architecture preset for architecture tasks', async () => {
-  const agents = [
-    makeMockAgent('software-architect'),
-    makeMockAgent('backend-architect'),
-    makeMockAgent('code-reviewer'),
-  ];
-  const store = makeMockStore();
-  const scanner = makeMockScanner(agents);
-
-  const result = await runMvpScenario(
+  const { result } = await runScenarioWithAgents(
     {
       title: 'Architecture decision: microservices vs monolith',
       description: 'Evaluate the tradeoffs for our system design',
     },
-    store,
-    scanner,
+    ['software-architect', 'backend-architect', 'code-reviewer']
   );
 
   assert.equal(result.presetUsed.name, 'architecture');
@@ -183,23 +182,14 @@ test('runMvpScenario result contains trackable IDs', async () => {
 });
 
 test('runMvpScenario with serial mode produces serial workflow plan', async () => {
-  const agents = [
-    makeMockAgent('software-architect'),
-    makeMockAgent('backend-architect'),
-    makeMockAgent('code-reviewer'),
-  ];
-  const store = makeMockStore();
-  const scanner = makeMockScanner(agents);
-
-  const result = await runMvpScenario(
+  const { result } = await runScenarioWithAgents(
     {
       title: 'Serial architecture review',
       description: 'Step by step analysis',
       presetName: 'architecture',
       executionMode: 'serial',
     },
-    store,
-    scanner,
+    ['software-architect', 'backend-architect', 'code-reviewer']
   );
 
   assert.equal(result.task.executionMode, 'serial');

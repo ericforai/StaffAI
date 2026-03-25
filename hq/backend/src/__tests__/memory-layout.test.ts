@@ -42,46 +42,56 @@ test('createMemoryLayout uses path.join for cross-platform compatibility', () =>
   }
 });
 
+function assertDocumentType(paths: string[], expected: MemoryDocumentType | null): void {
+  for (const filePath of paths) {
+    assert.equal(inferDocumentType(filePath), expected);
+  }
+}
+
 test('inferDocumentType correctly identifies PROJECT documents', () => {
-  assert.equal(inferDocumentType('context/project.md'), 'PROJECT');
-  assert.equal(inferType('context/some-file.md'), 'PROJECT');
-  assert.equal(inferDocumentType('context/subdir/file.md'), 'PROJECT');
+  assertDocumentType(
+    ['context/project.md', 'context/some-file.md', 'context/subdir/file.md'],
+    'PROJECT'
+  );
 });
 
 test('inferDocumentType correctly identifies TASK documents', () => {
-  assert.equal(inferDocumentType('tasks/task-123.md'), 'TASK');
-  assert.equal(inferDocumentType('tasks/subtask/abc.md'), 'TASK');
-  assert.equal(inferDocumentType('subdir/tasks/file.md'), 'TASK');
+  assertDocumentType(
+    ['tasks/task-123.md', 'tasks/subtask/abc.md', 'subdir/tasks/file.md'],
+    'TASK'
+  );
 });
 
 test('inferDocumentType correctly identifies DECISION documents', () => {
-  assert.equal(inferDocumentType('decisions/arch-001.md'), 'DECISION');
-  assert.equal(inferDocumentType('decisions/database/2024-03-25.md'), 'DECISION');
-  assert.equal(inferDocumentType('subdir/decisions/file.md'), 'DECISION');
+  assertDocumentType(
+    ['decisions/arch-001.md', 'decisions/database/2024-03-25.md', 'subdir/decisions/file.md'],
+    'DECISION'
+  );
 });
 
 test('inferDocumentType correctly identifies KNOWLEDGE documents', () => {
-  assert.equal(inferDocumentType('knowledge/api-endpoints.md'), 'KNOWLEDGE');
-  assert.equal(inferDocumentType('knowledge/auth/oauth.md'), 'KNOWLEDGE');
-  assert.equal(inferDocumentType('subdir/knowledge/file.md'), 'KNOWLEDGE');
+  assertDocumentType(
+    ['knowledge/api-endpoints.md', 'knowledge/auth/oauth.md', 'subdir/knowledge/file.md'],
+    'KNOWLEDGE'
+  );
 });
 
 test('inferDocumentType correctly identifies AGENT documents', () => {
-  assert.equal(inferDocumentType('agents/seo-specialist.md'), 'AGENT');
-  assert.equal(inferDocumentType('agents/frontend-dev/preferences.md'), 'AGENT');
-  assert.equal(inferDocumentType('subdir/agents/file.md'), 'AGENT');
+  assertDocumentType(
+    ['agents/seo-specialist.md', 'agents/frontend-dev/preferences.md', 'subdir/agents/file.md'],
+    'AGENT'
+  );
 });
 
 test('inferDocumentType correctly identifies SHARED documents', () => {
-  assert.equal(inferDocumentType('task-summaries/2024-03-25-task-1.md'), 'SHARED');
-  assert.equal(inferDocumentType('task-summaries/completed/task-2.md'), 'SHARED');
-  assert.equal(inferDocumentType('subdir/task-summaries/file.md'), 'SHARED');
+  assertDocumentType(
+    ['task-summaries/2024-03-25-task-1.md', 'task-summaries/completed/task-2.md', 'subdir/task-summaries/file.md'],
+    'SHARED'
+  );
 });
 
 test('inferDocumentType returns null for unknown paths', () => {
-  assert.equal(inferDocumentType('unknown/file.md'), null);
-  assert.equal(inferDocumentType('random/path/doc.md'), null);
-  assert.equal(inferDocumentType(''), null);
+  assertDocumentType(['unknown/file.md', 'random/path/doc.md', ''], null);
 });
 
 test('inferDocumentType handles Windows paths', () => {
@@ -173,8 +183,3 @@ test('MEMORY_FILE_NAMES contains expected file names', () => {
   assert.equal(MEMORY_FILE_NAMES.PROJECT_CONTEXT, 'project.md');
   assert.equal(MEMORY_FILE_NAMES.CURRENT_TASK, 'current-task.md');
 });
-
-// Helper function for type inference tests
-function inferType(path: string): MemoryDocumentType | null {
-  return inferDocumentType(path);
-}

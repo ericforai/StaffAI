@@ -57,62 +57,72 @@ function createTestTemplate(id: string, department?: string, owner?: string): Te
   };
 }
 
-test('UserRepository returns default user when file does not exist', () => {
+function createTestUser(overrides: Partial<UserConfig> = {}): UserConfig {
+  return {
+    id: 'test-user',
+    name: 'Test User',
+    department: 'engineering',
+    clearanceLevel: 'basic',
+    allowedAgentIds: [],
+    allowedAgentDepartments: [],
+    allowedAgentTags: [],
+    deniedAgentIds: [],
+    templateAccess: 'all',
+    memoryAccess: {
+      canReadProject: true,
+      canReadDecisions: true,
+      allowedDomains: [],
+    },
+    enabled: true,
+    ...overrides,
+  };
+}
+
+function withUsersFile(
+  policy: unknown,
+  run: (usersFile: string) => void
+): void {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'users-test-'));
   const usersFile = path.join(tempDir, 'users.json');
 
   try {
+    if (policy !== undefined) {
+      fs.writeFileSync(usersFile, JSON.stringify(policy));
+    }
+    run(usersFile);
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+}
+
+test('UserRepository returns default user when file does not exist', () => {
+  withUsersFile(undefined, (usersFile) => {
     const repo = createUserRepository(usersFile);
     const user = repo.getUser('any-user');
 
     assert.notEqual(user, null);
     assert.equal(user?.id, 'user-default');
     assert.equal(user?.name, 'Default User');
-  } finally {
-    fs.rmSync(tempDir, { recursive: true, force: true });
-  }
+  });
 });
 
 test('UserRepository loads users from file', () => {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'users-test-'));
-  const usersFile = path.join(tempDir, 'users.json');
-
-  try {
-    const testPolicy = {
+  withUsersFile(
+    {
       version: '1.0',
       defaultPolicy: 'allowAll' as const,
-      users: [
-        {
-          id: 'test-user',
-          name: 'Test User',
-          department: 'engineering',
-          clearanceLevel: 'senior' as const,
-          allowedAgentIds: ['frontend-developer'],
-          allowedAgentDepartments: [],
-          allowedAgentTags: [],
-          deniedAgentIds: [],
-          templateAccess: 'all' as const,
-          memoryAccess: {
-            canReadProject: true,
-            canReadDecisions: true,
-            allowedDomains: [],
-          },
-          enabled: true,
-        },
-      ],
-    };
+      users: [createTestUser({ clearanceLevel: 'senior', allowedAgentIds: ['frontend-developer'] })],
+    },
+    (usersFile) => {
+      const repo = createUserRepository(usersFile);
+      const user = repo.getUser('test-user');
 
-    fs.writeFileSync(usersFile, JSON.stringify(testPolicy));
-    const repo = createUserRepository(usersFile);
-    const user = repo.getUser('test-user');
-
-    assert.notEqual(user, null);
-    assert.equal(user?.id, 'test-user');
-    assert.equal(user?.name, 'Test User');
-    assert.equal(user?.clearanceLevel, 'senior');
-  } finally {
-    fs.rmSync(tempDir, { recursive: true, force: true });
-  }
+      assert.notEqual(user, null);
+      assert.equal(user?.id, 'test-user');
+      assert.equal(user?.name, 'Test User');
+      assert.equal(user?.clearanceLevel, 'senior');
+    }
+  );
 });
 
 test('UserRepository only returns enabled users', () => {
