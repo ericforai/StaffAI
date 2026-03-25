@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
-import { BaseTool, ToolContext, ToolResult } from './base-tool';
+import { BaseTool } from './base-tool';
 import type { ToolCategory, ToolRiskLevel } from '../shared/task-types';
 
 const execAsync = promisify(exec);
@@ -18,7 +18,7 @@ export class GitReadTool extends BaseTool<{ command: string; args?: string[] }> 
     args: z.array(z.string()).optional(),
   });
 
-  public async execute(input: { command: string; args?: string[] }, _context: ToolContext): Promise<ToolResult> {
+  public async run(input: { command: string; args?: string[] }) {
     try {
       const args = input.args?.join(' ') ?? '';
       const fullCommand = `git ${input.command} ${args}`;
@@ -58,7 +58,7 @@ export class GitDiffTool extends BaseTool<{ ref?: string }> {
     ref: z.string().optional().describe('The git ref to diff against (e.g. HEAD, origin/main).'),
   });
 
-  public async execute(input: { ref?: string }, _context: ToolContext): Promise<ToolResult> {
+  public async run(input: { ref?: string }) {
     try {
       const { stdout } = await execAsync(`git diff ${input.ref ?? ''}`);
 

@@ -88,7 +88,7 @@ function createNoopAdapter(name: string): RuntimeAdapter {
             runtimeName: name,
             executor: context.executor,
             simulated: true,
-            mode: 'serial',
+            executionMode: context.executionMode,
           },
         });
       }
@@ -102,7 +102,7 @@ function createNoopAdapter(name: string): RuntimeAdapter {
             runtimeName: name,
             executor: context.executor,
             simulated: true,
-            mode: 'parallel',
+            executionMode: context.executionMode,
           },
         }))
       );

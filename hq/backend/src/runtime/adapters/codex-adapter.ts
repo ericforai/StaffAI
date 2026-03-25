@@ -11,6 +11,7 @@ export class CodexRuntimeAdapter implements RuntimeAdapter {
         runtimeName: this.name,
         executor: 'codex',
         simulated: true,
+        executionMode: context.executionMode,
       },
     };
   }
@@ -18,14 +19,24 @@ export class CodexRuntimeAdapter implements RuntimeAdapter {
   async runSerial(contexts: RuntimeExecutionContext[]): Promise<RuntimeExecutionResult[]> {
     return contexts.map((c) => ({
       outputSummary: c.summary,
-      outputSnapshot: { runtimeName: this.name, executor: 'codex', simulated: true, mode: 'serial' },
+      outputSnapshot: {
+        runtimeName: this.name,
+        executor: 'codex',
+        simulated: true,
+        executionMode: c.executionMode,
+      },
     }));
   }
 
   async runParallel(contexts: RuntimeExecutionContext[]): Promise<RuntimeExecutionResult[]> {
     return contexts.map((c) => ({
       outputSummary: c.summary,
-      outputSnapshot: { runtimeName: this.name, executor: 'codex', simulated: true, mode: 'parallel' },
+      outputSnapshot: {
+        runtimeName: this.name,
+        executor: 'codex',
+        simulated: true,
+        executionMode: c.executionMode,
+      },
     }));
   }
 }

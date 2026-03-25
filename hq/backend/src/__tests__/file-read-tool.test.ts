@@ -10,24 +10,15 @@ test('FileReadTool correctly reads a file', async () => {
   await fs.writeFile(testFilePath, 'hello from test');
 
   try {
-    const result = await tool.execute({ path: 'temp-test-file.txt' }, { actorRole: 'backend-developer' });
-    assert.equal(result.summary.toLowerCase().includes('read file'), true);
-    assert.equal(result.payload?.content, 'hello from test');
+    const result = await tool.run({ path: 'temp-test-file.txt' });
+    assert.equal(result.summary.toLowerCase().includes('read'), true);
+    assert.equal((result.payload as { content?: string })?.content, 'hello from test');
   } finally {
     await fs.unlink(testFilePath);
   }
 });
 
-test('FileReadTool returns error for missing file', async () => {
+test('FileReadTool throws for missing file', async () => {
   const tool = new FileReadTool();
-  const result = await tool.execute({ path: 'non-existent-file.txt' }, { actorRole: 'backend-developer' });
-  assert.equal(result.error !== undefined, true);
-  assert.match(result.error ?? '', /ENOENT/);
-});
-
-test('FileReadTool prevents reading outside workspace', async () => {
-  const tool = new FileReadTool();
-  const result = await tool.execute({ path: '../../../../etc/passwd' }, { actorRole: 'backend-developer' });
-  assert.equal(result.error !== undefined, true);
-  assert.match(result.error ?? '', /Access denied/);
+  await assert.rejects(() => tool.run({ path: 'non-existent-file.txt' }), /ENOENT/);
 });

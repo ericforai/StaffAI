@@ -28,8 +28,8 @@ test('tool gateway blocks high-risk tools without approval', async () => {
   });
 
   const result = await gateway.executeTool(
-    'file_write',
-    { path: 'test-blocked.txt', content: 'test' },
+    'runtime_executor',
+    { task: 'do something risky' },
     { actorRole: 'backend-developer', taskId: 'task-1', executionId: 'execution-1' }
   );
 
@@ -58,7 +58,7 @@ test('tool gateway executes low-risk tool when allowed', async () => {
   }
   assert.equal(result.ok, true);
   assert.equal(result.log.status, 'completed');
-  assert.equal(result.log.riskLevel, 'medium');
-  assert.match(result.output?.summary ?? '', /(Ran bounded test target|Mock test execution successful)/);
+  assert.equal(result.log.riskLevel, 'low');
+  assert.match(result.output?.summary ?? '', /read/i);
   assert.equal(savedLogs.length, 1);
 });
