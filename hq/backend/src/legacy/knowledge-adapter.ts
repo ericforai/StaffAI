@@ -388,7 +388,7 @@ export class KnowledgeAdapter implements KnowledgeRepository {
    * Search knowledge entries by query
    * Returns results from both JSON and Markdown sources, merged and ranked
    */
-  public search(query: string, limit = 3): UnifiedKnowledgeEntry[] {
+  public async search(query: string, limit = 3): Promise<UnifiedKnowledgeEntry[]> {
     if (!query) {
       return [];
     }
@@ -423,7 +423,7 @@ export class KnowledgeAdapter implements KnowledgeRepository {
   /**
    * Get all knowledge entries from both sources
    */
-  public getAll(): UnifiedKnowledgeEntry[] {
+  public async getAll(): Promise<UnifiedKnowledgeEntry[]> {
     const jsonEntries = this.loadJsonKnowledge();
     const markdownEntries = this.loadMarkdownKnowledge();
 

@@ -26,15 +26,20 @@ import {
 import {
   createPostgresApprovalRepository,
   createPostgresExecutionRepository,
+  createPostgresTaskAssignmentRepository,
   createPostgresTaskRepository,
+  createPostgresToolCallLogRepository,
+  createPostgresWorkflowPlanRepository,
 } from './persistence/postgres-repositories';
 import {
   KnowledgeAdapter,
   createKnowledgeAdapter,
 } from './legacy/knowledge-adapter';
+import { createPostgresKnowledgeAdapter } from './persistence/postgres-knowledge-adapter';
 import type {
   KnowledgeAdapterConfig,
   JsonKnowledgeEntry,
+  KnowledgeRepository,
   UnifiedKnowledgeEntry,
 } from './legacy/knowledge-types';
 import {
@@ -46,6 +51,7 @@ import {
 import {
   createFileAuditLogRepository,
   createInMemoryAuditLogRepository,
+  createPostgresAuditLogRepository,
   type AuditLogRepository,
 } from './persistence/audit-log-repositories';
 
@@ -105,7 +111,7 @@ interface StorePersistenceDependencies {
   taskAssignmentRepository?: TaskAssignmentRepository;
   workflowPlanRepository?: WorkflowPlanRepository;
   toolCallLogRepository?: ToolCallLogRepository;
-  knowledgeAdapter?: KnowledgeAdapter;
+  knowledgeAdapter?: KnowledgeRepository;
   auditLogRepository?: AuditLogRepository;
 }
 
@@ -135,7 +141,7 @@ export class Store extends EventEmitter {
   private taskAssignmentRepository: TaskAssignmentRepository;
   private workflowPlanRepository: WorkflowPlanRepository;
   private toolCallLogRepository: ToolCallLogRepository;
-  private knowledgeAdapter: KnowledgeAdapter | null;
+  private knowledgeAdapter: KnowledgeRepository | null;
   private auditLogger: AuditLogger | null;
 
   constructor(dependencies: StorePersistenceDependencies = {}) {
@@ -149,6 +155,9 @@ export class Store extends EventEmitter {
             taskTable: process.env.AGENCY_POSTGRES_TASKS_TABLE,
             approvalTable: process.env.AGENCY_POSTGRES_APPROVALS_TABLE,
             executionTable: process.env.AGENCY_POSTGRES_EXECUTIONS_TABLE,
+            taskAssignmentTable: process.env.AGENCY_POSTGRES_TASK_ASSIGNMENTS_TABLE,
+            workflowPlanTable: process.env.AGENCY_POSTGRES_WORKFLOW_PLANS_TABLE,
+            toolCallLogTable: process.env.AGENCY_POSTGRES_TOOL_CALL_LOGS_TABLE,
           }
         : null;
     this.taskRepository =
@@ -176,34 +185,52 @@ export class Store extends EventEmitter {
       dependencies.taskAssignmentRepository ??
       (mode === 'memory'
         ? createInMemoryTaskAssignmentRepository()
-        : createFileTaskAssignmentRepository(getTaskAssignmentsFilePath()));
+        : mode === 'postgres'
+          ? createPostgresTaskAssignmentRepository(postgresOptions!)
+          : createFileTaskAssignmentRepository(getTaskAssignmentsFilePath()));
     this.workflowPlanRepository =
       dependencies.workflowPlanRepository ??
       (mode === 'memory'
         ? createInMemoryWorkflowPlanRepository()
-        : createFileWorkflowPlanRepository(getWorkflowPlansFilePath()));
+        : mode === 'postgres'
+          ? createPostgresWorkflowPlanRepository(postgresOptions!)
+          : createFileWorkflowPlanRepository(getWorkflowPlansFilePath()));
     this.toolCallLogRepository =
       dependencies.toolCallLogRepository ??
       (mode === 'memory'
         ? createInMemoryToolCallLogRepository()
-        : createFileToolCallLogRepository(getToolCallLogsFilePath()));
+        : mode === 'postgres'
+          ? createPostgresToolCallLogRepository(postgresOptions!)
+          : createFileToolCallLogRepository(getToolCallLogsFilePath()));
 
     // Initialize knowledge adapter (optional - backward compatible)
     this.knowledgeAdapter =
       dependencies.knowledgeAdapter ??
-      (mode !== 'memory'
-        ? createKnowledgeAdapter(
-            process.env.AGENCY_MEMORY_ROOT_DIR || path.join(__dirname, '../../.ai'),
-            KNOWLEDGE_FILE
-          )
-        : null);
+      (mode === 'postgres'
+        ? createPostgresKnowledgeAdapter({
+            connectionString: getPostgresConnectionString(),
+            schema: process.env.AGENCY_POSTGRES_SCHEMA || 'public',
+            tableName: process.env.AGENCY_POSTGRES_KNOWLEDGE_TABLE || 'knowledge_base',
+          })
+        : mode !== 'memory'
+          ? createKnowledgeAdapter(
+              process.env.AGENCY_MEMORY_ROOT_DIR || path.join(__dirname, '../../.ai'),
+              KNOWLEDGE_FILE
+            )
+          : null);
 
     // Initialize audit logger (optional - backward compatible)
     const auditLogRepository =
       dependencies.auditLogRepository ??
       (mode === 'memory'
         ? createInMemoryAuditLogRepository()
-        : createFileAuditLogRepository(getAuditLogsDir()));
+        : mode === 'postgres'
+          ? createPostgresAuditLogRepository({
+              connectionString: getPostgresConnectionString(),
+              schema: process.env.AGENCY_POSTGRES_SCHEMA || 'public',
+              tableName: process.env.AGENCY_POSTGRES_AUDIT_LOGS_TABLE || 'audit_logs',
+            })
+          : createFileAuditLogRepository(getAuditLogsDir()));
     this.auditLogger = mode !== 'memory' ? new AuditLogger(auditLogRepository) : null;
 
     this.load();
@@ -272,10 +299,10 @@ export class Store extends EventEmitter {
    * Get all knowledge entries (legacy format)
    * Falls back to JSON file if adapter is not available
    */
-  public getKnowledge(): KnowledgeEntry[] {
+  public async getKnowledge(): Promise<KnowledgeEntry[]> {
     // Use adapter if available
     if (this.knowledgeAdapter) {
-      const unified = this.knowledgeAdapter.getAll();
+      const unified = await this.knowledgeAdapter.getAll();
       return unified.map((entry) => ({
         task: entry.task,
         agentId: entry.agentId,
@@ -307,7 +334,7 @@ export class Store extends EventEmitter {
     }
 
     // Legacy fallback: write to JSON file
-    const knowledge = this.getKnowledge();
+    const knowledge = await this.getKnowledge();
     knowledge.push({ ...entry, timestamp: Date.now() });
 
     // 保留最近 100 条记录，防止无限增长
@@ -367,12 +394,12 @@ export class Store extends EventEmitter {
    * 返回最相关的 N 条记录
    * Uses adapter if available, otherwise falls back to JSON file
    */
-  public searchKnowledge(query: string, limit: number = 3): KnowledgeEntry[] {
+  public async searchKnowledge(query: string, limit: number = 3): Promise<KnowledgeEntry[]> {
     if (!query) return [];
 
     // Use adapter if available
     if (this.knowledgeAdapter) {
-      const unified = this.knowledgeAdapter.search(query, limit);
+      const unified = await this.knowledgeAdapter.search(query, limit);
       return unified.map((entry) => ({
         task: entry.task,
         agentId: entry.agentId,
@@ -382,7 +409,7 @@ export class Store extends EventEmitter {
     }
 
     // Legacy fallback: search in JSON file
-    const knowledge = this.getKnowledge();
+    const knowledge = await this.getKnowledge();
 
     // 计算每条记录的相关性得分
     const scored = knowledge
@@ -401,7 +428,7 @@ export class Store extends EventEmitter {
    * Get the knowledge adapter instance
    * Useful for migration operations
    */
-  public getKnowledgeAdapter(): KnowledgeAdapter | null {
+  public getKnowledgeAdapter(): KnowledgeRepository | null {
     return this.knowledgeAdapter;
   }
 

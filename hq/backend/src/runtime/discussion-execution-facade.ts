@@ -10,16 +10,17 @@ interface DiscussionExecutionFacadeDependencies {
   runtime: {
     generateText: (systemPrompt: string, userPrompt: string) => Promise<{ text: string; executor: ExecutorName }>;
   };
-  searchKnowledge: (task: string) => KnowledgeEntryLike[];
+  searchKnowledge: (task: string) => Promise<KnowledgeEntryLike[]>;
   getAgent: (id: string) => Agent | undefined;
 }
 
 export function createDiscussionExecutionFacade(dependencies: DiscussionExecutionFacadeDependencies) {
   return {
     async generateExpertReply(agent: Agent, assignment: string): Promise<{ text: string; executor: ExecutorName }> {
+      const knowledge = await dependencies.searchKnowledge(assignment);
       const prompt = buildExpertPrompt(
         assignment,
-        buildKnowledgeContext(assignment, dependencies.searchKnowledge(assignment), dependencies.getAgent),
+        buildKnowledgeContext(assignment, knowledge, dependencies.getAgent),
       );
       return dependencies.runtime.generateText(agent.systemPrompt, prompt);
     },

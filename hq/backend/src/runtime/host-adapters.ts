@@ -38,7 +38,7 @@ export interface HostAdapter {
   };
 }
 
-const defaultManifestPath = path.resolve(__dirname, '../../config/host-manifest.json');
+const defaultManifestPath = path.resolve(__dirname, '../../../config/host-manifest.json');
 
 export async function loadHostManifest(manifestPath: string = defaultManifestPath): Promise<HostManifest> {
   const raw = await fs.readFile(manifestPath, 'utf-8');

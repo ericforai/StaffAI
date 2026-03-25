@@ -27,6 +27,12 @@ import {
   checkAccess,
 } from '../memory/user-context-service';
 
+function nonTemplateNotes(documents: MemoryDocument[]): MemoryDocument[] {
+  return documents.filter(
+    (doc) => doc.relativePath.startsWith('notes/') && !doc.relativePath.endsWith('/_template.md')
+  );
+}
+
 test('Memory Layer Integration: end-to-end workflow', () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'agency-integration-'));
   const memoryRootDir = path.join(root, '.ai');
@@ -166,8 +172,9 @@ test('Memory Layer Integration: deduplication workflow', () => {
 
   const content = '# Duplicate\nThis content appears in multiple files.\n';
 
-  fs.writeFileSync(path.join(memoryRootDir, 'notes', 'original.md'), content, 'utf8');
+  fs.mkdirSync(path.join(memoryRootDir, 'backup'), { recursive: true });
   fs.writeFileSync(path.join(memoryRootDir, 'backup', 'copy.md'), content, 'utf8');
+  fs.writeFileSync(path.join(memoryRootDir, 'notes', 'original.md'), content, 'utf8');
   fs.writeFileSync(
     path.join(memoryRootDir, 'notes', 'unique.md'),
     '# Unique\nDifferent content.\n',
@@ -175,7 +182,10 @@ test('Memory Layer Integration: deduplication workflow', () => {
   );
 
   const documents = indexMemoryDocuments(memoryRootDir);
-  const deduplicated = deduplicateDocuments(documents);
+  const deduplicated = deduplicateDocuments(documents).filter(
+    (doc) =>
+      ['notes/original.md', 'notes/unique.md', 'backup/copy.md'].includes(doc.relativePath)
+  );
 
   assert.equal(deduplicated.length, 2);
   assert.ok(deduplicated.some((doc) => doc.relativePath === 'notes/original.md'));
@@ -272,7 +282,7 @@ test('Memory Layer Integration: multi-language content handling', () => {
     'utf8'
   );
 
-  const documents = indexMemoryDocuments(memoryRootDir);
+  const documents = nonTemplateNotes(indexMemoryDocuments(memoryRootDir));
   assert.equal(documents.length, 3);
 
   const mixedQuery = retrieveMemoryContext('中文 日本語 English', {
@@ -298,7 +308,7 @@ test('Memory Layer Integration: large scale document handling', () => {
     fs.writeFileSync(path.join(memoryRootDir, 'notes', fileName), content, 'utf8');
   }
 
-  const documents = indexMemoryDocuments(memoryRootDir);
+  const documents = nonTemplateNotes(indexMemoryDocuments(memoryRootDir));
   assert.equal(documents.length, docCount);
 
   const deduplicated = deduplicateDocuments(documents);
@@ -327,7 +337,7 @@ test('Memory Layer Integration: incremental updates', () => {
     'utf8'
   );
 
-  let documents = indexMemoryDocuments(memoryRootDir);
+  let documents = nonTemplateNotes(indexMemoryDocuments(memoryRootDir));
   assert.equal(documents.length, 1);
 
   fs.writeFileSync(
@@ -336,11 +346,13 @@ test('Memory Layer Integration: incremental updates', () => {
     'utf8'
   );
 
-  documents = indexMemoryDocuments(memoryRootDir);
+  documents = nonTemplateNotes(indexMemoryDocuments(memoryRootDir));
   assert.equal(documents.length, 2);
 
   const context = retrieveMemoryContext('doc1 doc2', { memoryRootDir });
-  assert.equal(context.entries.length, 2);
+  assert.ok(context.entries.length >= 2);
+  assert.equal(context.entries.some((entry) => entry.relativePath === 'notes/doc1.md'), true);
+  assert.equal(context.entries.some((entry) => entry.relativePath === 'notes/doc2.md'), true);
 
   fs.rmSync(root, { recursive: true, force: true });
 });
@@ -359,7 +371,7 @@ test('Memory Layer Integration: concurrent access simulation', () => {
     );
   }
 
-  const documents = indexMemoryDocuments(memoryRootDir);
+  const documents = nonTemplateNotes(indexMemoryDocuments(memoryRootDir));
   assert.equal(documents.length, 10);
 
   fs.rmSync(root, { recursive: true, force: true });
@@ -382,7 +394,7 @@ test('Memory Layer Integration: recovery from corrupted state', () => {
     'utf8'
   );
 
-  const documents = indexMemoryDocuments(memoryRootDir);
+  const documents = nonTemplateNotes(indexMemoryDocuments(memoryRootDir));
   assert.equal(documents.length, 1);
   assert.equal(documents[0]?.relativePath, 'notes/valid.md');
 

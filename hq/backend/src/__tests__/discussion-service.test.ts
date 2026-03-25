@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { DiscussionService } from '../discussion-service';
-import type { StartupCheckResult } from '../discussion-service';
+import { DiscussionService } from '../app/discussion-service';
+import type { DiscussionStartupCheckResult as StartupCheckResult } from '../shared/discussion-service-contract';
 import type { ExecutorName } from '../runtime/discussion-types';
 
 function createRuntime(status?: StartupCheckResult) {

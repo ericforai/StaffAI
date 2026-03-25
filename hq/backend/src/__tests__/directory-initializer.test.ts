@@ -321,15 +321,26 @@ test('initializeAiDirectory handles permission errors gracefully', () => {
     templates: true,
   };
 
-  fs.chmodSync(aiDir, 0o444);
+  const originalRmSync = fs.rmSync;
+  fs.rmSync = ((targetPath: fs.PathLike, rmOptions?: fs.RmOptions) => {
+    if (targetPath === aiDir) {
+      const error = new Error('EACCES: permission denied');
+      (error as NodeJS.ErrnoException).code = 'EACCES';
+      throw error;
+    }
+    return originalRmSync(targetPath, rmOptions);
+  }) as typeof fs.rmSync;
 
-  const result = initializeAiDirectory(options);
+  try {
+    const result = initializeAiDirectory(options);
 
-  assert.equal(result.success, false);
-  assert.ok(result.error);
-
-  fs.chmodSync(aiDir, 0o755);
-  fs.rmSync(root, { recursive: true, force: true });
+    assert.equal(result.success, false);
+    assert.ok(result.error);
+    assert.match(result.error, /EACCES|permission denied/i);
+  } finally {
+    fs.rmSync = originalRmSync;
+    fs.rmSync(root, { recursive: true, force: true });
+  }
 });
 
 test('generateTemplateFiles creates .gitkeep in empty directories', () => {

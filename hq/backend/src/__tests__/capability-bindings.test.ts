@@ -5,7 +5,7 @@ import {
   loadCapabilityBindingsConfig,
   resolveCapabilityBindings,
   validateCapabilityBindingsConfig,
-} from '../capability-bindings';
+} from '../governance/capability-bindings';
 
 test('loadCapabilityBindingsConfig reads binding definitions', async () => {
   const config = await loadCapabilityBindingsConfig();

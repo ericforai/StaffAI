@@ -2,7 +2,7 @@ import path from 'node:path';
 import { Scanner } from '../scanner';
 import { SkillScanner } from '../skill-scanner';
 import { Store } from '../store';
-import { DiscussionService } from '../discussion-service';
+import { DiscussionService } from './discussion-service';
 import { DiscussionRuntime } from '../runtime/discussion-runtime';
 import type { DashboardEvent } from '../observability/dashboard-events';
 

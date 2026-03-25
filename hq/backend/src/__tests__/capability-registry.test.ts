@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createCapabilityRegistry, bindAgentCapabilities } from '../capability-registry';
+import { createCapabilityRegistry, bindAgentCapabilities } from '../runtime/capability-registry';
 import type { Agent } from '../types';
 
 const reviewAgent: Agent = {

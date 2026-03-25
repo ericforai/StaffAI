@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { detectWorkflowStage, buildRecommendations } from '../recommendation-engine';
+import { detectWorkflowStage, buildRecommendations } from '../runtime/recommendation-engine';
 
 test('detectWorkflowStage identifies review tasks', () => {
   const stage = detectWorkflowStage('Please review this diff before merge');

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'path';
-import { loadHostManifest, listHostAdapters, getHostAdapter, renderHostInjectionSnippet } from '../host-adapters';
+import { loadHostManifest, listHostAdapters, getHostAdapter, renderHostInjectionSnippet } from '../runtime/host-adapters';
 
 const manifestPath = path.resolve(__dirname, '../../../config/host-manifest.json');
 

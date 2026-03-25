@@ -12,6 +12,7 @@
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import type { Store } from '../store';
+import type { AuditEvent } from './audit-logger';
 import type {
   ApprovalRecord,
   ApprovalRiskLevel,
@@ -93,15 +94,7 @@ export interface CancelApprovalInput {
 export interface ApprovalServiceDependencies {
   store: Store;
   auditLogger?: {
-    log: (event: {
-      entityType: 'approval';
-      entityId: string;
-      action: string;
-      actor: string;
-      previousState?: Record<string, unknown>;
-      newState?: Record<string, unknown>;
-      reason?: string;
-    }) => Promise<void>;
+    log: (event: AuditEvent) => Promise<unknown>;
   };
   riskEngine?: RiskAssessmentEngine;
 }

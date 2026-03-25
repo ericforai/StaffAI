@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { CheckCircle2, ExternalLink, FileClock, PlayCircle, ShieldAlert, Sparkles } from 'lucide-react';
 
 import { useApprovals } from '../hooks/useApprovals';
@@ -131,36 +131,37 @@ export function TaskWorkspacePanel({
     createTask,
   } = useTaskComposer();
   const [selectedTaskId, setSelectedTaskId] = useState('');
+  const effectiveSelectedTaskId = useMemo(() => {
+    if (!tasks.length) {
+      return '';
+    }
+
+    if (selectedTaskId && tasks.some((task) => task.id === selectedTaskId)) {
+      return selectedTaskId;
+    }
+
+    return tasks[0].id;
+  }, [selectedTaskId, tasks]);
   const {
     data: selectedTaskDetail,
     loading: detailLoading,
     error: detailError,
     setData: setSelectedTaskDetail,
     reload: reloadTaskDetail,
-  } = useTaskDetail(selectedTaskId);
-  const { executeTask, submitting: executingTask, error: executeError } = useTaskActions(selectedTaskId, setSelectedTaskDetail);
-
-  useEffect(() => {
-    if (!tasks.length) {
-      if (selectedTaskId) {
-        setSelectedTaskId('');
-      }
-      return;
-    }
-
-    if (!selectedTaskId || !tasks.some((task) => task.id === selectedTaskId)) {
-      setSelectedTaskId(tasks[0].id);
-    }
-  }, [selectedTaskId, tasks]);
+  } = useTaskDetail(effectiveSelectedTaskId);
+  const { executeTask, submitting: executingTask, error: executeError } = useTaskActions(
+    effectiveSelectedTaskId,
+    setSelectedTaskDetail
+  );
 
   const pendingApprovals = useMemo(
     () => mutableApprovals.filter((approval) => approval.status === 'pending').slice(0, 3),
     [mutableApprovals],
   );
-  const selectedTask = selectedTaskDetail?.task || tasks.find((task) => task.id === selectedTaskId) || null;
+  const selectedTask = selectedTaskDetail?.task || tasks.find((task) => task.id === effectiveSelectedTaskId) || null;
   const selectedTaskSummary = selectedTask ? latestSummaryByTaskId.get(selectedTask.id) ?? null : null;
   const latestExecution =
-    selectedTaskDetail?.executions[0] || tasks.find((task) => task.id === selectedTaskId)?.latestExecution || null;
+    selectedTaskDetail?.executions[0] || tasks.find((task) => task.id === effectiveSelectedTaskId)?.latestExecution || null;
   const selectedTaskCanExecute = selectedTask ? selectedTask.canExecute ?? selectedTask.status === 'created' : false;
 
   async function handleCreateTask() {
@@ -272,7 +273,7 @@ export function TaskWorkspacePanel({
             {loading && <p className="text-sm text-slate-500">正在加载任务…</p>}
             {!loading && tasks.length === 0 && <p className="text-sm text-slate-500">还没有任务，先在上方创建第一条任务。</p>}
             {tasks.slice(0, 5).map((task) => {
-              const selected = task.id === selectedTaskId;
+              const selected = task.id === effectiveSelectedTaskId;
               const latestSummary = latestSummaryByTaskId.get(task.id);
 
               return (

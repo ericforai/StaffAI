@@ -9,7 +9,7 @@ import { Store } from '../store';
 import { createDiscussionService } from './create-discussion-service';
 import { registerBackendRoutes } from './register-backend-routes';
 import type { DashboardEvent } from '../observability/dashboard-events';
-import { createRuntimePaths } from '../runtime-state';
+import { createRuntimePaths } from '../runtime/runtime-state';
 import { initializeMemoryLayout, getMemoryDirectory } from '../memory/memory-initializer';
 
 interface WebServerRuntimeDependencies {

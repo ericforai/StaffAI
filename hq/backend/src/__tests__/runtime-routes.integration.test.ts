@@ -7,7 +7,7 @@ import { Scanner } from '../scanner';
 import { Store } from '../store';
 import { SkillScanner } from '../skill-scanner';
 import { WebServer } from '../server';
-import { createRuntimePaths, ensureRuntimeState } from '../runtime-state';
+import { createRuntimePaths, ensureRuntimeState } from '../runtime/runtime-state';
 
 type EnvKey =
   | 'AGENCY_HOME'

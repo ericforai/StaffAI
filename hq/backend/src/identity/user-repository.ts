@@ -17,6 +17,22 @@ export interface UserRepository {
   dispose(): void;
 }
 
+function shouldWatchUserPolicy(): boolean {
+  if (process.env.AGENCY_WATCH_USER_POLICY === '1') {
+    return true;
+  }
+
+  if (process.env.AGENCY_WATCH_USER_POLICY === '0') {
+    return false;
+  }
+
+  if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'test') {
+    return false;
+  }
+
+  return process.env.NODE_ENV === 'development';
+}
+
 /**
  * Create a default user config for backward compatibility
  */
@@ -85,7 +101,7 @@ export function createUserRepository(filePath?: string): UserRepository {
 
   // Watch for file changes in development
   let isWatching = false;
-  if (process.env.NODE_ENV !== 'production') {
+  if (shouldWatchUserPolicy()) {
     isWatching = true;
     fs.watchFile(resolvedPath, { interval: 1000 }, () => {
       policy = loadPolicy(resolvedPath);

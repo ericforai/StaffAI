@@ -32,7 +32,7 @@ test('discussion execution facade builds expert prompt with knowledge context an
         return { text: 'expert reply', executor: 'codex' };
       },
     },
-    searchKnowledge: (task) => {
+    searchKnowledge: async (task) => {
       searchedTask = task;
       return [
         {
@@ -66,7 +66,7 @@ test('discussion execution facade builds synthesis prompt with host system promp
         return { text: 'synthesis text', executor: 'claude' };
       },
     },
-    searchKnowledge: () => [],
+    searchKnowledge: async () => [],
     getAgent: () => undefined,
   });
 

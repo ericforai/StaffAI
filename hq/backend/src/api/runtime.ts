@@ -2,24 +2,24 @@ import type express from 'express';
 import type { Scanner } from '../scanner';
 import type { SkillScanner } from '../skill-scanner';
 import type { Store } from '../store';
-import type { DiscussionService } from '../discussion-service';
-import { createCapabilityRegistry, bindAgentCapabilities } from '../capability-registry';
-import { buildRecommendations } from '../recommendation-engine';
-import { getHostAdapter, listHostAdapters, renderHostInjectionSnippet, type HostId } from '../host-adapters';
-import type { RuntimePaths } from '../runtime-state';
-import { writeRuntimeSnapshot } from '../runtime-state';
-import { getHostPolicy, loadHostPolicyConfig, validateHostPolicyConfig } from '../host-policy';
+import type { DiscussionServiceContract } from '../shared/discussion-service-contract';
+import { createCapabilityRegistry, bindAgentCapabilities } from '../runtime/capability-registry';
+import { buildRecommendations } from '../runtime/recommendation-engine';
+import { getHostAdapter, listHostAdapters, renderHostInjectionSnippet, type HostId } from '../runtime/host-adapters';
+import type { RuntimePaths } from '../runtime/runtime-state';
+import { writeRuntimeSnapshot } from '../runtime/runtime-state';
+import { getHostPolicy, loadHostPolicyConfig, validateHostPolicyConfig } from '../governance/host-policy';
 import {
   loadCapabilityBindingsConfig,
   resolveCapabilityBindings,
   validateCapabilityBindingsConfig,
-} from '../capability-bindings';
+} from '../governance/capability-bindings';
 
 interface RuntimeRouteDependencies {
   scanner: Scanner;
   skillScanner: SkillScanner;
   store: Store;
-  discussionService: DiscussionService;
+  discussionService: DiscussionServiceContract;
   runtimePaths: RuntimePaths;
 }
 

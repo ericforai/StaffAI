@@ -1,8 +1,11 @@
 import type express from 'express';
-import type { DiscussionService, StartupCheckResult } from '../discussion-service';
+import type {
+  DiscussionServiceContract,
+  DiscussionStartupCheckResult as StartupCheckResult,
+} from '../shared/discussion-service-contract';
 
 interface StartupRouteDependencies {
-  discussionService: DiscussionService;
+  discussionService: DiscussionServiceContract;
 }
 
 export function registerStartupRoutes(app: express.Application, dependencies: StartupRouteDependencies) {

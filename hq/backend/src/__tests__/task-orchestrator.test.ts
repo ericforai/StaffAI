@@ -61,12 +61,12 @@ test('createTaskDraft builds a routed task and persists it via store', async () 
   assert.equal(task.taskType, 'architecture_analysis');
   assert.equal(task.priority, 'medium');
   assert.equal(task.requestedBy, 'system');
-  assert.equal(task.status, 'routed');
+  assert.equal(task.status, 'waiting_approval');
   assert.equal(task.recommendedAgentRole, 'software-architect');
   assert.deepEqual(task.candidateAgentRoles, ['software-architect', 'dispatcher']);
   assert.equal(task.routingStatus, 'matched');
   assert.equal(savedTasks.length, 1);
-  assert.equal(savedApprovals.length, 0);
+  assert.equal(savedApprovals.length, 1);
   assert.equal(savedWorkflowPlans.length, 1);
   assert.equal(savedTaskAssignments.length, 2);
 });

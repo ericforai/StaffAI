@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {
+  ALLOWED_TOP_LEVEL_SOURCE_FILES,
   BACKEND_DEPENDENCY_RULES,
   getBackendSourceContext,
   normalizeBackendRelativePath,
@@ -157,5 +158,19 @@ test('composition roots may assemble api routes without tripping the guard', () 
   assert.ok(
     compositionEdges.every((edge) => edge.sourceContext === 'root'),
     `expected assembly file to stay classified as root, got ${compositionEdges.map(formatEdge).join(', ')}`,
+  );
+});
+
+test('legacy root-level platform modules stay migrated into bounded contexts', () => {
+  const topLevelSourceFiles = fs
+    .readdirSync(BACKEND_SRC_ROOT, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.ts'))
+    .map((entry) => entry.name)
+    .sort();
+
+  assert.deepEqual(
+    topLevelSourceFiles,
+    Array.from(ALLOWED_TOP_LEVEL_SOURCE_FILES).sort(),
+    `expected backend root to stay limited to approved entry files, found: ${topLevelSourceFiles.join(', ')}`,
   );
 });

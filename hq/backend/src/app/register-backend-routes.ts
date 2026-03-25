@@ -8,8 +8,10 @@ import { registerMemoryRoutes } from '../api/memory';
 import { registerRuntimeRoutes } from '../api/runtime';
 import { registerStartupRoutes } from '../api/startup';
 import { registerTaskEventRoutes } from '../api/task-events';
-import { registerTaskRoutes } from '../api/tasks';
+import { registerTaskRoutes, registerScenarioRoutes } from '../api/tasks';
 import { registerToolRoutes } from '../api/tools';
+import { registerAuditRoutes } from '../api/audit';
+import { registerPresetRoutes } from '../api/presets';
 import { retrieveMemoryContext } from '../memory/memory-retriever';
 import { createWriteBackService } from '../memory/write-back-service';
 import {
@@ -20,8 +22,8 @@ import type { DashboardEvent } from '../observability/dashboard-events';
 import { Scanner } from '../scanner';
 import { SkillScanner } from '../skill-scanner';
 import { Store } from '../store';
-import { DiscussionService } from '../discussion-service';
-import type { RuntimePaths } from '../runtime-state';
+import type { DiscussionServiceContract } from '../shared/discussion-service-contract';
+import type { RuntimePaths } from '../runtime/runtime-state';
 import { createUserRepository } from '../identity/user-repository.js';
 import { createPermissionChecker } from '../identity/permission-checker.js';
 import { createUserContextService } from '../identity/user-context.js';
@@ -32,7 +34,7 @@ interface RouteRegistrationDependencies {
   scanner: Scanner;
   skillScanner: SkillScanner;
   store: Store;
-  discussionService: DiscussionService;
+  discussionService: DiscussionServiceContract;
   runtimePaths: RuntimePaths;
   broadcast: (event: DashboardEvent) => void;
   runAdvancedDiscussion?: (topic: string) => Promise<{ summary: string }>;
@@ -164,6 +166,18 @@ export function registerBackendRoutes({
   registerExecutionRoutes(app, store);
   registerToolRoutes(app, store);
   registerMemoryRoutes(app, { memoryRootDir });
+
+  // Register audit routes if audit logger is enabled
+  const auditLogger = store.getAuditLogger();
+  if (auditLogger) {
+    registerAuditRoutes(app, auditLogger, store);
+  }
+
+  // Register MVP preset routes
+  registerPresetRoutes(app, store, scanner);
+
+  // Register MVP scenario routes
+  registerScenarioRoutes(app, store, scanner);
 
   registerDiscussionRoutes(app, {
     discussionService,

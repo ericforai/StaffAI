@@ -176,6 +176,27 @@ test('UserRepository only returns enabled users', () => {
   }
 });
 
+test('UserRepository does not start file watchers under node test', () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'users-test-'));
+  const usersFile = path.join(tempDir, 'users.json');
+  const originalWatchFile = fs.watchFile;
+  let watchCalls = 0;
+
+  fs.watchFile = ((...args: Parameters<typeof fs.watchFile>) => {
+    watchCalls += 1;
+    return originalWatchFile(...args);
+  }) as typeof fs.watchFile;
+
+  try {
+    const repo = createUserRepository(usersFile);
+    repo.dispose();
+    assert.equal(watchCalls, 0);
+  } finally {
+    fs.watchFile = originalWatchFile;
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
 test('PermissionChecker allows all agents when no restrictions', () => {
   const checker = createPermissionChecker();
   const user: UserConfig = {

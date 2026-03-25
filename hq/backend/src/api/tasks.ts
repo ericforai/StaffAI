@@ -1,6 +1,7 @@
 import type express from 'express';
 import type { AgentProfile } from '../types';
 import type { Store } from '../store';
+import type { Scanner } from '../scanner';
 import { createTaskDraft, validateTaskDraft } from '../orchestration/task-orchestrator';
 import { executeTaskRecord } from '../orchestration/task-execution-orchestrator';
 import {
@@ -8,6 +9,7 @@ import {
   buildTaskListReadModel,
   buildTaskWorkspaceSummary,
 } from '../orchestration/task-read-model';
+import { runMvpScenario } from '../orchestration/mvp-scenario-runner';
 import type { ExecutionLifecycleRecord } from '../runtime/execution-service';
 import { TASK_EXECUTION_MODES, type TaskExecutionMode, type TaskRecord } from '../shared/task-types';
 
@@ -183,5 +185,49 @@ export function registerTaskRoutes(
     return res.status(201).json({
       task,
     });
+  });
+}
+
+/**
+ * Register the MVP scenario endpoint.
+ * Separate from registerTaskRoutes to avoid breaking existing callers.
+ */
+export function registerScenarioRoutes(
+  app: express.Application,
+  store: Store,
+  scanner: Scanner,
+) {
+  app.post('/api/tasks/scenario', async (req, res) => {
+    const title = typeof req.body?.title === 'string' ? req.body.title.trim() : '';
+    const description = typeof req.body?.description === 'string' ? req.body.description.trim() : '';
+
+    if (!title || !description) {
+      return res.status(400).json({ error: 'title and description are required' });
+    }
+
+    const presetName = typeof req.body?.presetName === 'string' ? req.body.presetName : undefined;
+    const executionMode = readExecutionMode(req.body?.executionMode);
+    const requestedBy = typeof req.body?.requestedBy === 'string' ? req.body.requestedBy : undefined;
+
+    try {
+      const result = await runMvpScenario(
+        {
+          title,
+          description,
+          presetName,
+          executionMode,
+          requestedBy,
+        },
+        store,
+        scanner,
+      );
+
+      return res.status(201).json(result);
+    } catch (err) {
+      if (err instanceof Error && err.name === 'PresetNotFoundError') {
+        return res.status(404).json({ error: err.message });
+      }
+      throw err;
+    }
   });
 }

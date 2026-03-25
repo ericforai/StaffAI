@@ -1,28 +1,26 @@
-import { Scanner } from './scanner';
-import { Store } from './store';
-import { selectBestExpert } from './orchestration/agency-consult';
-import { createExpertDiscoveryService, ExpertCandidate } from './orchestration/expert-discovery';
+import { Scanner } from '../scanner';
+import { Store } from '../store';
+import { selectBestExpert } from '../orchestration/agency-consult';
+import { createExpertDiscoveryService, ExpertCandidate } from '../orchestration/expert-discovery';
 import {
   createDiscussionWorkflowFacade,
   AgencyConsultResult,
   DiscussionRunResult,
-} from './orchestration/discussion-workflow-facade';
-import { createDiscussionRosterService, DiscussionParticipant } from './orchestration/discussion-roster';
-import { createStaffingService } from './orchestration/staffing-service';
-import { createDiscussionExecutionFacade } from './runtime/discussion-execution-facade';
-import { createDiscussionEventPublisher, DiscussionEventPublisher } from './observability/discussion-event-publisher';
-import type { DashboardEvent } from './observability/dashboard-events';
-import type { ExecutorName, StartupCheckResult as RuntimeStartupCheckResult } from './runtime/discussion-types';
-
-export interface DiscussionSummaryResult {
-  summary: string;
-  executor: ExecutorName;
-}
-
-export type StartupCheckResult = RuntimeStartupCheckResult;
+} from '../orchestration/discussion-workflow-facade';
+import { createDiscussionRosterService, DiscussionParticipant } from '../orchestration/discussion-roster';
+import { createStaffingService } from '../orchestration/staffing-service';
+import { createDiscussionExecutionFacade } from '../runtime/discussion-execution-facade';
+import { createDiscussionEventPublisher, DiscussionEventPublisher } from '../observability/discussion-event-publisher';
+import type { DashboardEvent } from '../observability/dashboard-events';
+import type { ExecutorName, StartupCheckResult as RuntimeStartupCheckResult } from '../runtime/discussion-types';
+import type {
+  DiscussionServiceContract,
+  DiscussionSummaryResult,
+  DiscussionStartupCheckResult as StartupCheckResult,
+} from '../shared/discussion-service-contract';
 
 type EventPublisher = (event: DashboardEvent) => void;
-export type { ExecutorName } from './runtime/discussion-types';
+export type { ExecutorName } from '../runtime/discussion-types';
 
 interface DiscussionServiceOptions {
   runtime: {
@@ -32,7 +30,7 @@ interface DiscussionServiceOptions {
   workflowFacade?: ReturnType<typeof createDiscussionWorkflowFacade>;
 }
 
-export class DiscussionService {
+export class DiscussionService implements DiscussionServiceContract {
   private scanner: Scanner;
   private store: Store;
   private runtime: DiscussionServiceOptions['runtime'];

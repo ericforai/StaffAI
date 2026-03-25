@@ -295,8 +295,9 @@ test.beforeEach(async ({ page }) => {
 test('renders runtime foundation panel and default recommendations', async ({ page }) => {
   await page.goto('/');
 
-  await expect(page.getByText('Runtime Foundation')).toBeVisible();
-  await expect(page.getByText('宿主适配、能力与降级状态')).toBeVisible();
+  await page.getByRole('button', { name: '专家协作' }).click();
+
+  await expect(page.getByText('宿主能力与降级状态')).toBeVisible();
   await expect(page.getByRole('button', { name: 'codex' })).toBeVisible();
   await expect(page.getByText('Run expert discussion')).toBeVisible();
 });
@@ -304,16 +305,18 @@ test('renders runtime foundation panel and default recommendations', async ({ pa
 test('switches runtime host and shows degraded recommendations', async ({ page }) => {
   await page.goto('/');
 
+  await page.getByRole('button', { name: '专家协作' }).click();
   await page.getByRole('button', { name: 'gemini' }).click();
 
   await expect(page.getByText('Fallback to Web UI')).toBeVisible();
   await expect(page.getByText('partial', { exact: true })).toBeVisible();
-  await expect(page.getByText('sampling off · injection manual')).toBeVisible();
+  await expect(page.getByText('采样 关闭 · 注入 手动')).toBeVisible();
 });
 
 test('shows degraded badge and notice after discussion run', async ({ page }) => {
   await page.goto('/');
 
+  await page.getByRole('button', { name: '专家协作' }).click();
   await page
     .getByPlaceholder('描述你希望这场专家讨论解决的问题、目标和限制。')
     .fill('debug runtime degraded behavior before release');

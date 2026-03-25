@@ -22,6 +22,7 @@ import {
   TASK_TYPES,
 } from '../shared/task-types';
 import { createApprovalRecord, evaluateApprovalRequirement } from '../governance/approval-service';
+import { evaluateApprovalRequirement as evaluateApprovalRequirementV2 } from '../governance/approval-service-v2';
 import { recommendTaskRoute } from './task-routing';
 
 export interface TaskDraftInput {
@@ -273,7 +274,9 @@ export async function createTask(
 ): Promise<{ task: TaskRecord; routeDecision: TaskRouteDecision; workflowPlan: WorkflowPlan; assignments: TaskAssignment[] }> {
   const now = new Date().toISOString();
   const routeDecision = routeTask(input);
-  const approvalDecision = evaluateApprovalRequirement({
+
+  // Use ApprovalServiceV2 for enhanced risk assessment
+  const approvalDecision = evaluateApprovalRequirementV2({
     title: input.title.trim(),
     description: input.description.trim(),
   });
@@ -287,7 +290,7 @@ export async function createTask(
     status: approvalDecision.approvalRequired ? 'waiting_approval' : 'routed',
     executionMode: normalizeExecutionMode(input.executionMode, routeDecision.executionMode),
     approvalRequired: approvalDecision.approvalRequired,
-    riskLevel: approvalDecision.riskLevel,
+    riskLevel: approvalDecision.riskLevel.toLowerCase() as 'low' | 'medium' | 'high',
     requestedBy,
     requestedAt: now,
     recommendedAgentRole: routeDecision.recommendedAgentRole,

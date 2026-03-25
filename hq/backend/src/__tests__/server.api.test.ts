@@ -156,12 +156,12 @@ test('POST /api/tasks creates a task and GET /api/tasks returns it', async () =>
 
   assert.equal(createdPayload.task?.title, 'Refactor server composition');
   assert.equal(createdPayload.task?.description, 'Split route registration from domain logic');
-  assert.equal(createdPayload.task?.status, 'routed');
+  assert.equal(createdPayload.task?.status, 'waiting_approval');
   assert.equal(createdPayload.task?.executionMode, 'serial');
   assert.equal(createdPayload.task?.taskType, 'architecture_analysis');
   assert.equal(createdPayload.task?.priority, 'medium');
   assert.equal(createdPayload.task?.requestedBy, 'system');
-  assert.equal(createdPayload.task?.approvalRequired, false);
+  assert.equal(createdPayload.task?.approvalRequired, true);
   assert.equal(createdPayload.task?.recommendedAgentRole, 'software-architect');
   assert.equal(createdPayload.task?.routingStatus, 'matched');
   assert.equal(typeof createdPayload.task?.id, 'string');
@@ -177,18 +177,18 @@ test('POST /api/tasks creates a task and GET /api/tasks returns it', async () =>
       latestApproval?: unknown;
       latestExecution?: unknown;
     }>;
-    summary?: { totalTasks?: number; statusCounts?: { routed?: number } };
+    summary?: { totalTasks?: number; statusCounts?: { routed?: number; waiting_approval?: number } };
   };
 
   assert.equal(listPayload.tasks?.length, 1);
   assert.equal(listPayload.tasks?.[0]?.id, createdPayload.task?.id);
   assert.equal(listPayload.tasks?.[0]?.title, 'Refactor server composition');
-  assert.equal(listPayload.tasks?.[0]?.status, 'routed');
-  assert.equal(listPayload.tasks?.[0]?.canExecute, true);
-  assert.equal(listPayload.tasks?.[0]?.latestApproval, null);
+  assert.equal(listPayload.tasks?.[0]?.status, 'waiting_approval');
+  assert.equal(listPayload.tasks?.[0]?.canExecute, false);
+  assert.notEqual(listPayload.tasks?.[0]?.latestApproval, null);
   assert.equal(listPayload.tasks?.[0]?.latestExecution, null);
   assert.equal(listPayload.summary?.totalTasks, 1);
-  assert.equal(listPayload.summary?.statusCounts?.routed, 1);
+  assert.equal(listPayload.summary?.statusCounts?.waiting_approval, 1);
 
   const detailResponse = await fetch(`${baseUrl}/api/tasks/${createdPayload.task?.id}`);
   assert.equal(detailResponse.status, 200);
@@ -206,9 +206,10 @@ test('POST /api/tasks creates a task and GET /api/tasks returns it', async () =>
   assert.equal(detailPayload.task?.id, createdPayload.task?.id);
   assert.equal(detailPayload.task?.recommendedAgentRole, 'software-architect');
   assert.equal(detailPayload.task?.routingStatus, 'matched');
-  assert.deepEqual(detailPayload.approvals, []);
+  assert.equal(detailPayload.approvals?.length, 1);
+  assert.equal(detailPayload.approvals?.[0]?.status, 'pending');
   assert.deepEqual(detailPayload.executions, []);
-  assert.equal(detailPayload.summary?.approvalCounts?.pending, 0);
+  assert.equal(detailPayload.summary?.approvalCounts?.pending, 1);
   assert.equal(detailPayload.summary?.executionCount, 0);
 });
 
@@ -294,8 +295,8 @@ test('advanced discussion execution completes through the discussion runner', as
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      title: 'Run a multi-expert architecture review',
-      description: 'Use discussion mode to gather synthesis from multiple experts',
+      title: 'Summarize meeting notes with experts',
+      description: 'Use discussion mode to synthesize non-sensitive meeting notes',
       executionMode: 'advanced_discussion',
     }),
   });
@@ -502,14 +503,27 @@ test('POST /api/tasks/:id/execute degrades parallel mode when sampling is unavai
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      title: 'Execute a degraded parallel workflow',
-      description: 'Request parallel but allow fallback for unsupported runtime capability',
+      title: 'Deploy to production with parallel rollout',
+      description: 'Production deploy requires approval; request parallel but allow fallback when sampling is unavailable',
       executionMode: 'parallel',
     }),
   });
   assert.equal(taskResponse.status, 201);
   const taskPayload = (await taskResponse.json()) as { task?: { id?: string } };
   const taskId = taskPayload.task?.id;
+
+  const approvalsResponse = await fetch(`${baseUrl}/api/approvals`);
+  assert.equal(approvalsResponse.status, 200);
+  const approvalsPayload = (await approvalsResponse.json()) as {
+    approvals?: Array<{ id?: string; taskId?: string }>;
+  };
+  const approvalId = approvalsPayload.approvals?.find((approval) => approval.taskId === taskId)?.id;
+  assert.equal(typeof approvalId, 'string');
+
+  const approveResponse = await fetch(`${baseUrl}/api/approvals/${approvalId}/approve`, {
+    method: 'POST',
+  });
+  assert.equal(approveResponse.status, 200);
 
   const executeResponse = await fetch(`${baseUrl}/api/tasks/${taskId}/execute`, {
     method: 'POST',
@@ -929,6 +943,65 @@ test('approvals can be approved and rejected', async () => {
   assert.equal(rejectedPayload.approval?.status, 'rejected');
   assert.equal(rejectedPayload.task?.status, 'cancelled');
   assert.equal(rejectedPayload.task?.approvalRequired, true);
+});
+
+test('high-risk create → approve → execute writes memory summary', async () => {
+  const memoryRootDir = process.env.AGENCY_MEMORY_DIR as string;
+  fs.mkdirSync(memoryRootDir, { recursive: true });
+  fs.writeFileSync(
+    path.join(memoryRootDir, 'context.md'),
+    '# Context\nApproval gated execution integration test.\n',
+    'utf8'
+  );
+
+  const createResponse = await fetch(`${baseUrl}/api/tasks`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      title: 'Deploy to production',
+      description: 'Deploy latest build to production servers',
+      requestedBy: 'system',
+      executionMode: 'single',
+      priority: 'high',
+    }),
+  });
+  assert.equal(createResponse.status, 201);
+  const createdPayload = (await createResponse.json()) as { task?: { id?: string; status?: string } };
+  const taskId = createdPayload.task?.id;
+  assert.equal(typeof taskId, 'string');
+  assert.equal(createdPayload.task?.status, 'waiting_approval');
+
+  const approvalsResponse = await fetch(`${baseUrl}/api/approvals`);
+  assert.equal(approvalsResponse.status, 200);
+  const approvalsPayload = (await approvalsResponse.json()) as {
+    approvals?: Array<{ id?: string; taskId?: string }>;
+  };
+  const approvalId = approvalsPayload.approvals?.find((approval) => approval.taskId === taskId)?.id;
+  assert.equal(typeof approvalId, 'string');
+
+  const approveResponse = await fetch(`${baseUrl}/api/approvals/${approvalId}/approve`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ approver: 'manager1', reason: 'Ship it' }),
+  });
+  assert.equal(approveResponse.status, 200);
+
+  const summary = 'Approved execution finished cleanly';
+  const executeResponse = await fetch(`${baseUrl}/api/tasks/${taskId}/execute`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ executor: 'codex', summary }),
+  });
+  assert.equal(executeResponse.status, 201);
+
+  const summariesDir = path.join(memoryRootDir, 'task-summaries');
+  const summaryFiles = fs
+    .readdirSync(summariesDir)
+    .filter((name) => name.endsWith('.md') && name.includes(taskId as string));
+  assert.ok(summaryFiles.length >= 1);
+
+  const summaryContent = fs.readFileSync(path.join(summariesDir, summaryFiles[0]), 'utf8');
+  assert.ok(summaryContent.includes(summary));
 });
 
 test('GET /api/executions/:id returns not found for unknown executions', async () => {

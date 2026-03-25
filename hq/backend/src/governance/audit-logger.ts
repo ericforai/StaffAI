@@ -102,6 +102,13 @@ export class AuditLogger {
   }
 
   /**
+   * Alias for getAuditTrail to maintain compatibility with older tests
+   */
+  async getByEntityId(entityId: string): Promise<AuditLogEntry[]> {
+    return await this.getAuditTrail(entityId);
+  }
+
+  /**
    * Get audit logs filtered by entity type
    * @param entityType The type of entity
    * @returns Array of audit log entries
@@ -176,6 +183,17 @@ export class AuditLogger {
   async getById(id: string): Promise<AuditLogEntry | null> {
     return await this.repository.getById(id);
   }
+}
+
+/**
+ * Factory function to create an AuditLogger from a Store-like object
+ */
+export function createAuditLogger(store: { getAuditLogger(): AuditLogger | null }): AuditLogger {
+  const logger = store.getAuditLogger();
+  if (!logger) {
+    throw new Error('Audit logger not initialized in store');
+  }
+  return logger;
 }
 
 /**

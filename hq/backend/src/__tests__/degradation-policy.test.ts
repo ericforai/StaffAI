@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { resolveHostDegradation, resolveExecutorDegradation } from '../degradation-policy';
+import { resolveHostDegradation, resolveExecutorDegradation } from '../runtime/degradation-policy';
 
 test('full hosts stay in native mode when required capabilities are available', () => {
   const result = resolveHostDegradation({

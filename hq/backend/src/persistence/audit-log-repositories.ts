@@ -7,6 +7,7 @@
 
 import path from 'node:path';
 import fs from 'node:fs/promises';
+import { Pool, type PoolConfig } from 'pg';
 import type { AuditLogEntry, AuditEntityType } from '../governance/audit-logger';
 
 /**
@@ -19,6 +20,157 @@ export interface AuditLogRepository {
   getByEntityType(entityType: AuditEntityType): Promise<AuditLogEntry[]>;
   getByActor(actor: string): Promise<AuditLogEntry[]>;
   getByTimeRange(start: string, end: string): Promise<AuditLogEntry[]>;
+}
+
+/**
+ * Options for Postgres audit log repository
+ */
+export interface PostgresAuditLogOptions {
+  connectionString: string;
+  schema?: string;
+  tableName?: string;
+  poolMax?: number;
+  idleTimeoutMs?: number;
+  connectionTimeoutMs?: number;
+  ssl?: PoolConfig['ssl'];
+}
+
+/**
+ * Postgres-based audit log repository
+ */
+export class PostgresAuditLogRepository implements AuditLogRepository {
+  private readonly pool: Pool;
+  private readonly schema: string;
+  private readonly tableName: string;
+  private bootstrapPromise: Promise<void> | null = null;
+
+  constructor(options: PostgresAuditLogOptions) {
+    this.pool = new Pool({
+      connectionString: options.connectionString,
+      max: options.poolMax,
+      idleTimeoutMillis: options.idleTimeoutMs,
+      connectionTimeoutMillis: options.connectionTimeoutMs,
+      allowExitOnIdle: true,
+      ssl: options.ssl,
+    });
+    this.schema = options.schema || 'public';
+    this.tableName = options.tableName || 'audit_logs';
+  }
+
+  private async ensureBootstrapped(): Promise<void> {
+    if (!this.bootstrapPromise) {
+      this.bootstrapPromise = (async () => {
+        const qualifiedTable = `"${this.schema}"."${this.tableName}"`;
+        await this.pool.query(
+          `CREATE TABLE IF NOT EXISTS ${qualifiedTable} (
+            id TEXT PRIMARY KEY,
+            entity_type TEXT NOT NULL,
+            entity_id TEXT NOT NULL,
+            actor TEXT NOT NULL,
+            payload JSONB NOT NULL,
+            timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW()
+          )`
+        );
+        await this.pool.query(
+          `CREATE INDEX IF NOT EXISTS "${this.tableName}_entity_id_idx" ON ${qualifiedTable} (entity_id)`
+        );
+        await this.pool.query(
+          `CREATE INDEX IF NOT EXISTS "${this.tableName}_entity_type_idx" ON ${qualifiedTable} (entity_type)`
+        );
+        await this.pool.query(
+          `CREATE INDEX IF NOT EXISTS "${this.tableName}_actor_idx" ON ${qualifiedTable} (actor)`
+        );
+        await this.pool.query(
+          `CREATE INDEX IF NOT EXISTS "${this.tableName}_timestamp_idx" ON ${qualifiedTable} (timestamp)`
+        );
+      })();
+    }
+    return this.bootstrapPromise;
+  }
+
+  async save(entry: AuditLogEntry): Promise<void> {
+    await this.ensureBootstrapped();
+    const qualifiedTable = `"${this.schema}"."${this.tableName}"`;
+    await this.pool.query(
+      `INSERT INTO ${qualifiedTable} (id, entity_type, entity_id, actor, payload, timestamp)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT (id) DO UPDATE SET
+         entity_type = EXCLUDED.entity_type,
+         entity_id = EXCLUDED.entity_id,
+         actor = EXCLUDED.actor,
+         payload = EXCLUDED.payload,
+         timestamp = EXCLUDED.timestamp`,
+      [
+        entry.id,
+        entry.entityType,
+        entry.entityId,
+        entry.actor,
+        JSON.stringify(entry),
+        entry.timestamp,
+      ]
+    );
+  }
+
+  async getById(id: string): Promise<AuditLogEntry | null> {
+    await this.ensureBootstrapped();
+    const qualifiedTable = `"${this.schema}"."${this.tableName}"`;
+    const result = await this.pool.query(
+      `SELECT payload FROM ${qualifiedTable} WHERE id = $1`,
+      [id]
+    );
+    return result.rows[0] ? (result.rows[0].payload as AuditLogEntry) : null;
+  }
+
+  async getByEntityId(entityId: string): Promise<AuditLogEntry[]> {
+    await this.ensureBootstrapped();
+    const qualifiedTable = `"${this.schema}"."${this.tableName}"`;
+    const result = await this.pool.query(
+      `SELECT payload FROM ${qualifiedTable} WHERE entity_id = $1 ORDER BY timestamp DESC`,
+      [entityId]
+    );
+    return result.rows.map((row) => row.payload as AuditLogEntry);
+  }
+
+  async getByEntityType(entityType: AuditEntityType): Promise<AuditLogEntry[]> {
+    await this.ensureBootstrapped();
+    const qualifiedTable = `"${this.schema}"."${this.tableName}"`;
+    const result = await this.pool.query(
+      `SELECT payload FROM ${qualifiedTable} WHERE entity_type = $1 ORDER BY timestamp DESC`,
+      [entityType]
+    );
+    return result.rows.map((row) => row.payload as AuditLogEntry);
+  }
+
+  async getByActor(actor: string): Promise<AuditLogEntry[]> {
+    await this.ensureBootstrapped();
+    const qualifiedTable = `"${this.schema}"."${this.tableName}"`;
+    const result = await this.pool.query(
+      `SELECT payload FROM ${qualifiedTable} WHERE actor = $1 ORDER BY timestamp DESC`,
+      [actor]
+    );
+    return result.rows.map((row) => row.payload as AuditLogEntry);
+  }
+
+  async getByTimeRange(start: string, end: string): Promise<AuditLogEntry[]> {
+    await this.ensureBootstrapped();
+    const qualifiedTable = `"${this.schema}"."${this.tableName}"`;
+    const result = await this.pool.query(
+      `SELECT payload FROM ${qualifiedTable} 
+       WHERE timestamp >= $1 AND timestamp <= $2 
+       ORDER BY timestamp DESC`,
+      [start, end]
+    );
+    return result.rows.map((row) => row.payload as AuditLogEntry);
+  }
+}
+
+/**
+ * Factory function to create a Postgres audit log repository
+ */
+export function createPostgresAuditLogRepository(
+  options: PostgresAuditLogOptions
+): AuditLogRepository {
+  return new PostgresAuditLogRepository(options);
 }
 
 /**

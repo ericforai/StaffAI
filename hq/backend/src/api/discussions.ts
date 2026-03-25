@@ -1,11 +1,11 @@
 import type express from 'express';
-import type { DiscussionService } from '../discussion-service';
+import type { DiscussionServiceContract } from '../shared/discussion-service-contract';
 import type { Store } from '../store';
 import type { DashboardEvent } from '../observability/dashboard-events';
 import { normalizeExecutionMode, resolveExecutionDecision, StructuredExecutionError } from '../execution-strategy';
 
 interface DiscussionRouteDependencies {
-  discussionService: DiscussionService;
+  discussionService: DiscussionServiceContract;
   store: Store;
   broadcast: (event: DashboardEvent) => void;
 }

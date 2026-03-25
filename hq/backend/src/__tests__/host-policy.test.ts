@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { loadHostPolicyConfig, getHostPolicy, validateHostPolicyConfig } from '../host-policy';
+import { loadHostPolicyConfig, getHostPolicy, validateHostPolicyConfig } from '../governance/host-policy';
 
 test('loadHostPolicyConfig loads runtime host policy definitions', async () => {
   const config = await loadHostPolicyConfig();

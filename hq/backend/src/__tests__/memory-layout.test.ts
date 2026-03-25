@@ -156,7 +156,16 @@ test('MEMORY_DOCUMENT_TYPES contains all expected types', () => {
 });
 
 test('MEMORY_SUBDIRS contains all expected subdirectories', () => {
-  const expected = ['context', 'tasks', 'decisions', 'knowledge', 'agents', 'task-summaries'];
+  const expected = [
+    'context',
+    'tasks',
+    'decisions',
+    'knowledge',
+    'knowledge/successes',
+    'knowledge/failures',
+    'agents',
+    'task-summaries',
+  ];
   assert.deepEqual(Array.from(MEMORY_SUBDIRS), expected);
 });
 

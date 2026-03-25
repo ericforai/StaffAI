@@ -36,7 +36,7 @@ export interface UnifiedKnowledgeEntry {
   /** Timestamp in milliseconds */
   timestamp: number;
   /** Source of this entry */
-  source: 'json' | 'markdown';
+  source: 'json' | 'markdown' | 'postgres';
   /** Relative path for markdown entries, undefined for JSON */
   relativePath?: string;
 }
@@ -104,12 +104,12 @@ export interface KnowledgeRepository {
    * @param query - Search query string
    * @param limit - Maximum number of results
    */
-  search(query: string, limit?: number): UnifiedKnowledgeEntry[];
+  search(query: string, limit?: number): Promise<UnifiedKnowledgeEntry[]>;
 
   /**
    * Get all knowledge entries
    */
-  getAll(): UnifiedKnowledgeEntry[];
+  getAll(): Promise<UnifiedKnowledgeEntry[]>;
 
   /**
    * Migrate JSON entries to Markdown format

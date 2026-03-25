@@ -77,3 +77,7 @@ integrations/openclaw/*
 integrations/qwen/agents/
 !integrations/openclaw/README.md
 .gstack/
+
+# HQ runtime state (local)
+hq/.ai/
+hq/backend/.ai/

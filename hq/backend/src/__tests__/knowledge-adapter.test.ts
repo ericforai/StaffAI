@@ -165,7 +165,7 @@ test('KnowledgeAdapter.search - returns results matching the query', async () =>
       resultSummary: 'Created vector logo in multiple formats.',
     });
 
-    const results = adapter.search('React');
+    const results = await adapter.search('React');
 
     assert.ok(results.length > 0);
     assert.ok(results[0].agentId.includes('frontend'));
@@ -179,7 +179,7 @@ test('KnowledgeAdapter.search - returns empty array for empty query', async () =
 
   try {
     const adapter = createKnowledgeAdapter(memoryRootDir, jsonKnowledgePath);
-    const results = adapter.search('');
+    const results = await adapter.search('');
 
     assert.deepEqual(results, []);
   } finally {
@@ -196,7 +196,7 @@ test('KnowledgeAdapter.search - limits results to specified limit', async () => 
     await adapter.save({ task: 'Engineering task 1', agentId: 'engineering/agent', resultSummary: 'Done' });
     await adapter.save({ task: 'Engineering task 2', agentId: 'engineering/agent', resultSummary: 'Done' });
 
-    const results = adapter.search('engineering', 1);
+    const results = await adapter.search('engineering', 1);
 
     assert.ok(results.length <= 1);
   } finally {
@@ -222,7 +222,7 @@ test('KnowledgeAdapter.search - ranks results by relevance score', async () => {
       resultSummary: 'React components built',
     });
 
-    const results = adapter.search('backend');
+    const results = await adapter.search('backend');
 
     // Most relevant should be first
     assert.ok(results[0].agentId.includes('backend'));
@@ -249,7 +249,7 @@ test('KnowledgeAdapter.getAll - returns all entries from both sources', async ()
       resultSummary: 'Result 2',
     });
 
-    const all = adapter.getAll();
+    const all = await adapter.getAll();
 
     assert.ok(all.length >= 2);
   } finally {
@@ -269,7 +269,7 @@ test('KnowledgeAdapter.getAll - marks source correctly', async () => {
       resultSummary: 'Result 1',
     });
 
-    const all = adapter.getAll();
+    const all = await adapter.getAll();
     const jsonEntry = all.find((e) => e.source === 'json');
 
     assert.ok(jsonEntry !== undefined);

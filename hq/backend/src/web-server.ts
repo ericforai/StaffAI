@@ -2,7 +2,7 @@ import { Scanner } from './scanner';
 import { Store } from './store';
 import { WebServer } from './server';
 import { SkillScanner } from './skill-scanner';
-import { createRuntimePaths, ensureRuntimeState } from './runtime-state';
+import { createRuntimePaths, ensureRuntimeState } from './runtime/runtime-state';
 
 async function main() {
   if (!process.env.AGENCY_DISCUSSION_EXECUTOR) {

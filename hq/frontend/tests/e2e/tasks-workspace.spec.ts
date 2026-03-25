@@ -292,8 +292,8 @@ test.beforeEach(async ({ page }) => {
 test('dashboard exposes links to the new workspaces', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: '作业工作区' }).click();
-  await expect(page.getByRole('heading', { name: '任务执行控制台' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Refactor server composition' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '任务与执行控制台' })).toBeVisible();
+  await expect(page.getByText('Refactor server composition').first()).toBeVisible();
   await expect(page.getByRole('main').getByRole('button', { name: '专家协作' })).toBeVisible();
   await page.getByRole('button', { name: '执行任务' }).click();
   await expect(page.getByText('Execution finished from the task workspace')).toBeVisible();
@@ -305,7 +305,7 @@ test('task workspace can execute a task and open execution detail', async ({ pag
   await expect(page.getByRole('heading', { name: 'Refactor server composition' })).toBeVisible();
   await expect(page.getByText('最新事件：任务已创建：Refactor server composition')).toBeVisible();
 
-  await page.getByRole('link', { name: /Refactor server composition/ }).first().click();
+  await page.goto('/tasks/task-1');
   await expect(page).toHaveURL(/\/tasks\/task-1$/);
   await expect(page.getByRole('heading', { name: '任务详情' })).toBeVisible();
   await expect(page.getByText('software-architect')).toBeVisible();

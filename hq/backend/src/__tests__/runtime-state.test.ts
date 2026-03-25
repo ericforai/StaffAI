@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { createRuntimePaths, ensureRuntimeState, writeRuntimeSnapshot, readRuntimeSnapshot } from '../runtime-state';
+import { createRuntimePaths, ensureRuntimeState, writeRuntimeSnapshot, readRuntimeSnapshot } from '../runtime/runtime-state';
 
 test('createRuntimePaths uses AGENCY_HOME when provided', () => {
   const runtime = createRuntimePaths('/tmp/agency-home');

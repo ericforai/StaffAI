@@ -341,7 +341,7 @@ export class McpGateway {
       }
 
       if (name === 'report_task_result') {
-        this.store.saveKnowledge({
+        await this.store.saveKnowledge({
           task: args?.task as string,
           agentId: args?.agent_id as string,
           resultSummary: args?.result_summary as string,
@@ -514,8 +514,8 @@ export class McpGateway {
     return { hired, alreadyActive, missing };
   }
 
-  private buildKnowledgeContext(task: string): string {
-    const history = this.store.searchKnowledge(task);
+  private async buildKnowledgeContext(task: string): Promise<string> {
+    const history = await this.store.searchKnowledge(task);
     if (history.length === 0) {
       return '';
     }
@@ -636,6 +636,7 @@ export class McpGateway {
   }
 
   private async sampleExpertResponse(agent: Agent, assignment: string): Promise<string> {
+    const knowledgeContext = await this.buildKnowledgeContext(assignment);
     const response = await this.server.createMessage({
       systemPrompt: `${agent.systemPrompt}\n\n请始终以该专家身份完成分析，避免跳出角色。`,
       messages: [
@@ -643,7 +644,7 @@ export class McpGateway {
           role: 'user',
           content: {
             type: 'text',
-            text: `${assignment}${this.buildKnowledgeContext(assignment)}`,
+            text: `${assignment}${knowledgeContext}`,
           },
         },
       ],
@@ -857,7 +858,7 @@ export class McpGateway {
       throw new McpError(ErrorCode.InvalidRequest, 'Expert not found.');
     }
 
-    const historyContext = this.buildKnowledgeContext(task);
+    const historyContext = await this.buildKnowledgeContext(task);
     this.notifyDashboard({ type: 'AGENT_WORKING', agentId: agent.id, agentName: agent.frontmatter.name, task });
 
     return {

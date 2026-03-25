@@ -36,6 +36,19 @@ export const BACKEND_DEPENDENCY_RULES: BackendDependencyRule[] = [
   },
 ];
 
+export const ALLOWED_TOP_LEVEL_SOURCE_FILES = new Set([
+  'execution-strategy.ts',
+  'mcp-server.ts',
+  'mcp.ts',
+  'scanner.ts',
+  'server.ts',
+  'skill-scanner.ts',
+  'store.ts',
+  'translations.ts',
+  'types.ts',
+  'web-server.ts',
+]);
+
 const COMPOSITION_ROOT_FILES = new Set([
   'app/create-discussion-service.ts',
   'app/register-backend-routes.ts',

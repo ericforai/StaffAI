@@ -19,6 +19,17 @@ export interface RetrievedMemoryContext {
   context: string;
 }
 
+function buildMemoryCacheKey(
+  memoryRootDir: string,
+  query: string,
+  limit: number,
+  excerptMaxChars: number,
+  contextMaxChars: number,
+  documentTypes?: MemoryDocumentType[],
+): string {
+  return `${memoryRootDir}:${query}:${limit}:${excerptMaxChars}:${contextMaxChars}:${documentTypes?.join(',') ?? 'all'}`;
+}
+
 function getTokenSet(text: string): Set<string> {
   const tokens = text
     .toLowerCase()
@@ -121,7 +132,14 @@ export function retrieveMemoryContext(
   } = options;
 
   if (useCache) {
-    const cacheKey = `${memoryRootDir}:${query}:${limit}:${excerptMaxChars}:${contextMaxChars}:${documentTypes?.join(',') ?? 'all'}`;
+    const cacheKey = buildMemoryCacheKey(
+      memoryRootDir,
+      query,
+      limit,
+      excerptMaxChars,
+      contextMaxChars,
+      documentTypes,
+    );
     const cached = memoryCache.get(cacheKey);
     if (cached) {
       return cached;
@@ -220,7 +238,14 @@ export function retrieveMemoryContext(
   const result: RetrievedMemoryContext = { entries, context };
 
   if (useCache) {
-    const cacheKey = `${memoryRootDir}:${query}:${limit}:${excerptMaxChars}:${contextMaxChars}`;
+    const cacheKey = buildMemoryCacheKey(
+      memoryRootDir,
+      query,
+      limit,
+      excerptMaxChars,
+      contextMaxChars,
+      documentTypes,
+    );
     memoryCache.set(cacheKey, result);
   }
 
