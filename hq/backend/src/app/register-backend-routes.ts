@@ -161,6 +161,29 @@ export function registerBackendRoutes({
     onApprovalResolved: (approval) => {
       taskEvents.approvalResolved(approval);
     },
+    onExecutionStarted: (input) => {
+      taskEvents.executionStarted(input);
+    },
+    onExecutionFinished: (execution) => {
+      taskEvents.executionFinished(execution);
+    },
+    loadMemoryContext: (task) => {
+      const retrieved = retrieveMemoryContext(`${task.title}\n${task.description}`, {
+        memoryRootDir,
+        limit: 2,
+      });
+      return retrieved.context || undefined;
+    },
+    writeExecutionSummary: (task, execution) => {
+      writeBackService.writeExecutionSummary(task, execution);
+    },
+    sessionCapabilities: {
+      sampling: samplingEnabled,
+    },
+    runAdvancedDiscussion: runAdvancedDiscussion
+      ? runAdvancedDiscussion
+      : async (topic) => discussionService.runDiscussionSummary(topic),
+    autoExecuteAfterApproval: true,
   });
 
   registerExecutionRoutes(app, store);

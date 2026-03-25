@@ -6,6 +6,7 @@ import { runAdvancedDiscussionExecution } from '../runtime/advanced-discussion-r
 import { buildDispatcherDirective } from '../runtime/dispatcher-runtime';
 import type { TaskAssignment, TaskExecutionMode, TaskRecord, WorkflowPlan } from '../shared/task-types';
 import { resolveExecutionDecision, type SessionCapabilities } from '../execution-strategy';
+import { createAssignmentExecutor } from './assignment-executor';
 
 interface ExecuteTaskInput {
   executor: 'claude' | 'codex' | 'openai';
@@ -28,12 +29,136 @@ type TaskExecutionStore = Pick<Store, 'saveExecution' | 'updateExecution' | 'upd
       Store,
       | 'getTaskAssignmentsByTaskId'
       | 'getWorkflowPlanByTaskId'
+      | 'getTaskById'
       | 'saveTaskAssignment'
       | 'updateTaskAssignment'
       | 'saveWorkflowPlan'
       | 'updateWorkflowPlan'
+      | 'logAudit'
     >
   >;
+
+type AssignmentExecutorStore = Pick<Store, 'getTaskById' | 'updateTaskAssignment' | 'saveExecution' | 'logAudit'>;
+
+function hasAssignmentExecutorStore(store: TaskExecutionStore): store is TaskExecutionStore & AssignmentExecutorStore {
+  return (
+    typeof store.getTaskById === 'function' &&
+    typeof store.updateTaskAssignment === 'function' &&
+    typeof store.saveExecution === 'function' &&
+    typeof store.logAudit === 'function'
+  );
+}
+
+async function runWorkflowPlanWithAssignments(input: {
+  task: TaskRecord;
+  workflowPlan: WorkflowPlan;
+  assignments: TaskAssignment[];
+  executor: 'claude' | 'codex' | 'openai';
+  timeoutMs: number;
+  maxRetries: number;
+  memoryContextExcerpt?: string;
+  store: TaskExecutionStore;
+}): Promise<{ outputSummary: string; outputSnapshot?: Record<string, unknown> }> {
+  const { task, workflowPlan, executor, timeoutMs, maxRetries, memoryContextExcerpt, store } = input;
+
+  if (
+    !store.updateWorkflowPlan ||
+    !store.getTaskAssignmentsByTaskId ||
+    !hasAssignmentExecutorStore(store)
+  ) {
+    return {
+      outputSummary: task.description,
+    };
+  }
+
+  const assignmentExecutor = createAssignmentExecutor({
+    store,
+    auditLogger: null,
+    executor,
+    timeoutMs,
+  });
+
+  await store.updateWorkflowPlan(task.id, (current) => ({
+    ...current,
+    status: 'running',
+    updatedAt: new Date().toISOString(),
+  }));
+
+  const steps = [...workflowPlan.steps].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+  let failed = false;
+  if (workflowPlan.mode === 'parallel') {
+    const results = await Promise.all(
+      steps.map(async (step) => {
+        const assignment = input.assignments.find((a) => a.id === step.assignmentId);
+        if (!assignment) {
+          failed = true;
+          return;
+        }
+        const result = await assignmentExecutor.execute(assignment, {
+          taskId: task.id,
+          title: task.title,
+          description: step.description ?? step.title,
+          executor,
+          timeoutMs,
+          maxRetries,
+          memoryContextExcerpt,
+        });
+        if (result.status === 'failed') {
+          failed = true;
+        }
+      })
+    );
+    void results;
+  } else {
+    for (const step of steps) {
+      const assignment = input.assignments.find((a) => a.id === step.assignmentId);
+      if (!assignment) {
+        failed = true;
+        break;
+      }
+      const result = await assignmentExecutor.execute(assignment, {
+        taskId: task.id,
+        title: task.title,
+        description: step.description ?? step.title,
+        executor,
+        timeoutMs,
+        maxRetries,
+        memoryContextExcerpt,
+      });
+      if (result.status === 'failed') {
+        failed = true;
+        break;
+      }
+    }
+  }
+
+  await store.updateWorkflowPlan(task.id, (current) => ({
+    ...current,
+    status: failed ? 'failed' : 'completed',
+    updatedAt: new Date().toISOString(),
+  }));
+
+  const updatedAssignments = await store.getTaskAssignmentsByTaskId(task.id);
+  const byId = new Map(updatedAssignments.map((a) => [a.id, a]));
+  const lines: string[] = [];
+  for (const step of steps) {
+    const assignment = byId.get(step.assignmentId);
+    const label = step.title || step.id;
+    const status = assignment?.status ?? 'unknown';
+    const summary = assignment?.resultSummary ?? assignment?.errorMessage ?? '';
+    lines.push(`- [${status}] ${label}${summary ? `: ${summary}` : ''}`);
+  }
+
+  return {
+    outputSummary: lines.join('\n'),
+    outputSnapshot: {
+      workflowPlanId: workflowPlan.id,
+      mode: workflowPlan.mode,
+      failed,
+    },
+  };
+}
 
 function upgradeToSerialBundle(
   task: TaskRecord,
@@ -201,6 +326,17 @@ export async function executeTaskRecord(
         timeoutMs,
         maxRetries,
         degraded,
+        runtimeRunner: async () =>
+          runWorkflowPlanWithAssignments({
+            task,
+            workflowPlan: serialBundle.workflowPlan,
+            assignments: serialBundle.assignments,
+            executor: input.executor,
+            timeoutMs,
+            maxRetries,
+            memoryContextExcerpt,
+            store,
+          }),
         inputSnapshot: {
           dispatcherDirective,
           executionNotice: parallelDecision.notice,
@@ -239,6 +375,20 @@ export async function executeTaskRecord(
       timeoutMs,
       maxRetries,
       degraded,
+      runtimeRunner:
+        appliedMode === 'parallel' && existingWorkflowPlan && existingAssignments.length > 0
+          ? async () =>
+              runWorkflowPlanWithAssignments({
+                task,
+                workflowPlan: existingWorkflowPlan,
+                assignments: existingAssignments,
+                executor: input.executor,
+                timeoutMs,
+                maxRetries,
+                memoryContextExcerpt,
+                store,
+              })
+          : undefined,
       inputSnapshot: {
         dispatcherDirective,
         executionNotice: parallelDecision.notice,

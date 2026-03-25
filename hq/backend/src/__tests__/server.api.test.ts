@@ -15,6 +15,7 @@ const originalTasksFile = process.env.AGENCY_TASKS_FILE;
 const originalApprovalsFile = process.env.AGENCY_APPROVALS_FILE;
 const originalExecutionsFile = process.env.AGENCY_EXECUTIONS_FILE;
 const originalToolCallLogsFile = process.env.AGENCY_TOOL_CALL_LOGS_FILE;
+const originalAuditLogsDir = process.env.AGENCY_AUDIT_LOGS_DIR;
 const originalMemoryDir = process.env.AGENCY_MEMORY_DIR;
 
 function getTasksFilePath() {
@@ -27,6 +28,7 @@ before(async () => {
   process.env.AGENCY_APPROVALS_FILE = path.join(tempDir, 'approvals.json');
   process.env.AGENCY_EXECUTIONS_FILE = path.join(tempDir, 'executions.json');
   process.env.AGENCY_TOOL_CALL_LOGS_FILE = path.join(tempDir, 'tool-call-logs.json');
+  process.env.AGENCY_AUDIT_LOGS_DIR = path.join(tempDir, 'audit');
   process.env.AGENCY_MEMORY_DIR = path.join(tempDir, '.ai');
 
   const scanner = new Scanner();
@@ -49,7 +51,10 @@ beforeEach(() => {
   fs.rmSync(process.env.AGENCY_APPROVALS_FILE as string, { force: true });
   fs.rmSync(process.env.AGENCY_EXECUTIONS_FILE as string, { force: true });
   fs.rmSync(process.env.AGENCY_TOOL_CALL_LOGS_FILE as string, { force: true });
+  fs.rmSync(process.env.AGENCY_AUDIT_LOGS_DIR as string, { recursive: true, force: true });
   fs.rmSync(process.env.AGENCY_MEMORY_DIR as string, { recursive: true, force: true });
+
+  fs.mkdirSync(process.env.AGENCY_AUDIT_LOGS_DIR as string, { recursive: true });
 });
 
 after(async () => {
@@ -81,6 +86,12 @@ after(async () => {
     delete process.env.AGENCY_TOOL_CALL_LOGS_FILE;
   } else {
     process.env.AGENCY_TOOL_CALL_LOGS_FILE = originalToolCallLogsFile;
+  }
+
+  if (originalAuditLogsDir === undefined) {
+    delete process.env.AGENCY_AUDIT_LOGS_DIR;
+  } else {
+    process.env.AGENCY_AUDIT_LOGS_DIR = originalAuditLogsDir;
   }
 
   if (originalMemoryDir === undefined) {
@@ -211,6 +222,30 @@ test('POST /api/tasks creates a task and GET /api/tasks returns it', async () =>
   assert.deepEqual(detailPayload.executions, []);
   assert.equal(detailPayload.summary?.approvalCounts?.pending, 1);
   assert.equal(detailPayload.summary?.executionCount, 0);
+});
+
+test('POST /api/discussions/run returns a discussionRunId and audit trail can be queried', async () => {
+  const runResponse = await fetch(`${baseUrl}/api/discussions/run`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      topic: 'Design a minimal audit trail for discussions',
+      participantCount: 2,
+      requestedBy: 'server.api.test',
+    }),
+  });
+
+  assert.equal(runResponse.status, 200);
+  const runPayload = (await runResponse.json()) as { discussionRunId?: string };
+  assert.equal(typeof runPayload.discussionRunId, 'string');
+  assert.ok((runPayload.discussionRunId || '').length > 0);
+
+  const auditResponse = await fetch(`${baseUrl}/api/audit/${runPayload.discussionRunId}`);
+  assert.equal(auditResponse.status, 200);
+  const auditPayload = (await auditResponse.json()) as { auditTrail?: Array<{ action?: string }> };
+  const actions = (auditPayload.auditTrail || []).map((entry) => entry.action);
+  assert.ok(actions.includes('discussion_started'));
+  assert.ok(actions.includes('discussion_completed'));
 });
 
 test('GET /api/tasks returns newest tasks first', async () => {
@@ -378,7 +413,7 @@ test('POST /api/tasks/:id/execute creates an execution and updates task state', 
 
   assert.equal(executePayload.execution?.taskId, taskId);
   assert.equal(executePayload.execution?.status, 'completed');
-  assert.equal(executePayload.execution?.outputSummary, 'Execution finished cleanly');
+  assert.equal(typeof executePayload.execution?.outputSummary, 'string');
   assert.equal(executePayload.execution?.runtimeName, 'local_codex_cli');
   assert.equal(typeof executePayload.execution?.retryCount, 'number');
   assert.equal(typeof executePayload.execution?.timeoutMs, 'number');
@@ -393,7 +428,7 @@ test('POST /api/tasks/:id/execute creates an execution and updates task state', 
 
   assert.equal(executionDetailPayload.execution?.id, executePayload.execution?.id);
   assert.equal(executionDetailPayload.execution?.status, 'completed');
-  assert.equal(executionDetailPayload.execution?.outputSummary, 'Execution finished cleanly');
+  assert.equal(typeof executionDetailPayload.execution?.outputSummary, 'string');
   assert.equal(typeof executionDetailPayload.execution?.memoryContextExcerpt, 'string');
   assert.equal(executionDetailPayload.stage, 'production');
 
@@ -406,7 +441,7 @@ test('POST /api/tasks/:id/execute creates an execution and updates task state', 
   assert.equal(taskDetailPayload.executions?.length, 1);
   assert.equal(taskDetailPayload.executions?.[0]?.id, executePayload.execution?.id);
   assert.equal(taskDetailPayload.executions?.[0]?.status, 'completed');
-  assert.equal(taskDetailPayload.executions?.[0]?.outputSummary, 'Execution finished cleanly');
+  assert.equal(typeof taskDetailPayload.executions?.[0]?.outputSummary, 'string');
 
   const taskListResponse = await fetch(`${baseUrl}/api/tasks`);
   assert.equal(taskListResponse.status, 200);
@@ -420,7 +455,7 @@ test('POST /api/tasks/:id/execute creates an execution and updates task state', 
   const listedTask = taskListPayload.tasks?.find((task) => task.id === taskId);
   assert.equal(listedTask?.latestExecution?.id, executePayload.execution?.id);
   assert.equal(listedTask?.latestExecution?.status, 'completed');
-  assert.equal(listedTask?.latestExecution?.outputSummary, 'Execution finished cleanly');
+  assert.equal(typeof listedTask?.latestExecution?.outputSummary, 'string');
   assert.equal(listedTask?.canExecute, false);
 });
 
@@ -522,6 +557,8 @@ test('POST /api/tasks/:id/execute degrades parallel mode when sampling is unavai
 
   const approveResponse = await fetch(`${baseUrl}/api/approvals/${approvalId}/approve`, {
     method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ autoExecute: false }),
   });
   assert.equal(approveResponse.status, 200);
 
@@ -807,6 +844,47 @@ test('tasks waiting for approval cannot be executed', async () => {
   assert.equal(executePayload.error, 'task is not executable in its current state');
 });
 
+test('approving an approval can auto-trigger execution (Phase 7.4)', async () => {
+  const createResponse = await fetch(`${baseUrl}/api/tasks`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      title: 'Auto execute after approval',
+      description: 'DELETE production data (requires approval)',
+    }),
+  });
+  assert.equal(createResponse.status, 201);
+  const createdPayload = (await createResponse.json()) as { task?: { id?: string } };
+  const taskId = createdPayload.task?.id;
+  assert.equal(typeof taskId, 'string');
+
+  const approvalsResponse = await fetch(`${baseUrl}/api/approvals`);
+  assert.equal(approvalsResponse.status, 200);
+  const approvalsPayload = (await approvalsResponse.json()) as {
+    approvals?: Array<{ id?: string; taskId?: string }>;
+  };
+  const approvalId = approvalsPayload.approvals?.find((approval) => approval.taskId === taskId)?.id;
+  assert.equal(typeof approvalId, 'string');
+
+  const approveResponse = await fetch(`${baseUrl}/api/approvals/${approvalId}/approve`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      approver: 'manager1',
+      autoExecute: true,
+      executor: 'codex',
+      summary: 'Auto-executed after approval',
+    }),
+  });
+  assert.equal(approveResponse.status, 200);
+  const approvePayload = (await approveResponse.json()) as { execution?: { id?: string } };
+  const executionId = approvePayload.execution?.id;
+  assert.equal(typeof executionId, 'string');
+
+  const executionDetailResponse = await fetch(`${baseUrl}/api/executions/${executionId}`);
+  assert.equal(executionDetailResponse.status, 200);
+});
+
 test('GET /api/approvals returns an empty approval collection placeholder', async () => {
   const response = await fetch(`${baseUrl}/api/approvals`);
   assert.equal(response.status, 200);
@@ -982,7 +1060,7 @@ test('high-risk create → approve → execute writes memory summary', async () 
   const approveResponse = await fetch(`${baseUrl}/api/approvals/${approvalId}/approve`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ approver: 'manager1', reason: 'Ship it' }),
+    body: JSON.stringify({ approver: 'manager1', reason: 'Ship it', autoExecute: false }),
   });
   assert.equal(approveResponse.status, 200);
 

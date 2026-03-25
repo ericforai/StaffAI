@@ -7,9 +7,24 @@ import {
   rejectApproval,
 } from '../governance/approval-service-v2';
 import type { ApprovalRecord, ApprovalStatus } from '../shared/task-types';
+import type { ExecutionLifecycleRecord } from '../runtime/execution-service';
+import type { TaskRecord } from '../shared/task-types';
+import { executeTaskAfterApproval } from '../orchestration/approval-execution-bridge';
 
 interface ApprovalRouteDependencies {
   onApprovalResolved?: (approval: ApprovalRecord) => void;
+  onExecutionStarted?: (input: { taskId: string; executor: string }) => void;
+  onExecutionFinished?: (execution: ExecutionLifecycleRecord) => void;
+  loadMemoryContext?: (task: TaskRecord) => Promise<string | undefined | void> | string | undefined | void;
+  writeExecutionSummary?: (task: TaskRecord, execution: ExecutionLifecycleRecord) => Promise<void> | void;
+  sessionCapabilities?: { sampling: boolean };
+  runAdvancedDiscussion?: (topic: string) => Promise<{ summary: string }>;
+  /**
+   * Default behavior for auto-executing after approval.
+   * - true: approve endpoint triggers an execution unless request opts out.
+   * - false: approve endpoint never auto-executes (manual start only).
+   */
+  autoExecuteAfterApproval?: boolean;
   approvalService?: ApprovalServiceV2;
 }
 
@@ -142,6 +157,16 @@ export function registerApprovalRoutes(
   app.post('/api/approvals/:id/approve', async (req, res) => {
     const approver = (req.body?.approver as string) || 'system';
     const reason = req.body?.reason as string | undefined;
+    const autoExecute =
+      typeof req.body?.autoExecute === 'boolean'
+        ? req.body.autoExecute
+        : dependencies.autoExecuteAfterApproval ?? true;
+    const executor =
+      req.body?.executor === 'claude' || req.body?.executor === 'openai' ? req.body.executor : 'codex';
+    const summary = typeof req.body?.summary === 'string' ? req.body.summary : undefined;
+    const topic = typeof req.body?.topic === 'string' ? req.body.topic : undefined;
+    const timeoutMs = typeof req.body?.timeoutMs === 'number' ? req.body.timeoutMs : undefined;
+    const maxRetries = typeof req.body?.maxRetries === 'number' ? req.body.maxRetries : undefined;
 
     let approval: ApprovalRecord | null = null;
 
@@ -174,9 +199,38 @@ export function registerApprovalRoutes(
     }));
     dependencies.onApprovalResolved?.(approval);
 
+    let execution: ExecutionLifecycleRecord | undefined;
+    if (autoExecute && task?.id) {
+      try {
+        const result = await executeTaskAfterApproval(
+          {
+            taskId: task.id,
+            executor,
+            summary,
+            topic,
+            ...(typeof timeoutMs === 'number' ? { timeoutMs } : {}),
+            ...(typeof maxRetries === 'number' ? { maxRetries } : {}),
+          },
+          store,
+          {
+            onExecutionStarted: dependencies.onExecutionStarted,
+            onExecutionFinished: dependencies.onExecutionFinished,
+            loadMemoryContext: dependencies.loadMemoryContext,
+            writeExecutionSummary: dependencies.writeExecutionSummary,
+            sessionCapabilities: dependencies.sessionCapabilities,
+            runAdvancedDiscussion: dependencies.runAdvancedDiscussion,
+          }
+        );
+        execution = result.execution;
+      } catch {
+        // Auto-execution is best-effort; keep approval endpoint stable.
+      }
+    }
+
     return res.json({
       approval,
       task,
+      ...(execution ? { execution } : {}),
       summary: buildApprovalSummary(await store.getApprovals()),
     });
   });
