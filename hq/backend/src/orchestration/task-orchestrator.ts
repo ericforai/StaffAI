@@ -117,7 +117,7 @@ export function buildAssignmentRoleSequence(routeDecision: TaskRouteDecision): R
         { role: routeDecision.recommendedAgentRole, assignmentRole: 'primary', title: 'Implement the requested delivery slice' },
         { role: 'code-reviewer', assignmentRole: 'reviewer', title: 'Review implementation for risks and regressions' },
       ];
-    case 'code_review':
+    case 'code-review':
       return [{ role: routeDecision.recommendedAgentRole, assignmentRole: 'reviewer', title: 'Perform a focused code review' }];
     case 'documentation':
       return [{ role: routeDecision.recommendedAgentRole, assignmentRole: 'primary', title: 'Produce the requested documentation deliverable', order: 1 }];

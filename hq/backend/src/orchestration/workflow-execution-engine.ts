@@ -1,3 +1,4 @@
+import path from 'node:path';
 import type { WorkflowPlan, TaskAssignment, TaskRecord } from '../shared/task-types';
 import type { AuditLogger, AuditEvent } from '../governance/audit-logger';
 import type { Store } from '../store';
@@ -80,7 +81,7 @@ export interface WorkflowExecutionEngine {
  */
 export interface RunningWorkflow {
   workflowPlanId: string;
-  status: 'running' | 'skipped' | 'completed' | 'failed';
+  status: 'running' | 'paused' | 'skipped' | 'completed' | 'failed';
   startedAt: string;
   completedSteps: Set<string>;
   currentStep?: string;

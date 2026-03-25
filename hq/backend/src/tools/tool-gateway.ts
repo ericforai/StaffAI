@@ -1,14 +1,14 @@
 import { randomUUID } from 'node:crypto';
 import type { Store } from '../store';
 import type { ToolCallLog, ToolDefinition } from '../shared/task-types';
-import { BaseTool } from './base-tool';
+import { BaseTool, type ToolContext, type ToolResult, type ToolActorContext } from './base-tool';
 import { FileReadTool } from './file-read-tool';
 import { FileWriteTool } from './file-write-tool';
 import { TestRunnerTool } from './test-runner-tool';
 import { DocsSearchTool } from './docs-search-tool';
 import { RuntimeExecutorTool } from './runtime-executor-tool';
 
-export { ToolContext, ToolResult };
+export type { ToolContext, ToolResult, ToolActorContext };
 
 export interface ToolExecutionResult {
   ok: boolean;
@@ -50,7 +50,7 @@ export class ToolGateway {
   public checkPermission(
     actorRole: string,
     toolName: string,
-    context: Pick<ToolActorContext, 'approvalGranted'> = {}
+    context: Pick<ToolActorContext, 'approvalGranted'> = { approvalGranted: false }
   ): { allowed: boolean; tool: BaseTool | null; reason?: string } {
     const tool = this.getTool(toolName);
     if (!tool) {

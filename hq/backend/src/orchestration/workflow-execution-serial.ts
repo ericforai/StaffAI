@@ -55,7 +55,7 @@ export async function executeSerialWorkflow(
 
     completedSteps.push(step.id);
     mergedCompleted.add(step.id);
-    await updateStepStatus(workflowPlan.id, step.id, 'completed', assignment);
+    await updateStepState(workflowPlan.id, step.id, 'completed', assignment);
   }
 
   return {
@@ -168,8 +168,20 @@ async function updateStepState(
 }
 
 /**
- * Update workflow tracking (stub for compatibility if needed)
+ * Update workflow tracking for a running workflow
  */
-export function updateWorkflowTracking(): void {
-  // Logic moved inside the execution functions for better state management
+export function updateWorkflowTracking(
+  workflowPlanId: string,
+  currentStep: string,
+  completedSteps: Set<string>,
+  runningWorkflows: Map<string, RunningWorkflow>
+): void {
+  const prev = runningWorkflows.get(workflowPlanId);
+  runningWorkflows.set(workflowPlanId, {
+    workflowPlanId,
+    status: 'running',
+    startedAt: prev?.startedAt ?? new Date().toISOString(),
+    completedSteps,
+    currentStep,
+  });
 }
