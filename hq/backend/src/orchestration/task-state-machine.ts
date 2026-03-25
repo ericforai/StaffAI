@@ -9,7 +9,7 @@ import type { TaskRecord, TaskStatus } from '../shared/task-types';
 export const TASK_STATE_TRANSITIONS: Record<TaskStatus, string[]> = {
   created: ['route', 'request_approval', 'start_execution', 'cancel'],
   routed: ['request_approval', 'enqueue_task', 'start_execution', 'cancel'],
-  queued: ['start_execution', 'cancel'],
+  queued: ['start_execution', 'fail_execution', 'cancel'],
   waiting_approval: ['approve', 'reject', 'cancel'],
   running: ['complete_execution', 'fail_execution', 'cancel'],
   completed: [],
@@ -35,6 +35,7 @@ const EVENT_TO_STATUS: Record<TaskStatus, Record<string, TaskStatus>> = {
   },
   queued: {
     start_execution: 'running',
+    fail_execution: 'failed',
     cancel: 'cancelled',
   },
   waiting_approval: {

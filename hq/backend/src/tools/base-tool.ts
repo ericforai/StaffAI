@@ -1,6 +1,21 @@
 import { z } from 'zod';
 import type { ToolDefinition } from '../shared/task-types';
 
+export interface ToolContext {
+  executionId?: string;
+  taskId?: string;
+  actorRole: string;
+  approvalGranted?: boolean;
+}
+
+export type ToolActorContext = ToolContext;
+
+export interface ToolResult {
+  summary: string;
+  payload?: Record<string, unknown>;
+  error?: string;
+}
+
 export abstract class BaseTool<T extends Record<string, any> = any> {
   public abstract readonly name: string;
   public abstract readonly description: string;

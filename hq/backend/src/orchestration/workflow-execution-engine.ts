@@ -10,7 +10,7 @@ import { cancelWorkflow } from './workflow-execution-cancel';
  */
 export interface WorkflowExecutionStatus {
   workflowPlanId: string;
-  status: 'planned' | 'running' | 'completed' | 'failed' | 'skipped';
+  status: 'planned' | 'running' | 'paused' | 'completed' | 'failed' | 'skipped';
   currentStep?: string;
   completedSteps: string[];
   pendingSteps: string[];
@@ -62,7 +62,7 @@ export interface WorkflowExecutionEngine {
  */
 export interface RunningWorkflow {
   workflowPlanId: string;
-  status: 'running' | 'skipped' | 'completed' | 'failed';
+  status: 'running' | 'paused' | 'skipped' | 'completed' | 'failed';
   startedAt: string;
   completedSteps: Set<string>;
   currentStep?: string;
