@@ -1,6 +1,7 @@
 export const TASK_STATUSES = [
   'created',
   'routed',
+  'queued',
   'running',
   'waiting_approval',
   'completed',

@@ -8,7 +8,8 @@ import type { TaskRecord, TaskStatus } from '../shared/task-types';
  */
 export const TASK_STATE_TRANSITIONS: Record<TaskStatus, string[]> = {
   created: ['route', 'request_approval', 'start_execution', 'cancel'],
-  routed: ['request_approval', 'start_execution', 'cancel'],
+  routed: ['request_approval', 'enqueue_task', 'start_execution', 'cancel'],
+  queued: ['start_execution', 'cancel'],
   waiting_approval: ['approve', 'reject', 'cancel'],
   running: ['complete_execution', 'fail_execution', 'cancel'],
   completed: [],
@@ -28,6 +29,11 @@ const EVENT_TO_STATUS: Record<TaskStatus, Record<string, TaskStatus>> = {
   },
   routed: {
     request_approval: 'waiting_approval',
+    enqueue_task: 'queued',
+    start_execution: 'running',
+    cancel: 'cancelled',
+  },
+  queued: {
     start_execution: 'running',
     cancel: 'cancelled',
   },
@@ -56,6 +62,7 @@ export type TaskEvent =
   | 'approve'
   | 'reject'
   | 'cancel_approval'
+  | 'enqueue_task'
   | 'start_execution'
   | 'complete_execution'
   | 'fail_execution'
@@ -158,6 +165,7 @@ export class TaskStateMachine {
         request_approval: 'waiting_approval',
         approve: 'routed',
         reject: 'failed',
+        enqueue_task: 'queued',
         start_execution: 'running',
         complete_execution: 'completed',
         fail_execution: 'failed',

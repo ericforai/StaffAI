@@ -106,6 +106,7 @@ export async function buildTaskWorkspaceSummary(tasksOrStore: TaskListReadStore 
   const statusCounts: Record<TaskStatus, number> = {
     created: 0,
     routed: 0,
+    queued: 0,
     running: 0,
     waiting_approval: 0,
     completed: 0,
