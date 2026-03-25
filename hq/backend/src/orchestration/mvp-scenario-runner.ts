@@ -96,7 +96,7 @@ export async function runMvpScenario(
   }
 
   // 2. Activate preset (idempotent hire)
-  activatePreset(presetName, store, scanner);
+  activatePreset(preset.name, store, scanner);
 
   // 3. Build agent profiles from scanner for routing
   const allAgents = scanner.getAllAgents();

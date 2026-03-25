@@ -35,6 +35,28 @@ export interface PresetActivationResult {
 // Preset definitions
 // ---------------------------------------------------------------------------
 
+/** Maps legacy/normalized keys to registry ids (e.g. architecture-analysis → architecture). */
+const PRESET_KEY_ALIASES: Readonly<Record<string, string>> = {
+  'architecture-analysis': 'architecture',
+};
+
+export function canonicalMvpPresetKey(name: string): string {
+  return name.trim().replace(/_/g, '-');
+}
+
+function resolvePresetRegistryKey(name: string): string | undefined {
+  const trimmed = name.trim();
+  if (MVP_PRESETS.has(trimmed)) {
+    return trimmed;
+  }
+  const canonical = canonicalMvpPresetKey(trimmed);
+  if (MVP_PRESETS.has(canonical)) {
+    return canonical;
+  }
+  const alias = PRESET_KEY_ALIASES[canonical] ?? PRESET_KEY_ALIASES[trimmed];
+  return alias && MVP_PRESETS.has(alias) ? alias : undefined;
+}
+
 const MVP_PRESETS: ReadonlyMap<string, MvpPreset> = new Map([
   [
     'full-stack-dev',
@@ -71,6 +93,11 @@ const MVP_PRESETS: ReadonlyMap<string, MvpPreset> = new Map([
   ],
 ]);
 
+function getPresetFromRegistry(name: string): MvpPreset | undefined {
+  const key = resolvePresetRegistryKey(name);
+  return key ? MVP_PRESETS.get(key) : undefined;
+}
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -86,7 +113,7 @@ export function getAvailablePresets(): MvpPreset[] {
  * Look up a single preset by name. Returns undefined when not found.
  */
 export function getPresetByName(name: string): MvpPreset | undefined {
-  return MVP_PRESETS.get(name);
+  return getPresetFromRegistry(name);
 }
 
 /**
@@ -101,7 +128,7 @@ export function activatePreset(
   store: Pick<Store, 'getActiveIds' | 'save'>,
   scanner: Pick<Scanner, 'getAllAgents'>,
 ): PresetActivationResult {
-  const preset = MVP_PRESETS.get(presetName);
+  const preset = getPresetFromRegistry(presetName);
   if (!preset) {
     throw new PresetNotFoundError(presetName);
   }
