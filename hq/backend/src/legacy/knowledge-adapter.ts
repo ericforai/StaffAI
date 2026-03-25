@@ -23,6 +23,7 @@ import {
   DEFAULT_KNOWLEDGE_CONFIG,
   MAX_KNOWLEDGE_ENTRIES,
 } from './knowledge-types';
+import { calculateKnowledgeScore } from './knowledge-search';
 import { createMemoryLayout, type MemoryDirectoryLayout } from '../memory/memory-layout';
 
 /**
@@ -119,62 +120,6 @@ function inferCategory(entry: JsonKnowledgeEntry): string {
   }
 
   return 'general';
-}
-
-/**
- * Feature extraction for semantic search
- * Supports both Chinese characters and English words
- */
-function extractFeatures(text: string): Map<string, number> {
-  const features = new Map<string, number>();
-
-  // Split by whitespace and common punctuation
-  const words = text
-    .toLowerCase()
-    .split(/[\s,，.。!！?？\-_/]+/)
-    .filter((t) => t.length > 0);
-
-  for (const word of words) {
-    features.set(word, (features.get(word) ?? 0) + 1);
-  }
-
-  // Extract individual Chinese characters
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-    if (/[\u4e00-\u9fa5]/.test(char)) {
-      features.set(char, (features.get(char) ?? 0) + 1);
-    }
-  }
-
-  return features;
-}
-
-/**
- * Calculates relevance score for a knowledge entry against a query
- */
-function calculateScore(entry: JsonKnowledgeEntry, query: string): number {
-  const queryFeatures = extractFeatures(query);
-  const taskFeatures = extractFeatures(entry.task);
-  const resultFeatures = extractFeatures(entry.resultSummary);
-  const agentFeatures = extractFeatures(entry.agentId);
-
-  let score = 0;
-  queryFeatures.forEach((count, feature) => {
-    // Task description has highest weight
-    if (taskFeatures.has(feature)) {
-      score += count * taskFeatures.get(feature)! * 5;
-    }
-    // Result summary has medium weight
-    if (resultFeatures.has(feature)) {
-      score += count * resultFeatures.get(feature)! * 3;
-    }
-    // Agent ID has lowest weight
-    if (agentFeatures.has(feature)) {
-      score += count * agentFeatures.get(feature)! * 2;
-    }
-  });
-
-  return score;
 }
 
 /**
@@ -411,7 +356,7 @@ export class KnowledgeAdapter implements KnowledgeRepository {
     const scored = allEntries
       .map((entry) => ({
         entry,
-        score: calculateScore(entry, query),
+        score: calculateKnowledgeScore(entry, query),
       }))
       .filter((item) => item.score > 0)
       .sort((a, b) => b.score - a.score);

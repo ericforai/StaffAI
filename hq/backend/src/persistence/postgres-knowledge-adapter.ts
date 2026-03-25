@@ -7,6 +7,7 @@
  * @module persistence/postgres-knowledge-adapter
  */
 
+import { randomUUID } from 'node:crypto';
 import { Pool, type PoolConfig } from 'pg';
 import type {
   JsonKnowledgeEntry,
@@ -15,47 +16,7 @@ import type {
   MigrationResult,
   UnifiedKnowledgeEntry,
 } from '../legacy/knowledge-types';
-
-/**
- * Feature extraction for keyword-based scoring (identical to legacy adapter for consistency)
- */
-function extractFeatures(text: string): Map<string, number> {
-  const features = new Map<string, number>();
-  const words = text
-    .toLowerCase()
-    .split(/[\s,，.。!！?？\-_/]+/)
-    .filter((t) => t.length > 0);
-
-  for (const word of words) {
-    features.set(word, (features.get(word) ?? 0) + 1);
-  }
-
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-    if (/[\u4e00-\u9fa5]/.test(char)) {
-      features.set(char, (features.get(char) ?? 0) + 1);
-    }
-  }
-  return features;
-}
-
-/**
- * Calculates relevance score (identical to legacy adapter for consistency)
- */
-function calculateScore(entry: JsonKnowledgeEntry, query: string): number {
-  const queryFeatures = extractFeatures(query);
-  const taskFeatures = extractFeatures(entry.task);
-  const resultFeatures = extractFeatures(entry.resultSummary);
-  const agentFeatures = extractFeatures(entry.agentId);
-
-  let score = 0;
-  queryFeatures.forEach((count, feature) => {
-    if (taskFeatures.has(feature)) score += count * taskFeatures.get(feature)! * 5;
-    if (resultFeatures.has(feature)) score += count * resultFeatures.get(feature)! * 3;
-    if (agentFeatures.has(feature)) score += count * agentFeatures.get(feature)! * 2;
-  });
-  return score;
-}
+import { calculateKnowledgeScore } from '../legacy/knowledge-search';
 
 export interface PostgresKnowledgeOptions {
   connectionString: string;
@@ -82,13 +43,12 @@ export class PostgresKnowledgeAdapter implements KnowledgeRepository {
       allowExitOnIdle: true,
       ssl: options.ssl,
     });
-    this.schema = options.schema || 'public';
-    this.tableName = options.tableName || 'knowledge_base';
+    this.schema = options.schema ?? 'public';
+    this.tableName = options.tableName ?? 'knowledge_base';
   }
 
   private async ensureBootstrapped(): Promise<void> {
-    if (!this.bootstrapPromise) {
-      this.bootstrapPromise = (async () => {
+    this.bootstrapPromise ??= (async () => {
         const qualifiedTable = `"${this.schema}"."${this.tableName}"`;
         await this.pool.query(
           `CREATE TABLE IF NOT EXISTS ${qualifiedTable} (
@@ -102,7 +62,6 @@ export class PostgresKnowledgeAdapter implements KnowledgeRepository {
           `CREATE INDEX IF NOT EXISTS "${this.tableName}_payload_gin_idx" ON ${qualifiedTable} USING GIN (payload)`
         );
       })();
-    }
     return this.bootstrapPromise;
   }
 
@@ -112,10 +71,7 @@ export class PostgresKnowledgeAdapter implements KnowledgeRepository {
     const timestamp = entry.timestamp ?? Date.now();
     const entryWithTimestamp = { ...entry, timestamp };
     
-    // We use a hash of the task description as the primary key if no ID is provided,
-    // though the interface doesn't strictly have an ID. 
-    // For simplicity, we can just use a UUID or similar.
-    const id = `knl_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const id = `knl_${randomUUID()}`;
     
     await this.pool.query(
       `INSERT INTO ${qualifiedTable} (id, payload, created_at)
@@ -137,7 +93,7 @@ export class PostgresKnowledgeAdapter implements KnowledgeRepository {
     const scored = allEntries
       .map((entry) => ({
         entry,
-        score: calculateScore(entry, query),
+        score: calculateKnowledgeScore(entry, query),
       }))
       .filter((item) => item.score > 0)
       .sort((a, b) => b.score - a.score);

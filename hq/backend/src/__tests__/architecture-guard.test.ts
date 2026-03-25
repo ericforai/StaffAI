@@ -18,6 +18,7 @@ interface ImportEdge {
 }
 
 const BACKEND_SRC_ROOT = path.resolve(process.cwd(), 'src');
+const alphabeticalSort = (left: string, right: string) => left.localeCompare(right);
 
 function listSourceFiles(dirPath: string): string[] {
   const entries = fs.readdirSync(dirPath, { withFileTypes: true });
@@ -166,11 +167,11 @@ test('legacy root-level platform modules stay migrated into bounded contexts', (
     .readdirSync(BACKEND_SRC_ROOT, { withFileTypes: true })
     .filter((entry) => entry.isFile() && entry.name.endsWith('.ts'))
     .map((entry) => entry.name)
-    .sort();
+    .sort(alphabeticalSort);
 
   assert.deepEqual(
     topLevelSourceFiles,
-    Array.from(ALLOWED_TOP_LEVEL_SOURCE_FILES).sort(),
+    Array.from(ALLOWED_TOP_LEVEL_SOURCE_FILES).sort(alphabeticalSort),
     `expected backend root to stay limited to approved entry files, found: ${topLevelSourceFiles.join(', ')}`,
   );
 });

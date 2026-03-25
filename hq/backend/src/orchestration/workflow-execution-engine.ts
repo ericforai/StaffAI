@@ -1,4 +1,4 @@
-import type { WorkflowPlan, TaskAssignment, TaskRecord, TaskAssignmentStatus } from '../shared/task-types';
+import type { WorkflowPlan, TaskAssignment, TaskRecord } from '../shared/task-types';
 import type { AuditLogger, AuditEvent } from '../governance/audit-logger';
 import type { Store } from '../store';
 import type { AssignmentExecutor } from './assignment-executor';

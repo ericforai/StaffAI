@@ -16,6 +16,7 @@ const options = {
 
 function createSqlStateMock() {
   const rowsByTable = new Map<string, Map<string, Record<string, unknown>>>();
+  const tablePattern = /(?:INSERT INTO|FROM|UPDATE) ("[^"]+"\."[^"]+")/;
 
   function extractPayload(values: unknown[]): Record<string, unknown> {
     for (let index = values.length - 1; index >= 0; index -= 1) {
@@ -42,13 +43,29 @@ function createSqlStateMock() {
     return table;
   }
 
-  return async function queryMock(...args: unknown[]) {
-    const queryText = typeof args[0] === 'string' ? args[0] : String((args[0] as { text?: string })?.text ?? '');
-    const values = Array.isArray(args[1]) ? (args[1] as unknown[]) : [];
+  function getQueryText(args: unknown[]): string {
+    return typeof args[0] === 'string' ? args[0] : String((args[0] as { text?: string })?.text ?? '');
+  }
 
-    // Normalize table name from query (strip quotes if necessary for mapping)
-    const tableMatch = queryText.match(/(?:INSERT INTO|FROM|UPDATE) ("[^"]+"\."[^"]+")/);
-    const tableName = tableMatch ? tableMatch[1] : 'unknown';
+  function getTableName(queryText: string): string {
+    return tablePattern.exec(queryText)?.[1] ?? 'unknown';
+  }
+
+  function createRows(
+    tableName: string,
+    predicate: (payload: Record<string, unknown>) => boolean = () => true
+  ) {
+    const table = getTableStore(tableName);
+    const rows = Array.from(table.values())
+      .filter(predicate)
+      .map((payload) => ({ payload }));
+    return { rows, rowCount: rows.length };
+  }
+
+  return async function queryMock(...args: unknown[]) {
+    const queryText = getQueryText(args);
+    const values = Array.isArray(args[1]) ? (args[1] as unknown[]) : [];
+    const tableName = getTableName(queryText);
 
     if (queryText.includes('INSERT INTO')) {
       const table = getTableStore(tableName);
@@ -59,52 +76,37 @@ function createSqlStateMock() {
     }
 
     if (queryText.includes('SELECT payload FROM') && queryText.includes('WHERE id = $1')) {
-      const table = getTableStore(tableName);
-      const payload = table.get(String(values[0]));
+      const payload = getTableStore(tableName).get(String(values[0]));
       return { rows: payload ? [{ payload }] : [], rowCount: payload ? 1 : 0 };
     }
 
     if (queryText.includes('SELECT payload FROM') && queryText.includes('WHERE payload->>\'taskId\' = $1')) {
-      const table = getTableStore(tableName);
       const taskId = String(values[0]);
-      const rows = Array.from(table.values())
-        .filter((payload) => String(payload.taskId) === taskId)
-        .map((payload) => ({ payload }));
-      return { rows, rowCount: rows.length };
+      return createRows(tableName, (payload) => String(payload.taskId) === taskId);
     }
 
     if (queryText.includes('SELECT payload FROM') && queryText.includes('WHERE payload->>\'executionId\' = $1')) {
-      const table = getTableStore(tableName);
       const executionId = String(values[0]);
-      const rows = Array.from(table.values())
-        .filter((payload) => String(payload.executionId) === executionId)
-        .map((payload) => ({ payload }));
-      return { rows, rowCount: rows.length };
+      return createRows(tableName, (payload) => String(payload.executionId) === executionId);
     }
 
     if (queryText.includes('SELECT payload FROM') && queryText.includes('WHERE entity_id = $1')) {
-      const table = getTableStore(tableName);
       const entityId = String(values[0]);
-      const rows = Array.from(table.values())
-        .filter((payload) => String(payload.entityId) === entityId)
-        .map((payload) => ({ payload }));
-      return { rows, rowCount: rows.length };
+      return createRows(tableName, (payload) => String(payload.entityId) === entityId);
     }
 
     if (queryText.includes('SELECT payload FROM') && !queryText.includes('WHERE')) {
-      const table = getTableStore(tableName);
-      const rows = Array.from(table.values()).map((payload) => ({ payload }));
-      return { rows, rowCount: rows.length };
+      return createRows(tableName);
     }
 
     return { rows: [], rowCount: 0 };
   };
 }
 
-test('postgres operational repositories (assignments, plans, tool logs) work correctly', async () => {
-  const executedSql: string[] = [];
+function installPoolQueryMock(executedSql: string[]) {
   const originalQuery = Pool.prototype.query;
   const sqlStateMock = createSqlStateMock();
+
   (Pool.prototype as unknown as {
     query: (...args: unknown[]) => Promise<{ rows: unknown[]; rowCount: number }>;
   }).query = async function queryMock(...args: unknown[]) {
@@ -112,6 +114,15 @@ test('postgres operational repositories (assignments, plans, tool logs) work cor
     executedSql.push(queryText);
     return sqlStateMock(...args);
   };
+
+  return () => {
+    (Pool.prototype as unknown as { query: typeof originalQuery }).query = originalQuery;
+  };
+}
+
+test('postgres operational repositories (assignments, plans, tool logs) work correctly', async () => {
+  const executedSql: string[] = [];
+  const restorePoolQuery = installPoolQueryMock(executedSql);
 
   try {
     const assignmentRepo = createPostgresTaskAssignmentRepository(options);
@@ -162,21 +173,13 @@ test('postgres operational repositories (assignments, plans, tool logs) work cor
     assert.equal(executedSql.some(sql => sql.includes('CREATE TABLE IF NOT EXISTS "public"."workflow_plans"')), true);
     assert.equal(executedSql.some(sql => sql.includes('CREATE TABLE IF NOT EXISTS "public"."tool_call_logs"')), true);
   } finally {
-    (Pool.prototype as unknown as { query: typeof originalQuery }).query = originalQuery;
+    restorePoolQuery();
   }
 });
 
 test('postgres audit log repository works correctly', async () => {
   const executedSql: string[] = [];
-  const originalQuery = Pool.prototype.query;
-  const sqlStateMock = createSqlStateMock();
-  (Pool.prototype as unknown as {
-    query: (...args: unknown[]) => Promise<{ rows: unknown[]; rowCount: number }>;
-  }).query = async function queryMock(...args: unknown[]) {
-    const queryText = typeof args[0] === 'string' ? args[0] : String((args[0] as { text?: string })?.text ?? '');
-    executedSql.push(queryText);
-    return sqlStateMock(...args);
-  };
+  const restorePoolQuery = installPoolQueryMock(executedSql);
 
   try {
     const auditRepo = createPostgresAuditLogRepository(options);
@@ -194,21 +197,13 @@ test('postgres audit log repository works correctly', async () => {
     assert.equal(logs[0].id, 'audit-1');
     assert.equal(executedSql.some(sql => sql.includes('CREATE TABLE IF NOT EXISTS "public"."audit_logs"')), true);
   } finally {
-    (Pool.prototype as unknown as { query: typeof originalQuery }).query = originalQuery;
+    restorePoolQuery();
   }
 });
 
 test('postgres knowledge adapter works correctly', async () => {
   const executedSql: string[] = [];
-  const originalQuery = Pool.prototype.query;
-  const sqlStateMock = createSqlStateMock();
-  (Pool.prototype as unknown as {
-    query: (...args: unknown[]) => Promise<{ rows: unknown[]; rowCount: number }>;
-  }).query = async function queryMock(...args: unknown[]) {
-    const queryText = typeof args[0] === 'string' ? args[0] : String((args[0] as { text?: string })?.text ?? '');
-    executedSql.push(queryText);
-    return sqlStateMock(...args);
-  };
+  const restorePoolQuery = installPoolQueryMock(executedSql);
 
   try {
     const adapter = createPostgresKnowledgeAdapter(options);
@@ -224,6 +219,6 @@ test('postgres knowledge adapter works correctly', async () => {
     assert.equal(results[0].task, 'research postgres');
     assert.equal(executedSql.some(sql => sql.includes('CREATE TABLE IF NOT EXISTS "public"."knowledge_base"')), true);
   } finally {
-    (Pool.prototype as unknown as { query: typeof originalQuery }).query = originalQuery;
+    restorePoolQuery();
   }
 });

@@ -133,8 +133,8 @@ export function registerAuditRoutes(
       }
 
       if (limit) {
-        const parsedLimit = parseInt(limit, 10);
-        if (isNaN(parsedLimit) || parsedLimit < 1 || parsedLimit > 1000) {
+        const parsedLimit = Number.parseInt(limit, 10);
+        if (Number.isNaN(parsedLimit) || parsedLimit < 1 || parsedLimit > 1000) {
           res.status(400).json({ error: 'limit must be between 1 and 1000' });
           return;
         }

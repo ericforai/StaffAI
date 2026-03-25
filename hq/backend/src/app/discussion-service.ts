@@ -31,11 +31,11 @@ interface DiscussionServiceOptions {
 }
 
 export class DiscussionService implements DiscussionServiceContract {
-  private scanner: Scanner;
-  private store: Store;
-  private runtime: DiscussionServiceOptions['runtime'];
-  private events: DiscussionEventPublisher;
-  private workflowFacade: ReturnType<typeof createDiscussionWorkflowFacade>;
+  private readonly scanner: Scanner;
+  private readonly store: Store;
+  private readonly runtime: DiscussionServiceOptions['runtime'];
+  private readonly events: DiscussionEventPublisher;
+  private readonly workflowFacade: ReturnType<typeof createDiscussionWorkflowFacade>;
 
   constructor(scanner: Scanner, store: Store, publish: EventPublisher, options: DiscussionServiceOptions) {
     this.scanner = scanner;
