@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "test": "npm run build && node --test dist/**/*.test.js",
+    "build": "node -e \"const fs=require('fs');try{fs.rmSync('dist',{recursive:true});}catch(e){if(e&&e.code!=='ENOENT')throw e;}\" && tsc",
+    "test": "npm run build && AGENCY_UNDER_NODE_TEST=1 node --test --test-concurrency=1 dist/**/*.test.js",
     "start:web": "node dist/web-server.js",
     "start:mcp": "node dist/mcp-server.js",
     "dev:web": "ts-node src/web-server.ts",
@@ -16,10 +16,12 @@
   "description": "",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.27.1",
+    "bullmq": "^5.71.1",
     "chokidar": "^5.0.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "gray-matter": "^4.0.3",
+    "ioredis": "^5.10.1",
     "marked": "^17.0.4",
     "pg": "^8.20.0",
     "ws": "^8.19.0"
@@ -27,6 +29,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/ioredis": "^4.28.10",
     "@types/node": "^25.5.0",
     "@types/pg": "^8.20.0",
     "@types/ws": "^8.18.1",

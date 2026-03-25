@@ -1,4 +1,5 @@
 import type express from 'express';
+import { randomUUID } from 'node:crypto';
 import type { DiscussionServiceContract } from '../shared/discussion-service-contract';
 import type { Store } from '../store';
 import type { DashboardEvent } from '../observability/dashboard-events';
@@ -56,12 +57,46 @@ export function registerDiscussionRoutes(app: express.Application, dependencies:
       return res.status(400).json({ error: 'topic is required' });
     }
 
+    const discussionRunId = randomUUID();
+    const actor =
+      typeof req.body?.requestedBy === 'string' && req.body.requestedBy.trim()
+        ? req.body.requestedBy.trim()
+        : 'api';
+
     try {
+      await dependencies.store.logAudit({
+        entityType: 'execution',
+        entityId: discussionRunId,
+        action: 'discussion_started',
+        actor,
+        newState: { topic, participantCount, agentIds },
+      });
+
       const result = await dependencies.discussionService.runDiscussion(topic, participantCount, agentIds);
-      return res.json(result);
+
+      await dependencies.store.logAudit({
+        entityType: 'execution',
+        entityId: discussionRunId,
+        action: 'discussion_completed',
+        actor: 'system',
+        newState: { topic, synthesisPreview: typeof result.synthesis === 'string' ? result.synthesis.slice(0, 120) : '' },
+      });
+
+      return res.json({ ...result, discussionRunId });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown discussion error';
-      return res.status(503).json({ error: message });
+      try {
+        await dependencies.store.logAudit({
+          entityType: 'execution',
+          entityId: discussionRunId,
+          action: 'discussion_failed',
+          actor: 'system',
+          newState: { error: message },
+        });
+      } catch {
+        // ignore secondary audit failures
+      }
+      return res.status(503).json({ error: message, discussionRunId });
     }
   });
 
