@@ -37,6 +37,17 @@ import type {
   JsonKnowledgeEntry,
   UnifiedKnowledgeEntry,
 } from './legacy/knowledge-types';
+import {
+  AuditLogger,
+  type AuditEvent,
+  sanitizeState,
+  extractStateChanges,
+} from './governance/audit-logger';
+import {
+  createFileAuditLogRepository,
+  createInMemoryAuditLogRepository,
+  type AuditLogRepository,
+} from './persistence/audit-log-repositories';
 
 const STORE_FILE = path.join(__dirname, '../../active_squad.json');
 const TEMPLATES_FILE = path.join(__dirname, '../../templates.json');
@@ -46,6 +57,10 @@ const EXECUTIONS_FILE = process.env.AGENCY_EXECUTIONS_FILE || path.join(__dirnam
 const ASSIGNMENTS_FILE = process.env.AGENCY_TASK_ASSIGNMENTS_FILE || path.join(__dirname, '../../task_assignments.json');
 const WORKFLOW_PLANS_FILE = process.env.AGENCY_WORKFLOW_PLANS_FILE || path.join(__dirname, '../../workflow_plans.json');
 const TOOL_CALL_LOGS_FILE = process.env.AGENCY_TOOL_CALL_LOGS_FILE || path.join(__dirname, '../../tool_call_logs.json');
+
+function getAuditLogsDir() {
+  return process.env.AGENCY_AUDIT_LOGS_DIR || path.join(__dirname, '../../.ai/audit');
+}
 
 function getTasksFilePath() {
   return process.env.AGENCY_TASKS_FILE || path.join(__dirname, '../../tasks.json');
@@ -91,6 +106,7 @@ interface StorePersistenceDependencies {
   workflowPlanRepository?: WorkflowPlanRepository;
   toolCallLogRepository?: ToolCallLogRepository;
   knowledgeAdapter?: KnowledgeAdapter;
+  auditLogRepository?: AuditLogRepository;
 }
 
 function getPersistenceMode(): 'file' | 'memory' | 'postgres' {
@@ -120,6 +136,7 @@ export class Store extends EventEmitter {
   private workflowPlanRepository: WorkflowPlanRepository;
   private toolCallLogRepository: ToolCallLogRepository;
   private knowledgeAdapter: KnowledgeAdapter | null;
+  private auditLogger: AuditLogger | null;
 
   constructor(dependencies: StorePersistenceDependencies = {}) {
     super();
@@ -180,6 +197,14 @@ export class Store extends EventEmitter {
             KNOWLEDGE_FILE
           )
         : null);
+
+    // Initialize audit logger (optional - backward compatible)
+    const auditLogRepository =
+      dependencies.auditLogRepository ??
+      (mode === 'memory'
+        ? createInMemoryAuditLogRepository()
+        : createFileAuditLogRepository(getAuditLogsDir()));
+    this.auditLogger = mode !== 'memory' ? new AuditLogger(auditLogRepository) : null;
 
     this.load();
   }
@@ -380,6 +405,33 @@ export class Store extends EventEmitter {
     return this.knowledgeAdapter;
   }
 
+  // --- Audit Logging Logic ---
+
+  /**
+   * Get the audit logger instance
+   * Useful for audit queries and logging
+   */
+  public getAuditLogger(): AuditLogger | null {
+    return this.auditLogger;
+  }
+
+  /**
+   * Helper method to log an audit event
+   * Only logs if audit logger is enabled
+   */
+  public async logAudit(event: AuditEvent): Promise<void> {
+    if (this.auditLogger) {
+      const sanitizedEvent = {
+        ...event,
+        previousState: event.previousState
+          ? sanitizeState(event.previousState)
+          : undefined,
+        newState: event.newState ? sanitizeState(event.newState) : undefined,
+      };
+      await this.auditLogger.log(sanitizedEvent);
+    }
+  }
+
   // --- Task Logic ---
 
   public async getTasks(): Promise<TaskRecord[]> {
@@ -422,9 +474,29 @@ export class Store extends EventEmitter {
 
   public async updateApprovalStatus(
     approvalId: string,
-    status: ApprovalRecord['status']
+    status: ApprovalRecord['status'],
+    actor?: string
   ): Promise<ApprovalRecord | null> {
-    return await this.approvalRepository.updateStatus(approvalId, status);
+    // Get current approval for audit logging
+    const approvals = await this.approvalRepository.list();
+    const previousApproval = approvals.find((a) => a.id === approvalId);
+
+    const result = await this.approvalRepository.updateStatus(approvalId, status);
+
+    // Log audit event if status changed
+    if (result && previousApproval && previousApproval.status !== status) {
+      await this.logAudit({
+        entityType: 'approval',
+        entityId: approvalId,
+        action: status === 'approved' ? 'approved' : status === 'rejected' ? 'rejected' : 'status_changed',
+        actor: actor || 'system',
+        previousState: { status: previousApproval.status },
+        newState: { status },
+        metadata: { taskId: previousApproval.taskId },
+      });
+    }
+
+    return result;
   }
 
   public async getApprovalsByTaskId(taskId: string): Promise<ApprovalRecord[]> {

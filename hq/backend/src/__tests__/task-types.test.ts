@@ -14,7 +14,7 @@ import {
 
 test('shared task vocabulary exports explicit status collections', () => {
   assert.deepEqual(TASK_STATUSES, ['created', 'routed', 'running', 'waiting_approval', 'completed', 'failed', 'cancelled']);
-  assert.deepEqual(APPROVAL_STATUSES, ['pending', 'approved', 'rejected']);
+  assert.deepEqual(APPROVAL_STATUSES, ['pending', 'approved', 'rejected', 'cancelled']);
   assert.deepEqual(EXECUTION_STATUSES, ['pending', 'running', 'completed', 'failed', 'degraded']);
 });
 

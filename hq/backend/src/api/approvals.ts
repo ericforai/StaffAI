@@ -12,6 +12,7 @@ function buildApprovalSummary(approvals: ApprovalRecord[]) {
     pending: 0,
     approved: 0,
     rejected: 0,
+    cancelled: 0,
   };
   let latestRequestedAt: string | null = null;
   let latestResolvedAt: string | null = null;

@@ -165,6 +165,7 @@ function summarizeApprovals(approvals: ApprovalRecord[]) {
     pending: 0,
     approved: 0,
     rejected: 0,
+    cancelled: 0,
   };
   let latestApprovalAt: string | null = null;
 

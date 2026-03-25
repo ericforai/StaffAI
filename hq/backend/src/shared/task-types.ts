@@ -10,8 +10,12 @@ export const TASK_STATUSES = [
 
 export type TaskStatus = (typeof TASK_STATUSES)[number];
 
-export const APPROVAL_STATUSES = ['pending', 'approved', 'rejected'] as const;
+export const APPROVAL_STATUSES = ['pending', 'approved', 'rejected', 'cancelled'] as const;
 export type ApprovalStatus = (typeof APPROVAL_STATUSES)[number];
+
+// Risk levels for approval assessment
+export const APPROVAL_RISK_LEVELS = ['LOW', 'MEDIUM', 'HIGH'] as const;
+export type ApprovalRiskLevel = (typeof APPROVAL_RISK_LEVELS)[number];
 
 export const EXECUTION_STATUSES = ['pending', 'running', 'completed', 'failed', 'degraded'] as const;
 export type ExecutionStatus = (typeof EXECUTION_STATUSES)[number];
@@ -97,9 +101,15 @@ export interface TaskRouteDecision {
 export interface ApprovalRecord {
   id: string;
   taskId: string;
+  taskTitle?: string;           // NEW: Task title for display
   status: ApprovalStatus;
   requestedBy: string;
   requestedAt: string;
+  riskLevel?: ApprovalRiskLevel;  // NEW: Risk level assessment
+  approver?: string;           // NEW: Approver name/ID
+  approvedAt?: string;         // NEW: When approval was granted/denied
+  reason?: string;             // NEW: Reason for decision
+  decisionContext?: Record<string, unknown>;  // NEW: Additional context
   resolvedAt?: string;
 }
 
