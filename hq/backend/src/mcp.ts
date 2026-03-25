@@ -19,6 +19,9 @@ import {
   resolveExecutionDecision,
   SessionCapabilities,
 } from './execution-strategy';
+import { createUserRepository } from './identity/user-repository.js';
+import { createPermissionChecker } from './identity/permission-checker.js';
+import { createUserContextService } from './identity/user-context.js';
 
 interface RankedExpert {
   agent: Agent;
@@ -52,11 +55,20 @@ export class McpGateway {
   private scanner: Scanner;
   private store: Store;
   private webServerPort: number;
+  private userContextService: ReturnType<typeof createUserContextService>;
 
   constructor(scanner: Scanner, store: Store, webServerPort: number = 3333) {
     this.scanner = scanner;
     this.store = store;
     this.webServerPort = webServerPort;
+
+    // Initialize user context service
+    const userRepository = createUserRepository();
+    const permissionChecker = createPermissionChecker();
+    this.userContextService = createUserContextService(
+      userRepository,
+      permissionChecker
+    );
 
     this.server = new Server(
       {
@@ -168,6 +180,7 @@ export class McpGateway {
               type: 'object',
               properties: {
                 task: { type: 'string', description: '需要专家处理的任务或问题' },
+                user_id: { type: 'string', description: '用户ID（可选，用于权限过滤）' },
               },
               required: ['task'],
             },
@@ -183,6 +196,7 @@ export class McpGateway {
                   type: 'number',
                   description: '最多返回几位专家，默认 4，范围 1-8',
                 },
+                user_id: { type: 'string', description: '用户ID（可选，用于权限过滤）' },
               },
               required: ['topic'],
             },
@@ -264,6 +278,7 @@ export class McpGateway {
                   enum: ['auto', 'force_serial', 'require_sampling'],
                   description: '执行模式：自动/强制串行/必须并行(sampling)',
                 },
+                user_id: { type: 'string', description: '用户ID（可选，用于权限过滤）' },
               },
               required: ['topic'],
             },
@@ -299,9 +314,10 @@ export class McpGateway {
 
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
+      const userId = args?.user_id as string | undefined;
 
       if (name === 'find_experts') {
-        return this.handleFindExperts(args?.topic as string, args?.max_experts as number | undefined);
+        return this.handleFindExperts(args?.topic as string, args?.max_experts as number | undefined, userId);
       }
 
       if (name === 'manage_staff') {
@@ -313,7 +329,7 @@ export class McpGateway {
       }
 
       if (name === 'consult_the_agency') {
-        return this.handleSmartRouting(args?.task as string);
+        return this.handleSmartRouting(args?.task as string, userId);
       }
 
       if (name === 'assign_expert_tasks') {
@@ -337,7 +353,8 @@ export class McpGateway {
         return this.handleExpertDiscussion(
           args?.topic as string,
           args?.participant_count as number | undefined,
-          args?.execution_mode
+          args?.execution_mode,
+          userId
         );
       }
 
@@ -409,10 +426,14 @@ export class McpGateway {
     return score;
   }
 
-  private rankExperts(topic: string, maxExperts: number = 4): RankedExpert[] {
+  private rankExperts(topic: string, maxExperts: number = 4, userId?: string): RankedExpert[] {
     const activeIds = new Set(this.store.getActiveIds());
-    const ranked = this.scanner
-      .getAllAgents()
+
+    // Filter agents by user context
+    const allAgents = this.scanner.getAllAgents();
+    const filteredAgents = this.userContextService.filterAgentsByUser(allAgents, userId);
+
+    const ranked = filteredAgents
       .map((agent) => ({
         agent,
         score: this.calculateSmartScore(agent, topic),
@@ -707,10 +728,10 @@ export class McpGateway {
     return responses;
   }
 
-  private selectDiscussionParticipants(topic: string, requestedCount?: number): DiscussionParticipant[] {
+  private selectDiscussionParticipants(topic: string, requestedCount?: number, userId?: string): DiscussionParticipant[] {
     const participantCount = Math.min(Math.max(requestedCount ?? 3, 2), 4);
-    const ranked = this.rankExperts(topic, participantCount);
-    const baseline = ranked.length >= 2 ? ranked : this.rankExperts(topic, 2);
+    const ranked = this.rankExperts(topic, participantCount, userId);
+    const baseline = ranked.length >= 2 ? ranked : this.rankExperts(topic, 2, userId);
 
     return baseline.slice(0, participantCount).map((entry, _index, allEntries) => ({
       ...entry,
@@ -719,12 +740,12 @@ export class McpGateway {
     }));
   }
 
-  private async handleFindExperts(topic: string, requestedCount?: number) {
+  private async handleFindExperts(topic: string, requestedCount?: number, userId?: string) {
     if (!topic) {
       throw new McpError(ErrorCode.InvalidParams, 'topic is required');
     }
 
-    const ranked = this.rankExperts(topic, requestedCount ?? 4);
+    const ranked = this.rankExperts(topic, requestedCount ?? 4, userId);
     const lines = ranked.map(
       (entry, index) =>
         `${index + 1}. ${entry.agent.frontmatter.name} (\`${entry.agent.id}\`)${entry.isActive ? ' [在职]' : ' [候选]'}\n   匹配分: ${entry.score}\n   职责: ${entry.agent.frontmatter.description}`
@@ -797,12 +818,12 @@ export class McpGateway {
     };
   }
 
-  private async handleSmartRouting(task: string) {
+  private async handleSmartRouting(task: string, userId?: string) {
     if (!task) {
       throw new McpError(ErrorCode.InvalidParams, 'task is required');
     }
 
-    const [bestMatch] = this.rankExperts(task, 1);
+    const [bestMatch] = this.rankExperts(task, 1, userId);
     if (!bestMatch) {
       return {
         content: [{ type: 'text', text: '❌ 公司目前没有可用专家。' }],
@@ -909,7 +930,7 @@ export class McpGateway {
     };
   }
 
-  private async handleExpertDiscussion(topic: string, requestedCount?: number, requestedModeRaw?: unknown) {
+  private async handleExpertDiscussion(topic: string, requestedCount?: number, requestedModeRaw?: unknown, userId?: string) {
     if (!topic) {
       throw new McpError(ErrorCode.InvalidParams, 'topic is required');
     }
@@ -920,7 +941,7 @@ export class McpGateway {
       throw new McpError(ErrorCode.InvalidRequest, this.formatExecutionBlockedMessage(decision));
     }
 
-    const participants = this.selectDiscussionParticipants(topic, requestedCount);
+    const participants = this.selectDiscussionParticipants(topic, requestedCount, userId);
     if (participants.length < 2) {
       return {
         content: [{ type: 'text', text: '❌ 没有足够的专家来组织讨论。' }],

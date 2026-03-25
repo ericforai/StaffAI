@@ -2,7 +2,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type { ExecutionLifecycleRecord } from '../runtime/execution-service';
 import type { TaskRecord } from '../shared/task-types';
-import { indexMemoryDocuments, type MemoryDocument } from './memory-indexer';
+import type { MemoryDocumentType } from './memory-layout';
+import {
+  indexMemoryDocuments,
+  filterDocumentsByType,
+  filterDocumentsByDateRange,
+  type MemoryDocument,
+} from './memory-indexer';
 
 export interface RetrievedMemoryContext {
   entries: Array<{
@@ -59,7 +65,8 @@ function scoreDocument(document: MemoryDocument, queryTokens: Set<string>, order
 
   let score = 0;
   let matchedUnique = 0;
-  for (const token of queryTokens) {
+  const queryTokenArray = Array.from(queryTokens);
+  for (const token of queryTokenArray) {
     if (documentTokens.has(token)) {
       matchedUnique += 1;
       const tf = termFrequency.get(token) || 1;
@@ -98,6 +105,9 @@ export function retrieveMemoryContext(
     excerptMaxChars?: number;
     contextMaxChars?: number;
     fallbackMode?: 'none' | 'recent';
+    useCache?: boolean;
+    /** Optional: filter to specific document types */
+    documentTypes?: MemoryDocumentType[];
   }
 ): RetrievedMemoryContext {
   const {
@@ -106,7 +116,17 @@ export function retrieveMemoryContext(
     excerptMaxChars = 300,
     contextMaxChars = 1600,
     fallbackMode = 'recent',
+    useCache = false,
+    documentTypes,
   } = options;
+
+  if (useCache) {
+    const cacheKey = `${memoryRootDir}:${query}:${limit}:${excerptMaxChars}:${contextMaxChars}:${documentTypes?.join(',') ?? 'all'}`;
+    const cached = memoryCache.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
+  }
   const queryTokens = getTokenSet(query);
   const orderedQueryTokens = getTokenList(query);
 
@@ -117,7 +137,7 @@ export function retrieveMemoryContext(
     };
   }
 
-  const documents = indexMemoryDocuments(memoryRootDir);
+  const documents = indexMemoryDocuments(memoryRootDir, { documentTypes });
   if (documents.length === 0) {
     return {
       entries: [],
@@ -197,7 +217,14 @@ export function retrieveMemoryContext(
 
   const context = contextSections.join('\n\n');
 
-  return { entries, context };
+  const result: RetrievedMemoryContext = { entries, context };
+
+  if (useCache) {
+    const cacheKey = `${memoryRootDir}:${query}:${limit}:${excerptMaxChars}:${contextMaxChars}`;
+    memoryCache.set(cacheKey, result);
+  }
+
+  return result;
 }
 
 export function writeExecutionSummaryToMemory(
@@ -235,4 +262,229 @@ export function writeExecutionSummaryToMemory(
 
   fs.appendFileSync(filePath, `${lines.join('\n')}\n`, 'utf8');
   return filePath;
+}
+
+const memoryCache = new Map<string, RetrievedMemoryContext>();
+
+export function clearMemoryCache(): void {
+  memoryCache.clear();
+}
+
+export function retrieveForTask(
+  taskId: string,
+  query: string,
+  options: {
+    memoryRootDir: string;
+    limit?: number;
+    excerptMaxChars?: number;
+    contextMaxChars?: number;
+    useCache?: boolean;
+  }
+): RetrievedMemoryContext {
+  const { memoryRootDir, limit = 3, excerptMaxChars, contextMaxChars, useCache = false } = options;
+
+  if (!fs.existsSync(memoryRootDir)) {
+    return { entries: [], context: '' };
+  }
+
+  const allDocuments = indexMemoryDocuments(memoryRootDir);
+  const taskDocuments = allDocuments.filter((doc) =>
+    doc.relativePath.includes(taskId) || doc.relativePath.startsWith('task-summaries')
+  );
+
+  if (taskDocuments.length === 0) {
+    return retrieveMemoryContext(query, { memoryRootDir, limit, excerptMaxChars, contextMaxChars });
+  }
+
+  const queryTokens = getTokenSet(query);
+  const orderedQueryTokens = getTokenList(query);
+
+  const ranked = taskDocuments
+    .map((document) => ({
+      document,
+      score: scoreDocument(document, queryTokens, orderedQueryTokens),
+    }))
+    .sort((left, right) => {
+      if (right.score !== left.score) {
+        return right.score - left.score;
+      }
+      return right.document.modifiedAtMs - left.document.modifiedAtMs;
+    });
+
+  const matched = ranked.filter((item) => item.score > 0).slice(0, limit);
+  const selected = matched.length > 0 ? matched : taskDocuments.slice(0, limit).map((document) => ({ document, score: 0 }));
+
+  const baseEntries = selected.map((item) => ({
+    relativePath: item.document.relativePath,
+    excerpt: toExcerpt(item.document.content, excerptMaxChars),
+    score: item.score,
+  }));
+
+  const entries: RetrievedMemoryContext['entries'] = [];
+  const contextSections: string[] = [];
+  let usedChars = 0;
+  const maxChars = contextMaxChars || 1600;
+
+  for (let index = 0; index < baseEntries.length; index += 1) {
+    const entry = baseEntries[index];
+    const header = `#${index + 1} ${entry.relativePath}\n`;
+    const section = `${header}${entry.excerpt}`;
+    const separator = contextSections.length > 0 ? '\n\n' : '';
+    const projectedLength = usedChars + separator.length + section.length;
+
+    if (projectedLength <= maxChars) {
+      contextSections.push(section);
+      entries.push(entry);
+      usedChars = projectedLength;
+      continue;
+    }
+
+    const remaining = maxChars - usedChars - separator.length - header.length;
+    if (remaining <= 16) {
+      break;
+    }
+
+    const trimmedExcerpt = toExcerpt(entry.excerpt, remaining);
+    const trimmedSection = `${header}${trimmedExcerpt}`;
+    contextSections.push(trimmedSection);
+    entries.push({
+      ...entry,
+      excerpt: trimmedExcerpt,
+    });
+    break;
+  }
+
+  const context = contextSections.join('\n\n');
+
+  const result: RetrievedMemoryContext = { entries, context };
+
+  if (useCache) {
+    const cacheKey = `${memoryRootDir}:${query}:${limit}:${excerptMaxChars}:${contextMaxChars}`;
+    memoryCache.set(cacheKey, result);
+  }
+
+  return result;
+}
+
+export function retrieveProjectContext(options: {
+  memoryRootDir: string;
+  limit?: number;
+  excerptMaxChars?: number;
+  contextMaxChars?: number;
+}): RetrievedMemoryContext {
+  const { memoryRootDir, limit = 5 } = options;
+
+  if (!fs.existsSync(memoryRootDir)) {
+    return { entries: [], context: '' };
+  }
+
+  const documents = indexMemoryDocuments(memoryRootDir);
+
+  if (documents.length === 0) {
+    return { entries: [], context: '' };
+  }
+
+  const sorted = documents.sort((a, b) => b.modifiedAtMs - a.modifiedAtMs).slice(0, limit);
+
+  const entries = sorted.map((doc) => ({
+    relativePath: doc.relativePath,
+    excerpt: toExcerpt(doc.content, options.excerptMaxChars),
+    score: 0,
+  }));
+
+  const contextSections = entries.map(
+    (entry, index) => `#${index + 1} ${entry.relativePath}\n${entry.excerpt}`
+  );
+
+  let context = contextSections.join('\n\n');
+  const maxChars = options.contextMaxChars || 1600;
+  if (context.length > maxChars) {
+    context = context.slice(0, maxChars - 3) + '...';
+  }
+
+  return { entries, context };
+}
+
+export function retrieveDecisions(
+  query: string,
+  options: {
+    memoryRootDir: string;
+    limit?: number;
+    excerptMaxChars?: number;
+    contextMaxChars?: number;
+  }
+): RetrievedMemoryContext {
+  const { memoryRootDir, limit = 3 } = options;
+
+  if (!fs.existsSync(memoryRootDir)) {
+    return { entries: [], context: '' };
+  }
+
+  const allDocuments = indexMemoryDocuments(memoryRootDir);
+  const decisionDocuments = filterDocumentsByType(allDocuments, 'decisions');
+
+  if (decisionDocuments.length === 0) {
+    return { entries: [], context: '' };
+  }
+
+  return retrieveMemoryContext(query, {
+    ...options,
+    memoryRootDir,
+    limit,
+  });
+}
+
+export function retrieveAgentContext(
+  agentId: string,
+  options: {
+    memoryRootDir: string;
+    limit?: number;
+    excerptMaxChars?: number;
+    contextMaxChars?: number;
+  }
+): RetrievedMemoryContext {
+  const { memoryRootDir, limit = 3 } = options;
+
+  if (!fs.existsSync(memoryRootDir)) {
+    return { entries: [], context: '' };
+  }
+
+  const allDocuments = indexMemoryDocuments(memoryRootDir);
+  const agentDocuments = allDocuments.filter((doc) =>
+    doc.relativePath.includes(agentId)
+  );
+
+  if (agentDocuments.length === 0) {
+    return { entries: [], context: '' };
+  }
+
+  const entries = agentDocuments.slice(0, limit).map((doc) => ({
+    relativePath: doc.relativePath,
+    excerpt: toExcerpt(doc.content, options.excerptMaxChars),
+    score: 0,
+  }));
+
+  const contextSections = entries.map(
+    (entry, index) => `#${index + 1} ${entry.relativePath}\n${entry.excerpt}`
+  );
+
+  let context = contextSections.join('\n\n');
+  const maxChars = options.contextMaxChars || 1600;
+  if (context.length > maxChars) {
+    context = context.slice(0, maxChars - 3) + '...';
+  }
+
+  return { entries, context };
+}
+
+export function retrieveKnowledge(
+  query: string,
+  options: {
+    memoryRootDir: string;
+    limit?: number;
+    excerptMaxChars?: number;
+    contextMaxChars?: number;
+  }
+): RetrievedMemoryContext {
+  return retrieveMemoryContext(query, options);
 }

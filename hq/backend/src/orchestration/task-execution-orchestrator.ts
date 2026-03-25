@@ -3,18 +3,23 @@ import type { Store } from '../store';
 import type { ExecutionLifecycleRecord } from '../runtime/execution-service';
 import { buildSerialWorkflowPlan, runTaskExecution } from '../runtime/execution-service';
 import { runAdvancedDiscussionExecution } from '../runtime/advanced-discussion-runner';
+import { buildDispatcherDirective } from '../runtime/dispatcher-runtime';
 import type { TaskAssignment, TaskExecutionMode, TaskRecord, WorkflowPlan } from '../shared/task-types';
+import { resolveExecutionDecision, type SessionCapabilities } from '../execution-strategy';
 
 interface ExecuteTaskInput {
   executor: 'claude' | 'codex' | 'openai';
   summary: string;
   executionMode?: TaskExecutionMode;
+  timeoutMs?: number;
+  maxRetries?: number;
 }
 
 interface TaskExecutionDependencies {
   runAdvancedDiscussion?: (task: TaskRecord) => Promise<{ summary: string }>;
   loadMemoryContext?: (task: TaskRecord) => Promise<string | undefined | void> | string | undefined | void;
   writeExecutionSummary?: (task: TaskRecord, execution: ExecutionLifecycleRecord) => Promise<void> | void;
+  sessionCapabilities?: SessionCapabilities;
 }
 
 type TaskExecutionStore = Pick<Store, 'saveExecution' | 'updateExecution' | 'updateTask'> &
@@ -135,8 +140,30 @@ export async function executeTaskRecord(
       ? loadedMemoryContext
       : undefined;
   const requestedMode = input.executionMode ?? task.executionMode;
+  const timeoutMs = Number.isFinite(input.timeoutMs) && (input.timeoutMs ?? 0) > 0 ? (input.timeoutMs as number) : 30_000;
+  const maxRetries = Number.isFinite(input.maxRetries) && (input.maxRetries ?? 0) >= 0 ? (input.maxRetries as number) : 1;
+  const sessionCapabilities = dependencies.sessionCapabilities ?? { sampling: false };
+  const parallelDecision =
+    requestedMode === 'parallel'
+      ? resolveExecutionDecision(sessionCapabilities, 'auto')
+      : {
+          appliedMode: requestedMode,
+          degraded: false,
+          notice: undefined,
+        };
+  const appliedMode =
+    requestedMode === 'parallel'
+      ? (parallelDecision.appliedMode === 'parallel' ? 'parallel' : 'serial')
+      : requestedMode;
+  const degraded = requestedMode === 'parallel' ? parallelDecision.degraded : false;
+  const dispatcherDirective = buildDispatcherDirective({
+    task,
+    requestedMode,
+    appliedMode,
+    degraded,
+  });
 
-  if (requestedMode === 'advanced_discussion') {
+  if (appliedMode === 'advanced_discussion') {
     const advancedResult = await runAdvancedDiscussionExecution(
       task,
       input.executor,
@@ -155,7 +182,7 @@ export async function executeTaskRecord(
     };
   }
 
-  if (requestedMode === 'serial') {
+  if (appliedMode === 'serial') {
     const existingWorkflowPlan = store.getWorkflowPlanByTaskId
       ? await store.getWorkflowPlanByTaskId(task.id)
       : null;
@@ -170,6 +197,16 @@ export async function executeTaskRecord(
         summary: input.summary,
         memoryContextExcerpt,
         executionMode: 'serial',
+        task,
+        timeoutMs,
+        maxRetries,
+        degraded,
+        inputSnapshot: {
+          dispatcherDirective,
+          executionNotice: parallelDecision.notice,
+          requestedMode,
+          appliedMode: 'serial',
+        },
         workflowPlan: serialBundle.workflowPlan,
         assignments: serialBundle.assignments,
       },
@@ -179,7 +216,7 @@ export async function executeTaskRecord(
     await dependencies.writeExecutionSummary?.(task, result.execution);
 
     return {
-      mode: 'serial',
+      mode: requestedMode,
       ...result,
     };
   }
@@ -197,7 +234,17 @@ export async function executeTaskRecord(
       executor: input.executor,
       summary: input.summary,
       memoryContextExcerpt,
-      executionMode: requestedMode,
+      executionMode: appliedMode,
+      task,
+      timeoutMs,
+      maxRetries,
+      degraded,
+      inputSnapshot: {
+        dispatcherDirective,
+        executionNotice: parallelDecision.notice,
+        requestedMode,
+        appliedMode,
+      },
       workflowPlan: existingWorkflowPlan ?? undefined,
       assignments: existingAssignments.length > 0 ? existingAssignments : undefined,
     },
@@ -207,7 +254,7 @@ export async function executeTaskRecord(
   await dependencies.writeExecutionSummary?.(task, result.execution);
 
   return {
-    mode: task.executionMode,
+    mode: requestedMode,
     ...result,
   };
 }

@@ -1,0 +1,23 @@
+{
+  "version": "1.0",
+  "defaultPolicy": "allowAll",
+  "users": [
+    {
+      "id": "user-default",
+      "name": "Default User",
+      "department": "general",
+      "clearanceLevel": "basic",
+      "allowedAgentIds": [],
+      "allowedAgentDepartments": [],
+      "allowedAgentTags": [],
+      "deniedAgentIds": [],
+      "templateAccess": "all",
+      "memoryAccess": {
+        "canReadProject": true,
+        "canReadDecisions": true,
+        "allowedDomains": []
+      },
+      "enabled": true
+    }
+  ]
+}

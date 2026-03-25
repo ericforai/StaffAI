@@ -20,6 +20,7 @@ interface TaskRouteDependencies {
   onExecutionFinished?: (execution: ExecutionLifecycleRecord) => void;
   loadMemoryContext?: (task: TaskRecord) => Promise<string | undefined | void> | string | undefined | void;
   writeExecutionSummary?: (task: TaskRecord, execution: ExecutionLifecycleRecord) => Promise<void> | void;
+  sessionCapabilities?: { sampling: boolean };
 }
 
 function readExecutionMode(value: unknown): TaskExecutionMode | undefined {
@@ -28,6 +29,14 @@ function readExecutionMode(value: unknown): TaskExecutionMode | undefined {
   }
 
   return (TASK_EXECUTION_MODES as readonly string[]).includes(value) ? (value as TaskExecutionMode) : undefined;
+}
+
+function readPositiveInt(value: unknown): number | undefined {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
+    return undefined;
+  }
+
+  return Math.floor(value);
 }
 
 function pickLatestExecution(executions: ExecutionLifecycleRecord[]): ExecutionLifecycleRecord | undefined {
@@ -101,6 +110,8 @@ export function registerTaskRoutes(
 
     const executor = req.body?.executor === 'claude' || req.body?.executor === 'openai' ? req.body.executor : 'codex';
     const executionMode = readExecutionMode(req.body?.executionMode);
+    const timeoutMs = readPositiveInt(req.body?.timeoutMs);
+    const maxRetries = readPositiveInt(req.body?.maxRetries);
     const summary =
       typeof req.body?.summary === 'string' && req.body.summary.trim()
         ? req.body.summary.trim()
@@ -116,13 +127,25 @@ export function registerTaskRoutes(
       executor,
     });
 
-    const result = await executeTaskRecord(task, { executor, summary, ...(executionMode ? { executionMode } : {}) }, store, {
-      runAdvancedDiscussion: dependencies.runAdvancedDiscussion
-        ? async () => dependencies.runAdvancedDiscussion?.(topic) ?? { summary }
-        : undefined,
-      loadMemoryContext: dependencies.loadMemoryContext,
-      writeExecutionSummary: dependencies.writeExecutionSummary,
-    });
+    const result = await executeTaskRecord(
+      task,
+      {
+        executor,
+        summary,
+        ...(executionMode ? { executionMode } : {}),
+        ...(timeoutMs ? { timeoutMs } : {}),
+        ...(typeof maxRetries === 'number' ? { maxRetries } : {}),
+      },
+      store,
+      {
+        runAdvancedDiscussion: dependencies.runAdvancedDiscussion
+          ? async () => dependencies.runAdvancedDiscussion?.(topic) ?? { summary }
+          : undefined,
+        loadMemoryContext: dependencies.loadMemoryContext,
+        writeExecutionSummary: dependencies.writeExecutionSummary,
+        sessionCapabilities: dependencies.sessionCapabilities,
+      },
+    );
 
     dependencies.onExecutionFinished?.(result.execution);
 

@@ -1,0 +1,13 @@
+# User-specific configuration
+user.json
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# OS files
+.DS_Store
+Thumbs.db

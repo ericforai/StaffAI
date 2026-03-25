@@ -4,6 +4,7 @@ import { registerAgencyRoutes } from '../api/agency';
 import { registerApprovalRoutes } from '../api/approvals';
 import { registerDiscussionRoutes } from '../api/discussions';
 import { registerExecutionRoutes } from '../api/executions';
+import { registerMemoryRoutes } from '../api/memory';
 import { registerRuntimeRoutes } from '../api/runtime';
 import { registerStartupRoutes } from '../api/startup';
 import { registerTaskEventRoutes } from '../api/task-events';
@@ -20,6 +21,10 @@ import { SkillScanner } from '../skill-scanner';
 import { Store } from '../store';
 import { DiscussionService } from '../discussion-service';
 import type { RuntimePaths } from '../runtime-state';
+import { createUserRepository } from '../identity/user-repository.js';
+import { createPermissionChecker } from '../identity/permission-checker.js';
+import { createUserContextService } from '../identity/user-context.js';
+import { createUserContextMiddleware } from '../middleware/user-context.middleware.js';
 
 interface RouteRegistrationDependencies {
   app: express.Application;
@@ -42,6 +47,9 @@ export function registerBackendRoutes({
   broadcast,
   runAdvancedDiscussion,
 }: RouteRegistrationDependencies) {
+  const samplingEnabled =
+    process.env.AGENCY_RUNTIME_SAMPLING === '1' ||
+    process.env.AGENCY_RUNTIME_SAMPLING === 'true';
   const memoryRootDir =
     process.env.AGENCY_MEMORY_DIR || path.resolve(process.cwd(), '.ai');
   const taskEventFeed: Array<TaskDashboardEvent & { timestamp: string }> = [];
@@ -57,6 +65,24 @@ export function registerBackendRoutes({
     broadcast(eventWithTimestamp);
   });
 
+  // Initialize User Context Service
+  const userRepository = createUserRepository();
+  const permissionChecker = createPermissionChecker();
+  const userContextService = createUserContextService(
+    userRepository,
+    permissionChecker
+  );
+
+  // Register user context middleware (optional, can be enabled via env)
+  const authStrategy = (process.env.AGENCY_AUTH_STRATEGY || 'none') as 'header' | 'cookie' | 'jwt' | 'none';
+  if (authStrategy !== 'none') {
+    app.use('/api', createUserContextMiddleware({
+      userContextService,
+      authStrategy,
+      headerName: process.env.AGENCY_USER_HEADER || 'X-User-Id',
+    }));
+  }
+
   registerStartupRoutes(app, {
     discussionService,
   });
@@ -67,6 +93,7 @@ export function registerBackendRoutes({
     skillScanner,
     store,
     broadcast,
+    userContextService,
   });
 
   registerRuntimeRoutes(app, {
@@ -114,6 +141,9 @@ export function registerBackendRoutes({
         memoryRootDir,
       });
     },
+    sessionCapabilities: {
+      sampling: samplingEnabled,
+    },
   });
 
   registerApprovalRoutes(app, store, {
@@ -124,6 +154,7 @@ export function registerBackendRoutes({
 
   registerExecutionRoutes(app, store);
   registerToolRoutes(app, store);
+  registerMemoryRoutes(app, { memoryRootDir });
 
   registerDiscussionRoutes(app, {
     discussionService,

@@ -363,13 +363,24 @@ test('POST /api/tasks/:id/execute creates an execution and updates task state', 
 
   assert.equal(executeResponse.status, 201);
   const executePayload = (await executeResponse.json()) as {
-    execution?: { id?: string; status?: string; taskId?: string; outputSummary?: string };
+    execution?: {
+      id?: string;
+      status?: string;
+      taskId?: string;
+      outputSummary?: string;
+      runtimeName?: string;
+      retryCount?: number;
+      timeoutMs?: number;
+    };
     task?: { status?: string };
   };
 
   assert.equal(executePayload.execution?.taskId, taskId);
   assert.equal(executePayload.execution?.status, 'completed');
   assert.equal(executePayload.execution?.outputSummary, 'Execution finished cleanly');
+  assert.equal(executePayload.execution?.runtimeName, 'local_codex_cli');
+  assert.equal(typeof executePayload.execution?.retryCount, 'number');
+  assert.equal(typeof executePayload.execution?.timeoutMs, 'number');
   assert.equal(executePayload.task?.status, 'completed');
 
   const executionDetailResponse = await fetch(`${baseUrl}/api/executions/${executePayload.execution?.id}`);
@@ -484,6 +495,52 @@ test('POST /api/tasks/:id/execute exposes serial workflow plans and assignments'
   assert.equal(taskDetailPayload.workflowPlan?.steps?.length, 2);
   assert.equal(taskDetailPayload.assignments?.length, 2);
   assert.equal(taskDetailPayload.executions?.[0]?.workflowPlan?.mode, 'serial');
+});
+
+test('POST /api/tasks/:id/execute degrades parallel mode when sampling is unavailable', async () => {
+  const taskResponse = await fetch(`${baseUrl}/api/tasks`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      title: 'Execute a degraded parallel workflow',
+      description: 'Request parallel but allow fallback for unsupported runtime capability',
+      executionMode: 'parallel',
+    }),
+  });
+  assert.equal(taskResponse.status, 201);
+  const taskPayload = (await taskResponse.json()) as { task?: { id?: string } };
+  const taskId = taskPayload.task?.id;
+
+  const executeResponse = await fetch(`${baseUrl}/api/tasks/${taskId}/execute`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      executor: 'codex',
+      executionMode: 'parallel',
+      summary: 'Parallel request completed with fallback',
+      timeoutMs: 10000,
+      maxRetries: 2,
+    }),
+  });
+  assert.equal(executeResponse.status, 201);
+  const executePayload = (await executeResponse.json()) as {
+    mode?: string;
+    execution?: {
+      status?: string;
+      degraded?: boolean;
+      inputSnapshot?: { requestedMode?: string; appliedMode?: string };
+      timeoutMs?: number;
+      maxRetries?: number;
+    };
+  };
+
+  assert.equal(executePayload.mode, 'parallel');
+  assert.equal(executePayload.execution?.status, 'completed');
+  assert.equal(executePayload.execution?.degraded, true);
+  assert.equal(executePayload.execution?.inputSnapshot?.requestedMode, 'parallel');
+  assert.equal(executePayload.execution?.inputSnapshot?.appliedMode, 'serial');
+  assert.equal(executePayload.execution?.timeoutMs, 10000);
+  assert.equal(executePayload.execution?.maxRetries, 2);
 });
 
 test('GET /api/tools filters visible tools by role', async () => {

@@ -150,17 +150,31 @@ export interface ExecutionRecord {
   taskId: string;
   status: ExecutionStatus | 'pending' | 'completed' | 'failed';
   executor?: 'claude' | 'codex' | 'openai';
-  outputSummary?: string;
-  errorMessage?: string;
-  memoryContextExcerpt?: string;
-  startedAt?: string;
-  completedAt?: string;
-  workflowPlan?: WorkflowPlan;
-  assignments?: TaskAssignment[];
+  runtimeName?: string;
+  degraded?: boolean;
+  retryCount?: number;
+  maxRetries?: number;
+  timeoutMs?: number;
   assignmentId?: string;
   assignmentRole?: TaskAssignmentRole;
   workflowStepId?: string;
   workflowPlanId?: string;
+  inputSnapshot?: Record<string, unknown>;
+  outputSnapshot?: Record<string, unknown>;
+  structuredError?: {
+    code: 'timeout' | 'runtime_unavailable' | 'execution_failed' | 'degraded' | 'unknown';
+    message: string;
+    retriable: boolean;
+    details?: Record<string, unknown>;
+  };
+  outputSummary?: string;
+  errorMessage?: string;
+  memoryContextExcerpt?: string;
+  startedAt?: string;
+  endedAt?: string;
+  completedAt?: string;
+  workflowPlan?: WorkflowPlan;
+  assignments?: TaskAssignment[];
 }
 
 export interface ToolDefinition {

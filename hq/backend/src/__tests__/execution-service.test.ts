@@ -114,9 +114,125 @@ test('runTaskExecution serializes assignment-aware execution records', async () 
 
   assert.equal(result.execution.status, 'completed');
   assert.equal(result.execution.outputSummary, 'serial execution completed');
+  assert.equal(result.execution.runtimeName, 'local_codex_cli');
+  assert.equal(result.execution.retryCount, 0);
+  assert.equal(result.execution.maxRetries, 1);
   assert.equal(result.workflowPlan?.mode, 'serial');
   assert.equal(result.assignments?.length, 2);
   assert.equal(result.execution.workflowPlan?.mode, 'serial');
   assert.equal(result.execution.assignments?.length, 2);
   assert.equal(updatedTasks.length, 1);
+});
+
+test('runTaskExecution retries retriable runtime errors before succeeding', async () => {
+  const savedExecutions: ExecutionLifecycleRecord[] = [];
+  let attempts = 0;
+  const store = {
+    async saveExecution(execution: ExecutionLifecycleRecord) {
+      savedExecutions.push(execution);
+    },
+    async updateExecution(_id: string, updater: (execution: ExecutionLifecycleRecord) => ExecutionLifecycleRecord) {
+      savedExecutions[0] = updater(savedExecutions[0]);
+      return savedExecutions[0];
+    },
+    async updateTask(_id: string, updater: (task: TaskRecord) => TaskRecord) {
+      return updater({
+        id: 'task-retry',
+        title: 'Retry runtime',
+        description: 'retry path',
+        taskType: 'general',
+        priority: 'medium',
+        status: 'running',
+        executionMode: 'single',
+        approvalRequired: false,
+        riskLevel: 'low',
+        requestedBy: 'system',
+        requestedAt: '2026-03-24T00:00:00.000Z',
+        recommendedAgentRole: 'dispatcher',
+        candidateAgentRoles: ['dispatcher'],
+        routeReason: 'retry test',
+        routingStatus: 'manual_review',
+        createdAt: 'now',
+        updatedAt: 'now',
+      });
+    },
+  } as const;
+
+  const result = await runTaskExecution(
+    {
+      taskId: 'task-retry',
+      executor: 'codex',
+      summary: 'final summary',
+      maxRetries: 2,
+      runtimeRunner: async () => {
+        attempts += 1;
+        if (attempts < 2) {
+          throw new Error('Execution timed out after 10ms');
+        }
+        return {
+          outputSummary: 'final summary',
+          outputSnapshot: { attempts },
+        };
+      },
+      timeoutMs: 10,
+    },
+    store,
+  );
+
+  assert.equal(result.execution.status, 'completed');
+  assert.equal(result.execution.retryCount, 1);
+  assert.equal(result.execution.outputSnapshot?.attempts, 2);
+});
+
+test('runTaskExecution stores structured failure when retries are exhausted', async () => {
+  const savedExecutions: ExecutionLifecycleRecord[] = [];
+  const store = {
+    async saveExecution(execution: ExecutionLifecycleRecord) {
+      savedExecutions.push(execution);
+    },
+    async updateExecution(_id: string, updater: (execution: ExecutionLifecycleRecord) => ExecutionLifecycleRecord) {
+      savedExecutions[0] = updater(savedExecutions[0]);
+      return savedExecutions[0];
+    },
+    async updateTask(_id: string, updater: (task: TaskRecord) => TaskRecord) {
+      return updater({
+        id: 'task-failure',
+        title: 'Fail runtime',
+        description: 'failure path',
+        taskType: 'general',
+        priority: 'medium',
+        status: 'running',
+        executionMode: 'single',
+        approvalRequired: false,
+        riskLevel: 'low',
+        requestedBy: 'system',
+        requestedAt: '2026-03-24T00:00:00.000Z',
+        recommendedAgentRole: 'dispatcher',
+        candidateAgentRoles: ['dispatcher'],
+        routeReason: 'failure test',
+        routingStatus: 'manual_review',
+        createdAt: 'now',
+        updatedAt: 'now',
+      });
+    },
+  } as const;
+
+  const result = await runTaskExecution(
+    {
+      taskId: 'task-failure',
+      executor: 'claude',
+      summary: 'unused',
+      maxRetries: 1,
+      timeoutMs: 5,
+      runtimeRunner: async () => {
+        throw new Error('Execution timed out after 5ms');
+      },
+    },
+    store,
+  );
+
+  assert.equal(result.execution.status, 'failed');
+  assert.equal(result.execution.retryCount, 1);
+  assert.equal(result.execution.structuredError?.code, 'timeout');
+  assert.equal(result.execution.structuredError?.retriable, true);
 });

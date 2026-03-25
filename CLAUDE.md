@@ -25,12 +25,20 @@ cd hq/frontend && npm run dev
 
 ## Development Commands
 
+### Initial Setup
+```bash
+cd hq && ./setup.sh    # One-time setup: installs deps, generates runtime artifacts
+```
+
 ### Backend (`hq/backend/`)
 ```bash
 npm run build          # Compile TypeScript
 npm run start:web     # Start Express server (port 3333)
 npm run dev:web        # Dev mode with ts-node
 npm run start:mcp      # Start MCP server for Claude integration
+npm run test           # Run all tests (build + node:test)
+npm run test -- --test-name-pattern="execution"  # Run matching tests only
+node --test dist/__tests__/execution-service.test.js  # Run specific test file
 ```
 
 ### Frontend (`hq/frontend/`)
@@ -39,7 +47,12 @@ npm run dev            # Start Next.js dev server (port 3008)
 npm run build          # Production build
 npm run start          # Start production server
 npm run lint           # Run ESLint
+npm run test:e2e       # Run Playwright E2E tests (tests/e2e/)
 ```
+
+### Environment Variables
+- `AGENCY_HOME` - Runtime state directory (default: `~/.agency`)
+- `AGENCY_MCP_SAMPLING_POLICY` - Sampling mode: `client` (default) | `server` | `disabled`
 
 ---
 
@@ -116,6 +129,21 @@ When `consult_the_agency` is called, the system:
 3. If score < THRESHOLD (5), suggests hiring a better-matched inactive agent
 4. Injects relevant knowledge base entries into the task context
 
+### Runtime Architecture (Phase 3+)
+
+The runtime system supports multi-host execution with capability detection:
+
+- **Host Registry** (`hq/generated/registry/hosts.json`): Declares available executors (claude, codex, etc.) with capabilities
+- **Dispatcher Runtime**: Routes execution requests to appropriate hosts based on task requirements and host capabilities
+- **Runtime Adapter**: Abstracts host differences (sampling support, injection modes) for unified execution
+- **Capability Levels**: `full` (all features) vs `partial` (degraded execution with fallbacks)
+- **Discovery API**: `GET /api/runtime/discovery` - scans system for available runtime hosts
+
+**Sampling Policy** (`AGENCY_MCP_SAMPLING_POLICY`):
+- `client` - Host's native sampling (preferred)
+- `server` - HQ server-side sampling
+- `disabled` - No sampling (direct prompts only)
+
 ### Knowledge System
 
 - **File**: `hq/backend/company_knowledge.json`
@@ -155,6 +183,23 @@ When `consult_the_agency` is called, the system:
 - **Backend**: Uses strict TypeScript - no `any` types. Define interfaces in `types.ts`
 - **Frontend**: React 19 with strict null checks. Ref components to <300 lines
 - **Pattern**: Use `for...of` instead of `forEach`/`reduce` when dealing with union types (`T | null`) to avoid TypeScript inference issues
+
+---
+
+## Testing
+
+### Backend Tests (Node.js built-in `node:test`)
+- Location: `hq/backend/src/__tests__/
+- Test files must end in `.test.ts`
+- Uses `node:test` + `assert` (no external framework)
+- Run all: `npm run test` in `hq/backend/`
+- Run single file: `node --test dist/__tests__/filename.test.js`
+
+### Frontend E2E Tests (Playwright)
+- Location: `hq/frontend/tests/e2e/`
+- Config: `playwright.config.ts`
+- Run: `npm run test:e2e` in `hq/frontend/`
+- Tests require frontend dev server running (auto-started by Playwright)
 
 ---
 

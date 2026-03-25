@@ -4,8 +4,15 @@ import type {
   ExecutionRecord,
   TaskAssignment,
   TaskExecutionMode,
+  TaskRecord,
   WorkflowPlan,
 } from '../shared/task-types';
+import {
+  resolveRuntimeAdapter,
+  resolveRuntimeName,
+  type RuntimeExecutionContext,
+  type RuntimeExecutionError,
+} from './runtime-adapter';
 
 export interface SerialWorkflowBundle {
   workflowPlan: WorkflowPlan;
@@ -153,13 +160,23 @@ export async function runTaskExecution(
   input: {
     taskId: string;
     executor: 'claude' | 'codex' | 'openai';
+    runtimeName?: string;
     summary: string;
     memoryContextExcerpt?: string;
     executionMode?: TaskExecutionMode;
     workflowPlan?: WorkflowPlan;
     assignments?: TaskAssignment[];
+    task?: TaskRecord;
     taskTitle?: string;
     recommendedAgentRole?: string;
+    timeoutMs?: number;
+    maxRetries?: number;
+    degraded?: boolean;
+    inputSnapshot?: Record<string, unknown>;
+    runtimeRunner?: (context: RuntimeExecutionContext) => Promise<{
+      outputSummary: string;
+      outputSnapshot?: Record<string, unknown>;
+    }>;
   },
   store: Pick<Store, 'saveExecution' | 'updateExecution' | 'updateTask'> &
     Partial<Pick<Store, 'saveTaskAssignment' | 'updateTaskAssignment' | 'saveWorkflowPlan' | 'updateWorkflowPlan'>>
@@ -169,6 +186,11 @@ export async function runTaskExecution(
   workflowPlan?: WorkflowPlan;
   assignments?: TaskAssignment[];
 }> {
+  const timeoutMs = Number.isFinite(input.timeoutMs) && (input.timeoutMs ?? 0) > 0 ? (input.timeoutMs as number) : 30_000;
+  const maxRetries = Number.isFinite(input.maxRetries) && (input.maxRetries ?? 0) >= 0 ? (input.maxRetries as number) : 1;
+  const runtimeName = input.runtimeName || resolveRuntimeName(input.executor);
+  const runtimeAdapter = resolveRuntimeAdapter(input.executor);
+
   const serialBundle =
     input.executionMode === 'serial'
       ? input.workflowPlan && input.assignments
@@ -195,23 +217,101 @@ export async function runTaskExecution(
   const started = beginExecution({
     taskId: input.taskId,
     executor: input.executor,
+    runtimeName,
+    degraded: input.degraded,
+    timeoutMs,
+    maxRetries,
+    inputSnapshot: input.inputSnapshot,
     memoryContextExcerpt: input.memoryContextExcerpt,
     workflowPlan: completedWorkflowArtifacts?.workflowPlan,
     assignments: completedWorkflowArtifacts?.assignments,
   });
 
   await store.saveExecution(started);
-  const finalizedWorkflowArtifacts = serialBundle
-    ? completeSerialWorkflowBundle(serialBundle)
-    : completedWorkflowArtifacts;
-  const completed = finalizedWorkflowArtifacts
-    ? completeExecution(started, {
+  let lastError: RuntimeExecutionError | undefined;
+  let finalizedExecution: ExecutionLifecycleRecord | null = null;
+  let finalizedWorkflowArtifacts: { workflowPlan?: WorkflowPlan; assignments?: TaskAssignment[] } | undefined;
+  let finalAttempt = 0;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+    finalAttempt = attempt;
+    try {
+      const runtimeContext: RuntimeExecutionContext = {
+        task: input.task ?? {
+            id: input.taskId,
+            title: input.taskTitle ?? input.taskId,
+            description: input.summary,
+            taskType: 'general',
+            priority: 'medium',
+            status: 'running',
+            executionMode: input.executionMode ?? 'single',
+            approvalRequired: false,
+            riskLevel: 'low',
+            requestedBy: 'system',
+            requestedAt: new Date().toISOString(),
+            recommendedAgentRole: input.recommendedAgentRole ?? 'dispatcher',
+            candidateAgentRoles: [input.recommendedAgentRole ?? 'dispatcher'],
+            routeReason: 'runtime fallback context',
+            routingStatus: 'manual_review',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+        executor: input.executor,
+        runtimeName,
+        executionMode: input.executionMode ?? 'single',
         summary: input.summary,
-        workflowPlan: finalizedWorkflowArtifacts.workflowPlan,
-        assignments: finalizedWorkflowArtifacts.assignments,
-      })
-    : completeExecution(started, { summary: input.summary });
-  await store.updateExecution(started.id, () => completed);
+        memoryContextExcerpt: input.memoryContextExcerpt,
+        timeoutMs,
+        maxRetries,
+        inputSnapshot: input.inputSnapshot,
+      };
+      const runtimeResult = await withTimeout(
+        input.runtimeRunner ? input.runtimeRunner(runtimeContext) : runtimeAdapter.run(runtimeContext),
+        timeoutMs,
+      );
+
+      finalizedWorkflowArtifacts = serialBundle
+        ? completeSerialWorkflowBundle(serialBundle)
+        : completedWorkflowArtifacts;
+      finalizedExecution = finalizedWorkflowArtifacts
+        ? completeExecution(started, {
+            summary: runtimeResult.outputSummary || input.summary,
+            outputSnapshot: runtimeResult.outputSnapshot,
+            workflowPlan: finalizedWorkflowArtifacts.workflowPlan,
+            assignments: finalizedWorkflowArtifacts.assignments,
+            retryCount: attempt,
+            maxRetries,
+            timeoutMs,
+            degraded: input.degraded,
+          })
+        : completeExecution(started, {
+            summary: runtimeResult.outputSummary || input.summary,
+            outputSnapshot: runtimeResult.outputSnapshot,
+            retryCount: attempt,
+            maxRetries,
+            timeoutMs,
+            degraded: input.degraded,
+          });
+      break;
+    } catch (error) {
+      lastError = toRuntimeError(error, timeoutMs);
+      if (attempt < maxRetries && lastError.retriable) {
+        continue;
+      }
+    }
+  }
+
+  const completedOrFailed =
+    finalizedExecution ??
+    failExecution(started, {
+      errorMessage: lastError?.message || 'Execution failed',
+      retryCount: finalAttempt,
+      maxRetries,
+      timeoutMs,
+      degraded: input.degraded,
+      structuredError: lastError,
+    });
+  await store.updateExecution(started.id, () => completedOrFailed);
 
   if (finalizedWorkflowArtifacts?.workflowPlan && finalizedWorkflowArtifacts.assignments) {
     if (store.updateWorkflowPlan) {
@@ -237,12 +337,12 @@ export async function runTaskExecution(
 
   const task = await store.updateTask(input.taskId, (currentTask) => ({
     ...currentTask,
-    status: 'completed',
+    status: completedOrFailed.status === 'completed' ? 'completed' : 'failed',
     updatedAt: new Date().toISOString(),
   }));
 
   return {
-    execution: completed,
+    execution: completedOrFailed,
     task,
     ...(finalizedWorkflowArtifacts
       ? {
@@ -256,6 +356,11 @@ export async function runTaskExecution(
 export function beginExecution(input: {
   taskId: string;
   executor: 'claude' | 'codex' | 'openai';
+  runtimeName?: string;
+  degraded?: boolean;
+  timeoutMs?: number;
+  maxRetries?: number;
+  inputSnapshot?: Record<string, unknown>;
   memoryContextExcerpt?: string;
   workflowPlan?: WorkflowPlan;
   assignments?: TaskAssignment[];
@@ -265,6 +370,12 @@ export function beginExecution(input: {
     taskId: input.taskId,
     status: 'pending',
     executor: input.executor,
+    runtimeName: input.runtimeName || resolveRuntimeName(input.executor),
+    degraded: Boolean(input.degraded),
+    timeoutMs: input.timeoutMs,
+    maxRetries: input.maxRetries,
+    retryCount: 0,
+    inputSnapshot: input.inputSnapshot,
     memoryContextExcerpt: input.memoryContextExcerpt,
     startedAt: new Date().toISOString(),
     ...(input.workflowPlan ? { workflowPlan: input.workflowPlan } : {}),
@@ -276,6 +387,11 @@ export function completeExecution(
   execution: ExecutionLifecycleRecord,
   input: {
     summary: string;
+    outputSnapshot?: Record<string, unknown>;
+    retryCount?: number;
+    maxRetries?: number;
+    timeoutMs?: number;
+    degraded?: boolean;
     workflowPlan?: WorkflowPlan;
     assignments?: TaskAssignment[];
   }
@@ -284,6 +400,12 @@ export function completeExecution(
     ...execution,
     status: 'completed',
     outputSummary: input.summary,
+    outputSnapshot: input.outputSnapshot,
+    retryCount: input.retryCount ?? execution.retryCount,
+    maxRetries: input.maxRetries ?? execution.maxRetries,
+    timeoutMs: input.timeoutMs ?? execution.timeoutMs,
+    degraded: input.degraded ?? execution.degraded,
+    endedAt: new Date().toISOString(),
     completedAt: new Date().toISOString(),
     ...(input.workflowPlan ? { workflowPlan: input.workflowPlan } : {}),
     ...(input.assignments ? { assignments: input.assignments } : {}),
@@ -292,12 +414,73 @@ export function completeExecution(
 
 export function failExecution(
   execution: ExecutionLifecycleRecord,
-  input: { errorMessage: string }
+  input: {
+    errorMessage: string;
+    retryCount?: number;
+    maxRetries?: number;
+    timeoutMs?: number;
+    degraded?: boolean;
+    structuredError?: RuntimeExecutionError;
+  }
 ): ExecutionLifecycleRecord {
   return {
     ...execution,
     status: 'failed',
     errorMessage: input.errorMessage,
+    retryCount: input.retryCount ?? execution.retryCount,
+    maxRetries: input.maxRetries ?? execution.maxRetries,
+    timeoutMs: input.timeoutMs ?? execution.timeoutMs,
+    degraded: input.degraded ?? execution.degraded,
+    structuredError: input.structuredError
+      ? {
+          code: input.structuredError.code,
+          message: input.structuredError.message,
+          retriable: input.structuredError.retriable,
+          details: input.structuredError.details,
+        }
+      : execution.structuredError,
+    endedAt: new Date().toISOString(),
     completedAt: new Date().toISOString(),
+  };
+}
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  if (timeoutMs <= 0) {
+    return promise;
+  }
+
+  return new Promise<T>((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      reject(new Error(`Execution timed out after ${timeoutMs}ms`));
+    }, timeoutMs);
+
+    promise.then(
+      (value) => {
+        clearTimeout(timeout);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timeout);
+        reject(error);
+      },
+    );
+  });
+}
+
+function toRuntimeError(error: unknown, timeoutMs: number): RuntimeExecutionError {
+  const message = error instanceof Error ? error.message : 'Unknown runtime failure';
+  if (message.includes('timed out')) {
+    return {
+      code: 'timeout',
+      message,
+      retriable: true,
+      details: { timeoutMs },
+    };
+  }
+
+  return {
+    code: 'execution_failed',
+    message,
+    retriable: false,
   };
 }

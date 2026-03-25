@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 import http from 'node:http';
+import path from 'node:path';
 import { WebSocket, WebSocketServer } from 'ws';
 import { Scanner } from '../scanner';
 import { SkillScanner } from '../skill-scanner';
@@ -9,6 +10,7 @@ import { createDiscussionService } from './create-discussion-service';
 import { registerBackendRoutes } from './register-backend-routes';
 import type { DashboardEvent } from '../observability/dashboard-events';
 import { createRuntimePaths } from '../runtime-state';
+import { initializeMemoryLayout, getMemoryDirectory } from '../memory/memory-initializer';
 
 interface WebServerRuntimeDependencies {
   runAdvancedDiscussion?: (topic: string) => Promise<{ summary: string }>;
@@ -90,6 +92,16 @@ export function createWebServerRuntime({
   const server = http.createServer(app);
   const wss = setupWebSocket(server);
   const broadcast = (event: DashboardEvent) => broadcastToClients(wss, event);
+
+  // Initialize .ai/ memory directory structure
+  const memoryRootDir = getMemoryDirectory();
+  initializeMemoryLayout(memoryRootDir)
+    .then((layout) => {
+      console.log(`[Memory] Initialized .ai/ directory structure at ${layout.memoryRootDir}`);
+    })
+    .catch((error: Error) => {
+      console.error(`[Memory] Failed to initialize .ai/ directory structure:`, error.message);
+    });
 
   registerRoutes(app, scanner, skillScanner, store, broadcast, dependencies.runAdvancedDiscussion);
 

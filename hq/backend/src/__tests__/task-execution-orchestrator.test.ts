@@ -59,6 +59,7 @@ test('executeTaskRecord runs single execution through runtime service', async ()
 
   assert.equal(result.execution.status, 'completed');
   assert.equal(result.execution.outputSummary, 'done');
+  assert.equal(result.execution.runtimeName, 'local_codex_cli');
   assert.equal(updatedTaskStatus, 'completed');
 });
 
@@ -201,4 +202,43 @@ test('executeTaskRecord emits serial workflow plan and assignments for serial ta
   assert.equal(result.assignments?.length, 2);
   assert.equal(result.execution.workflowPlan?.mode, 'serial');
   assert.equal(result.execution.assignments?.[0]?.status, 'completed');
+  assert.equal(result.execution.inputSnapshot?.requestedMode, 'serial');
+  assert.equal(result.execution.inputSnapshot?.appliedMode, 'serial');
+});
+
+test('executeTaskRecord degrades parallel mode to serial when sampling is unavailable', async () => {
+  const task = makeTask({ executionMode: 'parallel' });
+  const executions: ExecutionLifecycleRecord[] = [];
+  const store = {
+    async saveExecution(execution: ExecutionLifecycleRecord) {
+      executions.push(execution);
+    },
+    async updateExecution(_id: string, updater: (execution: ExecutionLifecycleRecord) => ExecutionLifecycleRecord) {
+      const updated = updater(executions[0]);
+      executions[0] = updated;
+      return updated;
+    },
+    async updateTask(_id: string, updater: (task: TaskRecord) => TaskRecord) {
+      return updater(task);
+    },
+  } as Pick<Store, 'saveExecution' | 'updateExecution' | 'updateTask'>;
+
+  const result = await executeTaskRecord(
+    task,
+    {
+      executor: 'codex',
+      summary: 'parallel degraded summary',
+      executionMode: 'parallel',
+    },
+    store,
+    {
+      sessionCapabilities: { sampling: false },
+    },
+  );
+
+  assert.equal(result.mode, 'parallel');
+  assert.equal(result.execution.status, 'completed');
+  assert.equal(result.execution.degraded, true);
+  assert.equal(result.execution.inputSnapshot?.requestedMode, 'parallel');
+  assert.equal(result.execution.inputSnapshot?.appliedMode, 'serial');
 });
