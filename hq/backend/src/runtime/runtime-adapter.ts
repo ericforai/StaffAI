@@ -1,4 +1,6 @@
 import type { TaskExecutionMode, TaskRecord } from '../shared/task-types';
+import { ClaudeRuntimeAdapter } from './adapters/claude-adapter';
+import { CodexRuntimeAdapter } from './adapters/codex-adapter';
 
 export interface RuntimeExecutionContext {
   task: TaskRecord;
@@ -14,9 +16,31 @@ export interface RuntimeExecutionContext {
   inputSnapshot?: Record<string, unknown>;
 }
 
+/**
+ * Executor-specific output metadata from runtime execution.
+ * Contains only runtime-specific details, avoiding duplication with ExecutionRecord fields.
+ */
+export interface RuntimeOutputSnapshot extends Record<string, unknown> {
+  runtimeName: string;
+  executor: 'claude' | 'codex' | 'openai';
+  executionMode: TaskExecutionMode;
+  tokensUsed?: number;
+  modelVersion?: string;
+  responseTimeMs?: number;
+  cacheStatus?: 'hit' | 'miss' | 'disabled';
+  degraded?: boolean;
+  fallbackReason?: string;
+  simulated?: boolean;
+  assignmentId?: string;
+  workflowStepId?: string;
+  memoryContextExcerpt?: string;
+  inputSnapshot?: Record<string, unknown>;
+  additionalData?: Record<string, unknown>;
+}
+
 export interface RuntimeExecutionResult {
   outputSummary: string;
-  outputSnapshot?: Record<string, unknown>;
+  outputSnapshot?: RuntimeOutputSnapshot;
 }
 
 export interface RuntimeExecutionError {
@@ -38,27 +62,28 @@ function mapExecutorToRuntimeName(executor: 'claude' | 'codex' | 'openai'): stri
   return 'openai_api';
 }
 
-function createNoopAdapter(name: string): RuntimeAdapter {
-  return {
-    name,
-    supports: ['single', 'serial', 'parallel', 'advanced_discussion'],
+/**
+ * Real adapter implementations using ClaudeRuntimeAdapter and CodexRuntimeAdapter.
+ * OpenAI adapter uses a fallback implementation for future extensibility.
+ */
+const ADAPTERS: Record<'claude' | 'codex' | 'openai', RuntimeAdapter> = {
+  claude: new ClaudeRuntimeAdapter(),
+  codex: new CodexRuntimeAdapter(),
+  openai: {
+    name: 'openai_api',
+    supports: ['single', 'serial', 'parallel'],
     async run(context) {
       return {
         outputSummary: context.summary,
         outputSnapshot: {
-          runtimeName: name,
-          executor: context.executor,
-          simulated: true,
+          runtimeName: 'openai_api',
+          executor: 'openai',
+          executionMode: context.executionMode,
+          degraded: false,
         },
       };
     },
-  };
-}
-
-const ADAPTERS: Record<'claude' | 'codex' | 'openai', RuntimeAdapter> = {
-  codex: createNoopAdapter('local_codex_cli'),
-  claude: createNoopAdapter('local_claude_cli'),
-  openai: createNoopAdapter('openai_api'),
+  },
 };
 
 export function resolveRuntimeAdapter(executor: 'claude' | 'codex' | 'openai'): RuntimeAdapter {

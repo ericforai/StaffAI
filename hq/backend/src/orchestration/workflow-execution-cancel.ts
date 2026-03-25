@@ -53,7 +53,7 @@ export async function cancelWorkflow(
 
   await store.updateWorkflowPlan(workflow.taskId, (current) => ({
     ...current,
-    status: 'running',
+    status: 'cancelled',
     updatedAt: new Date().toISOString(),
   }));
 

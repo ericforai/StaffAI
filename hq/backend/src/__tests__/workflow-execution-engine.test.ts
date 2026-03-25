@@ -118,7 +118,7 @@ function createMockTask(taskId: string): TaskRecord {
     id: taskId,
     title: 'Test task',
     description: 'Test task description',
-    taskType: 'architecture_analysis',
+    taskType: 'architecture',
     priority: 'medium',
     status: 'routed',
     executionMode: 'serial',

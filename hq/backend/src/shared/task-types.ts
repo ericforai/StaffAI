@@ -1,6 +1,7 @@
 export const TASK_STATUSES = [
   'created',
   'routed',
+  'queued',
   'running',
   'waiting_approval',
   'completed',
@@ -24,9 +25,9 @@ export const TASK_PRIORITIES = ['low', 'medium', 'high', 'urgent'] as const;
 export type TaskPriority = (typeof TASK_PRIORITIES)[number];
 
 export const TASK_TYPES = [
-  'architecture_analysis',
+  'architecture',
   'backend_implementation',
-  'code_review',
+  'code-review',
   'documentation',
   'workflow_dispatch',
   'frontend_implementation',
@@ -150,7 +151,7 @@ export interface WorkflowPlan {
   mode: WorkflowPlanMode;
   synthesisRequired: boolean;
   steps: WorkflowPlanStep[];
-  status?: 'planned' | 'running' | 'completed' | 'failed';
+  status?: 'planned' | 'running' | 'completed' | 'failed' | 'cancelled';
   createdAt?: string;
   updatedAt?: string;
 }
@@ -195,6 +196,7 @@ export interface ToolDefinition {
   description?: string;
   inputSchema?: Record<string, unknown>;
   outputSchema?: Record<string, unknown>;
+  parameters?: any;
 }
 
 export interface ToolCallLog {
@@ -211,6 +213,8 @@ export interface ToolCallLog {
   toolId?: string;
   input?: string;
   output?: string;
+  fullInput?: any;
+  fullOutput?: any;
   createdAt: string;
   updatedAt?: string;
 }

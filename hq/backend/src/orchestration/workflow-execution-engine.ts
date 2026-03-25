@@ -1,16 +1,20 @@
-import type { WorkflowPlan, TaskAssignment, TaskRecord, TaskAssignmentStatus } from '../shared/task-types';
+import * as path from 'node:path';
+import type { WorkflowPlan, TaskAssignment, TaskRecord } from '../shared/task-types';
 import type { AuditLogger, AuditEvent } from '../governance/audit-logger';
 import type { Store } from '../store';
 import type { AssignmentExecutor } from './assignment-executor';
-import { executeSerialWorkflow, executeParallelWorkflow, updateWorkflowTracking } from './workflow-execution-serial';
+import { executeSerialWorkflow, executeParallelWorkflow } from './workflow-execution-serial';
 import { cancelWorkflow } from './workflow-execution-cancel';
+import { TaskController, type ExecutionState, type PauseOptions } from '../runtime/task-controller';
+import { ExecutionStateStore } from '../runtime/execution-store';
+import { createRuntimePaths } from '../runtime/runtime-state';
 
 /**
  * Status of workflow execution
  */
 export interface WorkflowExecutionStatus {
   workflowPlanId: string;
-  status: 'planned' | 'running' | 'completed' | 'failed' | 'skipped';
+  status: 'planned' | 'running' | 'paused' | 'completed' | 'failed' | 'skipped';
   currentStep?: string;
   completedSteps: string[];
   pendingSteps: string[];
@@ -42,7 +46,12 @@ export interface WorkflowExecutionEngine {
   execute(workflowPlan: WorkflowPlan): Promise<WorkflowExecutionResult>;
 
   /**
-   * Resume a previously cancelled workflow
+   * Pause a running workflow
+   */
+  pause(workflowPlanId: string, options?: PauseOptions): Promise<void>;
+
+  /**
+   * Resume a previously paused or cancelled workflow
    */
   resume(workflowPlanId: string): Promise<void>;
 
@@ -55,6 +64,16 @@ export interface WorkflowExecutionEngine {
    * Get current execution status
    */
   getStatus(workflowPlanId: string): WorkflowExecutionStatus;
+
+  /**
+   * Get detailed execution state including pause/resume information
+   */
+  getExecutionState(workflowPlanId: string): Promise<ExecutionState | null>;
+
+  /**
+   * Initialize the engine by restoring state from ExecutionStateStore
+   */
+  initialize(): Promise<void>;
 }
 
 /**
@@ -62,7 +81,7 @@ export interface WorkflowExecutionEngine {
  */
 export interface RunningWorkflow {
   workflowPlanId: string;
-  status: 'running' | 'skipped';
+  status: 'running' | 'paused' | 'skipped';
   startedAt: string;
   completedSteps: Set<string>;
   currentStep?: string;
@@ -96,11 +115,43 @@ export class DefaultWorkflowExecutionEngine implements WorkflowExecutionEngine {
   private readonly assignmentExecutor: AssignmentExecutor;
   private readonly auditLogger: WorkflowExecutionEngineConfig['auditLogger'];
   private readonly runningWorkflows = new Map<string, RunningWorkflow>();
+  private readonly taskController: TaskController;
+  private readonly executionStore: ExecutionStateStore;
 
   constructor(config: WorkflowExecutionEngineConfig) {
     this.store = config.store;
     this.assignmentExecutor = config.assignmentExecutor;
     this.auditLogger = config.auditLogger;
+
+    const runtimePaths = createRuntimePaths();
+    const stateDir = path.join(runtimePaths.sessionsDir, 'executions');
+    this.executionStore = new ExecutionStateStore(stateDir);
+    this.taskController = new TaskController(this.executionStore);
+
+    this.initialize().catch((error) => {
+      console.error('Failed to initialize WorkflowExecutionEngine:', error);
+    });
+  }
+
+  async initialize(): Promise<void> {
+    const allStates = await this.executionStore.listAll();
+    for (const state of allStates) {
+      if (state.status === 'running' || state.status === 'paused') {
+        const checkpointData = state.checkpointData as {
+          startedAt?: string;
+          completedSteps?: string[];
+          currentStep?: string;
+        } | undefined;
+
+        this.runningWorkflows.set(state.executionId, {
+          workflowPlanId: state.executionId,
+          status: state.status === 'running' ? 'running' : 'paused',
+          startedAt: state.startedAt,
+          completedSteps: new Set(checkpointData?.completedSteps ?? []),
+          currentStep: checkpointData?.currentStep,
+        });
+      }
+    }
   }
 
   async execute(workflowPlan: WorkflowPlan): Promise<WorkflowExecutionResult> {
@@ -142,6 +193,15 @@ export class DefaultWorkflowExecutionEngine implements WorkflowExecutionEngine {
       status: 'running',
       startedAt: new Date().toISOString(),
       completedSteps: new Set(),
+    });
+
+    // Save initial state to ExecutionStateStore to satisfy TaskController requirements
+    await this.executionStore.save({
+      executionId: workflowPlan.id,
+      status: 'running',
+      taskId: workflowPlan.taskId,
+      executor: 'claude', // Default executor for workflows
+      startedAt: new Date().toISOString(),
     });
 
     await this.updateWorkflowStatus(workflowPlan.taskId, 'running');
@@ -190,23 +250,78 @@ export class DefaultWorkflowExecutionEngine implements WorkflowExecutionEngine {
     return result;
   }
 
-  async resume(workflowPlanId: string): Promise<void> {
+  async pause(workflowPlanId: string, options?: PauseOptions): Promise<void> {
     const running = this.runningWorkflows.get(workflowPlanId);
-    if (running && running.status === 'skipped') {
+    if (running) {
+      this.runningWorkflows.set(workflowPlanId, {
+        ...running,
+        status: 'paused',
+      });
+    }
+
+    await this.taskController.pause(workflowPlanId, options);
+
+    await this.logAuditEvent({
+      entityType: 'execution',
+      entityId: workflowPlanId,
+      action: 'paused',
+      actor: 'system',
+      newState: { status: 'paused', checkpoint: !!options?.checkpointData },
+    });
+  }
+
+  async resume(workflowPlanId: string): Promise<void> {
+    const executionState = await this.executionStore.load(workflowPlanId);
+    if (!executionState) {
+      throw new Error(`Execution state not found for workflow: ${workflowPlanId}`);
+    }
+
+    if (executionState.status !== 'paused') {
+      throw new Error(`Cannot resume workflow with status: ${executionState.status}`);
+    }
+
+    const running = this.runningWorkflows.get(workflowPlanId);
+    if (running) {
       this.runningWorkflows.set(workflowPlanId, {
         ...running,
         status: 'running',
       });
-
-      await this.logAuditEvent({
-        entityType: 'execution',
-        entityId: workflowPlanId,
-        action: 'resumed',
-        actor: 'system',
-        previousState: { status: 'skipped' },
-        newState: { status: 'running' },
+    } else if (executionState.checkpointData) {
+      const checkpointData = executionState.checkpointData as {
+        startedAt?: string;
+        completedSteps?: string[];
+        currentStep?: string;
+      };
+      this.runningWorkflows.set(workflowPlanId, {
+        workflowPlanId,
+        status: 'running',
+        startedAt: executionState.startedAt,
+        completedSteps: new Set(checkpointData.completedSteps ?? []),
+        currentStep: checkpointData.currentStep,
       });
     }
+
+    await this.taskController.resume(workflowPlanId);
+
+    if (executionState.taskId) {
+      const workflow = await this.store.getWorkflowPlanByTaskId(executionState.taskId);
+      if (workflow) {
+        await this.store.updateWorkflowPlan(executionState.taskId, (current) => ({
+          ...current,
+          status: 'running',
+          updatedAt: new Date().toISOString(),
+        }));
+      }
+    }
+
+    await this.logAuditEvent({
+      entityType: 'execution',
+      entityId: workflowPlanId,
+      action: 'resumed',
+      actor: 'system',
+      previousState: { status: 'paused' },
+      newState: { status: 'running' },
+    });
   }
 
   async cancel(workflowPlanId: string): Promise<void> {
@@ -217,6 +332,11 @@ export class DefaultWorkflowExecutionEngine implements WorkflowExecutionEngine {
       this.runningWorkflows,
       this.auditLogger ? (event) => this.logAuditEvent(event as any) : undefined
     );
+    // Only cancel in task controller if execution state exists
+    const executionState = await this.executionStore.load(workflowPlanId);
+    if (executionState) {
+      await this.taskController.cancel(workflowPlanId);
+    }
   }
 
   getStatus(workflowPlanId: string): WorkflowExecutionStatus {
@@ -230,6 +350,10 @@ export class DefaultWorkflowExecutionEngine implements WorkflowExecutionEngine {
       startedAt: running?.startedAt,
       endedAt: undefined,
     };
+  }
+
+  async getExecutionState(workflowPlanId: string): Promise<ExecutionState | null> {
+    return await this.executionStore.load(workflowPlanId);
   }
 
   private async updateWorkflowStatus(taskId: string, status: WorkflowPlan['status']): Promise<void> {

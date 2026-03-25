@@ -84,7 +84,7 @@ test('runTaskExecution serializes assignment-aware execution records', async () 
         id: 'task-serial',
         title: 'Split runtime from API',
         description: 'Create a serial baseline',
-        taskType: 'architecture_analysis',
+        taskType: 'architecture',
         priority: 'medium',
         status: 'running',
         executionMode: 'serial',

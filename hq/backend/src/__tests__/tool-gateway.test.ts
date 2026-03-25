@@ -12,8 +12,10 @@ test('tool gateway filters visible tools by role', () => {
   });
 
   const reviewerTools = gateway.listTools('reviewer');
-  assert.equal(reviewerTools.some((tool) => tool.name === 'runtime_executor'), false);
-  assert.equal(reviewerTools.some((tool) => tool.name === 'docs_search'), true);
+  // file_write is NOT for reviewer
+  assert.equal(reviewerTools.some((tool) => tool.name === 'file_write'), false);
+  // file_read IS for reviewer
+  assert.equal(reviewerTools.some((tool) => tool.name === 'file_read'), true);
   assert.equal(savedLogs.length, 0);
 });
 
@@ -26,8 +28,8 @@ test('tool gateway blocks high-risk tools without approval', async () => {
   });
 
   const result = await gateway.executeTool(
-    'runtime_executor',
-    { task: 'Apply production migration' },
+    'file_write',
+    { path: 'test-blocked.txt', content: 'test' },
     { actorRole: 'backend-developer', taskId: 'task-1', executionId: 'execution-1' }
   );
 
@@ -37,7 +39,7 @@ test('tool gateway blocks high-risk tools without approval', async () => {
   assert.equal(savedLogs.length, 1);
 });
 
-test('tool gateway logs medium-risk tool execution when allowed', async () => {
+test('tool gateway executes low-risk tool when allowed', async () => {
   const savedLogs: ToolCallLog[] = [];
   const gateway = new ToolGateway({
     async saveToolCallLog(log: ToolCallLog) {
@@ -46,14 +48,17 @@ test('tool gateway logs medium-risk tool execution when allowed', async () => {
   });
 
   const result = await gateway.executeTool(
-    'test_runner',
-    { target: 'backend' },
+    'file_read',
+    { path: 'package.json' },
     { actorRole: 'backend-developer', taskId: 'task-1', executionId: 'execution-1' }
   );
 
+  if (!result.ok) {
+    console.error('Tool execution failed:', result.error);
+  }
   assert.equal(result.ok, true);
   assert.equal(result.log.status, 'completed');
-  assert.equal(result.log.riskLevel, 'medium');
-  assert.match(result.output?.summary ?? '', /Ran bounded test target/);
+  assert.equal(result.log.riskLevel, 'low');
+  assert.match(result.output?.summary.toLowerCase() ?? '', /read file/);
   assert.equal(savedLogs.length, 1);
 });
