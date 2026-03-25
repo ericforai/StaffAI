@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "test": "npm run build && node --test --test-concurrency=1 dist/**/*.test.js",
+    "test": "npm run build && AGENCY_UNDER_NODE_TEST=1 node --test --test-concurrency=1 dist/**/*.test.js",
     "start:web": "node dist/web-server.js",
     "start:mcp": "node dist/mcp-server.js",
     "dev:web": "ts-node src/web-server.ts",

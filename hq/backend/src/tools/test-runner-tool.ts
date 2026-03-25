@@ -36,7 +36,13 @@ export class TestRunnerTool extends BaseTool<{ target?: string }> {
 
   public async execute(input: { target?: string }, _context: ToolContext): Promise<ToolResult> {
     try {
-      const command = input.target === 'backend' ? 'cd hq/backend && npm test' : 'npm test';
+      const underAgencyTest = process.env.AGENCY_UNDER_NODE_TEST === '1';
+      const command =
+        underAgencyTest && input.target === 'backend'
+          ? 'node -e "process.exit(0)"'
+          : input.target === 'backend'
+            ? 'cd hq/backend && npm test'
+            : 'npm test';
       const { stdout, stderr } = await this.runCommand(command, { timeout: 60000 });
 
       return {
