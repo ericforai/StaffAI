@@ -164,7 +164,12 @@ test('composition roots may assemble api routes without tripping the guard', () 
 test('legacy root-level platform modules stay migrated into bounded contexts', () => {
   const topLevelSourceFiles = fs
     .readdirSync(BACKEND_SRC_ROOT, { withFileTypes: true })
-    .filter((entry) => entry.isFile() && entry.name.endsWith('.ts'))
+    .filter(
+      (entry) =>
+        entry.isFile() &&
+        entry.name.endsWith('.ts') &&
+        !entry.name.endsWith('.d.ts'),
+    )
     .map((entry) => entry.name)
     .sort();
 

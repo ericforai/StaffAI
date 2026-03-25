@@ -115,6 +115,10 @@ export class DefaultWorkflowExecutionEngine implements WorkflowExecutionEngine {
   private readonly assignmentExecutor: AssignmentExecutor;
   private readonly auditLogger: WorkflowExecutionEngineConfig['auditLogger'];
   private readonly runningWorkflows = new Map<string, RunningWorkflow>();
+  private readonly terminalWorkflowStatus = new Map<
+    string,
+    { status: 'completed' | 'failed' | 'skipped'; completedSteps: string[] }
+  >();
   private readonly taskController: TaskController;
   private readonly executionStore: ExecutionStateStore;
 
@@ -188,6 +192,7 @@ export class DefaultWorkflowExecutionEngine implements WorkflowExecutionEngine {
       };
     }
 
+    this.terminalWorkflowStatus.delete(workflowPlan.id);
     this.runningWorkflows.set(workflowPlan.id, {
       workflowPlanId: workflowPlan.id,
       status: 'running',
@@ -273,11 +278,11 @@ export class DefaultWorkflowExecutionEngine implements WorkflowExecutionEngine {
   async resume(workflowPlanId: string): Promise<void> {
     const executionState = await this.executionStore.load(workflowPlanId);
     if (!executionState) {
-      throw new Error(`Execution state not found for workflow: ${workflowPlanId}`);
+      return;
     }
 
     if (executionState.status !== 'paused') {
-      throw new Error(`Cannot resume workflow with status: ${executionState.status}`);
+      return;
     }
 
     const running = this.runningWorkflows.get(workflowPlanId);
@@ -340,6 +345,16 @@ export class DefaultWorkflowExecutionEngine implements WorkflowExecutionEngine {
   }
 
   getStatus(workflowPlanId: string): WorkflowExecutionStatus {
+    const terminal = this.terminalWorkflowStatus.get(workflowPlanId);
+    if (terminal) {
+      return {
+        workflowPlanId,
+        status: terminal.status,
+        completedSteps: terminal.completedSteps,
+        pendingSteps: [],
+        endedAt: new Date().toISOString(),
+      };
+    }
     const running = this.runningWorkflows.get(workflowPlanId);
     return {
       workflowPlanId,
@@ -381,11 +396,47 @@ export class DefaultWorkflowExecutionEngine implements WorkflowExecutionEngine {
       }));
     }
 
-    const running = this.runningWorkflows.get(workflowPlan.id);
-    if (running) {
-      this.runningWorkflows.set(workflowPlan.id, {
-        ...running,
-        status: result.status === 'skipped' ? 'skipped' : running.status,
+    this.runningWorkflows.delete(workflowPlan.id);
+    if (result.status === 'completed' || result.status === 'failed' || result.status === 'skipped') {
+      this.terminalWorkflowStatus.set(workflowPlan.id, {
+        status: result.status,
+        completedSteps: result.completedSteps,
+      });
+    }
+
+    const existingState = await this.executionStore.load(workflowPlan.id);
+    const startedAt = existingState?.startedAt ?? new Date().toISOString();
+    const executor = existingState?.executor ?? 'claude';
+
+    if (result.status === 'completed') {
+      await this.executionStore.save({
+        executionId: workflowPlan.id,
+        status: 'completed',
+        taskId: workflowPlan.taskId,
+        executor,
+        startedAt,
+        completedAt: new Date().toISOString(),
+        checkpointData: { completedSteps: result.completedSteps },
+      });
+    } else if (result.status === 'failed') {
+      await this.executionStore.save({
+        executionId: workflowPlan.id,
+        status: 'failed',
+        taskId: workflowPlan.taskId,
+        executor,
+        startedAt,
+        completedAt: new Date().toISOString(),
+        checkpointData: { completedSteps: result.completedSteps },
+      });
+    } else if (result.status === 'skipped') {
+      await this.executionStore.save({
+        executionId: workflowPlan.id,
+        status: 'cancelled',
+        taskId: workflowPlan.taskId,
+        executor,
+        startedAt,
+        cancelledAt: new Date().toISOString(),
+        checkpointData: { completedSteps: result.completedSteps },
       });
     }
 

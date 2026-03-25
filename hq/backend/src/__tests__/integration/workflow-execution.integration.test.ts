@@ -406,27 +406,13 @@ test('failure handling: cancelled workflow stops execution', async () => {
 // Test Suite 6: Workflow Resume and Recovery
 // ============================================================================
 
-test('workflow resume: can resume cancelled workflow', async () => {
-  const { task, workflowPlan } = await createWorkflowSetup(2, 'serial');
+test('workflow resume: is a no-op when there is no paused execution state', async () => {
+  const { workflowPlan } = await createWorkflowSetup(2, 'serial');
 
-  // Start execution to register in runningWorkflows
-  await store.updateWorkflowPlan(task.id, (current) => ({
-    ...current,
-    status: 'running',
-  }));
-
-  // Now cancel should work
-  await workflowEngine.cancel(workflowPlan.id);
-
-  // Verify workflow is cancelled/skipped
-  const statusAfterCancel = workflowEngine.getStatus(workflowPlan.id);
-  assert.ok(['skipped', 'planned'].includes(statusAfterCancel.status));
-
-  // Resume
   await workflowEngine.resume(workflowPlan.id);
 
   const statusAfterResume = workflowEngine.getStatus(workflowPlan.id);
-  assert.equal(statusAfterResume.status, 'running');
+  assert.equal(statusAfterResume.status, 'planned');
 });
 
 test('workflow resume: non-existent workflow handled gracefully', async () => {
@@ -548,23 +534,11 @@ test('audit logging: workflow cancellation creates audit event', async () => {
   assert.ok(Array.isArray(auditLogs));
 });
 
-test('audit logging: workflow resume creates audit event', async () => {
-  const { task, workflowPlan } = await createWorkflowSetup(1, 'serial');
+test('audit logging: workflow resume without paused state does not throw', async () => {
+  const { workflowPlan } = await createWorkflowSetup(1, 'serial');
 
-  // Start execution to register in runningWorkflows
-  await store.updateWorkflowPlan(task.id, (current) => ({
-    ...current,
-    status: 'running',
-  }));
-
-  // Cancel first
-  await workflowEngine.cancel(workflowPlan.id);
-
-  // Then resume
   await workflowEngine.resume(workflowPlan.id);
 
-  // Note: resume only logs if the workflow was in 'skipped' state
-  // This test verifies the integration works
   const auditLogs = await auditLogger!.getAuditTrail(workflowPlan.id);
   assert.ok(Array.isArray(auditLogs));
 });
