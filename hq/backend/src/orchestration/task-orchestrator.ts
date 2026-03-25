@@ -51,6 +51,7 @@ type TaskCreationStore = Pick<
 const TASK_STATE_TRANSITIONS: Record<TaskStatus, TaskStatus[]> = {
   created: ['routed', 'running', 'waiting_approval', 'cancelled'],
   routed: ['running', 'waiting_approval', 'cancelled'],
+  queued: ['running', 'waiting_approval', 'cancelled'],
   running: ['completed', 'failed', 'cancelled'],
   waiting_approval: ['created', 'routed', 'cancelled'],
   completed: [],
@@ -87,35 +88,46 @@ function inferPlanMode(executionMode: TaskExecutionMode): WorkflowPlanMode {
   return 'single';
 }
 
-function buildAssignmentRoleSequence(routeDecision: TaskRouteDecision): Array<{ role: string; assignmentRole: TaskAssignmentRole; title: string }> {
+type RoleSequenceEntry = {
+  role: string;
+  assignmentRole: TaskAssignmentRole;
+  title: string;
+  order?: number;
+};
+
+export function buildAssignmentRoleSequence(routeDecision: TaskRouteDecision): RoleSequenceEntry[] {
   switch (routeDecision.taskType) {
-    case 'architecture_analysis':
+    case 'architecture':
       return [
-        { role: routeDecision.recommendedAgentRole, assignmentRole: 'primary', title: 'Analyze architecture and produce recommendation' },
-        { role: 'dispatcher', assignmentRole: 'dispatcher', title: 'Consolidate architecture decisions and next steps' },
+        { role: routeDecision.recommendedAgentRole, assignmentRole: 'primary', title: '执行架构评估与技术决策' },
+        { role: 'dispatcher', assignmentRole: 'dispatcher', title: '汇总架构结论并推进后续任务' },
       ];
     case 'backend_implementation':
     case 'frontend_implementation':
-      return routeDecision.executionMode === 'parallel'
-        ? [
-            { role: routeDecision.recommendedAgentRole, assignmentRole: 'primary', title: 'Implement the main delivery slice' },
-            { role: 'code-reviewer', assignmentRole: 'reviewer', title: 'Review delivery risks and regressions' },
-          ]
-        : [
-            { role: routeDecision.recommendedAgentRole, assignmentRole: 'primary', title: 'Implement the requested delivery slice' },
-            { role: 'code-reviewer', assignmentRole: 'reviewer', title: 'Review implementation for risks and regressions' },
-          ];
-    case 'code_review':
-      return [{ role: routeDecision.recommendedAgentRole, assignmentRole: 'reviewer', title: 'Perform a focused code review' }];
+      if (routeDecision.executionMode === 'serial' || routeDecision.executionMode === 'advanced_discussion') {
+        return [
+          { role: 'dispatcher', assignmentRole: 'dispatcher', title: 'Analyze requirements and dispatch implementation tasks', order: 1 },
+          { role: 'software-architect', assignmentRole: 'secondary', title: 'Design architecture and technical approach', order: 2 },
+          { role: routeDecision.recommendedAgentRole, assignmentRole: 'primary', title: 'Implement the requested delivery slice', order: 3 },
+          { role: 'code-reviewer', assignmentRole: 'reviewer', title: 'Review implementation for risks and regressions', order: 4 },
+          { role: 'technical-writer', assignmentRole: 'secondary', title: 'Produce documentation for the implementation', order: 5 },
+        ];
+      }
+      return [
+        { role: routeDecision.recommendedAgentRole, assignmentRole: 'primary', title: 'Implement the requested delivery slice', order: 1 },
+        { role: 'code-reviewer', assignmentRole: 'reviewer', title: 'Review implementation for risks and regressions', order: 2 },
+      ];
+    case 'code-review':
+      return [{ role: routeDecision.recommendedAgentRole, assignmentRole: 'reviewer', title: '执行专项代码评审与合规检查', order: 1 }];
     case 'documentation':
-      return [{ role: routeDecision.recommendedAgentRole, assignmentRole: 'primary', title: 'Produce the requested documentation deliverable' }];
+      return [{ role: routeDecision.recommendedAgentRole, assignmentRole: 'primary', title: 'Produce the requested documentation deliverable', order: 1 }];
     case 'workflow_dispatch':
       return [
-        { role: 'dispatcher', assignmentRole: 'dispatcher', title: 'Split work and coordinate execution path' },
-        { role: 'software-architect', assignmentRole: 'secondary', title: 'Validate orchestration and plan quality' },
+        { role: 'dispatcher', assignmentRole: 'dispatcher', title: 'Split work and coordinate execution path', order: 1 },
+        { role: 'software-architect', assignmentRole: 'secondary', title: 'Validate orchestration and plan quality', order: 2 },
       ];
     default:
-      return [{ role: routeDecision.recommendedAgentRole, assignmentRole: 'primary', title: 'Execute the requested task' }];
+      return [{ role: routeDecision.recommendedAgentRole, assignmentRole: 'primary', title: 'Execute the requested task', order: 1 }];
   }
 }
 
@@ -198,7 +210,7 @@ export function buildPlan(task: TaskRecord, routeDecision: TaskRouteDecision): A
         agentId: assignments[index].agentId,
         assignmentRole: assignments[index].assignmentRole,
         status: 'pending',
-        order: index + 1,
+        order: entry.order ?? (task.executionMode === 'parallel' ? 1 : index + 1),
       })),
     },
   };

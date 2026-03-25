@@ -10,9 +10,31 @@ function readBoolean(value: unknown): boolean {
   return value === true;
 }
 
+/** High-risk tools must not trust approvalGranted unless an ApprovalRecord exists for the task. */
+export async function resolveToolApprovalClaim(
+  store: Pick<Store, 'getApprovalsByTaskId'>,
+  gateway: ToolGateway,
+  toolName: string,
+  taskId: string | undefined,
+  approvalClaimed: boolean,
+): Promise<boolean> {
+  const tool = gateway.getTool(toolName);
+  if (!tool || tool.definition.riskLevel !== 'high') {
+    return approvalClaimed;
+  }
+  if (!approvalClaimed) {
+    return false;
+  }
+  if (!taskId?.trim()) {
+    return false;
+  }
+  const approvals = await store.getApprovalsByTaskId(taskId);
+  return approvals.some((a) => a.status === 'approved');
+}
+
 export function registerToolRoutes(
   app: express.Application,
-  store: Pick<Store, 'saveToolCallLog'>
+  store: Pick<Store, 'saveToolCallLog' | 'getApprovalsByTaskId'>,
 ) {
   const gateway = new ToolGateway(store);
 
@@ -37,14 +59,23 @@ export function registerToolRoutes(
       });
     }
 
+    const taskId = readString(req.body?.taskId);
+    const approvalGranted = await resolveToolApprovalClaim(
+      store,
+      gateway,
+      toolName,
+      taskId,
+      readBoolean(req.body?.approvalGranted),
+    );
+
     const result = await gateway.executeTool(
       toolName,
       typeof req.body?.input === 'object' && req.body?.input !== null ? req.body.input : undefined,
       {
         actorRole,
-        taskId: readString(req.body?.taskId),
+        taskId,
         executionId: readString(req.body?.executionId),
-        approvalGranted: readBoolean(req.body?.approvalGranted),
+        approvalGranted,
       }
     );
 

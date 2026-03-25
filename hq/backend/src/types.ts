@@ -9,9 +9,9 @@ export interface AgentFrontmatter {
 }
 
 export type AgentTaskType =
-  | 'architecture_analysis'
+  | 'architecture'
   | 'backend_implementation'
-  | 'code_review'
+  | 'code-review'
   | 'documentation'
   | 'workflow_dispatch'
   | 'frontend_implementation'

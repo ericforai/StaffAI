@@ -106,6 +106,7 @@ export async function buildTaskWorkspaceSummary(tasksOrStore: TaskListReadStore 
   const statusCounts: Record<TaskStatus, number> = {
     created: 0,
     routed: 0,
+    queued: 0,
     running: 0,
     waiting_approval: 0,
     completed: 0,
@@ -135,7 +136,7 @@ export async function buildTaskWorkspaceSummary(tasksOrStore: TaskListReadStore 
       waitingApprovalTasks += 1;
     }
 
-    if (task.status === 'created' || task.status === 'routed' || task.status === 'running' || task.status === 'waiting_approval') {
+    if (task.status === 'created' || task.status === 'routed' || task.status === 'queued' || task.status === 'running' || task.status === 'waiting_approval') {
       activeTasks += 1;
     }
 

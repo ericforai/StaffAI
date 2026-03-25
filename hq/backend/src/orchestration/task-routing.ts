@@ -12,7 +12,7 @@ interface RouteRule {
 
 const ROUTE_RULES: RouteRule[] = [
   {
-    taskType: 'architecture_analysis',
+    taskType: 'architecture',
     keywords: ['architect', 'architecture', 'boundary', 'bounded context', 'refactor', 'design', 'ddd', 'modular'],
     recommendedAgentRole: 'software-architect',
     candidateAgentRoles: ['software-architect', 'dispatcher'],
@@ -23,7 +23,13 @@ const ROUTE_RULES: RouteRule[] = [
     taskType: 'backend_implementation',
     keywords: ['backend', 'api', 'database', 'migration', 'repository', 'service', 'orchestrator'],
     recommendedAgentRole: 'backend-architect',
-    candidateAgentRoles: ['backend-architect', 'code-reviewer'],
+    candidateAgentRoles: [
+      'dispatcher',
+      'software-architect',
+      'backend-architect', // Assuming 'backend-architect' is the 'primary-developer' for backend
+      'code-reviewer',
+      'technical-writer',
+    ],
     reason: 'Backend and API work should route to backend implementation ownership with review follow-up.',
     executionMode: 'serial',
   },
@@ -31,12 +37,18 @@ const ROUTE_RULES: RouteRule[] = [
     taskType: 'frontend_implementation',
     keywords: ['frontend', 'ui', 'page', 'component', 'react', 'next.js', 'dashboard'],
     recommendedAgentRole: 'frontend-developer',
-    candidateAgentRoles: ['frontend-developer', 'code-reviewer'],
+    candidateAgentRoles: [
+      'dispatcher',
+      'software-architect',
+      'frontend-developer',
+      'code-reviewer',
+      'technical-writer',
+    ],
     reason: 'UI work should route to frontend implementation ownership.',
     executionMode: 'serial',
   },
   {
-    taskType: 'code_review',
+    taskType: 'code-review',
     keywords: ['review', 'risk', 'audit', 'regression', 'bug risk'],
     recommendedAgentRole: 'code-reviewer',
     candidateAgentRoles: ['code-reviewer'],

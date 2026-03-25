@@ -427,9 +427,9 @@ export class TaskLifecycleService {
    */
   private recommendAgentForTaskType(taskType: TaskType): string {
     const agentMapping: Record<TaskType, string> = {
-      architecture_analysis: 'software-architect',
+      architecture: 'software-architect',
       backend_implementation: 'backend-developer',
-      code_review: 'code-reviewer',
+      'code-review': 'code-reviewer',
       documentation: 'technical-writer',
       workflow_dispatch: 'dispatcher',
       frontend_implementation: 'frontend-developer',

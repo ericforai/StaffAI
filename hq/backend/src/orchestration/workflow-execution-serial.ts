@@ -29,7 +29,10 @@ export async function executeSerialWorkflow(
       };
     }
 
-    updateWorkflowTracking(workflowPlan.id, step.id, new Set(), runningWorkflows);
+    const running = runningWorkflows.get(workflowPlan.id);
+    if (running) {
+      running.currentStep = step.id;
+    }
 
     const result = await assignmentExecutor.execute(assignment, {
       taskId: task.id,
@@ -40,7 +43,7 @@ export async function executeSerialWorkflow(
     });
 
     if (result.status === 'failed') {
-      await updateStepStatus(workflowPlan.id, step.id, 'failed', assignment);
+      await updateStepState(workflowPlan.id, step.id, 'failed', assignment);
       return {
         workflowPlanId: workflowPlan.id,
         status: 'failed',
@@ -52,9 +55,8 @@ export async function executeSerialWorkflow(
     }
 
     completedSteps.push(step.id);
-    await updateStepStatus(workflowPlan.id, step.id, 'completed', assignment);
+    await updateStepState(workflowPlan.id, step.id, 'completed', assignment);
 
-    const running = runningWorkflows.get(workflowPlan.id);
     if (running) {
       running.completedSteps.add(step.id);
     }
@@ -70,8 +72,9 @@ export async function executeSerialWorkflow(
 }
 
 /**
- * Execute a workflow plan in parallel mode
- * All steps are executed concurrently
+ * Execute a workflow plan in phased parallel mode (Map-Reduce)
+ * Steps with the same order execute concurrently.
+ * Groups execute sequentially in ascending order.
  */
 export async function executeParallelWorkflow(
   workflowPlan: WorkflowPlan,
@@ -82,90 +85,95 @@ export async function executeParallelWorkflow(
 ): Promise<WorkflowExecutionResult> {
   const completedSteps: string[] = [];
   const updatedAssignments: TaskAssignment[] = [...assignments];
-  const promises = workflowPlan.steps.map(async (step) => {
-    const assignment = assignments.find((a) => a.id === step.assignmentId);
-    if (!assignment) {
-      return {
-        stepId: step.id,
-        status: 'failed' as const,
-        error: 'Assignment not found',
-      };
-    }
 
-    const result = await assignmentExecutor.execute(assignment, {
-      taskId: task.id,
-      title: task.title,
-      description: step.description ?? step.title,
-      executor: 'claude',
-      timeoutMs: 30_000,
-    });
+  // Group steps by order
+  const stepsByOrder = new Map<number, typeof workflowPlan.steps>();
+  for (const step of workflowPlan.steps) {
+    const order = step.order || 1;
+    const existing = stepsByOrder.get(order) || [];
+    existing.push(step);
+    stepsByOrder.set(order, existing);
+  }
+
+  // Sort orders numerically
+  const sortedOrders = Array.from(stepsByOrder.keys()).sort((a, b) => a - b);
+
+  try {
+    for (const order of sortedOrders) {
+      const group = stepsByOrder.get(order)!;
+      
+      const results = await Promise.all(
+        group.map(async (step) => {
+          const assignment = assignments.find((a) => a.id === step.assignmentId);
+          if (!assignment) {
+            throw new Error(`Assignment not found for step ${step.id}`);
+          }
+
+          const running = runningWorkflows.get(workflowPlan.id);
+          if (running) {
+             // currentStep in parallel might be one of the group
+             running.currentStep = step.id;
+          }
+
+          const result = await assignmentExecutor.execute(assignment, {
+            taskId: task.id,
+            title: task.title,
+            description: step.description ?? step.title,
+            executor: 'claude',
+            timeoutMs: 30_000,
+          });
+
+          if (result.status === 'completed') {
+            completedSteps.push(step.id);
+            await updateStepState(workflowPlan.id, step.id, 'completed', assignment);
+            if (running) {
+              running.completedSteps.add(step.id);
+            }
+          } else {
+            await updateStepState(workflowPlan.id, step.id, 'failed', assignment);
+            throw new Error(`Step ${step.id} failed: ${result.error}`);
+          }
+          return result;
+        })
+      );
+    }
 
     return {
-      stepId: step.id,
-      status: result.status,
-      error: result.error,
-    };
-  });
-
-  const results = await Promise.all(promises);
-
-  for (const result of results) {
-    if (result.status === 'completed') {
-      completedSteps.push(result.stepId);
-      await updateStepStatus(workflowPlan.id, result.stepId, 'completed', assignments.find((a) => a.stepId === result.stepId)!);
-    } else if (result.status === 'failed') {
-      await updateStepStatus(workflowPlan.id, result.stepId, 'failed', assignments.find((a) => a.stepId === result.stepId)!);
-    }
-  }
-
-  const hasFailures = results.some((r) => r.status === 'failed');
-  const finalStatus = hasFailures ? 'failed' : 'completed';
-
-  return {
-    workflowPlanId: workflowPlan.id,
-    status: finalStatus,
-    completedSteps,
-    assignments: updatedAssignments,
-    outputSummary: finalStatus === 'completed' ? 'Parallel workflow completed successfully' : 'Some assignments failed',
-  };
-}
-
-/**
- * Update workflow tracking for a running workflow
- */
-export function updateWorkflowTracking(
-  workflowPlanId: string,
-  currentStep: string,
-  completedSteps: Set<string>,
-  runningWorkflows: Map<string, RunningWorkflow>
-): void {
-  const running = runningWorkflows.get(workflowPlanId);
-  if (running) {
-    runningWorkflows.set(workflowPlanId, {
-      ...running,
-      currentStep,
+      workflowPlanId: workflowPlan.id,
+      status: 'completed',
       completedSteps,
-    });
+      assignments: updatedAssignments,
+      outputSummary: `Successfully executed ${completedSteps.length} parallel steps in ${sortedOrders.length} phases`,
+    };
+  } catch (error) {
+    return {
+      workflowPlanId: workflowPlan.id,
+      status: 'failed',
+      completedSteps,
+      failedStep: workflowPlan.steps.find((s) => !completedSteps.includes(s.id))?.id,
+      error: error instanceof Error ? error.message : String(error),
+      assignments: updatedAssignments,
+    };
   }
 }
 
 /**
- * Update step status via assignment status update
+ * Update step state helper
  */
-async function updateStepStatus(
+async function updateStepState(
   workflowPlanId: string,
   stepId: string,
   status: TaskAssignmentStatus,
-  assignment: TaskAssignment | undefined
+  assignment: TaskAssignment
 ): Promise<void> {
-  if (!assignment) {
-    return;
-  }
-
-  // The assignment status update would happen via the store
-  // This is a placeholder for the actual update logic
-  // In the real implementation, this would be handled by the assignment executor
+  // In a real implementation, this would update the store
+  assignment.status = status;
+  assignment.updatedAt = new Date().toISOString();
 }
 
-// Re-export for use in other modules
-export type { RunningWorkflow };
+/**
+ * Update workflow tracking (stub for compatibility if needed)
+ */
+export function updateWorkflowTracking(): void {
+  // Logic moved inside the execution functions for better state management
+}

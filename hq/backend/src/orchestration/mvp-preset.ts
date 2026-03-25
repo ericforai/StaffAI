@@ -22,6 +22,8 @@ export interface MvpPreset {
   roles: string[];
   /** Default execution mode when using this preset */
   defaultExecutionMode: 'single' | 'serial' | 'parallel';
+  /** Default context paths to include in task context */
+  defaultContextPaths: string[];
 }
 
 export interface PresetActivationResult {
@@ -35,7 +37,52 @@ export interface PresetActivationResult {
 // Preset definitions
 // ---------------------------------------------------------------------------
 
+/** Normalize legacy keys (e.g. code_review) to registry keys (code-review). */
+export function canonicalMvpPresetKey(name: string): string {
+  return name.trim().replace(/_/g, '-');
+}
+
+/** Maps normalized keys that don't match a registry id (e.g. architecture-analysis → architecture). */
+const PRESET_KEY_ALIASES: Readonly<Record<string, string>> = {
+  'architecture-analysis': 'architecture',
+};
+
+function getPresetFromRegistry(name: string): MvpPreset | undefined {
+  const trimmed = name.trim();
+  const direct = MVP_PRESETS.get(trimmed);
+  if (direct) {
+    return direct;
+  }
+  const canonical = canonicalMvpPresetKey(trimmed);
+  const fromCanonical = MVP_PRESETS.get(canonical);
+  if (fromCanonical) {
+    return fromCanonical;
+  }
+  const aliasTarget = PRESET_KEY_ALIASES[canonical] ?? PRESET_KEY_ALIASES[trimmed];
+  return aliasTarget ? MVP_PRESETS.get(aliasTarget) : undefined;
+}
+
 const MVP_PRESETS: ReadonlyMap<string, MvpPreset> = new Map([
+  [
+    'architecture',
+    {
+      name: 'architecture',
+      description: '架构分析团队 — 架构评估与决策',
+      roles: ['software-architect', 'backend-architect', 'code-reviewer'],
+      defaultExecutionMode: 'serial' as const,
+      defaultContextPaths: ['src/shared', 'src/orchestration'],
+    },
+  ],
+  [
+    'code-review',
+    {
+      name: 'code-review',
+      description: '代码评审团队 — 轻量级评审',
+      roles: ['code-reviewer', 'software-architect'],
+      defaultExecutionMode: 'serial' as const,
+      defaultContextPaths: ['src/shared'],
+    },
+  ],
   [
     'full-stack-dev',
     {
@@ -49,24 +96,7 @@ const MVP_PRESETS: ReadonlyMap<string, MvpPreset> = new Map([
         'technical-writer',
       ],
       defaultExecutionMode: 'serial' as const,
-    },
-  ],
-  [
-    'code-review',
-    {
-      name: 'code-review',
-      description: '代码评审团队 — 轻量级评审',
-      roles: ['code-reviewer', 'software-architect'],
-      defaultExecutionMode: 'serial' as const,
-    },
-  ],
-  [
-    'architecture',
-    {
-      name: 'architecture',
-      description: '架构分析团队 — 架构评估与决策',
-      roles: ['software-architect', 'backend-architect', 'code-reviewer'],
-      defaultExecutionMode: 'serial' as const,
+      defaultContextPaths: ['src/shared', 'src/persistence', 'src/web'],
     },
   ],
 ]);
@@ -86,7 +116,7 @@ export function getAvailablePresets(): MvpPreset[] {
  * Look up a single preset by name. Returns undefined when not found.
  */
 export function getPresetByName(name: string): MvpPreset | undefined {
-  return MVP_PRESETS.get(name);
+  return getPresetFromRegistry(name);
 }
 
 /**
@@ -101,7 +131,7 @@ export function activatePreset(
   store: Pick<Store, 'getActiveIds' | 'save'>,
   scanner: Pick<Scanner, 'getAllAgents'>,
 ): PresetActivationResult {
-  const preset = MVP_PRESETS.get(presetName);
+  const preset = getPresetFromRegistry(presetName);
   if (!preset) {
     throw new PresetNotFoundError(presetName);
   }
