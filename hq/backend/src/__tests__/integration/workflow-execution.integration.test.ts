@@ -20,10 +20,8 @@ import { createTaskLifecycleService } from '../../orchestration/task-lifecycle-s
 import { createTaskStateMachine } from '../../orchestration/task-state-machine';
 import {
   createWorkflowExecutionEngine,
-  type WorkflowExecutionResult,
-  type WorkflowExecutionStatus,
 } from '../../orchestration/workflow-execution-engine';
-import { createAssignmentExecutor, type AssignmentExecutor } from '../../orchestration/assignment-executor';
+import type { AssignmentExecutor } from '../../orchestration/assignment-executor';
 import { AuditLogger, type AuditEvent } from '../../governance/audit-logger';
 import { createFileAuditLogRepository } from '../../persistence/audit-log-repositories';
 import type {
@@ -42,6 +40,7 @@ let lifecycleService: ReturnType<typeof createTaskLifecycleService>;
 let stateMachine: ReturnType<typeof createTaskStateMachine>;
 let workflowEngine: ReturnType<typeof createWorkflowExecutionEngine>;
 let mockAssignmentExecutor: AssignmentExecutor;
+const alphabeticalSort = (left: string, right: string) => left.localeCompare(right);
 
 async function setupTestEnvironment() {
   tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'agency-workflow-execution-'));
@@ -255,7 +254,10 @@ test('serial workflow: tracks completed steps', async () => {
   const result = await workflowEngine.execute(workflowPlan);
 
   assert.equal(result.status, 'completed');
-  assert.deepEqual(result.completedSteps.sort(), workflowPlan.steps.map((s) => s.id).sort());
+  assert.deepEqual(
+    [...result.completedSteps].sort(alphabeticalSort),
+    workflowPlan.steps.map((step) => step.id).sort(alphabeticalSort),
+  );
 });
 
 // ============================================================================
@@ -371,7 +373,7 @@ test('assignment sync: result summary preserved', async () => {
 // ============================================================================
 
 test('failure handling: workflow failure sets task status to failed', async () => {
-  const { task, workflowPlan } = await createWorkflowSetup(1, 'serial');
+  const { task } = await createWorkflowSetup(1, 'serial');
 
   // Manually set workflow to failed
   await store.updateWorkflowPlan(task.id, (current) => ({
@@ -515,7 +517,7 @@ test('edge case: workflow for non-existent task returns error', async () => {
 // ============================================================================
 
 test('audit logging: workflow execution creates audit events', async () => {
-  const { task, workflowPlan } = await createWorkflowSetup(1, 'serial');
+  const { workflowPlan } = await createWorkflowSetup(1, 'serial');
 
   await workflowEngine.execute(workflowPlan);
 

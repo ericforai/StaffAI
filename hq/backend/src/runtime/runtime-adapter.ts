@@ -1,4 +1,6 @@
 import type { TaskExecutionMode, TaskRecord } from '../shared/task-types';
+import { ClaudeRuntimeAdapter } from './adapters/claude-adapter';
+import { CodexRuntimeAdapter } from './adapters/codex-adapter';
 
 export interface RuntimeExecutionContext {
   task: TaskRecord;
@@ -30,6 +32,8 @@ export interface RuntimeAdapter {
   name: string;
   supports: Array<'single' | 'serial' | 'parallel' | 'advanced_discussion'>;
   run(context: RuntimeExecutionContext): Promise<RuntimeExecutionResult>;
+  runSerial(contexts: RuntimeExecutionContext[]): Promise<RuntimeExecutionResult[]>;
+  runParallel(contexts: RuntimeExecutionContext[]): Promise<RuntimeExecutionResult[]>;
 }
 
 function mapExecutorToRuntimeName(executor: 'claude' | 'codex' | 'openai'): string {
@@ -42,7 +46,7 @@ function createNoopAdapter(name: string): RuntimeAdapter {
   return {
     name,
     supports: ['single', 'serial', 'parallel', 'advanced_discussion'],
-    async run(context) {
+    async run(context: RuntimeExecutionContext): Promise<RuntimeExecutionResult> {
       return {
         outputSummary: context.summary,
         outputSnapshot: {
@@ -52,12 +56,40 @@ function createNoopAdapter(name: string): RuntimeAdapter {
         },
       };
     },
+    async runSerial(contexts: RuntimeExecutionContext[]): Promise<RuntimeExecutionResult[]> {
+      const results: RuntimeExecutionResult[] = [];
+      for (const context of contexts) {
+        results.push({
+          outputSummary: context.summary,
+          outputSnapshot: {
+            runtimeName: name,
+            executor: context.executor,
+            simulated: true,
+            mode: 'serial',
+          },
+        });
+      }
+      return results;
+    },
+    async runParallel(contexts: RuntimeExecutionContext[]): Promise<RuntimeExecutionResult[]> {
+      return Promise.all(
+        contexts.map((context) => ({
+          outputSummary: context.summary,
+          outputSnapshot: {
+            runtimeName: name,
+            executor: context.executor,
+            simulated: true,
+            mode: 'parallel',
+          },
+        }))
+      );
+    },
   };
 }
 
 const ADAPTERS: Record<'claude' | 'codex' | 'openai', RuntimeAdapter> = {
-  codex: createNoopAdapter('local_codex_cli'),
-  claude: createNoopAdapter('local_claude_cli'),
+  claude: new ClaudeRuntimeAdapter(),
+  codex: new CodexRuntimeAdapter(),
   openai: createNoopAdapter('openai_api'),
 };
 
@@ -68,3 +100,7 @@ export function resolveRuntimeAdapter(executor: 'claude' | 'codex' | 'openai'): 
 export function resolveRuntimeName(executor: 'claude' | 'codex' | 'openai'): string {
   return mapExecutorToRuntimeName(executor);
 }
+
+// Re-export adapter classes for external use
+export { ClaudeRuntimeAdapter } from './adapters/claude-adapter';
+export { CodexRuntimeAdapter } from './adapters/codex-adapter';

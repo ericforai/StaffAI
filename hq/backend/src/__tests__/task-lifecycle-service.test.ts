@@ -7,15 +7,11 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { randomUUID } from 'node:crypto';
 import type {
   ApprovalRecord,
-  ApprovalRiskLevel,
   TaskRecord,
-  TaskStatus,
 } from '../shared/task-types';
 import {
-  TaskLifecycleService,
   createTaskLifecycleService,
   type CreateTaskInput,
 } from '../orchestration/task-lifecycle-service';

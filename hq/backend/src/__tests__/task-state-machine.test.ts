@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
 import {
   TaskStateMachine,
   createTaskStateMachine,
@@ -63,7 +64,7 @@ function createMockAuditLogger(): AuditLogger {
     }) {
       logs.push(event);
       return {
-        id: 'log-' + Math.random(),
+        id: `log-${randomUUID()}`,
         timestamp: new Date().toISOString(),
         ...event,
       };

@@ -165,79 +165,14 @@ export class ApprovalServiceV2 {
    * Approve an approval
    */
   async approve(input: ApprovalDecisionInput): Promise<ApprovalRecord | null> {
-    // Check if approval exists first
-    const existing = await this.getApproval(input.approvalId);
-    if (!existing) {
-      return null;
-    }
-
-    // Update status
-    const updated = await this.dependencies.store.updateApprovalStatus(
-      input.approvalId,
-      'approved',
-      input.approver
-    );
-
-    if (!updated) return null;
-
-    // Store extended fields
-    await this.saveExtendedApproval(input.approvalId, {
-      approver: input.approver,
-      approvedAt: new Date().toISOString(),
-      reason: input.reason,
-    });
-
-    // Log audit event
-    await this.logAuditEvent({
-      entityType: 'approval',
-      entityId: input.approvalId,
-      action: 'approved',
-      actor: input.approver,
-      previousState: { status: 'pending' },
-      newState: { status: 'approved' },
-      reason: input.reason,
-    });
-
-    return updated;
+    return this.applyDecision(input, 'approved');
   }
 
   /**
    * Reject an approval
    */
   async reject(input: ApprovalDecisionInput): Promise<ApprovalRecord | null> {
-    // Check if approval exists first
-    const existing = await this.getApproval(input.approvalId);
-    if (!existing) {
-      return null;
-    }
-
-    const updated = await this.dependencies.store.updateApprovalStatus(
-      input.approvalId,
-      'rejected',
-      input.approver
-    );
-
-    if (!updated) return null;
-
-    // Store extended fields
-    await this.saveExtendedApproval(input.approvalId, {
-      approver: input.approver,
-      approvedAt: new Date().toISOString(),
-      reason: input.reason,
-    });
-
-    // Log audit event
-    await this.logAuditEvent({
-      entityType: 'approval',
-      entityId: input.approvalId,
-      action: 'rejected',
-      actor: input.approver,
-      previousState: { status: 'pending' },
-      newState: { status: 'rejected' },
-      reason: input.reason,
-    });
-
-    return updated;
+    return this.applyDecision(input, 'rejected');
   }
 
   /**
@@ -275,6 +210,43 @@ export class ApprovalServiceV2 {
       actor: input.actor,
       previousState: { status: 'pending' },
       newState: { status: 'cancelled' },
+      reason: input.reason,
+    });
+
+    return updated;
+  }
+
+  private async applyDecision(
+    input: ApprovalDecisionInput,
+    status: 'approved' | 'rejected'
+  ): Promise<ApprovalRecord | null> {
+    const existing = await this.getApproval(input.approvalId);
+    if (!existing) {
+      return null;
+    }
+
+    const updated = await this.dependencies.store.updateApprovalStatus(
+      input.approvalId,
+      status,
+      input.approver
+    );
+    if (!updated) {
+      return null;
+    }
+
+    await this.saveExtendedApproval(input.approvalId, {
+      approver: input.approver,
+      approvedAt: new Date().toISOString(),
+      reason: input.reason,
+    });
+
+    await this.logAuditEvent({
+      entityType: 'approval',
+      entityId: input.approvalId,
+      action: status,
+      actor: input.approver,
+      previousState: { status: 'pending' },
+      newState: { status },
       reason: input.reason,
     });
 
