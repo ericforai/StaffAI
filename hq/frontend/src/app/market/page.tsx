@@ -39,10 +39,10 @@ export default function MarketPage() {
       <aside className="w-64 flex-shrink-0 flex flex-col border-r border-slate-200 bg-white">
         <div className="p-6 border-b border-slate-100">
           <div className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] text-slate-400">
-            <span className="rounded bg-slate-900 px-1.5 py-0.5 text-white">AGENCY</span>
-            <span>HQ CONSOLE</span>
+            <span className="rounded bg-slate-900 px-1.5 py-0.5 text-white">AI员工</span>
+            <span>管理中心</span>
           </div>
-          <h1 className="mt-4 text-xl font-bold tracking-tight text-slate-900">指挥部</h1>
+          <h1 className="mt-4 text-xl font-bold tracking-tight text-slate-900">管理系统</h1>
         </div>
 
         <nav className="flex-1 overflow-y-auto p-4 space-y-1">
@@ -137,7 +137,7 @@ export default function MarketPage() {
                         <div className="inline-flex rounded-md bg-slate-50 p-2 text-slate-600 border border-slate-100 transition-colors group-hover:bg-slate-100">
                           <Icon className="h-4 w-4" />
                         </div>
-                        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-tight">{deptStats[key] || 0} experts</span>
+                        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-tight">{deptStats[key] || 0} 专家</span>
                       </div>
                       <p className="text-sm font-bold text-slate-900">{dept.label}</p>
                       <p className="mt-0.5 text-[11px] text-slate-500 leading-normal">

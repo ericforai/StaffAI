@@ -258,10 +258,10 @@ export default function BrainstormPage() {
       <aside className="w-64 flex-shrink-0 flex flex-col border-r border-slate-200 bg-white">
         <div className="p-6 border-b border-slate-100">
           <div className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] text-slate-400">
-            <span className="rounded bg-slate-900 px-1.5 py-0.5 text-white">AGENCY</span>
-            <span>HQ CONSOLE</span>
+            <span className="rounded bg-slate-900 px-1.5 py-0.5 text-white">AI员工</span>
+            <span>管理中心</span>
           </div>
-          <h1 className="mt-4 text-xl font-bold tracking-tight text-slate-900">指挥部</h1>
+          <h1 className="mt-4 text-xl font-bold tracking-tight text-slate-900">管理系统</h1>
         </div>
 
         <nav className="flex-1 overflow-y-auto p-4 space-y-1">
@@ -288,11 +288,11 @@ export default function BrainstormPage() {
         <div className="p-4 border-t border-slate-100">
           <div className="rounded-lg bg-slate-50 p-4 border border-slate-200">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] uppercase tracking-wider font-bold text-slate-500">System Status</span>
+              <span className="text-[10px] uppercase tracking-wider font-bold text-slate-500">系统状态</span>
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
             </div>
             <p className="mt-1 text-xs font-semibold text-slate-700">
-              {wsStatus === 'connected' ? 'Connected' : 'Synchronizing...'}
+              {wsStatus === 'connected' ? '已连接' : '同步中...'}
             </p>
           </div>
         </div>
