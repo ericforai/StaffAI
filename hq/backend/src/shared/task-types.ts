@@ -25,9 +25,10 @@ export const TASK_PRIORITIES = ['low', 'medium', 'high', 'urgent'] as const;
 export type TaskPriority = (typeof TASK_PRIORITIES)[number];
 
 export const TASK_TYPES = [
-  'architecture',
+  'architecture_analysis',
   'backend_implementation',
-  'code-review',
+  'backend_design',
+  'code_review',
   'documentation',
   'workflow_dispatch',
   'frontend_implementation',

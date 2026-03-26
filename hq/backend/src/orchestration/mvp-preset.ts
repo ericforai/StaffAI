@@ -37,47 +37,55 @@ export interface PresetActivationResult {
 // Preset definitions
 // ---------------------------------------------------------------------------
 
-/** Maps legacy/normalized keys to registry ids (e.g. architecture-analysis → architecture). */
-const PRESET_KEY_ALIASES: Readonly<Record<string, string>> = {
-  'architecture-analysis': 'architecture',
-};
-
-export function canonicalMvpPresetKey(name: string): string {
-  return name.trim().replace(/_/g, '-');
-}
-
-function resolvePresetRegistryKey(name: string): string | undefined {
-  const trimmed = name.trim();
-  if (MVP_PRESETS.has(trimmed)) {
-    return trimmed;
-  }
-  const canonical = canonicalMvpPresetKey(trimmed);
-  if (MVP_PRESETS.has(canonical)) {
-    return canonical;
-  }
-  const alias = PRESET_KEY_ALIASES[canonical] ?? PRESET_KEY_ALIASES[trimmed];
-  return alias && MVP_PRESETS.has(alias) ? alias : undefined;
-}
-
 const MVP_PRESETS: ReadonlyMap<string, MvpPreset> = new Map([
   [
-    'architecture',
+    'architecture_analysis',
     {
-      name: 'architecture',
-      description: '架构分析团队 — 架构评估与决策',
+      name: 'architecture_analysis',
+      description: '架构分析 — 专注于系统架构评估与演进',
       roles: ['software-architect', 'backend-architect', 'code-reviewer'],
       defaultExecutionMode: 'serial' as const,
-      defaultContextPaths: ['src/shared', 'src/orchestration'],
+      defaultContextPaths: ['docs/architecture', 'docs/system-design'],
     },
   ],
   [
-    'code-review',
+    'backend_design',
     {
-      name: 'code-review',
-      description: '代码评审团队 — 轻量级评审',
+      name: 'backend_design',
+      description: '后端设计 — 专注于服务端接口与数据模型设计',
+      roles: ['backend-architect', 'software-architect', 'code-reviewer'],
+      defaultExecutionMode: 'serial' as const,
+      defaultContextPaths: ['docs/backend', 'hq/backend/src'],
+    },
+  ],
+  [
+    'code_review',
+    {
+      name: 'code_review',
+      description: '代码评审 — 专注于代码质量与工程实践',
       roles: ['code-reviewer', 'software-architect'],
       defaultExecutionMode: 'serial' as const,
-      defaultContextPaths: ['src/shared'],
+      defaultContextPaths: ['docs/guidelines', '.github/pull_request_template.md'],
+    },
+  ],
+  [
+    'documentation',
+    {
+      name: 'documentation',
+      description: '文档撰写 — 专注于技术文档与用户指南',
+      roles: ['technical-writer', 'software-architect'],
+      defaultExecutionMode: 'serial' as const,
+      defaultContextPaths: ['docs/user-guides', 'README.md'],
+    },
+  ],
+  [
+    'workflow_dispatch',
+    {
+      name: 'workflow_dispatch',
+      description: '工作流编排 — 专注于自动化脚本与流水线设计',
+      roles: ['devops-engineer', 'software-architect', 'backend-architect'],
+      defaultExecutionMode: 'serial' as const,
+      defaultContextPaths: ['.github/workflows', 'scripts'],
     },
   ],
   [
@@ -93,14 +101,13 @@ const MVP_PRESETS: ReadonlyMap<string, MvpPreset> = new Map([
         'technical-writer',
       ],
       defaultExecutionMode: 'serial' as const,
-      defaultContextPaths: ['src/shared', 'src/persistence', 'src/web'],
+      defaultContextPaths: ['context/project.md', 'context/architecture.md'],
     },
   ],
 ]);
 
 function getPresetFromRegistry(name: string): MvpPreset | undefined {
-  const key = resolvePresetRegistryKey(name);
-  return key ? MVP_PRESETS.get(key) : undefined;
+  return MVP_PRESETS.get(name);
 }
 
 // ---------------------------------------------------------------------------

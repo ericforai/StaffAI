@@ -40,6 +40,8 @@ export interface MvpScenarioInput {
   executionMode?: TaskExecutionMode;
   /** Who requested the scenario */
   requestedBy?: string;
+  /** Additional context paths to include */
+  contextPaths?: string[];
 }
 
 export interface MvpScenarioResult {
@@ -60,8 +62,8 @@ export interface MvpScenarioResult {
 // ---------------------------------------------------------------------------
 
 const KEYWORD_PRESET_MAP: Array<{ keywords: string[]; presetName: string }> = [
-  { keywords: ['review', 'code review', '代码评审', '审查'], presetName: 'code-review' },
-  { keywords: ['architecture', '架构', 'design', '设计'], presetName: 'architecture' },
+  { keywords: ['review', 'code review', '代码评审', '审查'], presetName: 'code_review' },
+  { keywords: ['architecture', '架构', 'design', '设计'], presetName: 'architecture_analysis' },
 ];
 
 function autoSelectPreset(title: string, description: string): string {
@@ -108,10 +110,17 @@ export async function runMvpScenario(
   const executionMode = input.executionMode || preset.defaultExecutionMode;
   const requestedBy = input.requestedBy || 'mvp-scenario';
 
+  // 4b. Inject context paths into description if present
+  let finalDescription = input.description;
+  const contextPaths = input.contextPaths || preset.defaultContextPaths || [];
+  if (contextPaths.length > 0) {
+    finalDescription += `\n\nContext Sources:\n${contextPaths.map((p) => `- ${p}`).join('\n')}`;
+  }
+
   const result = await createTask(
     {
       title: input.title,
-      description: input.description,
+      description: finalDescription,
       executionMode,
       requestedBy,
     },

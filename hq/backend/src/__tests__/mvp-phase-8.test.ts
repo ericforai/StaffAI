@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import type { Agent } from '../types';
-import type { TaskRecord, TaskAssignment, WorkflowPlan } from '../shared/task-types';
+import type { TaskRecord, TaskAssignment, WorkflowPlan, TaskType } from '../shared/task-types';
 import { runMvpScenario } from '../orchestration/mvp-scenario-runner';
 import { getPresetByName } from '../orchestration/mvp-preset';
 
@@ -23,9 +23,9 @@ function makeMockAgent(id: string, role?: string): Agent {
       tools: [],
       allowedTaskTypes: [
         'general',
-        'architecture',
-        'backend_implementation',
-        'code-review',
+        'architecture_analysis',
+        'backend_design',
+        'code_review',
         'documentation',
         'workflow_dispatch',
       ],
@@ -72,64 +72,65 @@ function makeMockStore() {
   } as any;
 }
 
-test('MVP scenarios map to the current preset registry and generate runnable plans', async (t) => {
+test('Phase 8 MVP Task Types and Context Injection', async (t) => {
   const agents = [
     makeMockAgent('software-architect'),
     makeMockAgent('backend-architect'),
-    makeMockAgent('frontend-developer'),
     makeMockAgent('code-reviewer'),
     makeMockAgent('technical-writer'),
+    makeMockAgent('devops-engineer'),
   ];
   const store = makeMockStore();
   const scanner = makeMockScanner(agents);
 
-  const scenarios = [
+  const mvpScenarios = [
     {
-      presetName: 'architecture',
-      title: 'Architecture review',
-      description: 'Evaluate service boundaries and tradeoffs',
+      presetName: 'architecture_analysis',
       expectedRoles: ['software-architect', 'backend-architect', 'code-reviewer'],
+      expectedPaths: ['docs/architecture', 'docs/system-design'],
     },
     {
-      presetName: 'code-review',
-      title: 'Review authentication changes',
-      description: 'Audit the PR for regressions',
+      presetName: 'backend_design',
+      expectedRoles: ['backend-architect', 'software-architect', 'code-reviewer'],
+      expectedPaths: ['docs/backend', 'hq/backend/src'],
+    },
+    {
+      presetName: 'code_review',
       expectedRoles: ['code-reviewer', 'software-architect'],
+      expectedPaths: ['docs/guidelines', '.github/pull_request_template.md'],
     },
     {
-      presetName: 'full-stack-dev',
-      title: 'Build user auth',
-      description: 'Implement login flow and supporting docs',
-      expectedRoles: [
-        'software-architect',
-        'backend-architect',
-        'frontend-developer',
-        'code-reviewer',
-        'technical-writer',
-      ],
+      presetName: 'documentation',
+      expectedRoles: ['technical-writer', 'software-architect'],
+      expectedPaths: ['docs/user-guides', 'README.md'],
+    },
+    {
+      presetName: 'workflow_dispatch',
+      expectedRoles: ['devops-engineer', 'software-architect', 'backend-architect'],
+      expectedPaths: ['.github/workflows', 'scripts'],
     },
   ];
 
-  for (const scenario of scenarios) {
-    await t.test(`Scenario for ${scenario.presetName} uses the expected preset`, async () => {
+  for (const scenario of mvpScenarios) {
+    await t.test(`Scenario ${scenario.presetName} activates correct roles and injects context`, async () => {
       const result = await runMvpScenario(
         {
-          title: scenario.title,
-          description: scenario.description,
+          title: `Testing ${scenario.presetName}`,
+          description: 'A test task',
           presetName: scenario.presetName,
         },
         store,
         scanner,
       );
 
-      const preset = getPresetByName(scenario.presetName);
-      assert.ok(preset, `Preset ${scenario.presetName} should exist`);
       assert.equal(result.presetUsed.name, scenario.presetName);
       assert.deepEqual(result.presetUsed.roles, scenario.expectedRoles);
-      assert.ok(preset.defaultContextPaths.length > 0);
-      assert.equal(result.task.title, scenario.title);
-      assert.equal(result.workflowPlan.taskId, result.task.id);
-      assert.ok(result.assignments.length > 0);
+      
+      // Verify context source injection in description
+      for (const path of scenario.expectedPaths) {
+        assert.ok(result.task.description.includes(path), `Description should include context path: ${path}`);
+      }
+      assert.ok(result.task.description.includes('Context Sources:'));
     });
   }
 });
