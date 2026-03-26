@@ -30,7 +30,7 @@ npm run dev &
 FRONTEND_PID=$!
 
 echo "============================================================"
-echo "HQ Dashboard is running at: http://localhost:3008"
+echo "HQ Dashboard is running at: http://localhost:8888"
 echo "Backend API is running at:  http://localhost:3333"
 echo "Runtime artifacts:          $SCRIPT_DIR/generated"
 echo "Agency runtime dir:         $STATE_DIR"
