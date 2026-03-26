@@ -10,6 +10,7 @@ import { registerStartupRoutes } from '../api/startup';
 import { registerTaskEventRoutes } from '../api/task-events';
 import { registerTaskRoutes, registerScenarioRoutes } from '../api/tasks';
 import { registerToolRoutes } from '../api/tools';
+import { registerTemplateRoutes } from '../api/templates';
 import { registerAuditRoutes } from '../api/audit';
 import { registerPresetRoutes } from '../api/presets';
 import { retrieveMemoryContext } from '../memory/memory-retriever';
@@ -201,6 +202,9 @@ export function registerBackendRoutes({
 
   // Register MVP scenario routes
   registerScenarioRoutes(app, store, scanner);
+
+  // Register template routes
+  registerTemplateRoutes(app, { store });
 
   registerDiscussionRoutes(app, {
     discussionService,

@@ -118,10 +118,10 @@ export default function Dashboard() {
       <aside className="w-64 flex-shrink-0 flex flex-col border-r border-slate-200 bg-white">
         <div className="p-6 border-b border-slate-100">
           <div className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] text-slate-400">
-            <span className="rounded bg-slate-900 px-1.5 py-0.5 text-white">AGENCY</span>
-            <span>HQ CONSOLE</span>
+            <span className="rounded bg-slate-900 px-1.5 py-0.5 text-white">AI员工</span>
+            <span>管理中心</span>
           </div>
-          <h1 className="mt-4 text-xl font-bold tracking-tight text-slate-900">指挥部</h1>
+          <h1 className="mt-4 text-xl font-bold tracking-tight text-slate-900">管理系统</h1>
         </div>
 
         <nav className="flex-1 overflow-y-auto p-4 space-y-1">
@@ -148,11 +148,11 @@ export default function Dashboard() {
         <div className="p-4 border-t border-slate-100">
           <div className="rounded-lg bg-slate-50 p-4 border border-slate-200">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] uppercase tracking-wider font-bold text-slate-500">System Status</span>
+              <span className="text-[10px] uppercase tracking-wider font-bold text-slate-500">系统状态</span>
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
             </div>
             <p className="mt-1 text-xs font-semibold text-slate-700">
-              {wsStatus === 'connected' ? 'Connected' : 'Synchronizing...'}
+              {wsStatus === 'connected' ? '已连接' : '同步中...'}
             </p>
           </div>
         </div>
@@ -164,16 +164,16 @@ export default function Dashboard() {
           <div className="flex items-center gap-4">
             <h2 className="text-sm font-bold text-slate-900">总览</h2>
             <div className="h-4 w-px bg-slate-200" />
-            <p className="text-xs text-slate-500">The Agency HQ 指挥中心</p>
+            <p className="text-xs text-slate-500">AI 员工管理系统控制台</p>
           </div>
 
           <div className="flex gap-6">
             <div className="text-right">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Experts</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">专家</p>
               <p className="text-sm font-bold text-slate-900 leading-none mt-1">{activeIds.length}</p>
             </div>
             <div className="text-right">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Tasks</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">任务</p>
               <p className="text-sm font-bold text-slate-900 leading-none mt-1">{tasks.length}</p>
             </div>
           </div>

@@ -2,8 +2,8 @@ import './globals.css'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: '智能体指挥部 | The Agency HQ',
-  description: '管理您的 AI 专家特遣队',
+  title: 'AI 员工管理系统',
+  description: '高效管理您的 AI 专家特遣队',
 }
 
 export default function RootLayout({
