@@ -435,33 +435,6 @@ export default function OrganizationPage() {
                   </div>
                 </div>
 
-                {/* 在岗专家概览 */}
-                <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-4">
-                  <h3 className="text-sm font-bold text-slate-900 mb-4">在岗专家 ({activeIds.length})</h3>
-                  <div className="space-y-1 max-h-48 overflow-y-auto">
-                    {activeAgents.map((agent) => {
-                      const deptConfig = DEPT_MAP[agent.department];
-                      const Icon = deptConfig?.icon || Users;
-                      return (
-                        <div
-                          key={agent.id}
-                          onClick={() => setSelectedAgent(agent)}
-                          className={`flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs cursor-pointer transition-colors ${
-                            selectedAgent?.id === agent.id ? 'bg-slate-100' : 'hover:bg-slate-50'
-                          }`}
-                        >
-                          <Icon className="h-3 w-3 text-slate-400" />
-                          <span className="font-medium text-slate-700 truncate flex-1">{agent.frontmatter.name}</span>
-                        </div>
-                      );
-                    })}
-                    {activeAgents.length === 0 && (
-                      <div className="text-center py-4 text-xs text-slate-400">
-                        当前无在岗专家
-                      </div>
-                    )}
-                  </div>
-                </div>
               </div>
 
               {/* 底部：活动日志 */}
