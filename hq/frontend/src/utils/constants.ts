@@ -22,7 +22,7 @@ const DEFAULT_BACKEND_PORT = process.env.NEXT_PUBLIC_BACKEND_PORT || '3333';
 
 function getBrowserBackendHost() {
   if (typeof window === 'undefined') {
-    return null;
+    return 'localhost';
   }
 
   return window.location.hostname || 'localhost';
@@ -32,7 +32,7 @@ function getDefaultWsUrl() {
   const host = getBrowserBackendHost();
   const actualHost = host === 'localhost' || !host ? '127.0.0.1' : host;
 
-  const protocol = window.location.protocol === 'https:' && actualHost !== '127.0.0.1' ? 'wss' : 'ws';
+  const protocol = typeof window !== 'undefined' && window.location.protocol === 'https:' && actualHost !== '127.0.0.1' ? 'wss' : 'ws';
   return `${protocol}://${actualHost}:${DEFAULT_BACKEND_PORT}`;
 }
 
@@ -40,7 +40,7 @@ function getDefaultApiUrl() {
   const host = getBrowserBackendHost();
   const actualHost = host === 'localhost' || !host ? '127.0.0.1' : host;
 
-  const protocol = window.location.protocol === 'https:' && actualHost !== '127.0.0.1' ? 'https' : 'http';
+  const protocol = typeof window !== 'undefined' && window.location.protocol === 'https:' && actualHost !== '127.0.0.1' ? 'https' : 'http';
   return `${protocol}://${actualHost}:${DEFAULT_BACKEND_PORT}/api`;
 }
 

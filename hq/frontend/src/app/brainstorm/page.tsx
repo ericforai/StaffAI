@@ -70,7 +70,8 @@ export default function BrainstormPage() {
 
   useEffect(() => {
     void expertDiscussionAction.refreshCapabilities();
-  }, [expertDiscussionAction]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleWsMessage(data: WsMessage) {
     if (['SQUAD_UPDATED', 'AGENT_HIRED', 'AGENT_FIRED'].includes(data.type)) {

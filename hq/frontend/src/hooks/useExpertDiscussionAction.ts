@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { API_CONFIG } from '../utils/constants';
 
 export interface DiscussionParticipantResult {
@@ -88,7 +88,7 @@ export function useExpertDiscussionAction() {
     );
   };
 
-  const refreshCapabilities = async () => {
+  const refreshCapabilities = useCallback(async () => {
     setCapabilitiesLoading(true);
     try {
       const response = await fetch(`${API_CONFIG.BASE_URL}/mcp/capabilities`);
@@ -106,7 +106,7 @@ export function useExpertDiscussionAction() {
     } finally {
       setCapabilitiesLoading(false);
     }
-  };
+  }, [capabilities]);
 
   const runDiscussion = async (override?: Partial<UseExpertDiscussionActionState>) => {
     const nextTopic = override?.topic ?? topic;

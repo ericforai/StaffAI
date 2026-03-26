@@ -20,7 +20,9 @@ export function useAgents() {
         const data = await res.json();
         setAgents(data);
       } catch (err) {
-        console.error('Failed to load agents. Ensure backend is running on 3333:', err);
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        console.error(`Failed to load agents from ${API_CONFIG.BASE_URL}/agents:`, errorMessage);
+        console.error('Ensure backend is running on port 3333');
       } finally {
         setLoading(false);
       }
@@ -38,7 +40,9 @@ export function useAgents() {
         const data = await res.json();
         setActiveIds(data.activeAgentIds || []);
       } catch (err) {
-        console.error('Failed to load squad. Ensure backend is running on 3333:', err);
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        console.error(`Failed to load squad from ${API_CONFIG.BASE_URL}/squad:`, errorMessage);
+        console.error('Ensure backend is running on port 3333');
       }
     };
     fetchSquad();
