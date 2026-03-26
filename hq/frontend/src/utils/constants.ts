@@ -50,9 +50,6 @@ export function getWsUrl() {
 
 export function getApiBaseUrl() {
   const url = process.env.NEXT_PUBLIC_API_URL || getDefaultApiUrl();
-  if (typeof window !== 'undefined') {
-    console.log('[constants] API_BASE_URL:', url, '(env:', process.env.NEXT_PUBLIC_API_URL, ')');
-  }
   return url;
 }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { Store, Building2, ClipboardList, BrainCircuit, BookOpenText, Clipboard } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -11,20 +11,13 @@ import { ActivityLog, ActivityLog as ActivityLogType } from '../components/Activ
 import { DEPT_MAP, API_CONFIG } from '../utils/constants';
 
 export default function Dashboard() {
-  // Debug: 输出 API 配置
-  console.log('[Dashboard] API_CONFIG.BASE_URL:', API_CONFIG.BASE_URL);
-
   const { agents, activeIds, loading: agentsLoading } = useAgents();
   const { tasks, loading: tasksLoading } = useTasks();
   const [activities, setActivities] = useState<ActivityLogType[]>([]);
 
   const isLoading = agentsLoading || tasksLoading;
 
-  const { status: wsStatus } = useWebSocket({
-    onMessage: handleWsMessage,
-  });
-
-  function handleWsMessage(data: WsMessage) {
+  const handleWsMessage = useCallback((data: WsMessage) => {
     if (['SQUAD_UPDATED', 'AGENT_HIRED', 'AGENT_FIRED'].includes(data.type)) {
       // syncSquad logic if needed
     }
@@ -54,7 +47,11 @@ export default function Dashboard() {
     ) {
       setActivities((prev) => [newLog, ...prev].slice(0, 20));
     }
-  }
+  }, []);
+
+  const { status: wsStatus } = useWebSocket({
+    onMessage: handleWsMessage,
+  });
 
   const deptStats = useMemo(() => {
     const stats: Record<string, number> = {};

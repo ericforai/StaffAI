@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { useCallback } from 'react';
 import { useTaskDetail } from '../../../hooks/useTaskDetail';
 import { useTaskActions } from '../../../hooks/useTaskActions';
 import { useTaskEvents } from '../../../hooks/useTaskEvents';
@@ -150,22 +151,24 @@ export default function TaskDetailPage() {
   const latestExecution = data?.executions[0] ?? null;
   const taskStatusMessage = data ? getTaskStatusMessage(data.task.status, data.task.executionMode) : null;
 
+  const handleWsMessage = useCallback((message: WsMessage) => {
+    if (message.type !== 'TASK_EVENT' || !message.taskEventType || !message.message || !message.timestamp) {
+      return;
+    }
+    const event: TaskEvent = {
+      type: 'TASK_EVENT',
+      taskEventType: message.taskEventType,
+      message: message.message,
+      taskId: message.taskId,
+      approvalId: message.approvalId,
+      executionId: message.executionId,
+      timestamp: message.timestamp,
+    };
+    pushEvent(event);
+  }, [pushEvent]);
+
   useWebSocket({
-    onMessage: (message: WsMessage) => {
-      if (message.type !== 'TASK_EVENT' || !message.taskEventType || !message.message || !message.timestamp) {
-        return;
-      }
-      const event: TaskEvent = {
-        type: 'TASK_EVENT',
-        taskEventType: message.taskEventType,
-        message: message.message,
-        taskId: message.taskId,
-        approvalId: message.approvalId,
-        executionId: message.executionId,
-        timestamp: message.timestamp,
-      };
-      pushEvent(event);
-    },
+    onMessage: handleWsMessage,
   });
 
   async function handleExecuteTask() {

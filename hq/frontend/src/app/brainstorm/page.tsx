@@ -52,28 +52,7 @@ export default function BrainstormPage() {
   const reportTaskResultAction = useReportTaskResultAction();
   const runtimeFoundation = useRuntimeFoundation(expertDiscussionAction.topic, activeIds);
 
-  const { status: wsStatus } = useWebSocket({
-    onMessage: handleWsMessage,
-  });
-
-  const fetchTemplates = useCallback(
-    () =>
-      fetch(`${API_CONFIG.BASE_URL}/templates`)
-        .then((res) => res.json())
-        .then(setTemplates),
-    []
-  );
-
-  useEffect(() => {
-    fetchTemplates();
-  }, [fetchTemplates]);
-
-  useEffect(() => {
-    void expertDiscussionAction.refreshCapabilities();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  function handleWsMessage(data: WsMessage) {
+  const handleWsMessage = useCallback((data: WsMessage) => {
     if (['SQUAD_UPDATED', 'AGENT_HIRED', 'AGENT_FIRED'].includes(data.type)) {
       syncSquad();
     }
@@ -96,7 +75,28 @@ export default function BrainstormPage() {
       }
     }
 
-  }
+  }, [syncSquad]);
+
+  const { status: wsStatus } = useWebSocket({
+    onMessage: handleWsMessage,
+  });
+
+  const fetchTemplates = useCallback(
+    () =>
+      fetch(`${API_CONFIG.BASE_URL}/templates`)
+        .then((res) => res.json())
+        .then(setTemplates),
+    []
+  );
+
+  useEffect(() => {
+    fetchTemplates();
+  }, [fetchTemplates]);
+
+  useEffect(() => {
+    void expertDiscussionAction.refreshCapabilities();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSaveDiscussionTemplate = async () => {
     if (!newTemplateName || expertDiscussionAction.agentIds.length === 0) return;

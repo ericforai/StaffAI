@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { ChevronRight, Users, Activity, Palette, Megaphone, Building2, ChevronDown, Cpu, FolderKanban, Plus, Trash2 } from 'lucide-react';
 import { useAgents } from '../../hooks/useAgents';
@@ -70,20 +70,7 @@ export default function OrganizationPage() {
   // 只显示已入职的员工（在岗员工）
   const hiredAgents = useMemo(() => agents.filter((agent) => activeIds.includes(agent.id)), [agents, activeIds]);
 
-  const { status: wsStatus } = useWebSocket({
-    onMessage: handleWsMessage,
-  });
-
-  const fetchProjectTeams = () =>
-    fetch(`${API_CONFIG.BASE_URL}/templates`)
-      .then((res) => res.json())
-      .then((data) => setProjectTeams(data || []));
-
-  useMemo(() => {
-    fetchProjectTeams();
-  }, []);
-
-  function handleWsMessage(data: WsMessage) {
+  const handleWsMessage = useCallback((data: WsMessage) => {
     if (['SQUAD_UPDATED', 'AGENT_HIRED', 'AGENT_FIRED'].includes(data.type)) {
       syncSquad();
     }
@@ -117,7 +104,20 @@ export default function OrganizationPage() {
     ) {
       setActivities((prev) => [newLog, ...prev].slice(0, 20));
     }
-  }
+  }, [syncSquad]);
+
+  const { status: wsStatus } = useWebSocket({
+    onMessage: handleWsMessage,
+  });
+
+  const fetchProjectTeams = () =>
+    fetch(`${API_CONFIG.BASE_URL}/templates`)
+      .then((res) => res.json())
+      .then((data) => setProjectTeams(data || []));
+
+  useMemo(() => {
+    fetchProjectTeams();
+  }, []);
 
   const handleCreateTeam = async () => {
     if (!newTeamName) return;

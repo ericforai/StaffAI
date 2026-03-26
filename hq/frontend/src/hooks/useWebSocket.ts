@@ -54,70 +54,88 @@ export function useWebSocket({ onMessage, onError }: UseWebSocketOptions) {
     callbacksRef.current = { onMessage, onError };
   }, [onMessage, onError]);
 
-  const connect = useCallback(function connectSocket() {
-    // 清理旧连接和定时器
-    if (ws.current) {
-      ws.current.close();
-    }
-    if (reconnectTimer.current) {
-      clearTimeout(reconnectTimer.current);
-    }
-
-    setWsStatus('connecting');
-
-    try {
-      const wsUrl = getWsUrl();
-      lastWsUrlRef.current = wsUrl;
-      const socket = new WebSocket(wsUrl);
-
-      socket.onopen = () => {
-        hasConnectedRef.current = true;
-        setWsStatus('connected');
-      };
-
-      socket.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data) as WsMessage;
-          callbacksRef.current.onMessage(data);
-        } catch (err) {
-          console.error('Failed to parse WebSocket message:', err);
-        }
-      };
-
-      socket.onclose = () => {
-        setWsStatus('disconnected');
-        if (hasConnectedRef.current) {
-          console.warn(`WebSocket disconnected; retrying in ${WS_CONFIG.RECONNECT_DELAY}ms.`);
-        }
-        // 3秒后重连
-        reconnectTimer.current = setTimeout(connectSocket, WS_CONFIG.RECONNECT_DELAY);
-      };
-
-      socket.onerror = (error) => {
-        console.warn(`WebSocket connection failed for ${lastWsUrlRef.current}; waiting for reconnect.`);
-        callbacksRef.current.onError?.(error);
-      };
-
-      ws.current = socket;
-    } catch (err) {
-      console.error('Failed to create WebSocket:', err);
-      setWsStatus('disconnected');
-      reconnectTimer.current = setTimeout(connectSocket, WS_CONFIG.RECONNECT_DELAY);
-    }
-  }, []); // 空依赖数组，connect 只在挂载时创建一次
-
   useEffect(() => {
-    connect();
+    let cancelled = false;
 
-    return () => {
+    const connectSocket = () => {
+      // 清理旧连接和定时器
       if (ws.current) {
         ws.current.close();
+        ws.current = null;
       }
       if (reconnectTimer.current) {
         clearTimeout(reconnectTimer.current);
+        reconnectTimer.current = null;
+      }
+
+      if (cancelled) return;
+
+      setWsStatus('connecting');
+
+      try {
+        const wsUrl = getWsUrl();
+        lastWsUrlRef.current = wsUrl;
+        const socket = new WebSocket(wsUrl);
+
+        socket.onopen = () => {
+          if (cancelled) {
+            socket.close();
+            return;
+          }
+          hasConnectedRef.current = true;
+          setWsStatus('connected');
+        };
+
+        socket.onmessage = (event) => {
+          if (cancelled) return;
+          try {
+            const data = JSON.parse(event.data) as WsMessage;
+            callbacksRef.current.onMessage(data);
+          } catch (err) {
+            console.error('Failed to parse WebSocket message:', err);
+          }
+        };
+
+        socket.onclose = () => {
+          if (cancelled) return;
+          setWsStatus('disconnected');
+          if (hasConnectedRef.current) {
+            console.warn(`WebSocket disconnected; retrying in ${WS_CONFIG.RECONNECT_DELAY}ms.`);
+          }
+          // 3秒后重连
+          if (!cancelled) {
+            reconnectTimer.current = setTimeout(connectSocket, WS_CONFIG.RECONNECT_DELAY);
+          }
+        };
+
+        socket.onerror = (error) => {
+          console.warn(`WebSocket connection failed for ${lastWsUrlRef.current}; waiting for reconnect.`);
+          callbacksRef.current.onError?.(error);
+        };
+
+        ws.current = socket;
+      } catch (err) {
+        console.error('Failed to create WebSocket:', err);
+        if (cancelled) return;
+        setWsStatus('disconnected');
+        reconnectTimer.current = setTimeout(connectSocket, WS_CONFIG.RECONNECT_DELAY);
       }
     };
-  }, [connect]);
+
+    connectSocket();
+
+    return () => {
+      cancelled = true;
+      if (ws.current) {
+        ws.current.close();
+        ws.current = null;
+      }
+      if (reconnectTimer.current) {
+        clearTimeout(reconnectTimer.current);
+        reconnectTimer.current = null;
+      }
+    };
+  }, []); // 空依赖数组，只在挂载时运行一次
 
   return { status };
 }
