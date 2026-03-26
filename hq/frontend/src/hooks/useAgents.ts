@@ -8,21 +8,40 @@ import { API_CONFIG } from '../utils/constants';
 export function useAgents() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [activeIds, setActiveIds] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // 加载所有 agents
   useEffect(() => {
-    fetch(`${API_CONFIG.BASE_URL}/agents`)
-      .then(res => res.json())
-      .then(setAgents)
-      .catch(err => console.error('Failed to load agents:', err));
+    const fetchAgents = async () => {
+      try {
+        const url = `${API_CONFIG.BASE_URL}/agents`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`Fetch agents failed: ${res.status} ${res.statusText}`);
+        const data = await res.json();
+        setAgents(data);
+      } catch (err) {
+        console.error('Failed to load agents. Ensure backend is running on 3333:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAgents();
   }, []);
 
   // 加载活跃 squad
   useEffect(() => {
-    fetch(`${API_CONFIG.BASE_URL}/squad`)
-      .then(res => res.json())
-      .then(data => setActiveIds(data.activeAgentIds || []))
-      .catch(err => console.error('Failed to load squad:', err));
+    const fetchSquad = async () => {
+      try {
+        const url = `${API_CONFIG.BASE_URL}/squad`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`Fetch squad failed: ${res.status} ${res.statusText}`);
+        const data = await res.json();
+        setActiveIds(data.activeAgentIds || []);
+      } catch (err) {
+        console.error('Failed to load squad. Ensure backend is running on 3333:', err);
+      }
+    };
+    fetchSquad();
   }, []);
 
   // 计算活跃 agents
@@ -73,6 +92,7 @@ export function useAgents() {
     agents,
     activeIds,
     activeAgents,
+    loading,
     toggleAgent,
     saveSquad,
     syncSquad,

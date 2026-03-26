@@ -11,9 +11,11 @@ import { ActivityLog, ActivityLog as ActivityLogType } from '../components/Activ
 import { DEPT_MAP } from '../utils/constants';
 
 export default function Dashboard() {
-  const { agents, activeIds } = useAgents();
-  const { tasks } = useTasks();
+  const { agents, activeIds, loading: agentsLoading } = useAgents();
+  const { tasks, loading: tasksLoading } = useTasks();
   const [activities, setActivities] = useState<ActivityLogType[]>([]);
+
+  const isLoading = agentsLoading || tasksLoading;
 
   const { status: wsStatus } = useWebSocket({
     onMessage: handleWsMessage,
@@ -180,75 +182,84 @@ export default function Dashboard() {
         </header>
 
         <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
-          <div className="mx-auto w-full max-w-[1800px] space-y-6">
-            {/* Quick Access Cards */}
-            <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-              {dashboardCards.map((card) => {
-                const Icon = card.icon;
-                return (
-                  <Link key={card.key} href={card.href}>
-                    <motion.div
-                      whileHover={{ y: -4 }}
-                      className="group h-full rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-200 hover:border-slate-300 hover:shadow-lg"
-                    >
-                      <div className={`inline-flex rounded-lg bg-gradient-to-br ${card.color} p-2.5 text-white mb-4`}>
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <h3 className="text-base font-bold text-slate-900">{card.title}</h3>
-                      <p className="mt-1 text-sm text-slate-500 line-clamp-2">{card.description}</p>
-                      <div className="mt-4 flex items-center justify-between">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{card.stats}</p>
-                        <span className="text-xs font-medium text-slate-400 group-hover:text-slate-600">进入 →</span>
-                      </div>
-                    </motion.div>
-                  </Link>
-                );
-              })}
-            </section>
+          {isLoading ? (
+            <div className="flex h-full items-center justify-center">
+              <div className="text-center">
+                <div className="h-8 w-8 border-4 border-slate-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                <p className="text-sm font-medium text-slate-500">正在同步数据...</p>
+              </div>
+            </div>
+          ) : (
+            <div className="mx-auto w-full max-w-[1800px] space-y-6">
+              {/* Quick Access Cards */}
+              <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+                {dashboardCards.map((card) => {
+                  const Icon = card.icon;
+                  return (
+                    <Link key={card.key} href={card.href}>
+                      <motion.div
+                        whileHover={{ y: -4 }}
+                        className="group h-full rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-200 hover:border-slate-300 hover:shadow-lg"
+                      >
+                        <div className={`inline-flex rounded-lg bg-gradient-to-br ${card.color} p-2.5 text-white mb-4`}>
+                          <Icon className="h-5 w-5" />
+                        </div>
+                        <h3 className="text-base font-bold text-slate-900">{card.title}</h3>
+                        <p className="mt-1 text-sm text-slate-500 line-clamp-2">{card.description}</p>
+                        <div className="mt-4 flex items-center justify-between">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{card.stats}</p>
+                          <span className="text-xs font-medium text-slate-400 group-hover:text-slate-600">进入 →</span>
+                        </div>
+                      </motion.div>
+                    </Link>
+                  );
+                })}
+              </section>
 
-            {/* Stats Overview */}
-            <section className="grid gap-4 md:grid-cols-4">
-              <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-                <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">专家总数</p>
-                <p className="mt-2 text-2xl font-bold text-slate-900">{agents.length}</p>
-                <p className="mt-1 text-xs text-slate-500">来自 {Object.keys(DEPT_MAP).length} 个部门</p>
-              </div>
-              <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-                <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">在岗专家</p>
-                <p className="mt-2 text-2xl font-bold text-slate-900">{activeIds.length}</p>
-                <p className="mt-1 text-xs text-slate-500">当前活跃阵容</p>
-              </div>
-              <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-                <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">任务总数</p>
-                <p className="mt-2 text-2xl font-bold text-slate-900">{tasks.length}</p>
-                <p className="mt-1 text-xs text-slate-500">进行中的工作</p>
-              </div>
-              <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-                <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">部门分布</p>
-                <div className="mt-2 flex flex-wrap gap-1">
-                  {Object.entries(deptStats).slice(0, 4).map(([key, count]) => (
-                    <span key={key} className="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
-                      {key}: {count}
-                    </span>
-                  ))}
+              {/* Stats Overview */}
+              <section className="grid gap-4 md:grid-cols-4">
+                <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                  <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">专家总数</p>
+                  <p className="mt-2 text-2xl font-bold text-slate-900">{agents.length}</p>
+                  <p className="mt-1 text-xs text-slate-500">来自 {Object.keys(DEPT_MAP).length} 个部门</p>
                 </div>
-              </div>
-            </section>
+                <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                  <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">在岗专家</p>
+                  <p className="mt-2 text-2xl font-bold text-slate-900">{activeIds.length}</p>
+                  <p className="mt-1 text-xs text-slate-500">当前活跃阵容</p>
+                </div>
+                <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                  <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">任务总数</p>
+                  <p className="mt-2 text-2xl font-bold text-slate-900">{tasks.length}</p>
+                  <p className="mt-1 text-xs text-slate-500">进行中的工作</p>
+                </div>
+                <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                  <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">部门分布</p>
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {Object.entries(deptStats).slice(0, 4).map(([key, count]) => (
+                      <span key={key} className="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
+                        {key}: {count}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </section>
 
-            {/* Activity Log */}
-            <section className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
-              <div className="px-5 py-3 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Clipboard className="h-4 w-4 text-slate-500" />
-                  <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">系统活动流</h3>
+              {/* Activity Log */}
+              <section className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
+                <div className="px-5 py-3 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Clipboard className="h-4 w-4 text-slate-500" />
+                    <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">系统活动流</h3>
+                  </div>
+                  <span className={`h-2 w-2 rounded-full ${wsStatus === 'connected' ? 'bg-emerald-500' : 'bg-slate-300'}`} />
                 </div>
-                <span className={`h-2 w-2 rounded-full ${wsStatus === 'connected' ? 'bg-emerald-500' : 'bg-slate-300'}`} />
-              </div>
-              <div className="p-4 max-h-48 overflow-y-auto">
-                <ActivityLog activities={activities} wsStatus={wsStatus} />
-              </div>
-            </section>
-          </div>
+                <div className="p-4 max-h-48 overflow-y-auto">
+                  <ActivityLog activities={activities} wsStatus={wsStatus} />
+                </div>
+              </section>
+            </div>
+          )}
         </div>
       </main>
     </div>

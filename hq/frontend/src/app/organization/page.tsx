@@ -2,16 +2,17 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { ChevronRight, Users, Briefcase, Activity, Palette, Megaphone, TestTube, HelpCircle, Building2, ChevronDown, Save, FolderHeart, Cpu } from 'lucide-react';
+import { ChevronRight, Users, Activity, Palette, Megaphone, Building2, ChevronDown, Cpu, FolderKanban, Plus, Trash2 } from 'lucide-react';
 import { useAgents } from '../../hooks/useAgents';
-import { SaveTemplateModal } from '../../components/SaveTemplateModal';
 import { ActivityLog, type ActivityLog as ActivityLogType } from '../../components/ActivityLog';
 import { useWebSocket, type WsMessage } from '../../hooks/useWebSocket';
 import { API_CONFIG, DEPT_MAP } from '../../utils/constants';
 
-interface Template {
+interface ProjectTeam {
   name: string;
+  description?: string;
   activeAgentIds: string[];
+  createdAt?: string;
 }
 
 // 部门分组配置 - 模拟真实科层结构
@@ -55,12 +56,14 @@ const DEPT_GROUPS = {
 
 export default function OrganizationPage() {
   const { agents, activeIds, toggleAgent, saveSquad, syncSquad } = useAgents();
-  const [templates, setTemplates] = useState<Template[]>([]);
-  const [showSaveInput, setShowSaveInput] = useState(false);
-  const [newTemplateName, setNewTemplateName] = useState('');
+  const [projectTeams, setProjectTeams] = useState<ProjectTeam[]>([]);
+  const [showCreateTeam, setShowCreateTeam] = useState(false);
+  const [newTeamName, setNewTeamName] = useState('');
+  const [newTeamDesc, setNewTeamDesc] = useState('');
   const [activities, setActivities] = useState<ActivityLogType[]>([]);
   const [workingAgentId, setWorkingAgentId] = useState<string | null>(null);
   const [selectedAgent, setSelectedAgent] = useState<any | null>(null);
+  const [selectedTeam, setSelectedTeam] = useState<ProjectTeam | null>(null);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['技术中心', '产品中心']));
   const [expandedDepts, setExpandedDepts] = useState<Set<string>>(new Set());
 
@@ -71,13 +74,13 @@ export default function OrganizationPage() {
     onMessage: handleWsMessage,
   });
 
-  const fetchTemplates = () =>
+  const fetchProjectTeams = () =>
     fetch(`${API_CONFIG.BASE_URL}/templates`)
       .then((res) => res.json())
-      .then(setTemplates);
+      .then((data) => setProjectTeams(data || []));
 
   useMemo(() => {
-    fetchTemplates();
+    fetchProjectTeams();
   }, []);
 
   function handleWsMessage(data: WsMessage) {
@@ -116,21 +119,37 @@ export default function OrganizationPage() {
     }
   }
 
-  const handleSaveTemplate = async () => {
-    if (!newTemplateName) return;
+  const handleCreateTeam = async () => {
+    if (!newTeamName) return;
 
     await fetch(`${API_CONFIG.BASE_URL}/templates`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: newTemplateName, activeAgentIds: activeIds }),
+      body: JSON.stringify({
+        name: newTeamName,
+        description: newTeamDesc,
+        activeAgentIds: activeIds,
+        createdAt: new Date().toISOString()
+      }),
     });
 
-    setNewTemplateName('');
-    setShowSaveInput(false);
-    fetchTemplates();
+    setNewTeamName('');
+    setNewTeamDesc('');
+    setShowCreateTeam(false);
+    fetchProjectTeams();
   };
 
-  const applyTemplate = (template: Template) => saveSquad(template.activeAgentIds);
+  const handleActivateTeam = (team: ProjectTeam) => {
+    setSelectedTeam(team);
+    saveSquad(team.activeAgentIds);
+  };
+
+  const handleDeleteTeam = async (teamName: string) => {
+    await fetch(`${API_CONFIG.BASE_URL}/templates/${encodeURIComponent(teamName)}`, {
+      method: 'DELETE',
+    });
+    fetchProjectTeams();
+  };
 
   const toggleGroup = (groupName: string) => {
     setExpandedGroups(prev => {
@@ -248,11 +267,11 @@ export default function OrganizationPage() {
             </div>
             {activeIds.length > 0 && (
               <button
-                onClick={() => setShowSaveInput(true)}
+                onClick={() => setShowCreateTeam(true)}
                 className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 transition-all hover:border-slate-400 hover:text-slate-900"
               >
-                <Save className="h-3.5 w-3.5" />
-                保存阵容
+                <Plus className="h-3.5 w-3.5" />
+                保存为项目组
               </button>
             )}
           </div>
@@ -406,30 +425,56 @@ export default function OrganizationPage() {
                   </div>
                 )}
 
-                {/* 阵容模板 */}
+                {/* 项目组 */}
                 <div className="rounded-xl border border-slate-200 bg-white shadow-sm p-4">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-bold text-slate-900">阵容模板</h3>
+                    <div className="flex items-center gap-2">
+                      <FolderKanban className="h-4 w-4 text-slate-600" />
+                      <h3 className="text-sm font-bold text-slate-900">项目组</h3>
+                    </div>
+                    <button
+                      onClick={() => setShowCreateTeam(true)}
+                      className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-medium text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-100"
+                    >
+                      <Plus className="h-3 w-3" />
+                      新建
+                    </button>
                   </div>
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
-                    {templates.map((template) => (
-                      <button
-                        key={template.name}
-                        onClick={() => applyTemplate(template)}
-                        className="group flex w-full items-center justify-between rounded-lg border border-slate-100 bg-slate-50/50 px-3 py-2 text-left transition-all hover:border-slate-300 hover:bg-white"
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {projectTeams.map((team) => (
+                      <div
+                        key={team.name}
+                        className={`group rounded-lg border px-3 py-2 transition-all ${
+                          selectedTeam?.name === team.name
+                            ? 'border-sky-300 bg-sky-50'
+                            : 'border-slate-100 bg-slate-50/50 hover:border-slate-300 hover:bg-white'
+                        }`}
                       >
-                        <div className="flex items-center gap-2">
-                          <FolderHeart className="h-3.5 w-3.5 text-slate-400 group-hover:text-sky-600" />
-                          <span className="text-xs font-semibold text-slate-700 group-hover:text-slate-900 truncate">{template.name}</span>
+                        <div className="flex items-start justify-between gap-2">
+                          <button
+                            onClick={() => handleActivateTeam(team)}
+                            className="flex-1 text-left"
+                          >
+                            <p className="text-xs font-semibold text-slate-700 truncate">{team.name}</p>
+                            {team.description && (
+                              <p className="text-[10px] text-slate-500 truncate mt-0.5">{team.description}</p>
+                            )}
+                            <p className="text-[10px] text-slate-400 mt-1">{team.activeAgentIds.length} 成员</p>
+                          </button>
+                          <button
+                            onClick={() => handleDeleteTeam(team.name)}
+                            className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-500 transition-all"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
                         </div>
-                        <span className="text-[10px] font-bold text-slate-400 border border-slate-200 px-1.5 py-0.5 rounded">
-                          {template.activeAgentIds.length}
-                        </span>
-                      </button>
+                      </div>
                     ))}
-                    {templates.length === 0 && (
-                      <div className="text-center py-4 text-xs text-slate-400">
-                        暂无模板
+                    {projectTeams.length === 0 && (
+                      <div className="text-center py-6 text-xs text-slate-400">
+                        <FolderKanban className="h-6 w-6 mx-auto mb-2 text-slate-300" />
+                        <p>暂无项目组</p>
+                        <p className="text-[10px] mt-1">为不同任务创建团队</p>
                       </div>
                     )}
                   </div>
@@ -451,17 +496,71 @@ export default function OrganizationPage() {
         </div>
       </main>
 
-      {/* Save Template Modal */}
-      <SaveTemplateModal
-        show={showSaveInput}
-        value={newTemplateName}
-        onChange={setNewTemplateName}
-        onSave={handleSaveTemplate}
-        onCancel={() => {
-          setShowSaveInput(false);
-          setNewTemplateName('');
-        }}
-      />
+      {/* 创建项目组 Modal */}
+      {showCreateTeam && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowCreateTeam(false)}>
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <FolderKanban className="h-5 w-5 text-slate-600" />
+                <h3 className="text-base font-bold text-slate-900">创建项目组</h3>
+              </div>
+              <button
+                onClick={() => setShowCreateTeam(false)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                ×
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">项目组名称</label>
+                <input
+                  type="text"
+                  value={newTeamName}
+                  onChange={(e) => setNewTeamName(e.target.value)}
+                  placeholder="例如：官网重构组"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-slate-400"
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">描述（可选）</label>
+                <textarea
+                  value={newTeamDesc}
+                  onChange={(e) => setNewTeamDesc(e.target.value)}
+                  placeholder="例如：负责官网技术架构重构和前端开发"
+                  rows={2}
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-slate-400 resize-none"
+                />
+              </div>
+              <div className="flex items-center justify-between text-xs text-slate-500 bg-slate-50 rounded-lg px-3 py-2">
+                <span>当前成员数</span>
+                <span className="font-bold text-slate-700">{activeIds.length} 人</span>
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={() => {
+                    setShowCreateTeam(false);
+                    setNewTeamName('');
+                    setNewTeamDesc('');
+                  }}
+                  className="flex-1 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition-all hover:border-slate-300 hover:text-slate-900"
+                >
+                  取消
+                </button>
+                <button
+                  onClick={handleCreateTeam}
+                  disabled={!newTeamName}
+                  className="flex-1 rounded-lg border border-slate-900 bg-slate-900 px-4 py-2 text-xs font-bold text-white transition-all hover:bg-slate-800 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-100 disabled:text-slate-400"
+                >
+                  创建
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
