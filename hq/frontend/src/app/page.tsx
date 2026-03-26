@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Store, Building2, ClipboardList, BrainCircuit, BookOpenText, Clipboard } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -14,7 +14,6 @@ export default function Dashboard() {
   const { agents, activeIds } = useAgents();
   const { tasks } = useTasks();
   const [activities, setActivities] = useState<ActivityLogType[]>([]);
-  const [workingAgentId, setWorkingAgentId] = useState<string | null>(null);
 
   const { status: wsStatus } = useWebSocket({
     onMessage: handleWsMessage,
@@ -34,10 +33,6 @@ export default function Dashboard() {
     };
 
     if (data.type === 'AGENT_WORKING' || data.type === 'AGENT_ASSIGNED') {
-      if (data.agentId) {
-        setWorkingAgentId(data.agentId);
-        setTimeout(() => setWorkingAgentId(null), 3000);
-      }
       setActivities((prev) => [newLog, ...prev].slice(0, 20));
     } else if (
       [
@@ -63,8 +58,6 @@ export default function Dashboard() {
     }
     return stats;
   }, [agents]);
-
-  const activeAgents = useMemo(() => agents.filter((agent) => activeIds.includes(agent.id)), [agents, activeIds]);
 
   const dashboardCards = [
     {

@@ -66,7 +66,7 @@ test('buildSerialWorkflowPlan creates ordered steps with assignments', () => {
   assert.equal(assignments[1]?.assignmentRole, 'dispatcher');
 });
 
-test('runTaskExecution serializes assignment-aware execution records', async () => {
+test('runTaskExecution serializes assignment-aware execution records when runtime succeeds', async () => {
   const savedExecutions: ExecutionLifecycleRecord[] = [];
   const updatedTasks: string[] = [];
   const store = {
@@ -84,7 +84,7 @@ test('runTaskExecution serializes assignment-aware execution records', async () 
         id: 'task-serial',
         title: 'Split runtime from API',
         description: 'Create a serial baseline',
-        taskType: 'architecture',
+        taskType: 'architecture_analysis',
         priority: 'medium',
         status: 'running',
         executionMode: 'serial',
@@ -108,6 +108,14 @@ test('runTaskExecution serializes assignment-aware execution records', async () 
       executor: 'codex',
       summary: 'serial execution completed',
       executionMode: 'serial',
+      runtimeRunner: async () => ({
+        outputSummary: 'serial execution completed',
+        outputSnapshot: {
+          runtimeName: 'local_codex_cli',
+          executor: 'codex',
+          executionMode: 'serial',
+        },
+      }),
     },
     store
   );
@@ -122,6 +130,63 @@ test('runTaskExecution serializes assignment-aware execution records', async () 
   assert.equal(result.execution.workflowPlan?.mode, 'serial');
   assert.equal(result.execution.assignments?.length, 2);
   assert.equal(updatedTasks.length, 1);
+});
+
+test('runTaskExecution fails degraded runtime results instead of completing them', async () => {
+  const savedExecutions: ExecutionLifecycleRecord[] = [];
+  const store = {
+    async saveExecution(execution: ExecutionLifecycleRecord) {
+      savedExecutions.push(execution);
+    },
+    async updateExecution(_id: string, updater: (execution: ExecutionLifecycleRecord) => ExecutionLifecycleRecord) {
+      savedExecutions[0] = updater(savedExecutions[0]);
+      return savedExecutions[0];
+    },
+    async updateTask(_id: string, updater: (task: TaskRecord) => TaskRecord) {
+      return updater({
+        id: 'task-degraded',
+        title: 'Degraded runtime',
+        description: 'degraded path',
+        taskType: 'general',
+        priority: 'medium',
+        status: 'running',
+        executionMode: 'single',
+        approvalRequired: false,
+        riskLevel: 'low',
+        requestedBy: 'system',
+        requestedAt: '2026-03-24T00:00:00.000Z',
+        recommendedAgentRole: 'dispatcher',
+        candidateAgentRoles: ['dispatcher'],
+        routeReason: 'degraded test',
+        routingStatus: 'manual_review',
+        createdAt: 'now',
+        updatedAt: 'now',
+      });
+    },
+  } as const;
+
+  const result = await runTaskExecution(
+    {
+      taskId: 'task-degraded',
+      executor: 'codex',
+      summary: 'error summary',
+      runtimeRunner: async () => ({
+        outputSummary: 'Error executing codex: CLI exited with 1',
+        outputSnapshot: {
+          runtimeName: 'local_codex_cli',
+          executor: 'codex',
+          executionMode: 'single',
+          degraded: true,
+          fallbackReason: 'CLI exited with 1',
+        },
+      }),
+    },
+    store,
+  );
+
+  assert.equal(result.execution.status, 'failed');
+  assert.equal(result.execution.errorMessage, 'Error executing codex: CLI exited with 1');
+  assert.equal(result.execution.degraded, true);
 });
 
 test('runTaskExecution retries retriable runtime errors before succeeding', async () => {

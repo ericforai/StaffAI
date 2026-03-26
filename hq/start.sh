@@ -4,6 +4,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STATE_DIR="${AGENCY_HOME:-$HOME/.agency}"
+FRONTEND_PORT="${FRONTEND_PORT:-3008}"
+export NEXT_PUBLIC_BACKEND_PORT="${NEXT_PUBLIC_BACKEND_PORT:-3333}"
 
 echo "Starting The Agency HQ from: $SCRIPT_DIR"
 echo "Using Agency runtime dir: $STATE_DIR"
@@ -26,11 +28,11 @@ BACKEND_PID=$!
 
 echo "--- Initializing Frontend ---"
 cd "$SCRIPT_DIR/frontend"
-npm run dev &
+PORT="$FRONTEND_PORT" npm run dev &
 FRONTEND_PID=$!
 
 echo "============================================================"
-echo "HQ Dashboard is running at: http://localhost:8888"
+echo "HQ Dashboard is running at: http://localhost:$FRONTEND_PORT"
 echo "Backend API is running at:  http://localhost:3333"
 echo "Runtime artifacts:          $SCRIPT_DIR/generated"
 echo "Agency runtime dir:         $STATE_DIR"

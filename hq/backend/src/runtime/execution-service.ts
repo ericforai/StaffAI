@@ -186,6 +186,9 @@ export async function runTaskExecution(
   workflowPlan?: WorkflowPlan;
   assignments?: TaskAssignment[];
 }> {
+  const storeWithObservability = store as (typeof store) &
+    Partial<Pick<Store, 'appendExecutionTraceEvent' | 'saveCostLogEntry'>>;
+
   const timeoutMs = Number.isFinite(input.timeoutMs) && (input.timeoutMs ?? 0) > 0 ? (input.timeoutMs as number) : 30_000;
   const maxRetries = Number.isFinite(input.maxRetries) && (input.maxRetries ?? 0) >= 0 ? (input.maxRetries as number) : 1;
   const runtimeName = input.runtimeName || resolveRuntimeName(input.executor);
@@ -228,6 +231,22 @@ export async function runTaskExecution(
   });
 
   await store.saveExecution(started);
+  if (typeof storeWithObservability.appendExecutionTraceEvent === 'function') {
+    await storeWithObservability.appendExecutionTraceEvent({
+      id: `trace_exec_${started.id}_${Date.now()}`,
+      type: 'execution_started',
+      taskId: input.taskId,
+      executionId: started.id,
+      occurredAt: new Date().toISOString(),
+      actor: input.executor,
+      summary: `Execution started: ${started.id}`,
+      data: {
+        executor: input.executor,
+        runtimeName,
+        executionMode: input.executionMode ?? 'single',
+      },
+    });
+  }
   let lastError: RuntimeExecutionError | undefined;
   let finalizedExecution: ExecutionLifecycleRecord | null = null;
   let finalizedWorkflowArtifacts: { workflowPlan?: WorkflowPlan; assignments?: TaskAssignment[] } | undefined;
@@ -269,6 +288,24 @@ export async function runTaskExecution(
         input.runtimeRunner ? input.runtimeRunner(runtimeContext) : runtimeAdapter.run(runtimeContext),
         timeoutMs,
       );
+
+      if (runtimeResult.outputSnapshot?.degraded) {
+        lastError = {
+          code: 'execution_failed',
+          message: runtimeResult.outputSummary || 'Execution returned a degraded runtime result',
+          retriable: false,
+          details: runtimeResult.outputSnapshot ? { outputSnapshot: runtimeResult.outputSnapshot } : undefined,
+        };
+        finalizedExecution = failExecution(started, {
+          errorMessage: lastError.message,
+          retryCount: attempt,
+          maxRetries,
+          timeoutMs,
+          degraded: true,
+          structuredError: lastError,
+        });
+        break;
+      }
 
       finalizedWorkflowArtifacts = serialBundle
         ? completeSerialWorkflowBundle(serialBundle)
@@ -312,6 +349,71 @@ export async function runTaskExecution(
       structuredError: lastError,
     });
   await store.updateExecution(started.id, () => completedOrFailed);
+
+  if (typeof storeWithObservability.appendExecutionTraceEvent === 'function') {
+    await storeWithObservability.appendExecutionTraceEvent({
+      id: `trace_exec_${started.id}_${Date.now()}`,
+      type:
+        completedOrFailed.status === 'completed'
+          ? 'execution_completed'
+          : completedOrFailed.status === 'degraded'
+            ? 'execution_degraded'
+            : completedOrFailed.status === 'cancelled'
+              ? 'execution_cancelled'
+              : 'execution_failed',
+      taskId: input.taskId,
+      executionId: started.id,
+      occurredAt: new Date().toISOString(),
+      actor: input.executor,
+      summary: `Execution ${completedOrFailed.status}: ${started.id}`,
+      data: {
+        status: completedOrFailed.status,
+        degraded: completedOrFailed.degraded,
+        retryCount: completedOrFailed.retryCount,
+      },
+    });
+  }
+
+  const snapshot = completedOrFailed.outputSnapshot as Record<string, unknown> | undefined;
+  const tokensUsed = typeof snapshot?.tokensUsed === 'number' ? (snapshot.tokensUsed as number) : undefined;
+  if (typeof storeWithObservability.saveCostLogEntry === 'function' && tokensUsed !== undefined) {
+    const recordedAt = new Date().toISOString();
+    const costEntry = {
+      id: randomUUID(),
+      taskId: input.taskId,
+      executionId: started.id,
+      recordedAt,
+      source: 'runtime_output_snapshot' as const,
+      executor: input.executor,
+      runtimeName,
+      tokensUsed,
+      modelVersion: typeof snapshot?.modelVersion === 'string' ? (snapshot.modelVersion as string) : undefined,
+      responseTimeMs: typeof snapshot?.responseTimeMs === 'number' ? (snapshot.responseTimeMs as number) : undefined,
+      cacheStatus:
+        snapshot?.cacheStatus === 'hit' || snapshot?.cacheStatus === 'miss' || snapshot?.cacheStatus === 'disabled'
+          ? (snapshot.cacheStatus as 'hit' | 'miss' | 'disabled')
+          : undefined,
+    };
+
+    await storeWithObservability.saveCostLogEntry(costEntry);
+    if (typeof storeWithObservability.appendExecutionTraceEvent === 'function') {
+      await storeWithObservability.appendExecutionTraceEvent({
+        id: `trace_cost_${costEntry.id}_${Date.now()}`,
+        type: 'cost_observed',
+        taskId: input.taskId,
+        executionId: started.id,
+        occurredAt: recordedAt,
+        actor: input.executor,
+        summary: `Cost observed: ${tokensUsed} tokens`,
+        data: {
+          costLogEntryId: costEntry.id,
+          tokensUsed,
+          modelVersion: costEntry.modelVersion,
+          responseTimeMs: costEntry.responseTimeMs,
+        },
+      });
+    }
+  }
 
   if (finalizedWorkflowArtifacts?.workflowPlan && finalizedWorkflowArtifacts.assignments) {
     if (store.updateWorkflowPlan) {

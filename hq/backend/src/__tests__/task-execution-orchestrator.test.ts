@@ -28,7 +28,7 @@ function makeTask(overrides: Partial<TaskRecord> = {}): TaskRecord {
   };
 }
 
-test('executeTaskRecord runs single execution through runtime service', async () => {
+test('executeTaskRecord fails single execution when Codex CLI degrades', async () => {
   const task = makeTask();
   const executions: ExecutionLifecycleRecord[] = [];
   let updatedTaskStatus = '';
@@ -57,10 +57,11 @@ test('executeTaskRecord runs single execution through runtime service', async ()
     store
   );
 
-  assert.equal(result.execution.status, 'completed');
-  assert.equal(result.execution.outputSummary, 'done');
+  assert.equal(result.execution.status, 'failed');
+  assert.match(result.execution.errorMessage ?? '', /^Error executing codex:/);
   assert.equal(result.execution.runtimeName, 'local_codex_cli');
-  assert.equal(updatedTaskStatus, 'completed');
+  assert.equal(result.execution.degraded, true);
+  assert.equal(updatedTaskStatus, 'failed');
 });
 
 test('executeTaskRecord loads memory context before execution and writes back summary after completion', async () => {

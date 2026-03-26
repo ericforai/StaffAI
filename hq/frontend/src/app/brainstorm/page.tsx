@@ -11,7 +11,6 @@ import { useConsultAgencyAction } from '../../hooks/useConsultAgencyAction';
 import { useReportTaskResultAction } from '../../hooks/useReportTaskResultAction';
 import { useRuntimeFoundation } from '../../hooks/useRuntimeFoundation';
 import { useAgents } from '../../hooks/useAgents';
-import { ActivityLog, type ActivityLog as ActivityLogType } from '../../components/ActivityLog';
 import { API_CONFIG } from '../../utils/constants';
 import type { DiscussionExpert } from '../../hooks/useDiscussionControl';
 
@@ -33,7 +32,6 @@ export default function BrainstormPage() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [showSaveInput, setShowSaveInput] = useState(false);
   const [newTemplateName, setNewTemplateName] = useState('');
-  const [activities, setActivities] = useState<ActivityLogType[]>([]);
   const [consultProgress, setConsultProgress] = useState<ToolProgressState>({
     stage: 'idle',
     message: '准备接收顾问请求',
@@ -72,7 +70,7 @@ export default function BrainstormPage() {
 
   useEffect(() => {
     void expertDiscussionAction.refreshCapabilities();
-  }, []);
+  }, [expertDiscussionAction]);
 
   function handleWsMessage(data: WsMessage) {
     if (['SQUAD_UPDATED', 'AGENT_HIRED', 'AGENT_FIRED'].includes(data.type)) {
@@ -97,29 +95,6 @@ export default function BrainstormPage() {
       }
     }
 
-    const newLog: ActivityLogType = {
-      id: crypto.randomUUID(),
-      timestamp: new Date(),
-      agentName: data.agentName || (data.type === 'CONNECTED' ? '系统中心' : '指挥部'),
-      type: data.type as ActivityLogType['type'],
-      task: data.type === 'TOOL_PROGRESS' || data.type === 'TASK_EVENT' ? data.message : data.task,
-    };
-
-    if (
-      [
-        'AGENT_HIRED',
-        'AGENT_FIRED',
-        'SQUAD_UPDATED',
-        'CONNECTED',
-        'AGENT_TASK_COMPLETED',
-        'DISCUSSION_STARTED',
-        'DISCUSSION_COMPLETED',
-        'TOOL_PROGRESS',
-        'TASK_EVENT',
-      ].includes(data.type)
-    ) {
-      setActivities((prev) => [newLog, ...prev].slice(0, 20));
-    }
   }
 
   const handleSaveDiscussionTemplate = async () => {

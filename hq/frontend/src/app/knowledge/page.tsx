@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { Search, BookOpenText } from 'lucide-react';
 import { useWebSocket } from '../../hooks/useWebSocket';
@@ -21,6 +21,13 @@ interface KnowledgeEntry {
   tags: string[];
 }
 
+interface RawKnowledgeEntry {
+  excerpt?: string;
+  relativePath: string;
+  modifiedAtMs: number;
+  type: string;
+}
+
 export default function KnowledgePage() {
   const [knowledgeEntries, setKnowledgeEntries] = useState<KnowledgeEntry[]>([]);
   const [knowledgeQuery, setKnowledgeQuery] = useState('');
@@ -35,7 +42,7 @@ export default function KnowledgePage() {
       .then((res) => res.json())
       .then((data) => {
         if (data && Array.isArray(data.entries)) {
-          const entries: KnowledgeEntry[] = data.entries.map((entry: any) => {
+          const entries: KnowledgeEntry[] = data.entries.map((entry: RawKnowledgeEntry) => {
             let cleanContent = entry.excerpt || '';
             if (cleanContent.includes('---')) {
               cleanContent = cleanContent.split('---').pop()?.trim() || cleanContent;

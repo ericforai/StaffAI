@@ -71,8 +71,26 @@ test('RiskAssessmentEngine - destructive keywords as HIGH risk', () => {
     assert.equal(result.approvalRequired, true);
     assert.ok(
       result.factors.some(f => f.includes('destructive') || f.includes('operation') || f.includes('database'))
-    );
+      );
   }
+});
+
+test('RiskAssessmentEngine - Chinese destructive and production keywords as HIGH risk', () => {
+  const engine = createDefaultRiskAssessmentEngine();
+  const input: RiskAssessmentInput = {
+    title: '请删除生产数据库中的用户表',
+    description: '需要删表并同步处理生产环境'
+  };
+
+  const result = engine.assess(input);
+
+  assert.equal(result.riskLevel, 'HIGH');
+  assert.equal(result.approvalRequired, true);
+  assert.ok(
+    result.factors.some((factor) =>
+      factor.includes('destructive') || factor.includes('production') || factor.includes('database')
+    )
+  );
 });
 
 test('RiskAssessmentEngine - production keywords as HIGH risk', () => {

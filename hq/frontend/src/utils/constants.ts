@@ -18,6 +18,8 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
+const DEFAULT_BACKEND_PORT = process.env.NEXT_PUBLIC_BACKEND_PORT || '3333';
+
 function getBrowserBackendHost() {
   if (typeof window === 'undefined') {
     return null;
@@ -30,22 +32,22 @@ function getDefaultWsUrl() {
   const host = getBrowserBackendHost();
 
   if (!host) {
-    return 'ws://127.0.0.1:3333';
+    return `ws://127.0.0.1:${DEFAULT_BACKEND_PORT}`;
   }
 
   const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-  return `${protocol}://${host}:3333`;
+  return `${protocol}://${host}:${DEFAULT_BACKEND_PORT}`;
 }
 
 function getDefaultApiUrl() {
   const host = getBrowserBackendHost();
 
   if (!host) {
-    return 'http://localhost:3333/api';
+    return `http://localhost:${DEFAULT_BACKEND_PORT}/api`;
   }
 
   const protocol = window.location.protocol === 'https:' ? 'https' : 'http';
-  return `${protocol}://${host}:3333/api`;
+  return `${protocol}://${host}:${DEFAULT_BACKEND_PORT}/api`;
 }
 
 export function getWsUrl() {

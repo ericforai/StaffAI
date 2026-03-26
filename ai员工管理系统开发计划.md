@@ -1011,3 +1011,165 @@ hq/backend/src/
 3. 这段实现未来是否可迁移到 `StaffAI`？
 
 如果这三个问题答不清，就先不要继续写代码。
+
+---
+
+## 十、实现对照表（HQ 当前代码）
+
+> 说明：本对照表以本仓库 `agency-agents/hq` 的现状为准，用于验收“计划是否已落地”。
+> 你可以把它理解为：计划任务（Phase/Task）→ 代码落位 → 可运行的 API/页面 → 可验证的测试。
+
+### Phase 1｜交互入口层升级
+
+- **Task 1.1 新增任务中心视图**
+  - **任务列表**：`hq/frontend/src/app/tasks/page.tsx`
+  - **任务详情**：`hq/frontend/src/app/tasks/[id]/page.tsx`
+  - **执行详情**：`hq/frontend/src/app/executions/[id]/page.tsx`
+  - **审批列表**：`hq/frontend/src/app/approvals/page.tsx`
+  - **员工列表**：`hq/frontend/src/app/employees/page.tsx`（`/employees`）
+
+- **Task 1.3 后端 API 扩展**
+  - **tasks**：`hq/backend/src/api/tasks.ts`
+    - `POST /api/tasks`
+    - `GET /api/tasks`
+    - `GET /api/tasks/:id`
+  - **executions**：`hq/backend/src/api/executions.ts`
+    - `GET /api/executions/:id`
+  - **approvals**：`hq/backend/src/api/approvals.ts`
+    - `GET /api/approvals`
+    - `POST /api/approvals/:id/approve`
+    - `POST /api/approvals/:id/reject`
+
+- **Task 1.5 验收标准（前端）**
+  - Playwright E2E：`hq/frontend/tests/e2e/tasks-workspace.spec.ts`
+
+---
+
+### Phase 2｜员工注册中心与任务编排层
+
+- **Task 2.1 Agent Profile 结构化**
+  - **类型定义**：`hq/backend/src/types.ts`
+  - **扫描/结构化推断**：`hq/backend/src/scanner.ts`
+  - **API**：`hq/backend/src/api/agents.ts`（`GET /api/agents`）
+
+- **Task 2.2/2.3/2.4/2.7 模型与状态机**
+  - **统一模型与词表**：`hq/backend/src/shared/task-types.ts`
+  - **状态机**：`hq/backend/src/orchestration/task-state-machine.ts`
+
+- **Task 2.5 Orchestrator 服务**
+  - 任务创建/路由/计划/分配：`hq/backend/src/orchestration/task-orchestrator.ts`
+  - 路由规则：`hq/backend/src/orchestration/task-routing.ts`
+
+- **Task 2.8 第一版存储策略（文件/JSON + seam）**
+  - file repos：`hq/backend/src/persistence/file-repositories.ts`
+  - Store seam：`hq/backend/src/store.ts`
+
+---
+
+### Phase 3｜运行时层升级
+
+- **Task 3.1 Runtime Adapter 接口（含 cancel/pause/resume）**
+  - runtime adapter：`hq/backend/src/runtime/runtime-adapter.ts`
+  - 控制状态存储：`hq/backend/src/runtime/execution-store.ts`
+  - 控制器：`hq/backend/src/runtime/task-controller.ts`
+  - 执行控制 API：`hq/backend/src/api/executions.ts`
+    - `POST /api/executions/:id/pause`
+    - `POST /api/executions/:id/resume`
+    - `POST /api/executions/:id/cancel`
+
+- **Task 3.2 Execution 模型**
+  - `hq/backend/src/shared/task-types.ts`（`ExecutionRecord`）
+
+- **Task 3.4 PromptBuilder**
+  - `hq/backend/src/runtime/prompt-builder.ts`
+
+- **Task 3.5 超时、重试、降级**
+  - `hq/backend/src/runtime/execution-service.ts`
+  - `hq/backend/src/runtime/degradation-policy.ts`
+
+---
+
+### Phase 4｜记忆与知识层
+
+- **Task 4.1 `.ai/` 目录规范**
+  - `hq/backend/src/memory/memory-layout.ts`
+
+- **Task 4.3 Memory Indexer**
+  - `hq/backend/src/memory/memory-indexer.ts`
+
+- **Task 4.4 Retriever**
+  - `hq/backend/src/memory/file-memory-retriever.ts`
+  - `hq/backend/src/memory/memory-retriever.ts`（legacy/兼容路径）
+
+- **Task 4.6 第二版预留能力（embedding / rerank / usage logs / scoring）**
+  - 可插拔 embedding + cosine：`hq/backend/src/memory/retrieval/embedding.ts`
+  - usage logs（JSONL 追加写）：`hq/backend/src/memory/retrieval/usage-logger.ts`
+  - 开关配置：`hq/backend/src/memory/memory-retriever-types.ts`
+  - 接入点：`hq/backend/src/memory/file-memory-retriever.ts`
+  - 测试：`hq/backend/src/__tests__/memory-usage-logger.test.ts`
+
+- **Task 4.7 写回策略**
+  - `hq/backend/src/memory/write-back-service.ts`
+
+---
+
+### Phase 5｜工具与系统连接层
+
+- **Task 5.1 Tool Definition 抽象（input_schema/output_schema）**
+  - `hq/backend/src/tools/base-tool.ts`（对外暴露 JSON schema）
+  - `hq/backend/src/tools/json-schema.ts`（`zod-to-json-schema` 转换 + 缓存）
+  - 依赖：`hq/backend/package.json`（`zod-to-json-schema`）
+
+- **Task 5.2 Tool Gateway 接口**
+  - gateway：`hq/backend/src/tools/tool-gateway.ts`
+  - API：`hq/backend/src/api/tools.ts`
+
+- **Task 5.3 第一批工具映射**
+  - 工具实现：`hq/backend/src/tools/*`
+  - git 工具：`hq/backend/src/tools/git-tools.ts`（并已接入 gateway 默认注册）
+
+- **Task 5.6 工具调用日志**
+  - `ToolCallLog`：`hq/backend/src/shared/task-types.ts`
+  - 保存/查询：`hq/backend/src/store.ts` + `hq/backend/src/persistence/file-repositories.ts`
+
+---
+
+### Phase 6｜治理与观测层
+
+- **Task 6.1/6.2 Approval 模型与服务**
+  - 服务：`hq/backend/src/governance/approval-service-v2.ts`
+  - API：`hq/backend/src/api/approvals.ts`
+
+- **Task 6.4 Audit Log**
+  - 领域：`hq/backend/src/governance/audit-logger.ts`
+  - repo：`hq/backend/src/persistence/audit-log-repositories.ts`
+
+- **Task 6.5 Execution Trace**
+  - 类型：`hq/backend/src/shared/task-types.ts`（`ExecutionTraceEvent`）
+  - repo：`hq/backend/src/persistence/file-repositories.ts`（`ExecutionTraceRepository`）
+  - store：`hq/backend/src/store.ts`（append/get）
+  - 采集点：
+    - execution：`hq/backend/src/runtime/execution-service.ts`
+    - tool call：`hq/backend/src/tools/tool-gateway.ts`
+    - approval：`hq/backend/src/store.ts`
+  - API（聚合查询）：`hq/backend/src/api/executions.ts`
+    - `GET /api/executions/:id/trace`（含 `traceEvents`）
+
+- **Task 6.6 成本与耗时观测（CostLog）**
+  - 类型：`hq/backend/src/shared/task-types.ts`（`CostLogEntry`）
+  - repo：`hq/backend/src/persistence/file-repositories.ts`（`CostLogRepository`）
+  - store：`hq/backend/src/store.ts`
+  - 采集点：`hq/backend/src/runtime/execution-service.ts`（从 `outputSnapshot.tokensUsed` 写入）
+  - API：`hq/backend/src/api/executions.ts`（trace 含 `costLogs`）
+
+---
+
+### Phase 10｜测试计划（落地情况）
+
+- **10.1/10.2 后端测试基线**
+  - Node.js tests：`hq/backend/src/__tests__/*`
+  - 运行：`cd hq/backend && npm test`
+
+- **10.3 前端验收测试（Playwright）**
+  - 覆盖任务/执行/审批工作区：`hq/frontend/tests/e2e/tasks-workspace.spec.ts`
+  - 运行：`cd hq/frontend && npm run test:e2e`

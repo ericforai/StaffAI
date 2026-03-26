@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { FolderHeart, Save } from 'lucide-react';
 import { useAgents } from '../../hooks/useAgents';
@@ -33,8 +33,8 @@ export default function OrganizationPage() {
       .then(setTemplates);
 
   // Initial load
-  useMemo(() => {
-    fetchTemplates();
+  useEffect(() => {
+    void fetchTemplates();
   }, []);
 
   function handleWsMessage(data: WsMessage) {
@@ -230,7 +230,7 @@ export default function OrganizationPage() {
                   ))}
                   {activeAgents.length === 0 && (
                     <div className="text-center py-8 rounded-lg border border-dashed border-slate-200 text-slate-400 text-xs">
-                      当前无在岗专家。请前往"系统市场"挑选并聘用。
+                      当前无在岗专家。请前往&quot;系统市场&quot;挑选并聘用。
                     </div>
                   )}
                 </div>

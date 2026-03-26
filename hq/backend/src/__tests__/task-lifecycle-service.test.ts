@@ -170,6 +170,26 @@ test('TaskLifecycleService.createTask creates task with approval for high risk',
   assert.equal(approvals[0].status, 'pending');
 });
 
+test('TaskLifecycleService.createTask creates approval for Chinese high-risk task', async () => {
+  const mockStore = new MockStore();
+  const service = createTaskLifecycleService({ store: mockStore as any });
+
+  const task = await service.createTask({
+    title: '请删除生产数据库中的用户表',
+    description: '需要删表并处理生产环境数据',
+    requestedBy: 'user1',
+  });
+
+  assert.equal(task.status, 'waiting_approval');
+  assert.equal(task.approvalRequired, true);
+  assert.equal(task.riskLevel, 'high');
+  assert.equal(mockStore.getApprovalCount(), 1);
+
+  const approvals = await mockStore.getApprovals();
+  assert.equal(approvals[0].taskId, task.id);
+  assert.equal(approvals[0].status, 'pending');
+});
+
 test('TaskLifecycleService.createTask assigns LOW risk for documentation tasks', async () => {
   const mockStore = new MockStore();
   const service = createTaskLifecycleService({ store: mockStore as any });

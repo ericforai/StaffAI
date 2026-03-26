@@ -8,7 +8,7 @@ test('resolveRuntimeName maps executors to runtime names', () => {
   assert.equal(resolveRuntimeName('openai'), 'openai_api');
 });
 
-test('runtime adapters can execute baseline run contract', async () => {
+test('runtime adapters surface degraded output when Codex CLI fails', async () => {
   const adapter = resolveRuntimeAdapter('codex');
   const result = await adapter.run({
     task: {
@@ -38,7 +38,9 @@ test('runtime adapters can execute baseline run contract', async () => {
     maxRetries: 1,
   });
 
-  assert.equal(result.outputSummary, 'ok');
+  assert.match(result.outputSummary, /^Error executing codex:/);
   assert.equal(result.outputSnapshot?.runtimeName, 'local_codex_cli');
-  assert.equal(result.outputSnapshot?.simulated, true);
+  assert.equal(result.outputSnapshot?.executor, 'codex');
+  assert.equal(result.outputSnapshot?.degraded, true);
+  assert.equal(typeof result.outputSnapshot?.fallbackReason, 'string');
 });

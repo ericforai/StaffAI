@@ -718,7 +718,7 @@ test('GET /api/task-events returns emitted task and execution events', async () 
   assert.equal(Array.isArray(eventsPayload.events), true);
   assert.equal(eventsPayload.events?.some((event) => event.taskEventType === 'task_created' && event.taskId === taskId), true);
   assert.equal(
-    eventsPayload.events?.some((event) => event.taskEventType === 'execution_completed' && event.taskId === taskId),
+    eventsPayload.events?.some((event) => event.taskEventType === 'execution_failed' && event.taskId === taskId),
     true
   );
   assert.equal(typeof eventsPayload.events?.[0]?.timestamp, 'string');
@@ -1168,7 +1168,8 @@ test('GET /api/executions returns execution history with query filters and summa
   assert.equal(listPayload.summary?.total, 2);
   assert.equal(listPayload.summary?.matched, 2);
   assert.equal(listPayload.summary?.returned, 2);
-  assert.equal(listPayload.summary?.statusCounts?.completed, 2);
+  assert.equal(listPayload.summary?.statusCounts?.completed, 1);
+  assert.equal(listPayload.summary?.statusCounts?.failed, 1);
   assert.equal(listPayload.summary?.executorCounts?.codex, 1);
   assert.equal(listPayload.summary?.executorCounts?.claude, 1);
   assert.equal(listPayload.summary?.appliedFilters?.taskId, undefined);
@@ -1219,12 +1220,10 @@ test('GET /api/executions returns execution history with query filters and summa
       appliedFilters?: { status?: string; executor?: string; limit?: number };
     };
   };
-  assert.equal(statusExecutorLimitedPayload.executions?.every((execution) => execution.status === 'completed'), true);
-  assert.equal(statusExecutorLimitedPayload.executions?.every((execution) => execution.executor === 'codex'), true);
-  assert.equal(statusExecutorLimitedPayload.executions?.length, 1);
+  assert.equal(statusExecutorLimitedPayload.executions?.length, 0);
   assert.equal(statusExecutorLimitedPayload.summary?.total, 2);
-  assert.equal(statusExecutorLimitedPayload.summary?.matched, 1);
-  assert.equal(statusExecutorLimitedPayload.summary?.returned, 1);
+  assert.equal(statusExecutorLimitedPayload.summary?.matched, 0);
+  assert.equal(statusExecutorLimitedPayload.summary?.returned, 0);
   assert.equal(statusExecutorLimitedPayload.summary?.appliedFilters?.status, 'completed');
   assert.equal(statusExecutorLimitedPayload.summary?.appliedFilters?.executor, 'codex');
   assert.equal(statusExecutorLimitedPayload.summary?.appliedFilters?.limit, 1);
@@ -1239,9 +1238,10 @@ test('GET /api/executions returns execution history with query filters and summa
       appliedFilters?: { status?: string };
     };
   };
-  assert.equal(failedStatusPayload.executions?.length, 0);
-  assert.equal(failedStatusPayload.summary?.matched, 0);
-  assert.equal(failedStatusPayload.summary?.returned, 0);
+  assert.equal(failedStatusPayload.executions?.length, 1);
+  assert.equal(failedStatusPayload.executions?.every((execution) => execution.status === 'failed'), true);
+  assert.equal(failedStatusPayload.summary?.matched, 1);
+  assert.equal(failedStatusPayload.summary?.returned, 1);
   assert.equal(failedStatusPayload.summary?.appliedFilters?.status, 'failed');
 });
 

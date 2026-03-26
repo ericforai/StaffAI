@@ -79,6 +79,10 @@ function calculateConfidence(matchedFactors: number, totalEnabledRules: number):
   return Math.min(0.3 + ratio * 0.7, 1.0);
 }
 
+function includesAny(text: string, keywords: readonly string[]): boolean {
+  return keywords.some((keyword) => text.includes(keyword));
+}
+
 /**
  * Risk Assessment Engine
  *
@@ -206,8 +210,8 @@ export function getDefaultRiskRules(): RiskPolicyRule[] {
       enabled: true,
       condition: (input): boolean => {
         const text = `${input.title} ${input.description}`.toLowerCase();
-        const destructiveKeywords = ['delete', 'remove', 'destroy', 'drop', 'purge', 'wipe'];
-        return destructiveKeywords.some(keyword => text.includes(keyword));
+        const destructiveKeywords = ['delete', 'remove', 'destroy', 'drop', 'purge', 'wipe', '删除', '移除', '清空', '清除', '删表', '删库'];
+        return includesAny(text, destructiveKeywords);
       },
       riskLevel: 'HIGH',
       factor: 'Contains destructive operation keywords',
@@ -219,7 +223,7 @@ export function getDefaultRiskRules(): RiskPolicyRule[] {
       enabled: true,
       condition: (input): boolean => {
         const text = `${input.title} ${input.description}`.toLowerCase();
-        return text.includes('production') || text.includes('prod') || text.includes('live');
+        return includesAny(text, ['production', 'prod', 'live', '生产', '线上', '正式环境', '生产环境']);
       },
       riskLevel: 'HIGH',
       factor: 'Involves production environment',
@@ -243,8 +247,8 @@ export function getDefaultRiskRules(): RiskPolicyRule[] {
       enabled: true,
       condition: (input): boolean => {
         const text = `${input.title} ${input.description}`.toLowerCase();
-        const dbDestructive = ['truncate', 'alter table', 'drop table', 'delete from'];
-        return dbDestructive.some(op => text.includes(op));
+        const dbDestructive = ['truncate', 'alter table', 'drop table', 'delete from', '数据库', '数据表', '删表', '删库'];
+        return includesAny(text, dbDestructive);
       },
       riskLevel: 'HIGH',
       factor: 'Database destructive operation',
