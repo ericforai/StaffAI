@@ -64,6 +64,9 @@ export default function OrganizationPage() {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['技术中心', '产品中心']));
   const [expandedDepts, setExpandedDepts] = useState<Set<string>>(new Set());
 
+  // 只显示已入职的员工（在岗员工）
+  const hiredAgents = useMemo(() => agents.filter((agent) => activeIds.includes(agent.id)), [agents, activeIds]);
+
   const { status: wsStatus } = useWebSocket({
     onMessage: handleWsMessage,
   });
@@ -155,21 +158,18 @@ export default function OrganizationPage() {
 
   const activeAgents = useMemo(() => agents.filter((agent) => activeIds.includes(agent.id)), [agents, activeIds]);
 
-  // 统计信息
+  // 统计信息 - 只统计已入职员工
   const stats = useMemo(() => {
     const groupStats: any = {};
     const deptStats: any = {};
 
-    for (const agent of agents) {
+    for (const agent of hiredAgents) {
       // 部门统计
       const dept = agent.department;
       if (!deptStats[dept]) {
         deptStats[dept] = { total: 0, active: 0 };
       }
       deptStats[dept].total++;
-      if (activeIds.includes(agent.id)) {
-        deptStats[dept].active++;
-      }
 
       // 分组统计
       Object.entries(DEPT_GROUPS).forEach(([groupName, groupConfig]: any) => {
@@ -178,15 +178,12 @@ export default function OrganizationPage() {
             groupStats[groupName] = { total: 0, active: 0 };
           }
           groupStats[groupName].total++;
-          if (activeIds.includes(agent.id)) {
-            groupStats[groupName].active++;
-          }
         }
       });
     }
 
     return { groupStats, deptStats };
-  }, [agents, activeIds]);
+  }, [hiredAgents]);
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-800 font-sans">
@@ -298,7 +295,7 @@ export default function OrganizationPage() {
                           <div className="text-right">
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">人员</p>
                             <p className="text-sm font-bold text-slate-900 leading-none mt-1">
-                              {groupStat.active}/{groupStat.total}
+                              {groupStat.total}
                             </p>
                           </div>
                           <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${isExpanded ? '' : '-rotate-90'}`} />
@@ -314,7 +311,7 @@ export default function OrganizationPage() {
 
                             const DeptIcon = deptConfig.icon;
                             const deptStat = stats.deptStats[deptKey] || { total: 0, active: 0 };
-                            const deptAgents = agents.filter((agent) => agent.department === deptKey);
+                            const deptAgents = hiredAgents.filter((agent) => agent.department === deptKey);
                             const isDeptExpanded = expandedDepts.has(deptKey);
 
                             return (
@@ -329,32 +326,21 @@ export default function OrganizationPage() {
                                     <span className="text-xs font-semibold text-slate-700">{deptConfig.label}</span>
                                     <span className="text-[10px] text-slate-400">({deptStat.total})</span>
                                   </div>
-                                  <div className="text-xs text-slate-500">
-                                    在岗: {deptStat.active}
-                                  </div>
                                 </button>
 
                                 {/* 展开的人员列表 */}
                                 {isDeptExpanded && (
                                   <div className="px-4 py-2 space-y-1 ml-8">
                                     {deptAgents.map((agent) => {
-                                      const isActive = activeIds.includes(agent.id);
                                       const isWorking = workingAgentId === agent.id;
                                       return (
                                         <button
                                           key={agent.id}
-                                          onClick={() => {
-                                            toggleAgent(agent.id);
-                                            setSelectedAgent(agent);
-                                          }}
-                                          className={`w-full flex items-center justify-between rounded-lg px-3 py-2 text-left transition-all ${
-                                            isActive
-                                              ? 'bg-slate-900 text-white'
-                                              : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
-                                          }`}
+                                          onClick={() => setSelectedAgent(agent)}
+                                          className="w-full flex items-center justify-between rounded-lg px-3 py-2 text-left transition-all bg-slate-50 text-slate-600 hover:bg-slate-100"
                                         >
                                           <div className="flex items-center gap-2">
-                                            <div className={`h-2 w-2 rounded-full ${isActive ? 'bg-emerald-400' : 'bg-slate-300'} ${isWorking ? 'animate-pulse' : ''}`} />
+                                            <div className={`h-2 w-2 rounded-full bg-emerald-400 ${isWorking ? 'animate-pulse' : ''}`} />
                                             <span className="text-xs font-medium">{agent.frontmatter.name}</span>
                                           </div>
                                           <span className="text-[10px] uppercase tracking-tight opacity-60">
@@ -411,13 +397,9 @@ export default function OrganizationPage() {
                         onClick={() => {
                           toggleAgent(selectedAgent.id);
                         }}
-                        className={`w-full rounded-lg px-3 py-2 text-xs font-bold transition-all ${
-                          activeIds.includes(selectedAgent.id)
-                            ? 'border-slate-300 bg-slate-100 text-slate-700'
-                            : 'border-slate-900 bg-slate-900 text-white hover:bg-slate-800'
-                        }`}
+                        className="w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700 transition-all hover:border-slate-400 hover:text-slate-900"
                       >
-                        {activeIds.includes(selectedAgent.id) ? '设为离岗' : '设为在岗'}
+                        解聘（移出组织）
                       </button>
                     </div>
                   </div>
