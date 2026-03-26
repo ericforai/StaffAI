@@ -204,14 +204,9 @@ export default function OrganizationPage() {
           <Link href="/market" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
             人才市场
           </Link>
-          <div className="space-y-1">
-            <Link href="/organization" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium bg-slate-900 text-white shadow-sm">
-              组织架构
-            </Link>
-            <Link href="/employees" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium pl-10 text-slate-600 hover:bg-slate-50">
-              员工列表
-            </Link>
-          </div>
+          <Link href="/organization" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium bg-slate-900 text-white shadow-sm">
+            组织架构
+          </Link>
           <Link href="/tasks" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
             工作任务
           </Link>
