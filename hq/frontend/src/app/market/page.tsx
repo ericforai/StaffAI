@@ -53,7 +53,7 @@ export default function MarketPage() {
             人才市场
           </Link>
           <Link href="/organization" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
-            组织阵容
+            组织架构
           </Link>
           <Link href="/tasks" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
             工作任务

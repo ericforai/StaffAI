@@ -72,7 +72,7 @@ export default function Dashboard() {
     },
     {
       key: 'organization',
-      title: '组织阵容',
+      title: '组织架构',
       description: '围绕阵容管理、模板复用与在岗状态的组织视图',
       detail: '统一管理常用小队、当前在岗专家与动态流',
       icon: Building2,
@@ -132,7 +132,7 @@ export default function Dashboard() {
             人才市场
           </Link>
           <Link href="/organization" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
-            组织阵容
+            组织架构
           </Link>
           <Link href="/tasks" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
             工作任务

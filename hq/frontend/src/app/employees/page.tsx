@@ -60,7 +60,7 @@ export default function EmployeesPage() {
           </Link>
           <div className="space-y-1">
             <Link href="/organization" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
-              组织阵容
+              组织架构
             </Link>
             <Link href="/employees" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium bg-slate-900 text-white shadow-sm pl-10">
               员工列表
