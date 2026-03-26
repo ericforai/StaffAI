@@ -108,7 +108,7 @@ export default function OrganizationPage() {
             总览
           </Link>
           <Link href="/market" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
-            系统市场
+            人才市场
           </Link>
           <div className="space-y-1">
             <Link href="/organization" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium bg-slate-900 text-white shadow-sm">
@@ -230,7 +230,7 @@ export default function OrganizationPage() {
                   ))}
                   {activeAgents.length === 0 && (
                     <div className="text-center py-8 rounded-lg border border-dashed border-slate-200 text-slate-400 text-xs">
-                      当前无在岗专家。请前往&quot;系统市场&quot;挑选并聘用。
+                      当前无在岗专家。请前往&quot;人才市场&quot;挑选并聘用。
                     </div>
                   )}
                 </div>

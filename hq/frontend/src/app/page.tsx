@@ -62,7 +62,7 @@ export default function Dashboard() {
   const dashboardCards = [
     {
       key: 'market',
-      title: '系统市场',
+      title: '人才市场',
       description: '面向招聘、选型与能力发现的专家池视图',
       detail: '按部门浏览角色能力，快速检索合适专家',
       icon: Store,
@@ -129,7 +129,7 @@ export default function Dashboard() {
             总览
           </Link>
           <Link href="/market" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
-            系统市场
+            人才市场
           </Link>
           <Link href="/organization" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
             组织阵容

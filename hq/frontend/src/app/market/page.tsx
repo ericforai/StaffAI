@@ -50,7 +50,7 @@ export default function MarketPage() {
             总览
           </Link>
           <Link href="/market" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium bg-slate-900 text-white shadow-sm">
-            系统市场
+            人才市场
           </Link>
           <Link href="/organization" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
             组织阵容
@@ -71,7 +71,7 @@ export default function MarketPage() {
       <main className="flex-1 flex flex-col min-w-0 bg-slate-50/50 overflow-hidden">
         <header className="h-16 flex-shrink-0 flex items-center justify-between px-8 border-b border-slate-200 bg-white shadow-sm z-10">
           <div className="flex items-center gap-4">
-            <h2 className="text-sm font-bold text-slate-900">系统市场</h2>
+            <h2 className="text-sm font-bold text-slate-900">人才市场</h2>
             <div className="h-4 w-px bg-slate-200" />
             <p className="text-xs text-slate-500">面向招聘、选型与能力发现的专家池视图</p>
           </div>

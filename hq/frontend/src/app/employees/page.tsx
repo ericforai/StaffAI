@@ -56,7 +56,7 @@ export default function EmployeesPage() {
             总览
           </Link>
           <Link href="/market" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
-            系统市场
+            人才市场
           </Link>
           <div className="space-y-1">
             <Link href="/organization" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
