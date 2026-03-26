@@ -8,9 +8,12 @@ import { useAgents } from '../hooks/useAgents';
 import { useTasks } from '../hooks/useTasks';
 import { useWebSocket, WsMessage } from '../hooks/useWebSocket';
 import { ActivityLog, ActivityLog as ActivityLogType } from '../components/ActivityLog';
-import { DEPT_MAP } from '../utils/constants';
+import { DEPT_MAP, API_CONFIG } from '../utils/constants';
 
 export default function Dashboard() {
+  // Debug: 输出 API 配置
+  console.log('[Dashboard] API_CONFIG.BASE_URL:', API_CONFIG.BASE_URL);
+
   const { agents, activeIds, loading: agentsLoading } = useAgents();
   const { tasks, loading: tasksLoading } = useTasks();
   const [activities, setActivities] = useState<ActivityLogType[]>([]);

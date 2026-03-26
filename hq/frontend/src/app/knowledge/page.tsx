@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { Search, BookOpenText } from 'lucide-react';
 import { useWebSocket } from '../../hooks/useWebSocket';
+import { API_CONFIG } from '../../utils/constants';
 
 type KnowledgeSource = 'discussion' | 'consult' | 'report';
 
@@ -38,7 +39,7 @@ export default function KnowledgePage() {
   const { status: wsStatus } = useWebSocket({ onMessage: () => {} });
 
   useEffect(() => {
-    fetch('/api/memory/retrieve?q=*&limit=50')
+    fetch(`${API_CONFIG.BASE_URL}/memory/retrieve?q=*&limit=50`)
       .then((res) => res.json())
       .then((data) => {
         if (data && Array.isArray(data.entries)) {

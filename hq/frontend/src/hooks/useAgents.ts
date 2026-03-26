@@ -15,7 +15,10 @@ export function useAgents() {
     const fetchAgents = async () => {
       try {
         const url = `${API_CONFIG.BASE_URL}/agents`;
+        console.log('[useAgents] API_CONFIG.BASE_URL:', API_CONFIG.BASE_URL);
+        console.log('[useAgents] Fetching URL:', url);
         const res = await fetch(url);
+        console.log('[useAgents] Response:', res.status, res.statusText);
         if (!res.ok) throw new Error(`Fetch agents failed: ${res.status} ${res.statusText}`);
         const data = await res.json();
         setAgents(data);
