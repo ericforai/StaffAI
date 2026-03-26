@@ -13,6 +13,8 @@ import {
   filterDocumentsByDateRange,
   type MemoryDocument,
 } from './memory-indexer';
+import { DisabledEmbedder, HashingEmbedder, cosineSimilarity, type Embedder } from './retrieval/embedding';
+import { appendUsageLogEvent } from './retrieval/usage-logger';
 import {
   type MemoryRetriever,
   type MemoryContext,
@@ -32,6 +34,8 @@ interface CacheEntry {
   expiresAt: number;
 }
 
+type ScoredDocument = { document: MemoryDocument; score: number; lexicalScore: number; vectorScore?: number };
+
 /**
  * File-based implementation of MemoryRetriever
  */
@@ -40,11 +44,23 @@ export class FileMemoryRetriever implements MemoryRetriever {
   private readonly cacheTtlMs: number;
   private readonly enableCache: boolean;
   private readonly cache = new Map<string, CacheEntry>();
+  private readonly enableVectorRerank: boolean;
+  private readonly vectorWeight: number;
+  private readonly rerankTopK?: number;
+  private readonly embedder: Embedder;
+  private readonly enableUsageLogs: boolean;
+  private readonly usageLogPath: string;
 
   constructor(config: MemoryRetrieverConfig) {
     this.memoryRootDir = config.memoryRootDir;
     this.cacheTtlMs = config.cacheTtlMs ?? 300000; // 5 minutes default
     this.enableCache = config.enableCache ?? true;
+    this.enableVectorRerank = config.enableVectorRerank ?? false;
+    this.vectorWeight = config.vectorWeight ?? 0;
+    this.rerankTopK = config.rerankTopK;
+    this.embedder = this.enableVectorRerank ? new HashingEmbedder(512) : new DisabledEmbedder();
+    this.enableUsageLogs = config.enableUsageLogs ?? false;
+    this.usageLogPath = config.usageLogPath ?? path.join(this.memoryRootDir, 'usage', 'retrieval.jsonl');
   }
 
   /**
@@ -220,17 +236,96 @@ export class FileMemoryRetriever implements MemoryRetriever {
     documents: MemoryDocument[],
     options: Required<RetrieveOptions>
   ): RetrievalResult {
+    const t0 = Date.now();
     const filtered = this.filterDocuments(documents, options);
-    const scored = this.scoreDocuments(query, filtered);
-    const sorted = this.sortAndLimit(scored, options);
+    const t1 = Date.now();
+    const scored = this.scoreDocuments(query, filtered).map((entry) => ({
+      ...entry,
+      lexicalScore: entry.score,
+    }));
+    const t2 = Date.now();
+    const reranked = this.rerankIfEnabled(query, scored, options);
+    const t3 = Date.now();
+    const sorted = this.sortAndLimit(reranked, options);
     const entries = this.buildEntries(sorted, options);
     const context = this.buildContextString(entries, options);
+    const t4 = Date.now();
 
-    return {
+    const result: RetrievalResult = {
       entries,
       context,
       metadata: this.buildMetadata(query, documents.length, entries.length),
     };
+
+    if (this.enableUsageLogs) {
+      try {
+        appendUsageLogEvent(this.usageLogPath, {
+          ts: new Date().toISOString(),
+          retriever: 'file',
+          strategy: this.enableVectorRerank ? `lexical+${this.embedder.name}` : 'lexical',
+          query,
+          options: {
+            limit: options.limit,
+            threshold: options.threshold,
+            includeFullContent: options.includeFullContent,
+            documentTypes: options.documentTypes,
+            excerptMaxChars: options.excerptMaxChars,
+            contextMaxChars: options.contextMaxChars,
+            fallbackMode: options.fallbackMode,
+          },
+          totalDocuments: documents.length,
+          candidateCount: scored.length,
+          selectedCount: entries.length,
+          timingMs: {
+            filter: t1 - t0,
+            score: t2 - t1,
+            rerank: t3 - t2,
+            build: t4 - t3,
+          },
+          selected: entries.map((entry) => ({
+            relativePath: entry.relativePath,
+            type: entry.type,
+            lexicalScore: entry.score,
+            finalScore: entry.score,
+          })),
+        });
+      } catch {
+        // Swallow logging errors — retrieval must not fail.
+      }
+    }
+
+    return result;
+  }
+
+  private rerankIfEnabled(
+    query: string,
+    scored: ScoredDocument[],
+    options: Required<RetrieveOptions>,
+  ): ScoredDocument[] {
+    if (!this.enableVectorRerank || this.vectorWeight <= 0) {
+      return scored;
+    }
+    const queryVec = this.embedder.embed(query);
+    if (!queryVec) {
+      return scored;
+    }
+
+    const sortedLexical = scored.slice().sort((a, b) => b.lexicalScore - a.lexicalScore);
+    const topK = this.rerankTopK ?? Math.max(options.limit * 10, 50);
+    const head = sortedLexical.slice(0, topK);
+    const tail = sortedLexical.slice(topK);
+
+    const rerankedHead = head
+      .map((entry) => {
+        const docVec = this.embedder.embed(entry.document.content);
+        const vectorScore = docVec ? cosineSimilarity(queryVec, docVec) : 0;
+        const finalScore = entry.lexicalScore + this.vectorWeight * vectorScore;
+        return { entry, finalScore, vectorScore };
+      })
+      .sort((a, b) => b.finalScore - a.finalScore)
+      .map(({ entry, finalScore, vectorScore }) => ({ ...entry, score: finalScore, vectorScore }));
+
+    return [...rerankedHead, ...tail];
   }
 
   /**

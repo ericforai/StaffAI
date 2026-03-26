@@ -18,13 +18,14 @@ export type ApprovalStatus = (typeof APPROVAL_STATUSES)[number];
 export const APPROVAL_RISK_LEVELS = ['LOW', 'MEDIUM', 'HIGH'] as const;
 export type ApprovalRiskLevel = (typeof APPROVAL_RISK_LEVELS)[number];
 
-export const EXECUTION_STATUSES = ['pending', 'running', 'completed', 'failed', 'degraded'] as const;
+export const EXECUTION_STATUSES = ['pending', 'running', 'paused', 'cancelled', 'completed', 'failed', 'degraded'] as const;
 export type ExecutionStatus = (typeof EXECUTION_STATUSES)[number];
 
 export const TASK_PRIORITIES = ['low', 'medium', 'high', 'urgent'] as const;
 export type TaskPriority = (typeof TASK_PRIORITIES)[number];
 
 export const TASK_TYPES = [
+  'architecture',
   'architecture_analysis',
   'backend_implementation',
   'backend_design',
@@ -160,7 +161,7 @@ export interface WorkflowPlan {
 export interface ExecutionRecord {
   id: string;
   taskId: string;
-  status: ExecutionStatus | 'pending' | 'completed' | 'failed';
+  status: ExecutionStatus | 'pending' | 'completed' | 'failed' | 'cancelled' | 'paused';
   executor?: 'claude' | 'codex' | 'openai';
   runtimeName?: string;
   degraded?: boolean;
@@ -218,4 +219,49 @@ export interface ToolCallLog {
   fullOutput?: any;
   createdAt: string;
   updatedAt?: string;
+}
+
+export const EXECUTION_TRACE_EVENT_TYPES = [
+  'execution_started',
+  'execution_completed',
+  'execution_failed',
+  'execution_degraded',
+  'execution_paused',
+  'execution_resumed',
+  'execution_cancelled',
+  'tool_call_logged',
+  'approval_requested',
+  'approval_resolved',
+  'memory_retrieval',
+  'cost_observed',
+] as const;
+
+export type ExecutionTraceEventType = (typeof EXECUTION_TRACE_EVENT_TYPES)[number];
+
+export interface ExecutionTraceEvent {
+  id: string;
+  type: ExecutionTraceEventType;
+  taskId: string;
+  executionId?: string;
+  approvalId?: string;
+  toolCallLogId?: string;
+  occurredAt: string;
+  actor?: string;
+  summary?: string;
+  data?: Record<string, unknown>;
+}
+
+export interface CostLogEntry {
+  id: string;
+  taskId: string;
+  executionId: string;
+  recordedAt: string;
+  source: 'runtime_output_snapshot' | 'manual' | 'unknown';
+  executor: 'claude' | 'codex' | 'openai';
+  runtimeName: string;
+  tokensUsed?: number;
+  modelVersion?: string;
+  responseTimeMs?: number;
+  cacheStatus?: 'hit' | 'miss' | 'disabled';
+  meta?: Record<string, unknown>;
 }

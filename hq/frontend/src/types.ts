@@ -98,6 +98,15 @@ export interface ExecutionSummary {
   toolCalls?: ToolCallSummary[];
   toolCallLogs?: ToolCallSummary[];
   toolCallLog?: ToolCallSummary[];
+  controlState?: {
+    executionId: string;
+    status: string;
+    taskId: string;
+    pausedAt?: string;
+    resumedAt?: string;
+    cancelledAt?: string;
+    completedAt?: string;
+  };
 }
 
 export interface ToolCallSummary {

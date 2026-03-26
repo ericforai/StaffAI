@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { ToolDefinition } from '../shared/task-types';
+import { toJsonSchema } from './json-schema';
 
 export interface ToolContext {
   executionId?: string;
@@ -16,6 +17,12 @@ export interface ToolResult {
   error?: string;
 }
 
+const TOOL_RESULT_SCHEMA = z.object({
+  summary: z.string(),
+  payload: z.record(z.string(), z.unknown()).optional(),
+  error: z.string().optional(),
+});
+
 export abstract class BaseTool<T extends Record<string, any> = any> {
   public abstract readonly name: string;
   public abstract readonly description: string;
@@ -31,7 +38,8 @@ export abstract class BaseTool<T extends Record<string, any> = any> {
       category: this.category,
       riskLevel: this.riskLevel,
       allowedRoles: this.allowedRoles,
-      inputSchema: this.schema as any,
+      inputSchema: toJsonSchema(this.schema, `${this.name}_input`),
+      outputSchema: toJsonSchema(TOOL_RESULT_SCHEMA, `${this.name}_output`),
     };
   }
 

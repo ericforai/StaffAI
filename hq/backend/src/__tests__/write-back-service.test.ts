@@ -177,7 +177,8 @@ test('generateExecutionFilename - creates correct filename with outcome prefix',
 
   const filename = generateExecutionFilename(task, execution, outcome);
 
-  assert.ok(filename.includes('2026-03-25'));
+  const today = new Date().toISOString().slice(0, 10);
+  assert.ok(filename.includes(today));
   assert.ok(filename.includes('success'));
   assert.ok(filename.includes(task.id));
   assert.ok(filename.endsWith('.md'));
@@ -203,7 +204,8 @@ test('generateDecisionFilename - creates correct filename with date prefix', () 
 
   const filename = generateDecisionFilename(decisionId, title);
 
-  assert.ok(filename.includes('2026-03-25'));
+  const today = new Date().toISOString().slice(0, 10);
+  assert.ok(filename.includes(today));
   assert.ok(filename.includes('decision'));
   assert.ok(filename.includes(decisionId));
   assert.ok(filename.endsWith('.md'));

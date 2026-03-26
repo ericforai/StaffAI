@@ -7,6 +7,7 @@ import { FileWriteTool } from './file-write-tool';
 import { TestRunnerTool } from './test-runner-tool';
 import { DocsSearchTool } from './docs-search-tool';
 import { RuntimeExecutorTool } from './runtime-executor-tool';
+import { GitReadTool, GitDiffTool } from './git-tools';
 
 export type { ToolContext, ToolResult, ToolActorContext };
 
@@ -21,7 +22,7 @@ export interface ToolExecutionResult {
 export class ToolGateway {
   private readonly tools = new Map<string, BaseTool>();
 
-  constructor(private readonly store: Pick<Store, 'saveToolCallLog'>) {
+  constructor(private readonly store: Pick<Store, 'saveToolCallLog'> & Partial<Pick<Store, 'appendExecutionTraceEvent'>>) {
     this.registerDefaultTools();
   }
 
@@ -31,6 +32,8 @@ export class ToolGateway {
     this.registerTool(new TestRunnerTool());
     this.registerTool(new DocsSearchTool());
     this.registerTool(new RuntimeExecutorTool());
+    this.registerTool(new GitReadTool());
+    this.registerTool(new GitDiffTool());
   }
 
   public registerTool(tool: BaseTool): void {
@@ -106,6 +109,22 @@ export class ToolGateway {
       const log = this.createBaseLog(permission.tool.name, context, createdAt, 'completed', permission.tool.riskLevel, input);
       log.outputSummary = output.summary;
       await this.store.saveToolCallLog(log);
+      if (typeof this.store.appendExecutionTraceEvent === 'function') {
+        await this.store.appendExecutionTraceEvent({
+          id: `trace_tool_${log.id}_${Date.now()}`,
+          type: 'tool_call_logged',
+          taskId: context.taskId ?? 'unknown',
+          executionId: context.executionId,
+          toolCallLogId: log.id,
+          occurredAt: new Date().toISOString(),
+          actor: context.actorRole,
+          summary: `Tool call completed: ${log.toolName}`,
+          data: {
+            status: log.status,
+            riskLevel: log.riskLevel,
+          },
+        });
+      }
 
       return {
         ok: true,
@@ -117,6 +136,23 @@ export class ToolGateway {
       const log = this.createBaseLog(permission.tool.name, context, createdAt, 'failed', permission.tool.riskLevel, input);
       log.errorMessage = error.message;
       await this.store.saveToolCallLog(log);
+      if (typeof this.store.appendExecutionTraceEvent === 'function') {
+        await this.store.appendExecutionTraceEvent({
+          id: `trace_tool_${log.id}_${Date.now()}`,
+          type: 'tool_call_logged',
+          taskId: context.taskId ?? 'unknown',
+          executionId: context.executionId,
+          toolCallLogId: log.id,
+          occurredAt: new Date().toISOString(),
+          actor: context.actorRole,
+          summary: `Tool call failed: ${log.toolName}`,
+          data: {
+            status: log.status,
+            riskLevel: log.riskLevel,
+            error: log.errorMessage,
+          },
+        });
+      }
       return { ok: false, tool: permission.tool.definition, log, error: error.message };
     }
   }

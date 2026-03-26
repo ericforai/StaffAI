@@ -62,8 +62,8 @@ export interface MvpScenarioResult {
 // ---------------------------------------------------------------------------
 
 const KEYWORD_PRESET_MAP: Array<{ keywords: string[]; presetName: string }> = [
-  { keywords: ['review', 'code review', '代码评审', '审查'], presetName: 'code_review' },
-  { keywords: ['architecture', '架构', 'design', '设计'], presetName: 'architecture_analysis' },
+  { keywords: ['review', 'code review', '代码评审', '审查'], presetName: 'code-review' },
+  { keywords: ['architecture', '架构', 'design', '设计'], presetName: 'architecture' },
 ];
 
 function autoSelectPreset(title: string, description: string): string {

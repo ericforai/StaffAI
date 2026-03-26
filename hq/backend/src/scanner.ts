@@ -32,8 +32,8 @@ const DEFAULT_TOOLS_BY_ROLE: Record<string, string[]> = {
 };
 
 const DEFAULT_TASK_TYPES_BY_ROLE: Record<string, AgentTaskType[]> = {
-  'software-architect': ['architecture_analysis', 'workflow_dispatch', 'general'],
-  'backend-architect': ['backend_implementation', 'architecture_analysis', 'general'],
+  'software-architect': ['architecture', 'architecture_analysis', 'workflow_dispatch', 'general'],
+  'backend-architect': ['backend_implementation', 'architecture', 'architecture_analysis', 'general'],
   'frontend-developer': ['frontend_implementation', 'general'],
   'technical-writer': ['documentation', 'general'],
   'code-reviewer': ['code_review', 'quality_assurance', 'general'],

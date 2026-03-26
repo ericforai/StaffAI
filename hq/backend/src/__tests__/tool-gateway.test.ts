@@ -16,6 +16,8 @@ test('tool gateway filters visible tools by role', () => {
   assert.equal(reviewerTools.some((tool) => tool.name === 'file_write'), false);
   // file_read IS for reviewer
   assert.equal(reviewerTools.some((tool) => tool.name === 'file_read'), true);
+  // git_read IS for reviewer
+  assert.equal(reviewerTools.some((tool) => tool.name === 'git_read'), true);
   assert.equal(savedLogs.length, 0);
 });
 

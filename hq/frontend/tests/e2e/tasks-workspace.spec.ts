@@ -58,6 +58,20 @@ function mockTaskWorkspaceApi(page: Page) {
     const { pathname } = url;
     const method = route.request().method();
 
+    if (
+      pathname.startsWith('/api/executions/') &&
+      pathname.endsWith('/trace') &&
+      pathname !== '/api/executions/execution-1/trace' &&
+      method === 'GET'
+    ) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ trace: { traceEvents: [], costLogs: [] } }),
+      });
+      return;
+    }
+
     if (pathname === '/api/agents' && method === 'GET') {
       await route.fulfill({
         status: 200,
@@ -169,6 +183,31 @@ function mockTaskWorkspaceApi(page: Page) {
       return;
     }
 
+    if (pathname === '/api/tasks/task-risky' && method === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          task: {
+            id: 'task-risky',
+            title: 'Risky task',
+            description: 'A high risk task waiting for approval',
+            status: 'waiting_approval',
+            executionMode: 'serial',
+            approvalRequired: true,
+            riskLevel: 'high',
+            recommendedAgentRole: 'software-architect',
+            routingStatus: 'matched',
+            createdAt: '2026-03-24T00:00:00.000Z',
+            updatedAt: '2026-03-24T00:00:00.000Z',
+          },
+          approvals: approvals.filter((approval) => approval.taskId === 'task-risky'),
+          executions: [],
+        }),
+      });
+      return;
+    }
+
     if (pathname === '/api/tasks/task-1/execute' && method === 'POST') {
       tasks[0] = {
         ...tasks[0],
@@ -210,15 +249,62 @@ function mockTaskWorkspaceApi(page: Page) {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          execution: taskDetail.executions[0] || {
-            id: 'execution-1',
-            taskId: 'task-1',
-            status: 'completed',
-            executor: 'codex',
-            outputSummary: 'Execution finished cleanly',
+          execution: {
+            ...(taskDetail.executions[0] || {
+              id: 'execution-1',
+              taskId: 'task-1',
+              status: 'completed',
+              executor: 'codex',
+              outputSummary: 'Execution finished cleanly',
+            }),
+            toolCalls: [
+              {
+                id: 'toolcall-1',
+                toolName: 'file_read',
+                status: 'completed',
+                riskLevel: 'low',
+                actorRole: 'backend-developer',
+                inputSummary: 'path=package.json',
+                outputSummary: 'read ok',
+                createdAt: '2026-03-24T00:00:01.000Z',
+              },
+            ],
+            controlState: { executionId: 'execution-1', status: 'completed', taskId: 'task-1' },
           },
         }),
       });
+      return;
+    }
+
+    if (pathname === '/api/executions/execution-1/trace' && method === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          trace: {
+            execution: { id: 'execution-1', taskId: 'task-1', status: 'completed' },
+            traceEvents: [
+              { id: 'evt-1', type: 'execution_started', occurredAt: '2026-03-24T00:00:00.500Z', summary: 'Execution started' },
+              { id: 'evt-2', type: 'tool_call_logged', occurredAt: '2026-03-24T00:00:00.800Z', summary: 'Tool call completed' },
+              { id: 'evt-3', type: 'execution_completed', occurredAt: '2026-03-24T00:00:01.000Z', summary: 'Execution completed' },
+            ],
+            costLogs: [{ id: 'cost-1', recordedAt: '2026-03-24T00:00:01.000Z', tokensUsed: 123 }],
+          },
+        }),
+      });
+      return;
+    }
+
+    if (pathname === '/api/executions/execution-1/pause' && method === 'POST') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
+      return;
+    }
+    if (pathname === '/api/executions/execution-1/resume' && method === 'POST') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
+      return;
+    }
+    if (pathname === '/api/executions/execution-1/cancel' && method === 'POST') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
       return;
     }
 
@@ -317,6 +403,10 @@ test('task workspace can execute a task and open execution detail', async ({ pag
   await expect(page.getByText('Execution finished from the task workspace')).toBeVisible();
   await expect(page.getByText('执行器')).toBeVisible();
   await expect(page.getByText('codex')).toBeVisible();
+
+  await expect(page.getByTestId('execution-toolcalls')).toBeVisible();
+  await expect(page.getByTestId('toolcall-card-toolcall-1')).toBeVisible();
+  await expect(page.getByTestId('execution-trace-events')).toBeVisible();
 });
 
 test('task workspace can create a new task', async ({ page }) => {

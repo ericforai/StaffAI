@@ -1,0 +1,233 @@
+[
+  {
+    "id": "1ede2a19-0c85-45b1-b25f-e4e3b750a39b",
+    "title": "SEO优化方案",
+    "description": "优化www.ucloud.cn的网站SEO",
+    "taskType": "general",
+    "priority": "medium",
+    "status": "completed",
+    "executionMode": "single",
+    "approvalRequired": false,
+    "riskLevel": "low",
+    "requestedBy": "system",
+    "requestedAt": "2026-03-26T02:17:09.706Z",
+    "recommendedAgentRole": "dispatcher",
+    "candidateAgentRoles": [
+      "dispatcher"
+    ],
+    "routeReason": "No strong route match was found, so dispatcher should triage the task.",
+    "routingStatus": "manual_review",
+    "createdAt": "2026-03-26T02:17:09.706Z",
+    "updatedAt": "2026-03-26T02:24:43.387Z"
+  },
+  {
+    "id": "a51c2372-0c2a-4ee1-9047-237308898577",
+    "title": "深度分析 ucloud.cn 的 SEO 关键词策略",
+    "description": "请帮我分析 www.ucloud.cn 目前的 Meta 标签，并给出 5 个建议改进的关键词。",
+    "taskType": "general",
+    "priority": "medium",
+    "status": "completed",
+    "executionMode": "single",
+    "approvalRequired": false,
+    "riskLevel": "low",
+    "requestedBy": "system",
+    "requestedAt": "2026-03-26T03:11:25.643Z",
+    "recommendedAgentRole": "dispatcher",
+    "candidateAgentRoles": [
+      "dispatcher"
+    ],
+    "routeReason": "No strong route match was found, so dispatcher should triage the task.",
+    "routingStatus": "manual_review",
+    "createdAt": "2026-03-26T03:11:25.643Z",
+    "updatedAt": "2026-03-26T03:12:07.911Z"
+  },
+  {
+    "id": "0120202b-152d-40c6-9020-f5cc77bda890",
+    "title": "优刻得官网SEO分析",
+    "description": "请帮我分析 www.ucloud.cn 目前的 Meta 标签，并给出 5 个建议改进的关键词。",
+    "taskType": "general",
+    "priority": "medium",
+    "status": "completed",
+    "executionMode": "single",
+    "approvalRequired": false,
+    "riskLevel": "low",
+    "requestedBy": "system",
+    "requestedAt": "2026-03-26T03:20:17.718Z",
+    "recommendedAgentRole": "dispatcher",
+    "candidateAgentRoles": [
+      "dispatcher"
+    ],
+    "routeReason": "No strong route match was found, so dispatcher should triage the task.",
+    "routingStatus": "manual_review",
+    "createdAt": "2026-03-26T03:20:17.718Z",
+    "updatedAt": "2026-03-26T03:20:29.153Z"
+  },
+  {
+    "id": "eb388611-953e-42f2-9717-53bd248a79a5",
+    "title": "真实诊断任务",
+    "description": "请输出一句 real runtime check",
+    "taskType": "general",
+    "priority": "medium",
+    "status": "completed",
+    "executionMode": "single",
+    "approvalRequired": false,
+    "riskLevel": "low",
+    "requestedBy": "system",
+    "requestedAt": "2026-03-26T03:59:29.485Z",
+    "recommendedAgentRole": "dispatcher",
+    "candidateAgentRoles": [
+      "dispatcher"
+    ],
+    "routeReason": "No strong route match was found, so dispatcher should triage the task.",
+    "routingStatus": "manual_review",
+    "createdAt": "2026-03-26T03:59:29.485Z",
+    "updatedAt": "2026-03-26T03:59:38.980Z"
+  },
+  {
+    "id": "086e2ca4-5f48-454f-bd8d-b0b20d7ec547",
+    "title": "高风险真实诊断",
+    "description": "请删除生产数据库中的 users 表",
+    "taskType": "general",
+    "priority": "medium",
+    "status": "routed",
+    "executionMode": "single",
+    "approvalRequired": false,
+    "riskLevel": "low",
+    "requestedBy": "system",
+    "requestedAt": "2026-03-26T04:00:18.861Z",
+    "recommendedAgentRole": "dispatcher",
+    "candidateAgentRoles": [
+      "dispatcher"
+    ],
+    "routeReason": "No strong route match was found, so dispatcher should triage the task.",
+    "routingStatus": "manual_review",
+    "createdAt": "2026-03-26T04:00:18.861Z",
+    "updatedAt": "2026-03-26T04:00:18.861Z"
+  },
+  {
+    "id": "311d2512-a1d3-47e6-b973-4e59ec4d0d5e",
+    "title": "高风险真实诊断",
+    "description": "请删除生产数据库中的 users 表",
+    "taskType": "general",
+    "priority": "medium",
+    "status": "routed",
+    "executionMode": "single",
+    "approvalRequired": false,
+    "riskLevel": "low",
+    "requestedBy": "system",
+    "requestedAt": "2026-03-26T04:02:18.292Z",
+    "recommendedAgentRole": "dispatcher",
+    "candidateAgentRoles": [
+      "dispatcher"
+    ],
+    "routeReason": "No strong route match was found, so dispatcher should triage the task.",
+    "routingStatus": "manual_review",
+    "createdAt": "2026-03-26T04:02:18.292Z",
+    "updatedAt": "2026-03-26T04:02:18.292Z"
+  },
+  {
+    "id": "4177ba79-0686-4905-afa0-20584c5de9e7",
+    "title": "English prod delete",
+    "description": "delete from users in production",
+    "taskType": "general",
+    "priority": "medium",
+    "status": "completed",
+    "executionMode": "single",
+    "approvalRequired": false,
+    "riskLevel": "high",
+    "requestedBy": "system",
+    "requestedAt": "2026-03-26T04:02:18.317Z",
+    "recommendedAgentRole": "dispatcher",
+    "candidateAgentRoles": [
+      "dispatcher"
+    ],
+    "routeReason": "No strong route match was found, so dispatcher should triage the task.",
+    "routingStatus": "manual_review",
+    "createdAt": "2026-03-26T04:02:18.317Z",
+    "updatedAt": "2026-03-26T04:03:02.801Z"
+  },
+  {
+    "id": "e054ee30-3985-42cf-8ab7-8ec6ed803a7e",
+    "title": "高风险真实诊断",
+    "description": "请删除生产数据库中的 users 表",
+    "taskType": "general",
+    "priority": "medium",
+    "status": "routed",
+    "executionMode": "single",
+    "approvalRequired": false,
+    "riskLevel": "low",
+    "requestedBy": "system",
+    "requestedAt": "2026-03-26T04:05:23.043Z",
+    "recommendedAgentRole": "dispatcher",
+    "candidateAgentRoles": [
+      "dispatcher"
+    ],
+    "routeReason": "No strong route match was found, so dispatcher should triage the task.",
+    "routingStatus": "manual_review",
+    "createdAt": "2026-03-26T04:05:23.043Z",
+    "updatedAt": "2026-03-26T04:05:23.043Z"
+  },
+  {
+    "id": "169a505b-11c5-41ea-a7cc-bf628e2e587e",
+    "title": "English prod delete",
+    "description": "delete from users in production",
+    "taskType": "general",
+    "priority": "medium",
+    "status": "completed",
+    "executionMode": "single",
+    "approvalRequired": false,
+    "riskLevel": "high",
+    "requestedBy": "system",
+    "requestedAt": "2026-03-26T04:05:23.159Z",
+    "recommendedAgentRole": "dispatcher",
+    "candidateAgentRoles": [
+      "dispatcher"
+    ],
+    "routeReason": "No strong route match was found, so dispatcher should triage the task.",
+    "routingStatus": "manual_review",
+    "createdAt": "2026-03-26T04:05:23.159Z",
+    "updatedAt": "2026-03-26T04:05:33.100Z"
+  },
+  {
+    "id": "f63f334c-fe6f-4283-b40f-42b9a7aa1696",
+    "title": "Codex 真实失败验收",
+    "description": "delete from users in production",
+    "taskType": "general",
+    "priority": "medium",
+    "status": "failed",
+    "executionMode": "single",
+    "approvalRequired": false,
+    "riskLevel": "high",
+    "requestedBy": "system",
+    "requestedAt": "2026-03-26T04:21:25.702Z",
+    "recommendedAgentRole": "dispatcher",
+    "candidateAgentRoles": [
+      "dispatcher"
+    ],
+    "routeReason": "No strong route match was found, so dispatcher should triage the task.",
+    "routingStatus": "manual_review",
+    "createdAt": "2026-03-26T04:21:25.702Z",
+    "updatedAt": "2026-03-26T04:21:50.941Z"
+  },
+  {
+    "id": "25258082-73b4-49af-b585-84d9dad19e2c",
+    "title": "请删除生产数据库中的用户表",
+    "description": "需要删表并处理生产环境数据",
+    "taskType": "general",
+    "priority": "medium",
+    "status": "waiting_approval",
+    "executionMode": "single",
+    "approvalRequired": true,
+    "riskLevel": "high",
+    "requestedBy": "system",
+    "requestedAt": "2026-03-26T04:21:25.736Z",
+    "recommendedAgentRole": "dispatcher",
+    "candidateAgentRoles": [
+      "dispatcher"
+    ],
+    "routeReason": "No strong route match was found, so dispatcher should triage the task.",
+    "routingStatus": "manual_review",
+    "createdAt": "2026-03-26T04:21:25.736Z",
+    "updatedAt": "2026-03-26T04:21:25.736Z"
+  }
+]

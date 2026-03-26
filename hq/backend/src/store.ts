@@ -2,21 +2,36 @@ import fs from 'fs';
 import path from 'path';
 import { EventEmitter } from 'events';
 import { SquadState } from './types';
-import { ApprovalRecord, ExecutionRecord, TaskAssignment, TaskRecord, ToolCallLog, WorkflowPlan } from './shared/task-types';
+import {
+  ApprovalRecord,
+  CostLogEntry,
+  ExecutionRecord,
+  ExecutionTraceEvent,
+  TaskAssignment,
+  TaskRecord,
+  ToolCallLog,
+  WorkflowPlan,
+} from './shared/task-types';
 import {
   ApprovalRepository,
+  CostLogRepository,
   createFileApprovalRepository,
+  createFileCostLogRepository,
   createFileExecutionRepository,
+  createFileExecutionTraceRepository,
   createFileTaskAssignmentRepository,
   createFileTaskRepository,
   createFileToolCallLogRepository,
   createFileWorkflowPlanRepository,
   createInMemoryApprovalRepository,
+  createInMemoryCostLogRepository,
   createInMemoryExecutionRepository,
+  createInMemoryExecutionTraceRepository,
   createInMemoryTaskAssignmentRepository,
   createInMemoryTaskRepository,
   createInMemoryToolCallLogRepository,
   createInMemoryWorkflowPlanRepository,
+  ExecutionTraceRepository,
   ExecutionRepository,
   TaskAssignmentRepository,
   TaskRepository,
@@ -63,6 +78,8 @@ const EXECUTIONS_FILE = process.env.AGENCY_EXECUTIONS_FILE || path.join(__dirnam
 const ASSIGNMENTS_FILE = process.env.AGENCY_TASK_ASSIGNMENTS_FILE || path.join(__dirname, '../../task_assignments.json');
 const WORKFLOW_PLANS_FILE = process.env.AGENCY_WORKFLOW_PLANS_FILE || path.join(__dirname, '../../workflow_plans.json');
 const TOOL_CALL_LOGS_FILE = process.env.AGENCY_TOOL_CALL_LOGS_FILE || path.join(__dirname, '../../tool_call_logs.json');
+const EXECUTION_TRACES_FILE = process.env.AGENCY_EXECUTION_TRACES_FILE || path.join(__dirname, '../../execution_traces.json');
+const COST_LOGS_FILE = process.env.AGENCY_COST_LOGS_FILE || path.join(__dirname, '../../cost_logs.json');
 
 function getAuditLogsDir() {
   return process.env.AGENCY_AUDIT_LOGS_DIR || path.join(__dirname, '../../.ai/audit');
@@ -92,6 +109,14 @@ function getToolCallLogsFilePath() {
   return process.env.AGENCY_TOOL_CALL_LOGS_FILE || TOOL_CALL_LOGS_FILE;
 }
 
+function getExecutionTracesFilePath() {
+  return process.env.AGENCY_EXECUTION_TRACES_FILE || EXECUTION_TRACES_FILE;
+}
+
+function getCostLogsFilePath() {
+  return process.env.AGENCY_COST_LOGS_FILE || COST_LOGS_FILE;
+}
+
 export interface Template {
   name: string;
   activeAgentIds: string[];
@@ -111,6 +136,8 @@ interface StorePersistenceDependencies {
   taskAssignmentRepository?: TaskAssignmentRepository;
   workflowPlanRepository?: WorkflowPlanRepository;
   toolCallLogRepository?: ToolCallLogRepository;
+  executionTraceRepository?: ExecutionTraceRepository;
+  costLogRepository?: CostLogRepository;
   knowledgeAdapter?: KnowledgeRepository;
   auditLogRepository?: AuditLogRepository;
 }
@@ -141,6 +168,8 @@ export class Store extends EventEmitter {
   private taskAssignmentRepository: TaskAssignmentRepository;
   private workflowPlanRepository: WorkflowPlanRepository;
   private toolCallLogRepository: ToolCallLogRepository;
+  private executionTraceRepository: ExecutionTraceRepository;
+  private costLogRepository: CostLogRepository;
   private knowledgeAdapter: KnowledgeRepository | null;
   private auditLogger: AuditLogger | null;
 
@@ -202,6 +231,16 @@ export class Store extends EventEmitter {
         : mode === 'postgres'
           ? createPostgresToolCallLogRepository(postgresOptions!)
           : createFileToolCallLogRepository(getToolCallLogsFilePath()));
+
+    this.executionTraceRepository =
+      dependencies.executionTraceRepository ??
+      (mode === 'memory'
+        ? createInMemoryExecutionTraceRepository()
+        : createFileExecutionTraceRepository(getExecutionTracesFilePath()));
+
+    this.costLogRepository =
+      dependencies.costLogRepository ??
+      (mode === 'memory' ? createInMemoryCostLogRepository() : createFileCostLogRepository(getCostLogsFilePath()));
 
     // Initialize knowledge adapter (optional - backward compatible)
     this.knowledgeAdapter =
@@ -497,6 +536,19 @@ export class Store extends EventEmitter {
 
   public async saveApproval(approval: ApprovalRecord): Promise<void> {
     await this.approvalRepository.save(approval);
+    await this.appendExecutionTraceEvent({
+      id: `trace_${approval.id}_${Date.now()}`,
+      type: 'approval_requested',
+      taskId: approval.taskId,
+      approvalId: approval.id,
+      occurredAt: new Date().toISOString(),
+      actor: approval.requestedBy,
+      summary: `Approval requested: ${approval.id}`,
+      data: {
+        status: approval.status,
+        riskLevel: approval.riskLevel,
+      },
+    });
   }
 
   public async updateApprovalStatus(
@@ -512,6 +564,20 @@ export class Store extends EventEmitter {
 
     // Log audit event if status changed
     if (result && previousApproval && previousApproval.status !== status) {
+      await this.appendExecutionTraceEvent({
+        id: `trace_${approvalId}_${Date.now()}`,
+        type: 'approval_resolved',
+        taskId: previousApproval.taskId,
+        approvalId,
+        occurredAt: new Date().toISOString(),
+        actor: actor || 'system',
+        summary: `Approval ${status}: ${approvalId}`,
+        data: {
+          previousStatus: previousApproval.status,
+          status,
+        },
+      });
+
       await this.logAudit({
         entityType: 'approval',
         entityId: approvalId,
@@ -641,5 +707,31 @@ export class Store extends EventEmitter {
     updater: (toolCallLog: ToolCallLog) => ToolCallLog
   ): Promise<ToolCallLog | null> {
     return await this.toolCallLogRepository.update(toolCallLogId, updater);
+  }
+
+  // --- Trace + Cost Observability ---
+
+  public async appendExecutionTraceEvent(event: ExecutionTraceEvent): Promise<void> {
+    await this.executionTraceRepository.append(event);
+  }
+
+  public async getExecutionTraceEventsByExecutionId(executionId: string): Promise<ExecutionTraceEvent[]> {
+    return await this.executionTraceRepository.listByExecutionId(executionId);
+  }
+
+  public async getExecutionTraceEventsByTaskId(taskId: string): Promise<ExecutionTraceEvent[]> {
+    return await this.executionTraceRepository.listByTaskId(taskId);
+  }
+
+  public async saveCostLogEntry(entry: CostLogEntry): Promise<void> {
+    await this.costLogRepository.save(entry);
+  }
+
+  public async getCostLogsByExecutionId(executionId: string): Promise<CostLogEntry[]> {
+    return await this.costLogRepository.listByExecutionId(executionId);
+  }
+
+  public async getCostLogsByTaskId(taskId: string): Promise<CostLogEntry[]> {
+    return await this.costLogRepository.listByTaskId(taskId);
   }
 }

@@ -22,6 +22,7 @@ function makeMockAgent(id: string, role?: string): Agent {
       responsibilities: ['do things'],
       tools: [],
       allowedTaskTypes: [
+        'architecture',
         'general',
         'architecture_analysis',
         'backend_design',

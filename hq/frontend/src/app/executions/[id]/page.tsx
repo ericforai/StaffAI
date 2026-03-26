@@ -3,7 +3,9 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useExecutionDetail } from '../../../hooks/useExecutionDetail';
+import { useExecutionTrace } from '../../../hooks/useExecutionTrace';
 import type { ToolCallSummary } from '../../../types';
+import { API_CONFIG } from '../../../utils/constants';
 
 function formatToolCallStatus(status: string) {
   switch (status) {
@@ -60,7 +62,18 @@ export default function ExecutionDetailPage() {
   const params = useParams<{ id: string }>();
   const executionId = Array.isArray(params.id) ? params.id[0] : params.id;
   const { execution, loading, error, notFound, reload } = useExecutionDetail(executionId);
+  const { trace, loading: traceLoading, error: traceError, reload: reloadTrace } = useExecutionTrace(executionId);
   const toolCalls = normalizeToolCalls(execution);
+
+  async function postControl(action: 'pause' | 'resume' | 'cancel') {
+    if (!executionId) return;
+    await fetch(`${API_CONFIG.BASE_URL}/executions/${executionId}/${action}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Agency-Control': '1' },
+    });
+    await reload();
+    await reloadTrace();
+  }
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(190,214,227,0.5),transparent_26%),linear-gradient(180deg,#f7f2ea_0%,#f2eee7_100%)] px-6 py-8 text-slate-800">
@@ -75,7 +88,7 @@ export default function ExecutionDetailPage() {
           </Link>
         </div>
 
-        <div className="rounded-[1.8rem] border border-[#d9d0c4] bg-[#fffdfa]/94 p-6">
+        <div data-testid="execution-detail-root" className="rounded-[1.8rem] border border-[#d9d0c4] bg-[#fffdfa]/94 p-6">
           {loading && <p className="text-sm text-slate-600">正在加载执行详情…</p>}
           {error && (
             <div
@@ -147,6 +160,38 @@ export default function ExecutionDetailPage() {
                   <p className="mt-2 text-sm font-black text-slate-900">{execution.completedAt || '尚未完成'}</p>
                 </div>
               </div>
+
+              <div className="mt-4 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  data-testid="execution-pause-button"
+                  onClick={() => void postControl('pause')}
+                  className="rounded-full border border-[#ddd3c7] bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-slate-700 hover:border-[#b7a894] hover:text-slate-900"
+                >
+                  暂停
+                </button>
+                <button
+                  type="button"
+                  data-testid="execution-resume-button"
+                  onClick={() => void postControl('resume')}
+                  className="rounded-full border border-[#b8c9d2] bg-[#e9f0f3] px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-slate-800 hover:border-[#9ab0bc] hover:bg-[#dce8ee]"
+                >
+                  恢复
+                </button>
+                <button
+                  type="button"
+                  data-testid="execution-cancel-button"
+                  onClick={() => void postControl('cancel')}
+                  className="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-rose-700 hover:border-rose-300 hover:bg-rose-100"
+                >
+                  取消
+                </button>
+                {execution.controlState?.status && (
+                  <p className="self-center text-xs text-slate-500">
+                    控制状态：<span className="font-black text-slate-800">{execution.controlState.status}</span>
+                  </p>
+                )}
+              </div>
             </>
           )}
 
@@ -174,11 +219,11 @@ export default function ExecutionDetailPage() {
           )}
 
           {toolCalls.length > 0 && (
-            <div className="mt-4 rounded-[1.2rem] border border-[#ddd3c7] bg-white p-4">
+            <div data-testid="execution-toolcalls" className="mt-4 rounded-[1.2rem] border border-[#ddd3c7] bg-white p-4">
               <p className="text-[11px] tracking-[0.16em] text-slate-500">工具调用</p>
               <div className="mt-4 space-y-3">
                 {toolCalls.map((toolCall: ToolCallSummary) => (
-                  <div key={toolCall.id} className="rounded-[1.1rem] border border-slate-200 bg-[#fcfaf5] p-4">
+                  <div key={toolCall.id} data-testid={`toolcall-card-${toolCall.id}`} className="rounded-[1.1rem] border border-slate-200 bg-[#fcfaf5] p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="text-sm font-black text-slate-900">{toolCall.toolName}</p>
@@ -216,6 +261,36 @@ export default function ExecutionDetailPage() {
               </div>
             </div>
           )}
+
+          <div className="mt-4 rounded-[1.2rem] border border-[#ddd3c7] bg-white p-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[11px] tracking-[0.16em] text-slate-500">执行轨迹</p>
+              <button
+                type="button"
+                data-testid="execution-trace-reload"
+                onClick={() => void reloadTrace()}
+                className="rounded-full border border-[#ddd3c7] bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 hover:border-[#b7a894] hover:text-slate-900"
+              >
+                刷新
+              </button>
+            </div>
+            {traceLoading && <p className="mt-2 text-sm text-slate-600">正在加载执行轨迹…</p>}
+            {traceError && <p className="mt-2 text-sm text-rose-600">{traceError}</p>}
+            {!traceLoading && !traceError && (trace?.traceEvents?.length ?? 0) === 0 && (
+              <p className="mt-2 text-sm text-slate-500">暂无轨迹事件。</p>
+            )}
+            {(trace?.traceEvents?.length ?? 0) > 0 && (
+              <ul className="mt-3 space-y-2" data-testid="execution-trace-events">
+                {trace?.traceEvents?.slice(0, 20).map((event) => (
+                  <li key={event.id} className="rounded-[0.9rem] border border-[#eee6db] bg-[#fffdfa] p-3">
+                    <p className="text-xs font-black text-slate-800">{event.type}</p>
+                    <p className="mt-1 text-xs text-slate-500">{event.occurredAt}</p>
+                    {event.summary ? <p className="mt-2 text-sm text-slate-700">{event.summary}</p> : null}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </div>
     </main>

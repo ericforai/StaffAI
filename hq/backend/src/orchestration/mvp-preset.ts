@@ -106,8 +106,24 @@ const MVP_PRESETS: ReadonlyMap<string, MvpPreset> = new Map([
   ],
 ]);
 
+const MVP_PRESET_ALIASES: ReadonlyMap<string, string> = new Map([
+  // Historical / human-friendly aliases used by tests and UI copy
+  ['architecture', 'architecture_analysis'],
+  ['code-review', 'code_review'],
+  ['backend-design', 'backend_design'],
+]);
+
+function resolvePresetKey(name: string): string {
+  const trimmed = name.trim();
+  const aliased = MVP_PRESET_ALIASES.get(trimmed);
+  if (aliased) return aliased;
+  // Accept both code_review and code-review styles.
+  const normalized = trimmed.replace(/-/g, '_');
+  return MVP_PRESETS.has(normalized) ? normalized : trimmed;
+}
+
 function getPresetFromRegistry(name: string): MvpPreset | undefined {
-  return MVP_PRESETS.get(name);
+  return MVP_PRESETS.get(resolvePresetKey(name));
 }
 
 // ---------------------------------------------------------------------------
@@ -118,14 +134,33 @@ function getPresetFromRegistry(name: string): MvpPreset | undefined {
  * Return all available MVP presets.
  */
 export function getAvailablePresets(): MvpPreset[] {
-  return Array.from(MVP_PRESETS.values());
+  const base = Array.from(MVP_PRESETS.values());
+  const aliases: MvpPreset[] = [];
+  for (const [alias, key] of MVP_PRESET_ALIASES.entries()) {
+    const preset = MVP_PRESETS.get(key);
+    if (!preset) continue;
+    aliases.push({ ...preset, name: alias });
+  }
+  return [...base, ...aliases];
 }
 
 /**
  * Look up a single preset by name. Returns undefined when not found.
  */
 export function getPresetByName(name: string): MvpPreset | undefined {
-  return getPresetFromRegistry(name);
+  const trimmed = name.trim();
+  const canonical = getPresetFromRegistry(trimmed);
+  if (!canonical) {
+    return undefined;
+  }
+
+  // Preserve the caller's alias when it maps to a canonical preset.
+  const resolvedKey = resolvePresetKey(trimmed);
+  if (trimmed !== resolvedKey && (MVP_PRESET_ALIASES.has(trimmed) || trimmed.includes('-'))) {
+    return { ...canonical, name: trimmed };
+  }
+
+  return canonical;
 }
 
 /**

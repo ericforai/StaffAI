@@ -12,7 +12,7 @@ interface RouteRule {
 
 const ROUTE_RULES: RouteRule[] = [
   {
-    taskType: 'architecture_analysis',
+    taskType: 'architecture',
     keywords: ['architect', 'architecture', 'boundary', 'bounded context', 'refactor', 'design', 'ddd', 'modular'],
     recommendedAgentRole: 'software-architect',
     candidateAgentRoles: ['software-architect', 'dispatcher'],

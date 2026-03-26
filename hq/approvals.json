@@ -1,0 +1,77 @@
+[
+  {
+    "id": "264faf20-921f-43ae-ab20-8bc1f0ca8dbd",
+    "taskId": "4177ba79-0686-4905-afa0-20584c5de9e7",
+    "taskTitle": "English prod delete",
+    "status": "approved",
+    "requestedBy": "system",
+    "requestedAt": "2026-03-26T04:02:18.317Z",
+    "riskLevel": "HIGH",
+    "decisionContext": {
+      "factors": [
+        "Contains destructive operation keywords",
+        "Involves production environment",
+        "Database destructive operation",
+        "General routine task"
+      ],
+      "confidence": 0.58
+    },
+    "resolvedAt": "2026-03-26T04:03:02.655Z"
+  },
+  {
+    "id": "371abc47-9b3b-4501-9d23-5b8ee308c068",
+    "taskId": "169a505b-11c5-41ea-a7cc-bf628e2e587e",
+    "taskTitle": "English prod delete",
+    "status": "approved",
+    "requestedBy": "system",
+    "requestedAt": "2026-03-26T04:05:23.159Z",
+    "riskLevel": "HIGH",
+    "decisionContext": {
+      "factors": [
+        "Contains destructive operation keywords",
+        "Involves production environment",
+        "Database destructive operation",
+        "General routine task"
+      ],
+      "confidence": 0.58
+    },
+    "resolvedAt": "2026-03-26T04:05:32.862Z"
+  },
+  {
+    "id": "9652d134-2f6e-486d-a9b1-f13ac3ec650e",
+    "taskId": "f63f334c-fe6f-4283-b40f-42b9a7aa1696",
+    "taskTitle": "Codex 真实失败验收",
+    "status": "approved",
+    "requestedBy": "system",
+    "requestedAt": "2026-03-26T04:21:25.702Z",
+    "riskLevel": "HIGH",
+    "decisionContext": {
+      "factors": [
+        "Contains destructive operation keywords",
+        "Involves production environment",
+        "Database destructive operation",
+        "General routine task"
+      ],
+      "confidence": 0.58
+    },
+    "resolvedAt": "2026-03-26T04:21:50.799Z"
+  },
+  {
+    "id": "8418bf05-5451-4ad2-b3b1-24bf7d2b499b",
+    "taskId": "25258082-73b4-49af-b585-84d9dad19e2c",
+    "taskTitle": "请删除生产数据库中的用户表",
+    "status": "pending",
+    "requestedBy": "system",
+    "requestedAt": "2026-03-26T04:21:25.736Z",
+    "riskLevel": "HIGH",
+    "decisionContext": {
+      "factors": [
+        "Contains destructive operation keywords",
+        "Involves production environment",
+        "Database destructive operation",
+        "General routine task"
+      ],
+      "confidence": 0.58
+    }
+  }
+]

@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 import type {
   ApprovalRecord,
+  CostLogEntry,
+  ExecutionTraceEvent,
   ExecutionRecord,
   TaskAssignment,
   TaskRecord,
@@ -69,6 +71,20 @@ export interface ToolCallLogRepository {
   listByExecutionId(executionId: string): Promise<ToolCallLog[]>;
   save(toolCallLog: ToolCallLog): Promise<void>;
   update(toolCallLogId: string, updater: (toolCallLog: ToolCallLog) => ToolCallLog): Promise<ToolCallLog | null>;
+}
+
+export interface ExecutionTraceRepository {
+  list(): Promise<ExecutionTraceEvent[]>;
+  listByTaskId(taskId: string): Promise<ExecutionTraceEvent[]>;
+  listByExecutionId(executionId: string): Promise<ExecutionTraceEvent[]>;
+  append(event: ExecutionTraceEvent): Promise<void>;
+}
+
+export interface CostLogRepository {
+  list(): Promise<CostLogEntry[]>;
+  listByTaskId(taskId: string): Promise<CostLogEntry[]>;
+  listByExecutionId(executionId: string): Promise<CostLogEntry[]>;
+  save(entry: CostLogEntry): Promise<void>;
 }
 
 export function createFileTaskRepository(filePath: string): TaskRepository {
@@ -369,6 +385,80 @@ export function createFileToolCallLogRepository(filePath: string): ToolCallLogRe
       toolCallLogs[index] = updated;
       writeJsonFile(filePath, toolCallLogs);
       return updated;
+    },
+  };
+}
+
+export function createFileExecutionTraceRepository(filePath: string): ExecutionTraceRepository {
+  return {
+    async list() {
+      return readJsonFile<ExecutionTraceEvent[]>(filePath, []);
+    },
+    async listByTaskId(taskId) {
+      return (await this.list()).filter((event) => event.taskId === taskId);
+    },
+    async listByExecutionId(executionId) {
+      return (await this.list()).filter((event) => event.executionId === executionId);
+    },
+    async append(event) {
+      const events = await this.list();
+      events.push(event);
+      writeJsonFile(filePath, events);
+    },
+  };
+}
+
+export function createInMemoryExecutionTraceRepository(seed: ExecutionTraceEvent[] = []): ExecutionTraceRepository {
+  const events = [...seed];
+  return {
+    async list() {
+      return [...events];
+    },
+    async listByTaskId(taskId) {
+      return events.filter((event) => event.taskId === taskId);
+    },
+    async listByExecutionId(executionId) {
+      return events.filter((event) => event.executionId === executionId);
+    },
+    async append(event) {
+      events.push(event);
+    },
+  };
+}
+
+export function createFileCostLogRepository(filePath: string): CostLogRepository {
+  return {
+    async list() {
+      return readJsonFile<CostLogEntry[]>(filePath, []);
+    },
+    async listByTaskId(taskId) {
+      return (await this.list()).filter((entry) => entry.taskId === taskId);
+    },
+    async listByExecutionId(executionId) {
+      return (await this.list()).filter((entry) => entry.executionId === executionId);
+    },
+    async save(entry) {
+      const entries = await this.list();
+      entries.push(entry);
+      writeJsonFile(filePath, entries);
+    },
+  };
+}
+
+export function createInMemoryCostLogRepository(seed: CostLogEntry[] = []): CostLogRepository {
+  const entries = [...seed];
+  return {
+    async list() {
+      return [...entries];
+    },
+    async listByTaskId(taskId) {
+      return entries.filter((entry) => entry.taskId === taskId);
+    },
+    async listByExecutionId(executionId) {
+      return entries.filter((entry) => entry.executionId === executionId);
+    },
+    async save(entry) {
+      entries.push(entry);
     },
   };
 }

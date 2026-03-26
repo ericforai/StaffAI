@@ -97,6 +97,7 @@ type RoleSequenceEntry = {
 
 export function buildAssignmentRoleSequence(routeDecision: TaskRouteDecision): RoleSequenceEntry[] {
   switch (routeDecision.taskType) {
+    case 'architecture':
     case 'architecture_analysis':
       return [
         { role: routeDecision.recommendedAgentRole, assignmentRole: 'primary', title: '执行架构评估与技术决策' },

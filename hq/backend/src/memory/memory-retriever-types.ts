@@ -157,4 +157,16 @@ export interface MemoryRetrieverConfig {
   cacheTtlMs?: number;
   /** Whether caching is enabled (default: true) */
   enableCache?: boolean;
+
+  /** Enable vector-based reranking (default: false) */
+  enableVectorRerank?: boolean;
+  /** Weight for vector score blending (default: 0) */
+  vectorWeight?: number;
+  /** How many top lexical candidates to rerank (default: max(limit*10, 50)) */
+  rerankTopK?: number;
+
+  /** Enable retrieval usage logging (default: false) */
+  enableUsageLogs?: boolean;
+  /** Path to a JSONL usage log file (default: <memoryRootDir>/usage/retrieval.jsonl) */
+  usageLogPath?: string;
 }

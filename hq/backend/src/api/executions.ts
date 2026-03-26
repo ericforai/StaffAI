@@ -1,6 +1,10 @@
 import type express from 'express';
+import path from 'node:path';
 import type { Store } from '../store';
 import type { ExecutionRecord, ToolCallLog } from '../shared/task-types';
+import { createRuntimePaths } from '../runtime/runtime-state';
+import { ExecutionStateStore, type ExecutionState } from '../runtime/execution-store';
+import { TaskController } from '../runtime/task-controller';
 
 const EXECUTIONS_API_STAGE = 'production';
 const EXECUTION_FIELDS = [
@@ -112,6 +116,52 @@ type ExecutionDetailRecord = ExecutionRecord & {
   toolCalls?: ToolCallLog[];
 };
 
+function isLoopbackIp(ip: string | undefined): boolean {
+  if (!ip) return false;
+  return ip === '127.0.0.1' || ip === '::1' || ip.startsWith('::ffff:127.0.0.1');
+}
+
+function requireExecutionControlAccess(req: express.Request, res: express.Response): boolean {
+  // Minimal guard: require explicit control header AND loopback origin by default.
+  // This keeps accidental exposure safer without introducing full auth.
+  const headerOk = String(req.header('X-Agency-Control') ?? '') === '1';
+  const allowRemote = String(process.env.AGENCY_ALLOW_REMOTE_CONTROL ?? '').toLowerCase() === 'true';
+  const ipOk = allowRemote ? true : isLoopbackIp(req.ip);
+  if (!headerOk || !ipOk) {
+    res.status(403).json({ error: 'execution control not allowed', stage: EXECUTIONS_API_STAGE });
+    return false;
+  }
+  return true;
+}
+
+function mapExecutionRecordToState(execution: ExecutionRecord): ExecutionState {
+  const startedAt = execution.startedAt || new Date().toISOString();
+  const terminalOrControlled = new Set(['paused', 'cancelled', 'completed', 'failed']);
+  const status = terminalOrControlled.has(execution.status) ? (execution.status as ExecutionState['status']) : 'running';
+
+  return {
+    executionId: execution.id,
+    status,
+    taskId: execution.taskId,
+    workflowPlanId: execution.workflowPlanId,
+    assignmentId: execution.assignmentId,
+    executor: execution.executor ?? 'claude',
+    startedAt,
+    ...(execution.completedAt ? { completedAt: execution.completedAt } : {}),
+    ...(execution.status === 'cancelled' ? { cancelledAt: execution.endedAt ?? new Date().toISOString() } : {}),
+  };
+}
+
+async function ensureExecutionState(store: ExecutionStateStore, execution: ExecutionRecord): Promise<ExecutionState> {
+  const existing = await store.load(execution.id);
+  if (existing) {
+    return existing;
+  }
+  const state = mapExecutionRecordToState(execution);
+  await store.save(state);
+  return state;
+}
+
 async function loadExecutionToolCalls(store: Store, execution: ExecutionRecord): Promise<ToolCallLog[] | undefined> {
   const storeWithToolCalls = store as Store & Partial<{
     getToolCallLogsByExecutionId: (executionId: string) => Promise<ToolCallLog[]>;
@@ -126,6 +176,11 @@ async function loadExecutionToolCalls(store: Store, execution: ExecutionRecord):
 }
 
 export function registerExecutionRoutes(app: express.Application, store: Store) {
+  const runtimePaths = createRuntimePaths();
+  const stateDir = path.join(runtimePaths.sessionsDir, 'executions');
+  const executionStateStore = new ExecutionStateStore(stateDir);
+  const taskController = new TaskController(executionStateStore);
+
   app.get('/api/executions', async (req, res) => {
     const taskId = readStringQuery(req.query.taskId);
     const status = readStringQuery(req.query.status);
@@ -180,12 +235,174 @@ export function registerExecutionRoutes(app: express.Application, store: Store) 
     }
 
     const toolCalls = await loadExecutionToolCalls(store, execution);
+    const controlState = await ensureExecutionState(executionStateStore, execution);
 
     return res.json({
       execution: {
         ...execution,
         ...(toolCalls ? { toolCalls } : {}),
+        controlState,
       },
+      stage: EXECUTIONS_API_STAGE,
+    });
+  });
+
+  app.get('/api/executions/:id/trace', async (req, res) => {
+    const execution = await store.getExecutionById(req.params.id);
+    if (!execution) {
+      return res.status(404).json({
+        error: 'execution not found',
+        executionId: req.params.id,
+        stage: EXECUTIONS_API_STAGE,
+      });
+    }
+
+    const [task, approvals, toolCalls, controlState] = await Promise.all([
+      store.getTaskById(execution.taskId),
+      store.getApprovalsByTaskId(execution.taskId),
+      loadExecutionToolCalls(store, execution),
+      ensureExecutionState(executionStateStore, execution),
+    ]);
+
+    const storeWithTrace = store as Store & Partial<{
+      getExecutionTraceEventsByExecutionId: (executionId: string) => Promise<any[]>;
+      getCostLogsByExecutionId: (executionId: string) => Promise<any[]>;
+    }>;
+    const [traceEvents, costLogs] = await Promise.all([
+      typeof storeWithTrace.getExecutionTraceEventsByExecutionId === 'function'
+        ? storeWithTrace.getExecutionTraceEventsByExecutionId(execution.id)
+        : Promise.resolve([]),
+      typeof storeWithTrace.getCostLogsByExecutionId === 'function'
+        ? storeWithTrace.getCostLogsByExecutionId(execution.id)
+        : Promise.resolve([]),
+    ]);
+
+    const tokensUsed =
+      costLogs.length > 0 && typeof costLogs[costLogs.length - 1]?.tokensUsed === 'number'
+        ? (costLogs[costLogs.length - 1].tokensUsed as number)
+        : typeof (execution.outputSnapshot as any)?.tokensUsed === 'number'
+          ? ((execution.outputSnapshot as any).tokensUsed as number)
+          : undefined;
+
+    return res.json({
+      trace: {
+        execution,
+        task,
+        approvals,
+        toolCalls: toolCalls ?? [],
+        controlState,
+        traceEvents,
+        costLogs,
+        cost: {
+          tokensUsed,
+        },
+        summary: {
+          toolCalls: (toolCalls ?? []).length,
+          approvals: approvals.length,
+        },
+      },
+      stage: EXECUTIONS_API_STAGE,
+    });
+  });
+
+  app.post('/api/executions/:id/cancel', async (req, res) => {
+    if (!requireExecutionControlAccess(req, res)) {
+      return;
+    }
+    const execution = await store.getExecutionById(req.params.id);
+    if (!execution) {
+      return res.status(404).json({
+        error: 'execution not found',
+        executionId: req.params.id,
+        stage: EXECUTIONS_API_STAGE,
+      });
+    }
+
+    await ensureExecutionState(executionStateStore, execution);
+    try {
+      await taskController.cancel(execution.id);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'cannot cancel execution';
+      return res.status(409).json({ error: message, stage: EXECUTIONS_API_STAGE });
+    }
+
+    const now = new Date().toISOString();
+    const updated = await store.updateExecution(execution.id, (current) => ({
+      ...current,
+      status: 'cancelled',
+      endedAt: current.endedAt ?? now,
+      completedAt: current.completedAt ?? now,
+    }));
+
+    return res.json({
+      execution: updated ?? execution,
+      controlState: await executionStateStore.load(execution.id),
+      stage: EXECUTIONS_API_STAGE,
+    });
+  });
+
+  app.post('/api/executions/:id/pause', async (req, res) => {
+    if (!requireExecutionControlAccess(req, res)) {
+      return;
+    }
+    const execution = await store.getExecutionById(req.params.id);
+    if (!execution) {
+      return res.status(404).json({
+        error: 'execution not found',
+        executionId: req.params.id,
+        stage: EXECUTIONS_API_STAGE,
+      });
+    }
+
+    await ensureExecutionState(executionStateStore, execution);
+    try {
+      await taskController.pause(execution.id, {});
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'cannot pause execution';
+      return res.status(409).json({ error: message, stage: EXECUTIONS_API_STAGE });
+    }
+
+    const updated = await store.updateExecution(execution.id, (current) => ({
+      ...current,
+      status: 'paused',
+    }));
+
+    return res.json({
+      execution: updated ?? execution,
+      controlState: await executionStateStore.load(execution.id),
+      stage: EXECUTIONS_API_STAGE,
+    });
+  });
+
+  app.post('/api/executions/:id/resume', async (req, res) => {
+    if (!requireExecutionControlAccess(req, res)) {
+      return;
+    }
+    const execution = await store.getExecutionById(req.params.id);
+    if (!execution) {
+      return res.status(404).json({
+        error: 'execution not found',
+        executionId: req.params.id,
+        stage: EXECUTIONS_API_STAGE,
+      });
+    }
+
+    await ensureExecutionState(executionStateStore, execution);
+    try {
+      await taskController.resume(execution.id);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'cannot resume execution';
+      return res.status(409).json({ error: message, stage: EXECUTIONS_API_STAGE });
+    }
+
+    const updated = await store.updateExecution(execution.id, (current) => ({
+      ...current,
+      status: 'running',
+    }));
+
+    return res.json({
+      execution: updated ?? execution,
+      controlState: await executionStateStore.load(execution.id),
       stage: EXECUTIONS_API_STAGE,
     });
   });

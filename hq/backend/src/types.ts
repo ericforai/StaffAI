@@ -9,6 +9,7 @@ export interface AgentFrontmatter {
 }
 
 export type AgentTaskType =
+  | 'architecture'
   | 'architecture_analysis'
   | 'backend_implementation'
   | 'backend_design'
