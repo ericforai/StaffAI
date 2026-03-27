@@ -1,0 +1,30 @@
+#!/bin/bash
+#
+# pre-commit hook - 自动测试验证
+#
+# 在每次 commit 前运行测试
+# 如果测试失败，阻止提交
+#
+
+set -e
+
+echo "🔍 运行 pre-commit 测试..."
+
+# 切换到 backend 目录
+cd hq/backend
+
+# 运行测试
+if npm run test --silent 2>&1 | grep -q "FAIL\|failing"; then
+    echo ""
+    echo "❌ 测试失败！提交已阻止。"
+    echo ""
+    echo "修复选项:"
+    echo "  1. 运行 npm run auto-fix 自动修复"
+    echo "  2. 手动修复后再次提交"
+    echo "  3. 使用 git commit --no-verify 跳过检查"
+    echo ""
+    exit 1
+fi
+
+echo "✅ 测试通过，继续提交..."
+exit 0
