@@ -3,6 +3,7 @@ import type express from 'express';
 import { registerAgencyRoutes } from '../api/agency';
 import { registerApprovalRoutes } from '../api/approvals';
 import { registerDiscussionRoutes } from '../api/discussions';
+import { registerMarketRoutes } from '../api/market';
 import { registerExecutionRoutes } from '../api/executions';
 import { registerMemoryRoutes } from '../api/memory';
 import { registerRuntimeRoutes } from '../api/runtime';
@@ -211,4 +212,7 @@ export function registerBackendRoutes({
     store,
     broadcast,
   });
+
+  // Register talent market routes
+  registerMarketRoutes(app, { store });
 }

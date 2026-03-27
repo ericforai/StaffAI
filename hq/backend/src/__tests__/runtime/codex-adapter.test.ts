@@ -6,6 +6,7 @@ import type {
 } from '../../runtime/runtime-adapter';
 
 // Enable mock mode for tests
+process.env.AGENCY_UNDER_NODE_TEST = '1';
 process.env.AGENCY_TEST_MODE = 'mock';
 
 function createMockContext(overrides?: Partial<RuntimeExecutionContext>): RuntimeExecutionContext {
