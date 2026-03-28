@@ -50,11 +50,19 @@ export function extractStructuredResponse(raw: string, executor: ExecutorName): 
 
   try {
     const parsed = JSON.parse(text) as Record<string, unknown>;
+
+    // Format 1: Direct response field
     const direct = typeof parsed.response === 'string' ? parsed.response.trim() : null;
     if (direct) {
       return direct;
     }
 
+    // Format 2: result as string (Claude CLI --output-format json)
+    if (typeof parsed.result === 'string') {
+      return parsed.result.trim();
+    }
+
+    // Format 3: Nested result.response
     const nested =
       typeof parsed.result === 'object' && parsed.result !== null
         ? (parsed.result as Record<string, unknown>)
@@ -64,6 +72,7 @@ export function extractStructuredResponse(raw: string, executor: ExecutorName): 
       return nestedResult;
     }
 
+    // Format 4: Content array
     const content = Array.isArray(parsed.content) ? (parsed.content as Array<Record<string, unknown>>) : null;
     const contentText = content
       ? content

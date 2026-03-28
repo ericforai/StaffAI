@@ -26,6 +26,19 @@ const STRUCTURED_RESPONSE_SCHEMA = JSON.stringify({
   required: ['response'],
 });
 
+/**
+ * Allowed MCP tools for expert discussion.
+ * Only search-related tools are permitted.
+ */
+const ALLOWED_TOOL_PATTERNS = [
+  'mcp__web-readers__*',
+  'mcp__web-reader__*',
+  'WebSearch',
+];
+
+const EXPERT_SYSTEM_PROMPT = `You are an expert advisor with access to web search tools.
+You can search the internet to provide current, accurate information in your area of expertise.`;
+
 interface DiscussionRuntimeOptions {
   workspaceRoot: string;
   claudePath: string;
@@ -183,22 +196,25 @@ export class DiscussionRuntime {
     await this.ensureExecutable(this.claudePath, 'Claude Code');
     let stdout = '';
     try {
+      const args = [
+        '-p',
+        '--output-format',
+        'json',
+        '--json-schema',
+        STRUCTURED_RESPONSE_SCHEMA,
+        '--no-session-persistence',
+        '--permission-mode',
+        'bypassPermissions',
+        '--allowed-tools',
+        ALLOWED_TOOL_PATTERNS.join(','),
+        '--system-prompt',
+        `${EXPERT_SYSTEM_PROMPT}\n\n${systemPrompt}`,
+        userPrompt,
+      ];
+
       const result = await execFileAsync(
         this.claudePath,
-        [
-          '-p',
-          '--output-format',
-          'json',
-          '--json-schema',
-          STRUCTURED_RESPONSE_SCHEMA,
-          '--no-session-persistence',
-          '--permission-mode',
-          'bypassPermissions',
-          '--tools=',
-          '--system-prompt',
-          systemPrompt,
-          userPrompt,
-        ],
+        args,
         {
           cwd: this.workspaceRoot,
           env: this.getExecutorEnv(),

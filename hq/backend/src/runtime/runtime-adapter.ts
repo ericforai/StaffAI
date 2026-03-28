@@ -1,6 +1,7 @@
 import type { TaskExecutionMode, TaskRecord } from '../shared/task-types';
 import { ClaudeRuntimeAdapter } from './adapters/claude-adapter';
 import { CodexRuntimeAdapter } from './adapters/codex-adapter';
+import { OpenAIRuntimeAdapter } from './adapters/openai-adapter';
 
 export interface RuntimeExecutionContext {
   task: TaskRecord;
@@ -64,56 +65,10 @@ function mapExecutorToRuntimeName(executor: 'claude' | 'codex' | 'openai'): stri
   return 'openai_api';
 }
 
-function createNoopAdapter(name: string): RuntimeAdapter {
-  return {
-    name,
-    supports: ['single', 'serial', 'parallel', 'advanced_discussion'],
-    async run(context: RuntimeExecutionContext): Promise<RuntimeExecutionResult> {
-      return {
-        outputSummary: context.summary,
-        outputSnapshot: {
-          runtimeName: 'openai_api',
-          executor: 'openai',
-          executionMode: context.executionMode,
-          degraded: false,
-        },
-      };
-    },
-    async runSerial(contexts: RuntimeExecutionContext[]): Promise<RuntimeExecutionResult[]> {
-      const results: RuntimeExecutionResult[] = [];
-      for (const context of contexts) {
-        results.push({
-          outputSummary: context.summary,
-          outputSnapshot: {
-            runtimeName: name,
-            executor: context.executor,
-            simulated: true,
-            executionMode: context.executionMode,
-          },
-        });
-      }
-      return results;
-    },
-    async runParallel(contexts: RuntimeExecutionContext[]): Promise<RuntimeExecutionResult[]> {
-      return Promise.all(
-        contexts.map((context) => ({
-          outputSummary: context.summary,
-          outputSnapshot: {
-            runtimeName: name,
-            executor: context.executor,
-            simulated: true,
-            executionMode: context.executionMode,
-          },
-        }))
-      );
-    },
-  };
-}
-
 const ADAPTERS: Record<'claude' | 'codex' | 'openai', RuntimeAdapter> = {
   claude: new ClaudeRuntimeAdapter(),
   codex: new CodexRuntimeAdapter(),
-  openai: createNoopAdapter('openai_api'),
+  openai: new OpenAIRuntimeAdapter(),
 };
 
 export function resolveRuntimeAdapter(executor: 'claude' | 'codex' | 'openai'): RuntimeAdapter {
@@ -127,3 +82,4 @@ export function resolveRuntimeName(executor: 'claude' | 'codex' | 'openai'): str
 // Re-export adapter classes for external use
 export { ClaudeRuntimeAdapter } from './adapters/claude-adapter';
 export { CodexRuntimeAdapter } from './adapters/codex-adapter';
+export { OpenAIRuntimeAdapter } from './adapters/openai-adapter';

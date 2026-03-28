@@ -57,7 +57,7 @@ export async function executeAssignmentWithRetry(
 
   return {
     success: false,
-    error: lastError ?? 'Execution failed',
+    error: lastError ?? '执行失败',
     attempts: maxRetries,
   };
 }

@@ -346,7 +346,8 @@ export function registerMarketRoutes(
       // Generate employee agent file
       const employeeId = `emp_${candidate.owner}_${candidate.name}`.toLowerCase().replace(/[^a-z0-9]/g, '_');
       // Resolve from project root so Scanner can discover the file
-      const projectRoot = path.resolve(__dirname, '../../../');
+      // Note: __dirname = hq/backend/dist/api/, need 4 levels to reach project root
+      const projectRoot = path.resolve(__dirname, '../../../../');
       const employeesDir = path.join(projectRoot, 'hq', 'generated', 'employees');
       const targetPath = path.join(employeesDir, `${employeeId}.md`);
       const relativePath = `hq/generated/employees/${employeeId}.md`;

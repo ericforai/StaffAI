@@ -3,6 +3,7 @@ import type { ExecutionLifecycleRecord } from '../runtime/execution-service';
 import { runTaskExecution } from '../runtime/execution-service';
 import { runAdvancedDiscussionExecution } from '../runtime/advanced-discussion-runner';
 import { buildDispatcherDirective } from '../runtime/dispatcher-runtime';
+import { resolveTaskTimeoutMs } from '../runtime/task-execution-config';
 import type { TaskAssignment, TaskExecutionMode, TaskRecord, WorkflowPlan } from '../shared/task-types';
 import { resolveExecutionDecision, type SessionCapabilities } from '../execution-strategy';
 import { createAssignmentExecutor } from './assignment-executor';
@@ -254,7 +255,7 @@ export async function executeTaskRecord(
       ? loadedMemoryContext
       : undefined;
   const requestedMode = input.executionMode ?? task.executionMode;
-  const timeoutMs = Number.isFinite(input.timeoutMs) && (input.timeoutMs ?? 0) > 0 ? (input.timeoutMs as number) : 30_000;
+  const timeoutMs = resolveTaskTimeoutMs(input.timeoutMs);
   const maxRetries = Number.isFinite(input.maxRetries) && (input.maxRetries ?? 0) >= 0 ? (input.maxRetries as number) : 1;
   const sessionCapabilities = dependencies.sessionCapabilities ?? { sampling: false };
   const parallelDecision =
