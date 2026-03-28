@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import Link from 'next/link';
-import { useWebSocket, type WsMessage } from '../../hooks/useWebSocket';
+import { useGlobalWebSocket, type WsMessage } from '../../hooks/useGlobalWebSocket';
 import { DiscussionControlPanel } from '../../components/DiscussionControlPanel';
 import { useFindExpertsAction } from '../../hooks/useFindExpertsAction';
 import { useHireExpertsAction } from '../../hooks/useHireExpertsAction';
@@ -77,7 +77,7 @@ export default function BrainstormPage() {
 
   }, [syncSquad]);
 
-  const { status: wsStatus } = useWebSocket({
+  const { status: wsStatus } = useGlobalWebSocket({
     onMessage: handleWsMessage,
   });
 

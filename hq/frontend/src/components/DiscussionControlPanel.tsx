@@ -159,6 +159,23 @@ function getStepTone(stepIndex: number, activeIndex: number, status: ToolProgres
   return 'border-[#dbe3ef] bg-white text-slate-500';
 }
 
+function formatProgressStatus(status: ToolProgressState['status']) {
+  switch (status) {
+    case 'idle':
+      return '空闲';
+    case 'started':
+      return '已启动';
+    case 'running':
+      return '进行中';
+    case 'completed':
+      return '已完成';
+    case 'failed':
+      return '失败';
+    default:
+      return status;
+  }
+}
+
 function renderProgressBoard(
   label: string,
   progress: ToolProgressState,
@@ -178,7 +195,7 @@ function renderProgressBoard(
           <p className="mt-1 text-sm font-black text-slate-900">{progress.message}</p>
         </div>
         <div className="text-right">
-          <p className="text-[10px] font-black tracking-[0.18em] text-slate-500">{progress.status}</p>
+          <p className="text-[10px] font-black tracking-[0.18em] text-slate-500">{formatProgressStatus(progress.status)}</p>
           <p className="mt-1 text-lg font-black text-slate-900">{progress.progress}%</p>
         </div>
       </div>

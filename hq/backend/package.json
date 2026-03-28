@@ -1,14 +1,21 @@
 {
   "name": "backend",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "scripts": {
     "build": "node -e \"const fs=require('fs');try{fs.rmSync('dist',{recursive:true});}catch(e){if(e&&e.code!=='ENOENT')throw e;}\" && tsc",
-    "test": "npm run build && AGENCY_UNDER_NODE_TEST=1 node --test --test-concurrency=1 dist/**/*.test.js",
+    "test": "npm run build && AGENCY_UNDER_NODE_TEST=1 node --test --test-concurrency=1 $(pwd)/dist/**/*.test.js",
     "start:web": "node dist/web-server.js",
     "start:mcp": "node dist/mcp-server.js",
     "dev:web": "ts-node src/web-server.ts",
-    "dev:mcp": "ts-node src/mcp-server.ts"
+    "dev:mcp": "ts-node src/mcp-server.ts",
+    "generate:executions": "ts-node src/scripts/generate-execution-records.ts",
+    "auto-fix": "node ../../.claude/scripts/fix.js run",
+    "auto-fix:status": "node ../../.claude/scripts/fix.js status",
+    "auto-fix:reset": "node ../../.claude/scripts/fix.js reset",
+    "auto-fix:history": "node ../../.claude/scripts/fix.js history",
+    "watch:fix": "node ../../.claude/scripts/watch-and-fix.js",
+    "test:watch": "node ../../.claude/scripts/watch-and-fix.js"
   },
   "keywords": [],
   "author": "",

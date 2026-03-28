@@ -1,8 +1,8 @@
-import { exec } from 'node:child_process';
+import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import type { RuntimeAdapter, RuntimeExecutionContext, RuntimeExecutionResult, RuntimeOutputSnapshot } from '../runtime-adapter';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 export class CodexRuntimeAdapter implements RuntimeAdapter {
   name = 'local_codex_cli';
@@ -10,18 +10,32 @@ export class CodexRuntimeAdapter implements RuntimeAdapter {
 
   private async executeLocal(context: RuntimeExecutionContext): Promise<RuntimeExecutionResult> {
     const startTime = Date.now();
+
+    // Test mode: return mock data
+    if (process.env.AGENCY_UNDER_NODE_TEST === '1' && process.env.AGENCY_TEST_MODE === 'mock') {
+      return {
+        outputSummary: 'Mocked Codex output for testing',
+        outputSnapshot: {
+          runtimeName: this.name,
+          executor: 'codex',
+          executionMode: context.executionMode,
+          degraded: false,
+          responseTimeMs: Date.now() - startTime,
+        },
+      };
+    }
+
     try {
       // Build the prompt for the local CLI
-      // We pass the summary and description as the task to execute
       const taskDescription = context.task.description || context.task.title;
       const fullPrompt = `${taskDescription}\n\nContext:\n${context.summary}`;
 
-      // Escape for shell
-      const escapedPrompt = JSON.stringify(fullPrompt);
-
-      // Execute the local codex command
-      // We assume 'codex' is in the PATH as verified by the startup check
-      const { stdout } = await execAsync(`codex ${escapedPrompt}`, { timeout: 120000 });
+      // Use 'codex exec' subcommand for non-interactive execution
+      // Codex automatically uses configured MCP servers
+      const { stdout } = await execFileAsync('codex', ['exec', '--ephemeral', '--json', fullPrompt], {
+        timeout: context.timeoutMs || 120000,
+        maxBuffer: 1024 * 1024 * 8,
+      });
 
       const responseTimeMs = Date.now() - startTime;
       const outputSnapshot: RuntimeOutputSnapshot = {

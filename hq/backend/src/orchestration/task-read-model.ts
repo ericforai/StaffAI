@@ -208,8 +208,8 @@ export async function buildTaskDetailReadModel(
 
   const assignments = store.getTaskAssignmentsByTaskId ? await store.getTaskAssignmentsByTaskId(task.id) : [];
   const workflowPlan = store.getWorkflowPlanByTaskId ? await store.getWorkflowPlanByTaskId(task.id) : null;
-  const approvals = await store.getApprovalsByTaskId(task.id);
-  const executions = await store.getExecutionsByTaskId(task.id);
+  const approvals = sortByNewestTimestamp(await store.getApprovalsByTaskId(task.id));
+  const executions = sortByNewestTimestamp(await store.getExecutionsByTaskId(task.id));
   const { approvalCounts, latestApprovalAt } = summarizeApprovals(approvals);
   const { latestExecutionStatus, latestExecutionAt } = summarizeExecutions(executions);
 

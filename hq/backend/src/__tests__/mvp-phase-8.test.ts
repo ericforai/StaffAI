@@ -66,6 +66,7 @@ function makeMockStore() {
     saveWorkflowPlan: async (wp: WorkflowPlan) => { workflowPlans.push(wp); },
     saveApproval: async (a: any) => { approvals.push(a); },
     logAudit: async (event: any) => { auditEvents.push(event); },
+    getTasks: async () => tasks,
     _getTasks: () => tasks,
     _getAssignments: () => assignments,
     _getWorkflowPlans: () => workflowPlans,

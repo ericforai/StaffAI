@@ -1,0 +1,56 @@
+{
+  "description": "自动化修复循环配置 - 定义权限和安全护栏",
+  "version": "1.0.0",
+  "permissions": {
+    "allowedTools": [
+      "Bash",
+      "Read",
+      "Write",
+      "Edit",
+      "Glob",
+      "Grep"
+    ],
+    "allowedCommands": [
+      "git add",
+      "git commit",
+      "git checkout",
+      "git branch",
+      "git status",
+      "git diff",
+      "npm run test",
+      "npm run build",
+      "node --test"
+    ],
+    "blockedCommands": [
+      "git push --force",
+      "git reset --hard",
+      "rm -rf",
+      "DROP TABLE",
+      "DELETE FROM"
+    ]
+  },
+  "safety": {
+    "autoCommit": true,
+    "autoPush": false,
+    "requireReviewForPush": true,
+    "maxAttemptsPerSession": 5,
+    "timeoutSeconds": 300
+  },
+  "qualityGates": {
+    "testPassRequired": true,
+    "coverageThreshold": 80,
+    "typeCheckRequired": true,
+    "codeReviewRequired": true,
+    "maxFixSize": 10
+  },
+  "rollback": {
+    "enabled": true,
+    "keepHistory": true,
+    "autoRevertOnFailure": false
+  },
+  "notifications": {
+    "onSuccess": true,
+    "onFailure": true,
+    "onTimeout": true
+  }
+}

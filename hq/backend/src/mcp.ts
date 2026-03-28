@@ -615,9 +615,31 @@ export class McpGateway {
   }
 
   private async generateSerialConsultResponse(agent: Agent, assignment: string): Promise<string> {
-    const result = await this.executeAgentTask(agent.id, assignment);
-    const text = this.extractToolText(result);
-    return text || `【专家建议来自：${agent.frontmatter.name}】\n\n${assignment}`;
+    // 使用 server.createMessage() 调用 AI 模型，而不是只返回 prompt
+    const knowledgeContext = await this.buildKnowledgeContext(assignment);
+    try {
+      const response = await this.server.createMessage({
+        systemPrompt: `${agent.systemPrompt}\n\n请始终以该专家身份完成分析，避免跳出角色。`,
+        messages: [
+          {
+            role: 'user',
+            content: {
+              type: 'text',
+              text: `${assignment}${knowledgeContext}`,
+            },
+          },
+        ],
+        maxTokens: 1200,
+      });
+
+      const text = this.extractTextContent(response.content);
+      return `【专家建议来自：${agent.frontmatter.name}】\n\n${text}`;
+    } catch (error) {
+      // 如果 createMessage 失败，返回错误信息
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error(`[MCP] AI call failed for ${agent.id}:`, errorMessage);
+      return `【专家建议来自：${agent.frontmatter.name}】\n\n⚠️ AI 调用失败，请稍后重试。\n\n---\n任务：${assignment}`;
+    }
   }
 
   private synthesizeFallbackDiscussion(topic: string, expertResponses: ExpertResponse[]): string {

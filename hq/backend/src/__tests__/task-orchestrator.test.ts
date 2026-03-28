@@ -8,6 +8,7 @@ import {
   createTaskDraft,
   rebuildWorkflowBundleForSerialExecution,
   validateTaskDraft,
+  type TaskCreationStore,
 } from '../orchestration/task-orchestrator';
 
 test('validateTaskDraft accepts non-empty title and description', () => {
@@ -36,19 +37,25 @@ test('createTaskDraft builds a routed task and persists it via store', async () 
   const savedWorkflowPlans: unknown[] = [];
   const savedTaskAssignments: unknown[] = [];
   const store = {
-    async saveTask(task) {
+    async saveTask(task: TaskRecord) {
       savedTasks.push(task);
     },
-    async saveApproval(approval) {
+    async saveApproval(approval: unknown) {
       savedApprovals.push(approval);
     },
-    async saveWorkflowPlan(plan) {
+    async saveWorkflowPlan(plan: unknown) {
       savedWorkflowPlans.push(plan);
     },
-    async saveTaskAssignment(assignment) {
+    async saveTaskAssignment(assignment: TaskAssignment) {
       savedTaskAssignments.push(assignment);
     },
-  } as Pick<Store, 'saveTask' | 'saveApproval' | 'saveWorkflowPlan' | 'saveTaskAssignment'>;
+    async getTasks() {
+      return [];
+    },
+    async getTaskById() {
+      return null;
+    },
+  } satisfies TaskCreationStore;
 
   const task = await createTaskDraft(
     {

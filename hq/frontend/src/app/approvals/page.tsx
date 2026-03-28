@@ -5,9 +5,23 @@ import Link from 'next/link';
 import { useApprovals } from '../../hooks/useApprovals';
 import { useApprovalActions } from '../../hooks/useApprovalActions';
 import { useTaskEventFeed } from '../../hooks/useTaskEventFeed';
-import { useWebSocket } from '../../hooks/useWebSocket';
+import { useGlobalWebSocket } from '../../hooks/useGlobalWebSocket';
+import { formatTimestamp } from '../../utils/dateFormatter';
 
 type FilterStatus = 'all' | 'pending' | 'approved' | 'rejected';
+
+function formatApprovalStatus(status: string) {
+  switch (status) {
+    case 'pending':
+      return '待处理';
+    case 'approved':
+      return '已批准';
+    case 'rejected':
+      return '已拒绝';
+    default:
+      return status;
+  }
+}
 
 const formatApprovalDate = (value?: string) => {
   if (!value) {
@@ -34,7 +48,7 @@ export default function ApprovalsPage() {
     rejectApproval,
   } = useApprovalActions(approvals);
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
-  const { status: wsStatus } = useWebSocket({ onMessage: () => {} });
+  const { status: wsStatus } = useGlobalWebSocket({ onMessage: () => {} });
 
   const totalApprovals = actionApprovals.length;
   const nextPendingApproval = actionApprovals.find((approval) => approval.status === 'pending');
@@ -284,8 +298,8 @@ export default function ApprovalsPage() {
                         )}
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-bold text-slate-900">{approval.status}</p>
-                        <p className="mt-1 text-xs text-slate-500">{approval.requestedAt}</p>
+                        <p className="text-sm font-bold text-slate-900">{formatApprovalStatus(approval.status)}</p>
+                        <p className="mt-1 text-xs text-slate-500">{formatTimestamp(approval.requestedAt)}</p>
                       </div>
                     </div>
 

@@ -73,5 +73,22 @@
       ],
       "confidence": 0.58
     }
+  },
+  {
+    "id": "74076cbf-fc3a-4934-80f7-c8d676d3c4ed",
+    "taskId": "20260327040",
+    "taskTitle": "Delete production data",
+    "status": "pending",
+    "requestedBy": "system",
+    "requestedAt": "2026-03-27T05:58:00.518Z",
+    "riskLevel": "HIGH",
+    "decisionContext": {
+      "factors": [
+        "Contains destructive operation keywords",
+        "Involves production environment",
+        "General routine task"
+      ],
+      "confidence": 0.51
+    }
   }
 ]

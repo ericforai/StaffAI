@@ -2,10 +2,9 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
-import { ChevronRight, Users, Activity, Palette, Megaphone, Building2, ChevronDown, Cpu, FolderKanban, Plus, Trash2 } from 'lucide-react';
+import { ChevronRight, Users, Palette, Megaphone, Building2, ChevronDown, Cpu, FolderKanban, Plus, Trash2, Activity } from 'lucide-react';
 import { useAgents } from '../../hooks/useAgents';
-import { ActivityLog, type ActivityLog as ActivityLogType } from '../../components/ActivityLog';
-import { useWebSocket, type WsMessage } from '../../hooks/useWebSocket';
+import { useGlobalWebSocket, type WsMessage } from '../../hooks/useGlobalWebSocket';
 import { API_CONFIG, DEPT_MAP } from '../../utils/constants';
 
 interface ProjectTeam {
@@ -60,7 +59,6 @@ export default function OrganizationPage() {
   const [showCreateTeam, setShowCreateTeam] = useState(false);
   const [newTeamName, setNewTeamName] = useState('');
   const [newTeamDesc, setNewTeamDesc] = useState('');
-  const [activities, setActivities] = useState<ActivityLogType[]>([]);
   const [workingAgentId, setWorkingAgentId] = useState<string | null>(null);
   const [selectedAgent, setSelectedAgent] = useState<any | null>(null);
   const [selectedTeam, setSelectedTeam] = useState<ProjectTeam | null>(null);
@@ -75,38 +73,15 @@ export default function OrganizationPage() {
       syncSquad();
     }
 
-    const newLog: ActivityLogType = {
-      id: crypto.randomUUID(),
-      timestamp: new Date(),
-      agentName: data.agentName || (data.type === 'CONNECTED' ? '系统中心' : '指挥部'),
-      type: data.type as ActivityLogType['type'],
-      task: data.type === 'TOOL_PROGRESS' || data.type === 'TASK_EVENT' ? data.message : data.task,
-    };
-
     if (data.type === 'AGENT_WORKING' || data.type === 'AGENT_ASSIGNED') {
       if (data.agentId) {
         setWorkingAgentId(data.agentId);
         setTimeout(() => setWorkingAgentId(null), 3000);
       }
-      setActivities((prev) => [newLog, ...prev].slice(0, 20));
-    } else if (
-      [
-        'AGENT_HIRED',
-        'AGENT_FIRED',
-        'SQUAD_UPDATED',
-        'CONNECTED',
-        'AGENT_TASK_COMPLETED',
-        'DISCUSSION_STARTED',
-        'DISCUSSION_COMPLETED',
-        'TOOL_PROGRESS',
-        'TASK_EVENT',
-      ].includes(data.type)
-    ) {
-      setActivities((prev) => [newLog, ...prev].slice(0, 20));
     }
   }, [syncSquad]);
 
-  const { status: wsStatus } = useWebSocket({
+  const { status: wsStatus } = useGlobalWebSocket({
     onMessage: handleWsMessage,
   });
 
@@ -480,16 +455,6 @@ export default function OrganizationPage() {
                   </div>
                 </div>
 
-              </div>
-
-              {/* 底部：活动日志 */}
-              <div className="lg:col-span-3 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-                <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50">
-                  <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">系统活动流</h3>
-                </div>
-                <div className="p-0 max-h-48">
-                  <ActivityLog activities={activities} wsStatus={wsStatus} />
-                </div>
               </div>
             </div>
           </div>

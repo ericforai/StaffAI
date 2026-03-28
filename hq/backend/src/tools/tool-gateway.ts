@@ -118,7 +118,7 @@ export class ToolGateway {
           toolCallLogId: log.id,
           occurredAt: new Date().toISOString(),
           actor: context.actorRole,
-          summary: `Tool call completed: ${log.toolName}`,
+          summary: `工具调用完成：${log.toolName}`,
           data: {
             status: log.status,
             riskLevel: log.riskLevel,
@@ -145,7 +145,7 @@ export class ToolGateway {
           toolCallLogId: log.id,
           occurredAt: new Date().toISOString(),
           actor: context.actorRole,
-          summary: `Tool call failed: ${log.toolName}`,
+          summary: `工具调用失败：${log.toolName}`,
           data: {
             status: log.status,
             riskLevel: log.riskLevel,

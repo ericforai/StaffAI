@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --webpack -p 8888",
+    "dev": "next dev --webpack -p 3008",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -16,6 +16,8 @@
     "next": "16.1.7",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {

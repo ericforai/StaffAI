@@ -7,6 +7,8 @@ import type { TaskSummary } from '../types';
 export function useTaskComposer(onTaskCreated?: (task: TaskSummary) => void) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [assigneeId, setAssigneeId] = useState('');
+  const [assigneeName, setAssigneeName] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,6 +22,8 @@ export function useTaskComposer(onTaskCreated?: (task: TaskSummary) => void) {
         body: JSON.stringify({
           title,
           description,
+          assigneeId: assigneeId || undefined,
+          assigneeName: assigneeName || undefined,
         }),
       });
 
@@ -31,6 +35,8 @@ export function useTaskComposer(onTaskCreated?: (task: TaskSummary) => void) {
       onTaskCreated?.(payload.task);
       setTitle('');
       setDescription('');
+      setAssigneeId('');
+      setAssigneeName('');
       return payload.task;
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : '任务创建失败。');
@@ -45,6 +51,10 @@ export function useTaskComposer(onTaskCreated?: (task: TaskSummary) => void) {
     setTitle,
     description,
     setDescription,
+    assigneeId,
+    setAssigneeId,
+    assigneeName,
+    setAssigneeName,
     submitting,
     error,
     createTask,
