@@ -1,9 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import Link from 'next/link';
 import { Search, BookOpenText } from 'lucide-react';
-import { useGlobalWebSocket } from '../../hooks/useGlobalWebSocket';
 import { API_CONFIG } from '../../utils/constants';
 
 type KnowledgeSource = 'discussion' | 'consult' | 'report';
@@ -35,8 +33,6 @@ export default function KnowledgePage() {
   const [knowledgeSourceFilter, setKnowledgeSourceFilter] = useState<'all' | KnowledgeSource>('all');
   const [knowledgeAgentFilter, setKnowledgeAgentFilter] = useState<'all' | string>('all');
   const [selectedKnowledgeId, setSelectedKnowledgeId] = useState<string | null>(null);
-
-  const { status: wsStatus } = useGlobalWebSocket({ onMessage: () => {} });
 
   useEffect(() => {
     fetch(`${API_CONFIG.BASE_URL}/memory/retrieve?q=*&limit=50`)
@@ -132,71 +128,9 @@ export default function KnowledgePage() {
   }, [filteredKnowledgeEntries, selectedKnowledgeId]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-800 font-sans">
-      {/* Sidebar */}
-      <aside className="w-64 flex-shrink-0 flex flex-col border-r border-slate-200 bg-white">
-        <div className="p-6 border-b border-slate-100">
-          <div className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] text-slate-400">
-            <span className="rounded bg-slate-900 px-1.5 py-0.5 text-white">AI员工</span>
-            <span>管理中心</span>
-          </div>
-          <h1 className="mt-4 text-xl font-bold tracking-tight text-slate-900">管理系统</h1>
-        </div>
-
-        <nav className="flex-1 overflow-y-auto p-4 space-y-1">
-          <Link href="/" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
-            总览
-          </Link>
-          <Link href="/market" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
-            人才市场
-          </Link>
-          <Link href="/organization" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
-            组织架构
-          </Link>
-          <Link href="/tasks" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
-            工作任务
-          </Link>
-          <Link href="/brainstorm" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">
-            专家协作
-          </Link>
-          <Link href="/knowledge" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium bg-slate-900 text-white shadow-sm">
-            知识资产
-          </Link>
-        </nav>
-
-        <div className="p-4 border-t border-slate-100">
-          <div className="rounded-lg bg-slate-50 p-4 border border-slate-200">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] uppercase tracking-wider font-bold text-slate-500">系统状态</span>
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            </div>
-            <p className="mt-1 text-xs font-semibold text-slate-700">
-              {wsStatus === 'connected' ? '已连接' : '同步中...'}
-            </p>
-          </div>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 bg-slate-50/50 overflow-hidden">
-        <header className="h-16 flex-shrink-0 flex items-center justify-between px-8 border-b border-slate-200 bg-white shadow-sm z-10">
-          <div className="flex items-center gap-4">
-            <h2 className="text-sm font-bold text-slate-900">知识资产</h2>
-            <div className="h-4 w-px bg-slate-200" />
-            <p className="text-xs text-slate-500">围绕历史结论、专家归档与检索回看的知识台</p>
-          </div>
-
-          <div className="flex gap-4">
-            <div className="text-right">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">知识库</p>
-              <p className="text-sm font-bold text-slate-900 leading-none mt-1">{knowledgeEntries.length}</p>
-            </div>
-          </div>
-        </header>
-
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
-          <div className="mx-auto w-full max-w-[1800px] space-y-5">
-            <div className="grid gap-6 xl:grid-cols-3">
+    <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+      <div className="mx-auto w-full max-w-[1800px] space-y-5">
+        <div className="grid gap-6 xl:grid-cols-3">
               {[
                 { label: '沉淀总览', value: knowledgeEntries.length, detail: '归档结论、专家回复与建议。' },
                 { label: '专家资产', value: knowledgeAgentOptions.length, detail: '追踪不同角色的观点与输出。' },
@@ -355,8 +289,6 @@ export default function KnowledgePage() {
               </div>
             </div>
           </div>
-        </div>
-      </main>
     </div>
   );
 }
