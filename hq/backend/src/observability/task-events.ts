@@ -51,7 +51,7 @@ export function createTaskEventPublisher(publish: (event: TaskDashboardEvent) =>
         type: 'TASK_EVENT',
         taskEventType: 'execution_started',
         taskId: input.taskId,
-        message: `任务开始执行（${input.executor}）`,
+        message: '任务开始执行',
       });
     },
     executionFinished(execution: ExecutionRecord) {

@@ -1,5 +1,5 @@
 /**
- * 实时作战日志组件
+ * Real-time activity log component
  */
 import { motion, AnimatePresence } from 'framer-motion';
 import { Activity } from 'lucide-react';
@@ -28,36 +28,46 @@ export interface ActivityLogProps {
   wsStatus: 'connecting' | 'connected' | 'disconnected';
 }
 
-export function ActivityLog({ activities, wsStatus }: ActivityLogProps) {
-  const formatLogType = (type: ActivityLog['type']) => {
-    switch (type) {
-      case 'AGENT_WORKING':
-        return '正在执行任务';
-      case 'AGENT_HIRED':
-        return '专家已加入编组';
-      case 'AGENT_FIRED':
-        return '专家已移出编组';
-      case 'SQUAD_UPDATED':
-        return '阵容同步完成';
-      case 'CONNECTED':
-        return '实时链路已建立';
-      case 'AGENT_ASSIGNED':
-        return '讨论任务已分配';
-      case 'AGENT_TASK_COMPLETED':
-        return '专家回复已提交';
-      case 'DISCUSSION_STARTED':
-        return '专家讨论已启动';
-      case 'DISCUSSION_COMPLETED':
-        return '专家讨论已完成';
-      case 'TOOL_PROGRESS':
-        return '执行进度更新';
-      case 'TASK_EVENT':
-        return '任务状态更新';
-      default:
-        return '';
-    }
-  };
+function formatLogType(type: ActivityLog['type']): string {
+  switch (type) {
+    case 'AGENT_WORKING':
+      return '正在执行任务';
+    case 'AGENT_HIRED':
+      return '专家已加入编组';
+    case 'AGENT_FIRED':
+      return '专家已移出编组';
+    case 'SQUAD_UPDATED':
+      return '阵容同步完成';
+    case 'CONNECTED':
+      return '实时链路已建立';
+    case 'AGENT_ASSIGNED':
+      return '讨论任务已分配';
+    case 'AGENT_TASK_COMPLETED':
+      return '专家回复已提交';
+    case 'DISCUSSION_STARTED':
+      return '专家讨论已启动';
+    case 'DISCUSSION_COMPLETED':
+      return '专家讨论已完成';
+    case 'TOOL_PROGRESS':
+      return '执行进度更新';
+    case 'TASK_EVENT':
+      return '任务状态更新';
+    default:
+      return '';
+  }
+}
 
+function formatLogEntry(log: ActivityLog): string {
+  if (log.type === 'AGENT_WORKING') {
+    return `正在执行：${log.task?.substring(0, 30)}...`;
+  }
+  if (log.type === 'TOOL_PROGRESS' || log.type === 'TASK_EVENT') {
+    return log.task || formatLogType(log.type);
+  }
+  return formatLogType(log.type);
+}
+
+export function ActivityLog({ activities, wsStatus }: ActivityLogProps) {
   return (
     <div className="border-t border-[#dbe3ef] pt-6">
       <div className="mb-5 flex items-center justify-between">
@@ -70,29 +80,22 @@ export function ActivityLog({ activities, wsStatus }: ActivityLogProps) {
           {wsStatus === 'connected' ? '连接正常' : '连接中断'}
         </div>
       </div>
-      <div className="max-h-64 space-y-3 overflow-y-auto pr-2 custom-scrollbar">
+      <div className="max-h-64 space-y-1 overflow-y-auto pr-2 custom-scrollbar">
         <AnimatePresence mode="popLayout">
-          {activities.map(log => (
+          {activities.map((log) => (
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               key={log.id}
-              className="flex gap-3 rounded-[1.1rem] border border-[#dbe3ef] bg-[#f8fafc] p-3 text-sm leading-6"
+              className="grid grid-cols-[80px_1fr] gap-2 rounded-lg border border-[#dbe3ef] bg-[#f8fafc] px-3 py-2 text-sm"
             >
               <span className="font-mono text-xs font-bold text-slate-500">
                 {log.timestamp.toLocaleTimeString([], { hour12: false })}
               </span>
               <span className="text-slate-700">
-                <span className="font-black text-slate-900">{log.agentName}</span>{' '}
-                <span className="text-sm text-slate-600">
-                  {log.type === 'AGENT_WORKING' && `正在执行：${log.task?.substring(0, 25)}...`}
-                  {(log.type === 'TOOL_PROGRESS' || log.type === 'TASK_EVENT') &&
-                    `${log.task || formatLogType(log.type)}`}
-                  {log.type !== 'AGENT_WORKING' &&
-                    log.type !== 'TOOL_PROGRESS' &&
-                    log.type !== 'TASK_EVENT' &&
-                    formatLogType(log.type)}
-                </span>
+                <span className="font-semibold text-slate-900">{log.agentName}</span>
+                <span className="text-slate-500 mx-1">·</span>
+                <span className="text-slate-600">{formatLogEntry(log)}</span>
               </span>
             </motion.div>
           ))}

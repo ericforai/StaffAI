@@ -78,6 +78,11 @@ integrations/qwen/agents/
 !integrations/openclaw/README.md
 .gstack/
 
+# Environment files (may contain secrets)
+.env
+.env.*
+!.env.example
+
 # HQ runtime state (local)
 hq/.ai/
 hq/backend/.ai/

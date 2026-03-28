@@ -6,6 +6,8 @@ import { useExecutionDetail } from '../../../hooks/useExecutionDetail';
 import { useExecutionTrace } from '../../../hooks/useExecutionTrace';
 import type { ToolCallSummary } from '../../../types';
 import { API_CONFIG } from '../../../utils/constants';
+import { formatTimestamp } from '../../../utils/dateFormatter';
+import ReactMarkdown from 'react-markdown';
 
 function formatToolCallStatus(status: string) {
   switch (status) {
@@ -26,6 +28,54 @@ function formatToolCallStatus(status: string) {
   }
 }
 
+function formatExecutionStatus(status: string) {
+  switch (status) {
+    case 'pending':
+      return '等待中';
+    case 'running':
+      return '执行中';
+    case 'completed':
+    case 'succeeded':
+      return '已完成';
+    case 'failed':
+      return '失败';
+    case 'cancelled':
+      return '已取消';
+    case 'paused':
+      return '已暂停';
+    default:
+      return status;
+  }
+}
+
+function formatControlStatus(status: string) {
+  switch (status) {
+    case 'paused':
+      return '已暂停';
+    case 'resumed':
+      return '已恢复';
+    case 'cancelled':
+      return '已取消';
+    case 'completed':
+      return '已完成';
+    default:
+      return status;
+  }
+}
+
+function formatExecutor(executor?: string) {
+  switch (executor) {
+    case 'claude':
+      return 'Claude';
+    case 'codex':
+      return 'Codex';
+    case 'openai':
+      return 'OpenAI';
+    default:
+      return executor || '未知';
+  }
+}
+
 function formatRiskLevel(riskLevel?: string) {
   if (!riskLevel) {
     return '未标注';
@@ -43,6 +93,13 @@ function formatRiskLevel(riskLevel?: string) {
   }
 }
 
+function formatExecutionDisplayId(execution: { displayExecutionId?: string; id: string }) {
+  if (execution.displayExecutionId && execution.displayExecutionId.trim()) {
+    return execution.displayExecutionId;
+  }
+  return execution.id;
+}
+
 function normalizeToolCalls(execution: ReturnType<typeof useExecutionDetail>['execution']) {
   if (!execution) {
     return [];
@@ -56,6 +113,108 @@ function normalizeToolCalls(execution: ReturnType<typeof useExecutionDetail>['ex
   }
 
   return [];
+}
+
+function formatTraceEventType(type: string) {
+  switch (type) {
+    case 'execution_started':
+      return '开始执行';
+    case 'execution_completed':
+      return '执行完成';
+    case 'execution_failed':
+      return '执行失败';
+    case 'execution_cancelled':
+      return '执行取消';
+    case 'execution_degraded':
+      return '降级执行';
+    case 'cost_observed':
+      return '成本统计';
+    default:
+      return type;
+  }
+}
+
+function formatTraceEventSummary(type: string, summary?: string) {
+  if (!summary) {
+    return undefined;
+  }
+
+  // 处理旧的英文格式 - Execution started/failed/completed/cancelled/degraded
+  if (summary.startsWith('Execution started:')) {
+    // "开始执行" 类型已经说明了，不需要额外显示
+    return undefined;
+  }
+  if (summary.startsWith('Execution ')) {
+    const match = /^Execution\s+(\w+):\s+(.+)$/.exec(summary);
+    if (match) {
+      const [, status, id] = match;
+      // 如果是 UUID，不显示；否则显示状态信息
+      if (/^[0-9a-f-]{36}$/i.test(id)) {
+        return undefined;
+      }
+    }
+  }
+
+  // 处理成本统计
+  if (type === 'cost_observed' && summary.startsWith('Cost observed:')) {
+    const match = /Cost observed:\s*(\d+)\s*tokens/.exec(summary);
+    if (match) {
+      return `本次消耗：${match[1]} tokens`;
+    }
+  }
+
+  // 对于工具调用完成/失败，如果有工具名称，显示出来
+  if (type === 'tool_call_logged') {
+    if (summary.startsWith('工具调用完成：') || summary.startsWith('工具调用失败：')) {
+      return summary;
+    }
+  }
+
+  // 对于开始/完成类事件，如果摘要只是重复类型信息，不显示
+  if (type === 'execution_started' || type === 'execution_completed' ||
+      type === 'execution_failed' || type === 'execution_cancelled') {
+    // 如果摘要只是"开始执行任务：xxx"或"完成任务：xxx"，类型已经说明了
+    if (summary.startsWith('开始执行任务：') || summary.startsWith('完成任务：') ||
+        summary.startsWith('失败任务：') || summary.startsWith('取消任务：')) {
+      return undefined;
+    }
+  }
+
+  // 其他情况直接返回 summary
+  return summary;
+}
+
+function formatTraceOccurredAt(occurredAt: string) {
+  const absolute = formatTimestamp(occurredAt);
+  const timestamp = new Date(occurredAt).getTime();
+  if (!Number.isFinite(timestamp)) {
+    return absolute;
+  }
+
+  const deltaMs = Date.now() - timestamp;
+  if (deltaMs < 0) {
+    return absolute;
+  }
+
+  const minutes = Math.floor(deltaMs / 60_000);
+  if (minutes <= 0) {
+    return `${absolute}（刚刚）`;
+  }
+  if (minutes < 60) {
+    return `${absolute}（${minutes}分钟前）`;
+  }
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) {
+    return `${absolute}（${hours}小时前）`;
+  }
+
+  const days = Math.floor(hours / 24);
+  if (days === 1) {
+    return `${absolute}（昨天）`;
+  }
+
+  return absolute;
 }
 
 export default function ExecutionDetailPage() {
@@ -138,12 +297,16 @@ export default function ExecutionDetailPage() {
             <>
               <div className="grid gap-4 sm:grid-cols-3">
                 <div className="rounded-[1.2rem] border border-[#ddd3c7] bg-white p-4">
+                  <p className="text-[11px] tracking-[0.16em] text-slate-500">执行编号</p>
+                  <p className="mt-2 text-sm font-black text-slate-900">{formatExecutionDisplayId(execution)}</p>
+                </div>
+                <div className="rounded-[1.2rem] border border-[#ddd3c7] bg-white p-4">
                   <p className="text-[11px] tracking-[0.16em] text-slate-500">状态</p>
-                  <p className="mt-2 text-sm font-black text-slate-900">{execution.status}</p>
+                  <p className="mt-2 text-sm font-black text-slate-900">{formatExecutionStatus(execution.status)}</p>
                 </div>
                 <div className="rounded-[1.2rem] border border-[#ddd3c7] bg-white p-4">
                   <p className="text-[11px] tracking-[0.16em] text-slate-500">执行器</p>
-                  <p className="mt-2 text-sm font-black text-slate-900">{execution.executor || '未知'}</p>
+                  <p className="mt-2 text-sm font-black text-slate-900">{formatExecutor(execution.executor)}</p>
                 </div>
                 <div className="rounded-[1.2rem] border border-[#ddd3c7] bg-white p-4">
                   <p className="text-[11px] tracking-[0.16em] text-slate-500">任务编号</p>
@@ -153,11 +316,11 @@ export default function ExecutionDetailPage() {
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
                 <div className="rounded-[1.2rem] border border-[#ddd3c7] bg-white p-4">
                   <p className="text-[11px] tracking-[0.16em] text-slate-500">开始时间</p>
-                  <p className="mt-2 text-sm font-black text-slate-900">{execution.startedAt || '未知'}</p>
+                  <p className="mt-2 text-sm font-black text-slate-900">{formatTimestamp(execution.startedAt)}</p>
                 </div>
                 <div className="rounded-[1.2rem] border border-[#ddd3c7] bg-white p-4">
                   <p className="text-[11px] tracking-[0.16em] text-slate-500">完成时间</p>
-                  <p className="mt-2 text-sm font-black text-slate-900">{execution.completedAt || '尚未完成'}</p>
+                  <p className="mt-2 text-sm font-black text-slate-900">{execution.completedAt ? formatTimestamp(execution.completedAt) : '尚未完成'}</p>
                 </div>
               </div>
 
@@ -188,7 +351,7 @@ export default function ExecutionDetailPage() {
                 </button>
                 {execution.controlState?.status && (
                   <p className="self-center text-xs text-slate-500">
-                    控制状态：<span className="font-black text-slate-800">{execution.controlState.status}</span>
+                    控制状态：<span className="font-black text-slate-800">{formatControlStatus(execution.controlState.status)}</span>
                   </p>
                 )}
               </div>
@@ -198,7 +361,9 @@ export default function ExecutionDetailPage() {
           {execution?.outputSummary && (
             <div className="mt-4 rounded-[1.2rem] border border-[#ddd3c7] bg-white p-4">
               <p className="text-[11px] tracking-[0.16em] text-slate-500">输出摘要</p>
-              <p className="mt-2 text-sm leading-7 text-slate-700">{execution.outputSummary}</p>
+              <div className="mt-2 text-sm leading-7 text-slate-700 prose prose-slate max-w-none">
+                <ReactMarkdown>{execution.outputSummary}</ReactMarkdown>
+              </div>
             </div>
           )}
 
@@ -206,15 +371,6 @@ export default function ExecutionDetailPage() {
             <div className="mt-4 rounded-[1.2rem] border border-rose-400/30 bg-rose-500/10 p-4">
               <p className="text-[10px] uppercase tracking-[0.2em] text-rose-200">失败原因</p>
               <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-rose-50">{execution.errorMessage}</p>
-            </div>
-          )}
-
-          {execution?.memoryContextExcerpt && (
-            <div className="mt-4 rounded-[1.2rem] border border-[#ddd3c7] bg-white p-4">
-              <p className="text-[11px] tracking-[0.16em] text-slate-500">执行上下文摘录</p>
-              <p className="mt-2 whitespace-pre-wrap text-sm leading-7 text-slate-700">
-                {execution.memoryContextExcerpt}
-              </p>
             </div>
           )}
 
@@ -246,14 +402,14 @@ export default function ExecutionDetailPage() {
                       </div>
                       <div className="rounded-[1rem] border border-slate-200 bg-white p-3">
                         <p className="text-[10px] font-black tracking-[0.16em] text-slate-500">输出摘要</p>
-                        <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">
-                          {toolCall.outputSummary || '暂无输出摘要'}
-                        </p>
+                        <div className="mt-2 text-sm leading-6 text-slate-700 prose prose-slate max-w-none">
+                          {toolCall.outputSummary ? <ReactMarkdown>{toolCall.outputSummary}</ReactMarkdown> : '暂无输出摘要'}
+                        </div>
                       </div>
                     </div>
 
                     <div className="mt-3 flex flex-wrap items-center gap-3 text-[11px] tracking-[0.16em] text-slate-500">
-                      {(toolCall.timestamp || toolCall.createdAt) && <span>{toolCall.timestamp || toolCall.createdAt}</span>}
+                      {(toolCall.timestamp || toolCall.createdAt) && <span>{formatTimestamp(toolCall.timestamp || toolCall.createdAt)}</span>}
                       {toolCall.id && <span>ID: {toolCall.id}</span>}
                     </div>
                   </div>
@@ -264,7 +420,7 @@ export default function ExecutionDetailPage() {
 
           <div className="mt-4 rounded-[1.2rem] border border-[#ddd3c7] bg-white p-4">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-[11px] tracking-[0.16em] text-slate-500">执行轨迹</p>
+              <p className="text-[11px] tracking-[0.16em] text-slate-500">执行流程记录</p>
               <button
                 type="button"
                 data-testid="execution-trace-reload"
@@ -274,20 +430,23 @@ export default function ExecutionDetailPage() {
                 刷新
               </button>
             </div>
-            {traceLoading && <p className="mt-2 text-sm text-slate-600">正在加载执行轨迹…</p>}
+            {traceLoading && <p className="mt-2 text-sm text-slate-600">正在加载流程记录…</p>}
             {traceError && <p className="mt-2 text-sm text-rose-600">{traceError}</p>}
             {!traceLoading && !traceError && (trace?.traceEvents?.length ?? 0) === 0 && (
-              <p className="mt-2 text-sm text-slate-500">暂无轨迹事件。</p>
+              <p className="mt-2 text-sm text-slate-500">暂无流程记录。</p>
             )}
             {(trace?.traceEvents?.length ?? 0) > 0 && (
               <ul className="mt-3 space-y-2" data-testid="execution-trace-events">
-                {trace?.traceEvents?.slice(0, 20).map((event) => (
-                  <li key={event.id} className="rounded-[0.9rem] border border-[#eee6db] bg-[#fffdfa] p-3">
-                    <p className="text-xs font-black text-slate-800">{event.type}</p>
-                    <p className="mt-1 text-xs text-slate-500">{event.occurredAt}</p>
-                    {event.summary ? <p className="mt-2 text-sm text-slate-700">{event.summary}</p> : null}
-                  </li>
-                ))}
+                {trace?.traceEvents?.slice(0, 20).map((event) => {
+                  const summaryText = formatTraceEventSummary(event.type, event.summary);
+                  return (
+                    <li key={event.id} className="rounded-[0.9rem] border border-[#eee6db] bg-[#fffdfa] p-3">
+                      <p className="text-xs font-black text-slate-800">{formatTraceEventType(event.type)}</p>
+                      <p className="mt-1 text-xs text-slate-500">{formatTraceOccurredAt(event.occurredAt)}</p>
+                      {summaryText ? <p className="mt-2 text-sm text-slate-700">{summaryText}</p> : null}
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </div>

@@ -249,24 +249,9 @@ export function registerMarketRoutes(
         evaluations.push({ evaluation, repo });
       }
 
-      // Store candidates in pool
-      const candidates = await Promise.all(
-        evaluations.map(async ({ evaluation, repo }) => {
-          const candidateData = gitHubRepoToCandidate(repo, evaluation);
-
-          // Check if already exists
-          const existing = await candidateRepo.getByUrl(repo.url);
-          if (existing) {
-            // Update evaluation
-            return await candidateRepo.update(existing.id, (c) => ({
-              ...c,
-              evaluation: candidateData.evaluation,
-              capability: candidateData.capability,
-            }));
-          }
-
-          return await candidateRepo.add(candidateData);
-        })
+      // Store candidates in pool (sequential to avoid file write race conditions)
+      const candidates = await candidateRepo.addBatch(
+        evaluations.map(({ evaluation, repo }) => gitHubRepoToCandidate(repo, evaluation))
       );
 
       return res.json({

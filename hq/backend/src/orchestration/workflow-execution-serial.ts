@@ -1,6 +1,7 @@
 import type { WorkflowPlan, TaskAssignment, TaskRecord, TaskAssignmentStatus } from '../shared/task-types';
 import type { AssignmentExecutor } from './assignment-executor';
 import type { RunningWorkflow, WorkflowExecutionResult } from './workflow-execution-engine';
+import { getDefaultTaskTimeoutMs } from '../runtime/task-execution-config';
 
 /**
  * Execute a workflow plan in serial mode
@@ -13,6 +14,7 @@ export async function executeSerialWorkflow(
   assignmentExecutor: AssignmentExecutor,
   runningWorkflows: Map<string, RunningWorkflow>
 ): Promise<WorkflowExecutionResult> {
+  const timeoutMs = getDefaultTaskTimeoutMs();
   const completedSteps: string[] = [];
   const updatedAssignments: TaskAssignment[] = [...assignments];
 
@@ -38,7 +40,7 @@ export async function executeSerialWorkflow(
       title: task.title,
       description: step.description ?? step.title,
       executor: 'claude',
-      timeoutMs: 30_000,
+      timeoutMs,
     });
 
     if (result.status === 'failed') {
@@ -79,6 +81,7 @@ export async function executeParallelWorkflow(
   assignmentExecutor: AssignmentExecutor,
   runningWorkflows: Map<string, RunningWorkflow>
 ): Promise<WorkflowExecutionResult> {
+  const timeoutMs = getDefaultTaskTimeoutMs();
   const completedSteps: string[] = [];
   const updatedAssignments: TaskAssignment[] = [...assignments];
 
@@ -116,7 +119,7 @@ export async function executeParallelWorkflow(
             title: task.title,
             description: step.description ?? step.title,
             executor: 'claude',
-            timeoutMs: 30_000,
+            timeoutMs,
           });
 
           if (result.status === 'completed') {

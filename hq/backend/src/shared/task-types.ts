@@ -80,6 +80,9 @@ export interface TaskRecord {
   candidateAgentRoles: string[];
   routeReason: string;
   routingStatus: 'matched' | 'manual_review';
+  // 任务负责人（从组织架构选择的员工）
+  assigneeId?: string;
+  assigneeName?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -160,6 +163,7 @@ export interface WorkflowPlan {
 
 export interface ExecutionRecord {
   id: string;
+  displayExecutionId?: string;
   taskId: string;
   status: ExecutionStatus | 'pending' | 'completed' | 'failed' | 'cancelled' | 'paused';
   executor?: 'claude' | 'codex' | 'openai';

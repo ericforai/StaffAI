@@ -44,7 +44,7 @@ export async function executeTaskAfterApproval(
   }));
 
   const topic = input.topic?.trim() ? input.topic.trim() : `${task.title}\n\n${task.description}`;
-  const summary = input.summary?.trim() ? input.summary.trim() : `Execution completed for ${task.title}`;
+  const summary = input.summary?.trim() ? input.summary.trim() : `完成任务：${task.title}`;
 
   deps.onExecutionStarted?.({ taskId: task.id, executor: input.executor });
 

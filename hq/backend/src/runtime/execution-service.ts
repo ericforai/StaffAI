@@ -13,6 +13,7 @@ import {
   type RuntimeExecutionContext,
   type RuntimeExecutionError,
 } from './runtime-adapter';
+import { resolveTaskTimeoutMs } from './task-execution-config';
 
 export interface SerialWorkflowBundle {
   workflowPlan: WorkflowPlan;
@@ -20,6 +21,77 @@ export interface SerialWorkflowBundle {
 }
 
 export type ExecutionLifecycleRecord = ExecutionRecord;
+
+function resolveFallbackExecutors(preferred: 'claude' | 'codex' | 'openai'): Array<'claude' | 'codex' | 'openai'> {
+  switch (preferred) {
+    case 'claude':
+      return ['openai', 'codex'];
+    case 'codex':
+      return ['openai', 'claude'];
+    case 'openai':
+      return ['claude', 'codex'];
+    default:
+      return [];
+  }
+}
+
+function buildExecutionDisplayPrefix(date = new Date()): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}${month}${day}`;
+}
+
+function buildFallbackExecutionDisplayId(date = new Date()): string {
+  const prefix = buildExecutionDisplayPrefix(date);
+  const hh = String(date.getHours()).padStart(2, '0');
+  const mm = String(date.getMinutes()).padStart(2, '0');
+  const ss = String(date.getSeconds()).padStart(2, '0');
+  return `${prefix}-${hh}${mm}${ss}`;
+}
+
+async function generateExecutionDisplayId(
+  store: Partial<Pick<Store, 'getExecutions'>>,
+): Promise<string> {
+  if (typeof store.getExecutions !== 'function') {
+    return buildFallbackExecutionDisplayId();
+  }
+
+  const prefix = buildExecutionDisplayPrefix();
+  const executions = await store.getExecutions();
+  const existingIds = new Set(
+    executions
+      .filter((e) => typeof e.displayExecutionId === 'string' && e.displayExecutionId.startsWith(prefix))
+      .map((e) => e.displayExecutionId),
+  );
+
+  for (let seq = 1; seq <= 999; seq++) {
+    const candidate = `${prefix}-${String(seq).padStart(3, '0')}`;
+    if (!existingIds.has(candidate)) return candidate;
+  }
+
+  // Fallback to timestamp-based ID if all sequential slots taken
+  return `${prefix}-${Date.now()}`;
+}
+
+function mapExecutionStatusToChinese(status: ExecutionLifecycleRecord['status']): string {
+  switch (status) {
+    case 'completed':
+      return '完成';
+    case 'failed':
+      return '失败';
+    case 'cancelled':
+      return '取消';
+    case 'degraded':
+      return '降级';
+    case 'running':
+      return '进行中';
+    case 'pending':
+      return '已启动';
+    default:
+      return '未知状态';
+  }
+}
 
 function createSerialWorkflowBundle(input: {
   taskId: string;
@@ -179,7 +251,9 @@ export async function runTaskExecution(
     }>;
   },
   store: Pick<Store, 'saveExecution' | 'updateExecution' | 'updateTask'> &
-    Partial<Pick<Store, 'saveTaskAssignment' | 'updateTaskAssignment' | 'saveWorkflowPlan' | 'updateWorkflowPlan'>>
+    Partial<
+      Pick<Store, 'saveTaskAssignment' | 'updateTaskAssignment' | 'saveWorkflowPlan' | 'updateWorkflowPlan' | 'getExecutions'>
+    >
 ): Promise<{
   execution: ExecutionLifecycleRecord;
   task: Awaited<ReturnType<Store['updateTask']>>;
@@ -189,10 +263,11 @@ export async function runTaskExecution(
   const storeWithObservability = store as (typeof store) &
     Partial<Pick<Store, 'appendExecutionTraceEvent' | 'saveCostLogEntry'>>;
 
-  const timeoutMs = Number.isFinite(input.timeoutMs) && (input.timeoutMs ?? 0) > 0 ? (input.timeoutMs as number) : 30_000;
+  const timeoutMs = resolveTaskTimeoutMs(input.timeoutMs);
   const maxRetries = Number.isFinite(input.maxRetries) && (input.maxRetries ?? 0) >= 0 ? (input.maxRetries as number) : 1;
   const runtimeName = input.runtimeName || resolveRuntimeName(input.executor);
   const runtimeAdapter = resolveRuntimeAdapter(input.executor);
+  const displayExecutionId = await generateExecutionDisplayId(store);
 
   const serialBundle =
     input.executionMode === 'serial'
@@ -220,6 +295,7 @@ export async function runTaskExecution(
   const started = beginExecution({
     taskId: input.taskId,
     executor: input.executor,
+    displayExecutionId,
     runtimeName,
     degraded: input.degraded,
     timeoutMs,
@@ -239,7 +315,7 @@ export async function runTaskExecution(
       executionId: started.id,
       occurredAt: new Date().toISOString(),
       actor: input.executor,
-      summary: `Execution started: ${started.id}`,
+      summary: `开始执行任务：${input.taskTitle ?? input.taskId}`,
       data: {
         executor: input.executor,
         runtimeName,
@@ -251,6 +327,8 @@ export async function runTaskExecution(
   let finalizedExecution: ExecutionLifecycleRecord | null = null;
   let finalizedWorkflowArtifacts: { workflowPlan?: WorkflowPlan; assignments?: TaskAssignment[] } | undefined;
   let finalAttempt = 0;
+  let resolvedExecutor: 'claude' | 'codex' | 'openai' = input.executor;
+  let resolvedRuntimeName = runtimeName;
 
   for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
     finalAttempt = attempt;
@@ -311,7 +389,7 @@ export async function runTaskExecution(
         ? completeSerialWorkflowBundle(serialBundle)
         : completedWorkflowArtifacts;
       finalizedExecution = finalizedWorkflowArtifacts
-        ? completeExecution(started, {
+        ? completeExecution({ ...started, executor: resolvedExecutor, runtimeName: resolvedRuntimeName }, {
             summary: runtimeResult.outputSummary || input.summary,
             outputSnapshot: runtimeResult.outputSnapshot,
             workflowPlan: finalizedWorkflowArtifacts.workflowPlan,
@@ -321,7 +399,7 @@ export async function runTaskExecution(
             timeoutMs,
             degraded: input.degraded,
           })
-        : completeExecution(started, {
+        : completeExecution({ ...started, executor: resolvedExecutor, runtimeName: resolvedRuntimeName }, {
             summary: runtimeResult.outputSummary || input.summary,
             outputSnapshot: runtimeResult.outputSnapshot,
             retryCount: attempt,
@@ -338,10 +416,105 @@ export async function runTaskExecution(
     }
   }
 
+  if (
+    !finalizedExecution &&
+    !input.runtimeRunner &&
+    input.executor === 'claude' &&
+    lastError?.retriable
+  ) {
+    const fallbackExecutors = resolveFallbackExecutors(input.executor);
+
+    for (const fallbackExecutor of fallbackExecutors) {
+      try {
+        const fallbackRuntimeName = resolveRuntimeName(fallbackExecutor);
+        const fallbackAdapter = resolveRuntimeAdapter(fallbackExecutor);
+        const runtimeContext: RuntimeExecutionContext = {
+          task: input.task ?? {
+              id: input.taskId,
+              title: input.taskTitle ?? input.taskId,
+              description: input.summary,
+              taskType: 'general',
+              priority: 'medium',
+              status: 'running',
+              executionMode: input.executionMode ?? 'single',
+              approvalRequired: false,
+              riskLevel: 'low',
+              requestedBy: 'system',
+              requestedAt: new Date().toISOString(),
+              recommendedAgentRole: input.recommendedAgentRole ?? 'dispatcher',
+              candidateAgentRoles: [input.recommendedAgentRole ?? 'dispatcher'],
+              routeReason: 'runtime fallback context',
+              routingStatus: 'manual_review',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+          executor: fallbackExecutor,
+          runtimeName: fallbackRuntimeName,
+          executionMode: input.executionMode ?? 'single',
+          summary: input.summary,
+          memoryContextExcerpt: input.memoryContextExcerpt,
+          timeoutMs,
+          maxRetries,
+          inputSnapshot: input.inputSnapshot,
+        };
+        const fallbackResult = await withTimeout(fallbackAdapter.run(runtimeContext), timeoutMs);
+
+        if (fallbackResult.outputSnapshot?.degraded) {
+          lastError = {
+            code: 'execution_failed',
+            message: fallbackResult.outputSummary || 'Execution returned a degraded runtime result',
+            retriable: false,
+            details: fallbackResult.outputSnapshot ? { outputSnapshot: fallbackResult.outputSnapshot } : undefined,
+          };
+          continue;
+        }
+
+        resolvedExecutor = fallbackExecutor;
+        resolvedRuntimeName = fallbackRuntimeName;
+        const fallbackSnapshot =
+          fallbackResult.outputSnapshot && typeof fallbackResult.outputSnapshot === 'object'
+            ? {
+                ...fallbackResult.outputSnapshot,
+                additionalData: {
+                  ...((fallbackResult.outputSnapshot.additionalData as Record<string, unknown> | undefined) ?? {}),
+                  fallbackFrom: input.executor,
+                },
+              }
+            : fallbackResult.outputSnapshot;
+
+        finalizedWorkflowArtifacts = serialBundle
+          ? completeSerialWorkflowBundle(serialBundle)
+          : completedWorkflowArtifacts;
+        finalizedExecution = finalizedWorkflowArtifacts
+          ? completeExecution({ ...started, executor: fallbackExecutor, runtimeName: fallbackRuntimeName }, {
+              summary: fallbackResult.outputSummary || input.summary,
+              outputSnapshot: fallbackSnapshot,
+              workflowPlan: finalizedWorkflowArtifacts.workflowPlan,
+              assignments: finalizedWorkflowArtifacts.assignments,
+              retryCount: finalAttempt,
+              maxRetries,
+              timeoutMs,
+              degraded: input.degraded,
+            })
+          : completeExecution({ ...started, executor: fallbackExecutor, runtimeName: fallbackRuntimeName }, {
+              summary: fallbackResult.outputSummary || input.summary,
+              outputSnapshot: fallbackSnapshot,
+              retryCount: finalAttempt,
+              maxRetries,
+              timeoutMs,
+              degraded: input.degraded,
+            });
+        break;
+      } catch (error) {
+        lastError = toRuntimeError(error, timeoutMs);
+      }
+    }
+  }
+
   const completedOrFailed =
     finalizedExecution ??
-    failExecution(started, {
-      errorMessage: lastError?.message || 'Execution failed',
+    failExecution({ ...started, executor: resolvedExecutor, runtimeName: resolvedRuntimeName }, {
+      errorMessage: lastError?.message || '执行失败',
       retryCount: finalAttempt,
       maxRetries,
       timeoutMs,
@@ -364,12 +537,14 @@ export async function runTaskExecution(
       taskId: input.taskId,
       executionId: started.id,
       occurredAt: new Date().toISOString(),
-      actor: input.executor,
-      summary: `Execution ${completedOrFailed.status}: ${started.id}`,
+      actor: completedOrFailed.executor ?? input.executor,
+      summary: `${mapExecutionStatusToChinese(completedOrFailed.status)}任务：${input.taskTitle ?? input.taskId}`,
       data: {
         status: completedOrFailed.status,
         degraded: completedOrFailed.degraded,
         retryCount: completedOrFailed.retryCount,
+        executor: completedOrFailed.executor ?? input.executor,
+        runtimeName: completedOrFailed.runtimeName ?? runtimeName,
       },
     });
   }
@@ -384,8 +559,8 @@ export async function runTaskExecution(
       executionId: started.id,
       recordedAt,
       source: 'runtime_output_snapshot' as const,
-      executor: input.executor,
-      runtimeName,
+      executor: completedOrFailed.executor ?? input.executor,
+      runtimeName: completedOrFailed.runtimeName ?? runtimeName,
       tokensUsed,
       modelVersion: typeof snapshot?.modelVersion === 'string' ? (snapshot.modelVersion as string) : undefined,
       responseTimeMs: typeof snapshot?.responseTimeMs === 'number' ? (snapshot.responseTimeMs as number) : undefined,
@@ -404,7 +579,7 @@ export async function runTaskExecution(
         executionId: started.id,
         occurredAt: recordedAt,
         actor: input.executor,
-        summary: `Cost observed: ${tokensUsed} tokens`,
+        summary: `本次消耗：${tokensUsed} tokens`,
         data: {
           costLogEntryId: costEntry.id,
           tokensUsed,
@@ -458,6 +633,7 @@ export async function runTaskExecution(
 export function beginExecution(input: {
   taskId: string;
   executor: 'claude' | 'codex' | 'openai';
+  displayExecutionId?: string;
   runtimeName?: string;
   degraded?: boolean;
   timeoutMs?: number;
@@ -469,6 +645,7 @@ export function beginExecution(input: {
 }): ExecutionLifecycleRecord {
   return {
     id: randomUUID(),
+    displayExecutionId: input.displayExecutionId ?? buildFallbackExecutionDisplayId(),
     taskId: input.taskId,
     status: 'pending',
     executor: input.executor,

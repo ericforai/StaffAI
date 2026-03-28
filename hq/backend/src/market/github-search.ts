@@ -108,9 +108,6 @@ const MAX_SEARCH_PER_PAGE = 100;
 const REQUEST_TIMEOUT = 10000; // 10 seconds
 const MAX_RETRIES = 2;
 
-// Get optional auth token from environment
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-
 // =============================================================================
 // Implementation
 // =============================================================================
@@ -128,6 +125,7 @@ function parseRateLimit(headers: Headers): RateLimitInfo {
 
 /**
  * Build common headers for GitHub API requests
+ * Reads GITHUB_TOKEN at call time (not import time) so .env loading works correctly
  */
 function buildHeaders(): HeadersInit {
   const headers: HeadersInit = {
@@ -135,8 +133,9 @@ function buildHeaders(): HeadersInit {
     'User-Agent': 'Agency-HQ-GitHub-Search',
   };
 
-  if (GITHUB_TOKEN) {
-    headers['Authorization'] = `Bearer ${GITHUB_TOKEN}`;
+  const token = process.env.GITHUB_TOKEN;
+  if (token) {
+    headers['Authorization'] = `token ${token}`;
   }
 
   return headers;
@@ -285,6 +284,8 @@ export const gitHubSearchService: GitHubSearchService = {
 
         // Combine and filter nulls
         const repos = [...detailedRepos, ...basicRepos].filter((r): r is GitHubRepo => r !== null);
+
+        return repos;
       } catch (error) {
         lastError = error as Error;
 

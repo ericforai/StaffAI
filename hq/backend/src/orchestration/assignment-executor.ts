@@ -7,6 +7,7 @@ import type { Store } from '../store';
 import { executeAssignmentWithRetry, trackRunningAssignment } from './assignment-execution-runner';
 import { updateAssignmentExecutionStatus, markAssignmentCompleted, markAssignmentFailed } from './assignment-status-updater';
 import { logAssignmentAuditEvent } from './assignment-audit-logger';
+import { resolveTaskTimeoutMs } from '../runtime/task-execution-config';
 
 /**
  * Status of assignment execution
@@ -99,11 +100,11 @@ export class DefaultAssignmentExecutor implements AssignmentExecutor {
     this.store = config.store;
     this.auditLogger = config.auditLogger;
     this.defaultExecutor = config.executor;
-    this.defaultTimeoutMs = config.timeoutMs ?? 30_000;
+    this.defaultTimeoutMs = resolveTaskTimeoutMs(config.timeoutMs);
   }
 
   async execute(assignment: TaskAssignment, input: AssignmentExecutionInput): Promise<AssignmentResult> {
-    const timeoutMs = input.timeoutMs ?? this.defaultTimeoutMs;
+    const timeoutMs = resolveTaskTimeoutMs(input.timeoutMs ?? this.defaultTimeoutMs);
     const executor = input.executor ?? this.defaultExecutor;
     const maxRetries = input.maxRetries ?? 1;
 
@@ -160,7 +161,7 @@ export class DefaultAssignmentExecutor implements AssignmentExecutor {
         retryCount: result.attempts,
       };
     } else {
-      await markAssignmentFailed(this.store, assignment.id, result.error ?? 'Execution failed');
+      await markAssignmentFailed(this.store, assignment.id, result.error ?? '执行失败');
       return {
         assignmentId: assignment.id,
         status: 'failed',

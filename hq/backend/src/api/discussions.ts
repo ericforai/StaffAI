@@ -224,6 +224,10 @@ export function registerDiscussionRoutes(app: express.Application, dependencies:
   });
 
   app.post('/api/internal/event', (req, res) => {
+    const clientIp = req.ip || req.socket.remoteAddress || '';
+    if (!clientIp.includes('127.0.0.1') && !clientIp.includes('::1') && !clientIp.includes('::ffff:127.0.0.1')) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
     dependencies.broadcast(req.body);
     res.json({ success: true });
   });

@@ -70,6 +70,10 @@ class MockStore {
     return Array.from(this.approvals.values()).filter(a => a.taskId === taskId);
   }
 
+  async getTasks(): Promise<TaskRecord[]> {
+    return Array.from(this.tasks.values());
+  }
+
   // Helper methods for testing
   getTaskCount(): number {
     return this.tasks.size;

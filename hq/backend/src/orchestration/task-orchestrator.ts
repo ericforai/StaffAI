@@ -32,6 +32,9 @@ export interface TaskDraftInput {
   priority?: string;
   requestedBy?: string;
   executionMode?: string;
+  // 任务负责人（从组织架构选择的员工）
+  assigneeId?: string;
+  assigneeName?: string;
 }
 
 export interface AssignmentPlan {
@@ -43,10 +46,38 @@ export interface CreateTaskDependencies {
   getAgentProfiles?: () => AgentProfile[];
 }
 
-type TaskCreationStore = Pick<
+export type TaskCreationStore = Pick<
   Store,
-  'saveTask' | 'saveApproval' | 'saveTaskAssignment' | 'saveWorkflowPlan'
+  'saveTask' | 'saveApproval' | 'saveTaskAssignment' | 'saveWorkflowPlan' | 'getTasks' | 'getTaskById'
 >;
+
+/**
+ * Generate a sequential task ID based on current date (YYYYMMDDNNN)
+ * e.g., 20260326001
+ *
+ * Uses getById-based probing to avoid the read-then-max race condition
+ * under concurrent access. Falls back to UUID if 10 sequential slots are taken.
+ */
+export async function generateTaskId(
+  store: Pick<Store, 'getTasks' | 'getTaskById'>,
+): Promise<string> {
+  const today = new Date();
+  const dateStr =
+    today.getFullYear().toString() +
+    String(today.getMonth() + 1).padStart(2, '0') +
+    String(today.getDate()).padStart(2, '0');
+
+  // Try up to 10 sequential IDs, probing for uniqueness each time
+  for (let seq = 1; seq <= 10; seq++) {
+    const candidate = `${dateStr}${String(seq).padStart(3, '0')}`;
+    const existing = await store.getTaskById(candidate);
+    if (!existing) return candidate;
+  }
+
+  // Fallback to UUID if all sequential IDs taken
+  const { randomUUID } = await import('node:crypto');
+  return randomUUID();
+}
 
 const TASK_STATE_TRANSITIONS: Record<TaskStatus, TaskStatus[]> = {
   created: ['routed', 'running', 'waiting_approval', 'cancelled'],
@@ -124,11 +155,11 @@ export function buildAssignmentRoleSequence(routeDecision: TaskRouteDecision): R
       return [{ role: routeDecision.recommendedAgentRole, assignmentRole: 'primary', title: 'Produce the requested documentation deliverable', order: 1 }];
     case 'workflow_dispatch':
       return [
-        { role: 'dispatcher', assignmentRole: 'dispatcher', title: 'Split work and coordinate execution path', order: 1 },
-        { role: 'software-architect', assignmentRole: 'secondary', title: 'Validate orchestration and plan quality', order: 2 },
+        { role: 'dispatcher', assignmentRole: 'dispatcher', title: '拆分任务并协调执行路径', order: 1 },
+        { role: 'software-architect', assignmentRole: 'secondary', title: '验证编排和计划质量', order: 2 },
       ];
     default:
-      return [{ role: routeDecision.recommendedAgentRole, assignmentRole: 'primary', title: 'Execute the requested task', order: 1 }];
+      return [{ role: routeDecision.recommendedAgentRole, assignmentRole: 'primary', title: '执行任务', order: 1 }];
   }
 }
 
@@ -227,7 +258,7 @@ export function buildPlan(task: TaskRecord, routeDecision: TaskRouteDecision): A
       steps: roleSequence.map((entry, index) => ({
         id: randomUUID(),
         title: entry.title,
-        description: `${entry.role} owns step ${index + 1} for ${task.title}`,
+        description: `为任务「${task.title}」执行步骤 ${index + 1}`,
         assignmentId: assignments[index].id,
         agentId: assignments[index].agentId,
         assignmentRole: assignments[index].assignmentRole,
@@ -315,8 +346,9 @@ export async function createTask(
     description: input.description.trim(),
   });
   const requestedBy = typeof input.requestedBy === 'string' && input.requestedBy.trim() ? input.requestedBy.trim() : 'system';
+  const taskId = await generateTaskId(store);
   const task: TaskRecord = {
-    id: randomUUID(),
+    id: taskId,
     title: input.title.trim(),
     description: input.description.trim(),
     taskType: routeDecision.taskType,
@@ -331,6 +363,8 @@ export async function createTask(
     candidateAgentRoles: routeDecision.candidateAgentRoles,
     routeReason: routeDecision.reason,
     routingStatus: routeDecision.routingStatus,
+    assigneeId: input.assigneeId,
+    assigneeName: input.assigneeName,
     createdAt: now,
     updatedAt: now,
   };

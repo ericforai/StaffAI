@@ -41,12 +41,40 @@ function readPositiveInt(value: unknown): number | undefined {
   return Math.floor(value);
 }
 
+// Simple in-memory rate limiter for execution endpoints
+const executionRateLimit = new Map<string, { count: number; resetAt: number }>();
+function checkRateLimit(key: string, maxPerMinute = 10): boolean {
+  const now = Date.now();
+  const entry = executionRateLimit.get(key);
+  if (!entry || now > entry.resetAt) {
+    executionRateLimit.set(key, { count: 1, resetAt: now + 60000 });
+    return true;
+  }
+  entry.count++;
+  return entry.count <= maxPerMinute;
+}
+
 function pickLatestExecution(executions: ExecutionLifecycleRecord[]): ExecutionLifecycleRecord | undefined {
   return executions.slice().sort((left, right) => {
     const leftTime = Date.parse(left.completedAt || left.startedAt || '1970-01-01T00:00:00.000Z');
     const rightTime = Date.parse(right.completedAt || right.startedAt || '1970-01-01T00:00:00.000Z');
     return rightTime - leftTime;
   })[0];
+}
+
+function resolveTaskExecutor(raw: unknown): 'claude' | 'codex' | 'openai' {
+  if (raw === 'claude' || raw === 'codex' || raw === 'openai') {
+    return raw;
+  }
+
+  const envPreferred = process.env.AGENCY_TASK_EXECUTOR;
+  if (envPreferred === 'claude' || envPreferred === 'codex' || envPreferred === 'openai') {
+    return envPreferred;
+  }
+
+  // Default to claude since it supports MCP tools (web search, document reading)
+  // Only use openai if explicitly configured via AGENCY_TASK_EXECUTOR
+  return 'claude';
 }
 
 function pickWorkflowArtifacts(detail: Awaited<ReturnType<typeof buildTaskDetailReadModel>>) {
@@ -95,6 +123,9 @@ export function registerTaskRoutes(
   });
 
   app.post('/api/tasks/:id/execute', async (req, res) => {
+    if (!checkRateLimit(req.ip || 'unknown')) {
+      return res.status(429).json({ error: 'Too many requests. Please try again later.' });
+    }
     const task = await store.getTaskById(req.params.id);
     if (!task) {
       return res.status(404).json({
@@ -110,14 +141,14 @@ export function registerTaskRoutes(
       });
     }
 
-    const executor = req.body?.executor === 'claude' || req.body?.executor === 'openai' ? req.body.executor : 'codex';
+    const executor = resolveTaskExecutor(req.body?.executor);
     const executionMode = readExecutionMode(req.body?.executionMode);
     const timeoutMs = readPositiveInt(req.body?.timeoutMs);
     const maxRetries = readPositiveInt(req.body?.maxRetries);
     const summary =
       typeof req.body?.summary === 'string' && req.body.summary.trim()
         ? req.body.summary.trim()
-        : `Execution completed for ${task.title}`;
+        : `完成任务：${task.title}`;
 
     const topic =
       typeof req.body?.topic === 'string' && req.body.topic.trim()
@@ -163,14 +194,23 @@ export function registerTaskRoutes(
     const priority = typeof req.body?.priority === 'string' ? req.body.priority : undefined;
     const requestedBy = typeof req.body?.requestedBy === 'string' ? req.body.requestedBy : undefined;
     const executionMode = typeof req.body?.executionMode === 'string' ? req.body.executionMode : undefined;
-    const validation = validateTaskDraft({ title, description, taskType, priority, requestedBy, executionMode });
+    const assigneeId = typeof req.body?.assigneeId === 'string' ? req.body.assigneeId : undefined;
+    const assigneeName = typeof req.body?.assigneeName === 'string' ? req.body.assigneeName : undefined;
+
+    if (assigneeId && assigneeId.length > 100) {
+      return res.status(400).json({ error: 'assigneeId too long (max 100 characters)' });
+    }
+    if (assigneeName && assigneeName.length > 200) {
+      return res.status(400).json({ error: 'assigneeName too long (max 200 characters)' });
+    }
+    const validation = validateTaskDraft({ title, description, taskType, priority, requestedBy, executionMode, assigneeId, assigneeName });
 
     if (!validation.valid) {
       return res.status(400).json({ error: validation.error });
     }
 
     const task = await createTaskDraft(
-      { title, description, taskType, priority, requestedBy, executionMode },
+      { title, description, taskType, priority, requestedBy, executionMode, assigneeId, assigneeName },
       store,
       {
         getAgentProfiles: dependencies.getAgentProfiles,

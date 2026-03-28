@@ -3,10 +3,12 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { CheckCircle2, ExternalLink, FileClock, PlayCircle, ShieldAlert, Sparkles } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
 import { useApprovals } from '../hooks/useApprovals';
 import { useApprovalActions } from '../hooks/useApprovalActions';
 import { useTaskActions } from '../hooks/useTaskActions';
+import type { TaskExecutor } from '../hooks/useTaskActions';
 import { useTaskComposer } from '../hooks/useTaskComposer';
 import { useTaskDetail } from '../hooks/useTaskDetail';
 import type { TaskEventSummary } from '../lib/taskEventProjection';
@@ -131,6 +133,7 @@ export function TaskWorkspacePanel({
     createTask,
   } = useTaskComposer();
   const [selectedTaskId, setSelectedTaskId] = useState('');
+  const [selectedExecutor, setSelectedExecutor] = useState<TaskExecutor>('openai');
   const effectiveSelectedTaskId = useMemo(() => {
     if (!tasks.length) {
       return '';
@@ -173,7 +176,7 @@ export function TaskWorkspacePanel({
   }
 
   async function handleExecuteSelectedTask() {
-    const succeeded = await executeTask();
+    const succeeded = await executeTask(selectedExecutor);
     if (succeeded) {
       await Promise.all([onRefreshTasks(), reloadTaskDetail()]);
     }
@@ -374,6 +377,18 @@ export function TaskWorkspacePanel({
                   <p className="mt-2 text-sm leading-6 text-slate-600">
                     直接从 HQ 触发任务执行。高级讨论型任务会继续走讨论分支，不会丢失现有路径。
                   </p>
+                  <label className="mt-3 block text-[11px] font-black tracking-[0.16em] text-slate-500">
+                    执行器
+                    <select
+                      value={selectedExecutor}
+                      onChange={(event) => setSelectedExecutor(event.target.value as TaskExecutor)}
+                      className="mt-2 w-full rounded-[0.9rem] border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 outline-none focus:border-slate-400"
+                    >
+                      <option value="openai">OpenAI API</option>
+                      <option value="codex">Codex CLI</option>
+                      <option value="claude">Claude CLI</option>
+                    </select>
+                  </label>
                   <button
                     type="button"
                     onClick={() => void handleExecuteSelectedTask()}
@@ -396,7 +411,9 @@ export function TaskWorkspacePanel({
                       <p className="mt-2 text-[10px] font-black tracking-[0.18em] text-slate-500">
                         {formatExecutionStatus(latestExecution.status)} · {latestExecution.executor || '未知执行器'}
                       </p>
-                      <p className="mt-2 text-sm leading-6 text-slate-700">{latestExecution.outputSummary || '暂无执行输出摘要。'}</p>
+                      <div className="mt-2 prose prose-slate max-w-none text-sm leading-6 text-slate-700">
+                        {latestExecution.outputSummary ? <ReactMarkdown>{latestExecution.outputSummary}</ReactMarkdown> : '暂无执行输出摘要。'}
+                      </div>
                       <Link
                         href={`/executions/${latestExecution.id}`}
                         className="mt-4 inline-flex items-center gap-2 text-[11px] font-black tracking-[0.16em] text-sky-700 hover:text-sky-900"

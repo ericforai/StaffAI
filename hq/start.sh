@@ -10,6 +10,13 @@ export NEXT_PUBLIC_BACKEND_PORT="${NEXT_PUBLIC_BACKEND_PORT:-3333}"
 echo "Starting The Agency HQ from: $SCRIPT_DIR"
 echo "Using Agency runtime dir: $STATE_DIR"
 
+if [ -f "$SCRIPT_DIR/backend/.env" ]; then
+  echo "--- Loading environment variables from .env ---"
+  set -a
+  source "$SCRIPT_DIR/backend/.env"
+  set +a
+fi
+
 mkdir -p "$STATE_DIR/config" "$STATE_DIR/cache/hosts" "$STATE_DIR/cache/discovery" "$STATE_DIR/sessions" "$STATE_DIR/logs" "$STATE_DIR/generated" "$STATE_DIR/executors"
 
 if [ ! -f "$SCRIPT_DIR/generated/registry/hosts.json" ]; then

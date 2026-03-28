@@ -9,6 +9,7 @@ import { TaskController } from '../runtime/task-controller';
 const EXECUTIONS_API_STAGE = 'production';
 const EXECUTION_FIELDS = [
   'id',
+  'displayExecutionId',
   'taskId',
   'status',
   'executor',

@@ -140,6 +140,16 @@ Sections are grouped into Persona versus Operations. The conversion scripts depe
 - Frontend uses React 19 with strict null checks.
 - Prefer `for...of` over `forEach` or `reduce` when dealing with nullable unions.
 
+## Guides Index
+
+- `AI 元编码法则（Thread 规范）`  
+  Path: `docs/guides/ai-meta-coding-laws.md`  
+  适用：定义本 thread 的规范沉淀边界、法则模板、索引机制与演进策略。
+
+- `法则生命周期管理（Rule Lifecycle Laws）`  
+  Path: `docs/guides/rule-lifecycle-laws.md`  
+  适用：规范法则从 Draft 到 Active、Superseded、Deprecated 的变更与追溯流程。
+
 ## Deferred TODO / Roadmap
 
 These items are intentionally left for later:
