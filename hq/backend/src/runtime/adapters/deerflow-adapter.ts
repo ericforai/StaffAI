@@ -8,6 +8,9 @@ export class DeerFlowRuntimeAdapter implements RuntimeAdapter {
 
   async run(context: RuntimeExecutionContext): Promise<RuntimeExecutionResult> {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s default timeout
+
       const response = await fetch(`${this.WORKSHOP_URL}/api/v1/tasks/execute`, {
         method: 'POST',
         headers: {
@@ -18,7 +21,10 @@ export class DeerFlowRuntimeAdapter implements RuntimeAdapter {
           action: context.task.title || 'Unknown Task',
           payload: context.inputSnapshot || {}
         }),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`Workshop responded with status: ${response.status}`);

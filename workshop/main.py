@@ -55,7 +55,12 @@ def execute_task(task: TaskEnvelope):
             "raw_output": task.payload
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        # 记录详细错误到控制台，但返回精简信息给前端
+        print(f"Error executing task: {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Workshop execution failed: {type(e).__name__}"
+        )
 
 if __name__ == "__main__":
     import uvicorn

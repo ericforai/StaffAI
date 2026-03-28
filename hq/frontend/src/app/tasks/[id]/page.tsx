@@ -146,20 +146,7 @@ function formatExecutionStatus(status: string) {
   }
 }
 
-function formatExecutor(executor?: string) {
-  switch (executor) {
-    case 'claude':
-      return 'Claude';
-    case 'codex':
-      return 'Codex';
-    case 'openai':
-      return 'OpenAI';
-    case 'deerflow':
-      return 'DeerFlow';
-    default:
-      return executor || '未知';
-  }
-}
+import { formatExecutor } from '../../../utils/formatters';
 
 /**
  * 清理多余的空行，只保留段落之间的单行空行
