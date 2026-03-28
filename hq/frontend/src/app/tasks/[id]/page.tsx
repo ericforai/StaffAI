@@ -154,6 +154,8 @@ function formatExecutor(executor?: string) {
       return 'Codex';
     case 'openai':
       return 'OpenAI';
+    case 'deerflow':
+      return 'DeerFlow';
     default:
       return executor || '未知';
   }
@@ -702,6 +704,7 @@ export default function TaskDetailPage() {
                     <option value="openai">OpenAI API</option>
                     <option value="codex">Codex CLI</option>
                     <option value="claude">Claude CLI</option>
+                    <option value="deerflow">DeerFlow Engine</option>
                   </select>
                 </label>
                 <button

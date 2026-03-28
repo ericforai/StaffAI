@@ -71,6 +71,8 @@ function formatExecutor(executor?: string) {
       return 'Codex';
     case 'openai':
       return 'OpenAI';
+    case 'deerflow':
+      return 'DeerFlow';
     default:
       return executor || '未知';
   }

@@ -23,7 +23,7 @@ interface ToolProgressState {
   message: string;
   progress: number;
   status: 'idle' | 'started' | 'running' | 'completed' | 'failed';
-  executor?: 'claude' | 'codex' | 'openai';
+  executor?: 'claude' | 'codex' | 'openai' | 'deerflow';
 }
 
 export default function BrainstormPage() {

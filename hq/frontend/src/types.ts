@@ -88,7 +88,7 @@ export interface ExecutionSummary {
   displayExecutionId?: string;
   taskId: string;
   status: string;
-  executor?: 'claude' | 'codex' | 'openai';
+  executor?: 'claude' | 'codex' | 'openai' | 'deerflow';
   runtimeName?: string;
   degraded?: boolean;
   outputSummary?: string;

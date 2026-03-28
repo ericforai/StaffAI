@@ -5,7 +5,7 @@ export interface RuntimeHostSummary {
   id: string;
   label: string;
   capabilityLevel: 'full' | 'partial' | 'advisory';
-  supportedExecutors: Array<'claude' | 'codex' | 'openai'>;
+  supportedExecutors: Array<'claude' | 'codex' | 'openai' | 'deerflow'>;
   supportsSampling: boolean;
   supportsInjection: boolean;
   supportsRuntimeExecution: boolean;
@@ -36,7 +36,7 @@ export function useRuntimeFoundation(topic: string, activeAgentIds: string[]) {
   const [hosts, setHosts] = useState<RuntimeHostSummary[]>([]);
   const [capabilities, setCapabilities] = useState<RuntimeCapability[]>([]);
   const [recommendations, setRecommendations] = useState<RuntimeRecommendation[]>([]);
-  const [selectedHostId, setSelectedHostId] = useState<'claude' | 'codex' | 'gemini'>('codex');
+  const [selectedHostId, setSelectedHostId] = useState<'claude' | 'codex' | 'gemini' | 'deerflow'>('codex');
   const [runtimeStateDir, setRuntimeStateDir] = useState('~/.agency');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

@@ -7,6 +7,7 @@ import { Building2, ClipboardList, BrainCircuit, BookOpenText, Clipboard, Store 
 import { useAgents } from '../hooks/useAgents';
 import { useTasks } from '../hooks/useTasks';
 import { useGlobalWebSocket, WsMessage } from '../hooks/useGlobalWebSocket';
+import { useWorkshopHealth } from '../hooks/useWorkshopHealth';
 import { DEPT_MAP } from '../utils/constants';
 
 export default function DashboardLayout({
@@ -41,6 +42,8 @@ export default function DashboardLayout({
   const { status: wsStatus } = useGlobalWebSocket({
     onMessage: handleWsMessage,
   });
+
+  const { status: workshopStatus } = useWorkshopHealth();
 
   const navItems = [
     { href: '/', label: '总览', icon: null },
@@ -83,14 +86,23 @@ export default function DashboardLayout({
           })}
         </nav>
 
-        <div className="p-3 border-t border-slate-100">
+        <div className="p-3 border-t border-slate-100 space-y-2">
           <div className="rounded-lg bg-slate-50 p-3 border border-slate-200">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] uppercase tracking-wider font-bold text-slate-500">系统状态</span>
+              <span className="text-[10px] uppercase tracking-wider font-bold text-slate-500">WebSocket</span>
               <span className={`h-1.5 w-1.5 rounded-full ${wsStatus === 'connected' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
             </div>
             <p className="mt-1 text-xs font-semibold text-slate-700">
               {wsStatus === 'connected' ? '已连接' : '同步中...'}
+            </p>
+          </div>
+          <div className="rounded-lg bg-slate-50 p-3 border border-slate-200">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] uppercase tracking-wider font-bold text-slate-500">Workshop</span>
+              <span className={`h-1.5 w-1.5 rounded-full ${workshopStatus === 'connected' ? 'bg-emerald-500 animate-pulse' : workshopStatus === 'loading' ? 'bg-amber-400' : 'bg-rose-500'}`} />
+            </div>
+            <p className="mt-1 text-xs font-semibold text-slate-700">
+              {workshopStatus === 'connected' ? '正常运行' : workshopStatus === 'loading' ? '正在加载' : '未连接'}
             </p>
           </div>
         </div>

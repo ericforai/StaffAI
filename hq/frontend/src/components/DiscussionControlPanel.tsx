@@ -49,7 +49,7 @@ interface ToolProgressState {
   message: string;
   progress: number;
   status: 'idle' | 'started' | 'running' | 'completed' | 'failed';
-  executor?: 'claude' | 'codex' | 'openai';
+  executor?: 'claude' | 'codex' | 'openai' | 'deerflow';
 }
 
 interface ProgressStep {
@@ -114,8 +114,8 @@ interface DiscussionControlPanelProps {
   runtimeStateDir: string;
   runtimeLoading: boolean;
   runtimeError: string | null;
-  selectedHostId: 'claude' | 'codex' | 'gemini';
-  onSelectHost: (hostId: 'claude' | 'codex' | 'gemini') => void;
+  selectedHostId: 'claude' | 'codex' | 'gemini' | 'deerflow';
+  onSelectHost: (hostId: 'claude' | 'codex' | 'gemini' | 'deerflow') => void;
 }
 
 const PARTICIPANT_OPTIONS = [2, 3, 4];
