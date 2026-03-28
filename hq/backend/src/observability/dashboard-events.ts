@@ -10,7 +10,7 @@ export interface DashboardEvent {
   message?: string;
   progress?: number;
   status?: 'started' | 'running' | 'completed' | 'failed';
-  executor?: 'codex' | 'claude' | 'openai';
+  executor?: 'codex' | 'claude' | 'openai' | 'deerflow';
   participantCount?: number;
   participants?: Array<{ id: string; name: string }>;
   hiredAgentIds?: string[];

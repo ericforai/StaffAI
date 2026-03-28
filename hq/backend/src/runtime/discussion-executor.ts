@@ -2,13 +2,17 @@ import type { ExecutorName } from './discussion-types';
 
 export function resolveExecutorPreference(raw: string | undefined): ExecutorName {
   const normalized = (raw || 'claude').toLowerCase();
-  if (normalized === 'codex' || normalized === 'claude' || normalized === 'openai') {
-    return normalized;
+  if (normalized === 'codex' || normalized === 'claude' || normalized === 'openai' || normalized === 'deerflow') {
+    return normalized as ExecutorName;
   }
   return 'claude';
 }
 
 export function resolveExecutorAttempts(preferred: ExecutorName): ExecutorName[] {
+  if (preferred === 'deerflow') {
+    return ['deerflow', 'claude', 'codex', 'openai'];
+  }
+
   if (preferred === 'codex') {
     return ['codex', 'claude', 'openai'];
   }

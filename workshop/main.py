@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import sys
 import os
@@ -10,6 +11,15 @@ deerflow_harness_path = os.path.join(base_dir, "deer-flow", "backend", "packages
 sys.path.append(deerflow_harness_path)
 
 app = FastAPI(title="StaffAI Workshop", description="Python Execution Core for StaffAI")
+
+# 配置 CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 开发环境下允许所有来源，生产环境建议指定端口
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class TaskEnvelope(BaseModel):
     task_id: str

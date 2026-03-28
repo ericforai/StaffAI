@@ -26,10 +26,10 @@ import { SkillScanner } from '../skill-scanner';
 import { Store } from '../store';
 import type { DiscussionServiceContract } from '../shared/discussion-service-contract';
 import type { RuntimePaths } from '../runtime/runtime-state';
-import { createUserRepository } from '../identity/user-repository.js';
-import { createPermissionChecker } from '../identity/permission-checker.js';
-import { createUserContextService } from '../identity/user-context.js';
-import { createUserContextMiddleware } from '../middleware/user-context.middleware.js';
+import { createUserRepository } from '../identity/user-repository';
+import { createPermissionChecker } from '../identity/permission-checker';
+import { createUserContextService } from '../identity/user-context';
+import { createUserContextMiddleware } from '../middleware/user-context.middleware';
 
 interface RouteRegistrationDependencies {
   app: express.Application;

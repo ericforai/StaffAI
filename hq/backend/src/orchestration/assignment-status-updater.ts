@@ -29,11 +29,11 @@ export async function updateAssignmentExecutionStatus(
  */
 export async function markAssignmentCompleted(
   store: Pick<Store, 'updateTaskAssignment' | 'saveExecution'>,
-  executor: 'claude' | 'codex' | 'openai',
+  executor: 'claude' | 'codex' | 'openai' | 'deerflow',
   assignmentId: string,
   outputSummary?: string,
   outputSnapshot?: Record<string, unknown>,
-  resolveRuntimeNameFn?: (executor: 'claude' | 'codex' | 'openai') => string
+  resolveRuntimeNameFn?: (executor: 'claude' | 'codex' | 'openai' | 'deerflow') => string
 ): Promise<void> {
   const resolveName = resolveRuntimeNameFn || resolveRuntimeName;
 
