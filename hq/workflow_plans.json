@@ -66472,5 +66472,26 @@
         "order": 1
       }
     ]
+  },
+  {
+    "id": "5493e127-ae92-4a13-8985-f3d5e2399fd7",
+    "taskId": "20260328001",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-03-28T01:21:52.951Z",
+    "updatedAt": "2026-03-28T01:21:52.951Z",
+    "steps": [
+      {
+        "id": "d6fbc8a2-bd5e-472c-9614-a1455eef7484",
+        "title": "执行任务",
+        "description": "为任务「Execution projection task」执行步骤 1",
+        "assignmentId": "91d75e9f-cc91-4e66-865c-7b76af87f63e",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
   }
 ]

@@ -40672,5 +40672,35 @@
       "runtimeName": "local_claude_cli",
       "executionMode": "single"
     }
+  },
+  {
+    "id": "trace_exec_197a1ae1-a9ec-4795-b614-03a7c7fefc82_1774660913342",
+    "type": "execution_started",
+    "taskId": "20260328001",
+    "executionId": "197a1ae1-a9ec-4795-b614-03a7c7fefc82",
+    "occurredAt": "2026-03-28T01:21:53.342Z",
+    "actor": "openai",
+    "summary": "开始执行任务：20260328001",
+    "data": {
+      "executor": "openai",
+      "runtimeName": "openai_api",
+      "executionMode": "single"
+    }
+  },
+  {
+    "id": "trace_exec_197a1ae1-a9ec-4795-b614-03a7c7fefc82_1774660913369",
+    "type": "execution_failed",
+    "taskId": "20260328001",
+    "executionId": "197a1ae1-a9ec-4795-b614-03a7c7fefc82",
+    "occurredAt": "2026-03-28T01:21:53.370Z",
+    "actor": "openai",
+    "summary": "失败任务：20260328001",
+    "data": {
+      "status": "failed",
+      "degraded": true,
+      "retryCount": 0,
+      "executor": "openai",
+      "runtimeName": "openai_api"
+    }
   }
 ]
