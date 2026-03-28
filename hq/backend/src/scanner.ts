@@ -17,7 +17,8 @@ import { AGENT_TRANSLATIONS } from './translations';
 const AGENT_DIRS = [
   'design', 'engineering', 'game-development', 'marketing',
   'paid-media', 'product', 'project-management', 'testing',
-  'support', 'spatial-computing', 'specialized'
+  'support', 'spatial-computing', 'specialized',
+  'hq/generated/employees',
 ];
 
 const ROOT_DIR = path.resolve(__dirname, '../../../');

@@ -17,6 +17,8 @@
 
 import type { Router } from 'express';
 import { randomUUID } from 'node:crypto';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import { z } from 'zod';
 import type { GitHubRepo } from '../market/github-search';
 import { gitHubSearchService } from '../market/github-search';
@@ -358,14 +360,18 @@ export function registerMarketRoutes(
 
       // Generate employee agent file
       const employeeId = `emp_${candidate.owner}_${candidate.name}`.toLowerCase().replace(/[^a-z0-9]/g, '_');
-      const targetPath = `hq/generated/employees/${employeeId}.md`;
+      // Resolve from project root so Scanner can discover the file
+      // Note: __dirname = hq/backend/dist/api/, need 4 levels to reach project root
+      const projectRoot = path.resolve(__dirname, '../../../../');
+      const employeesDir = path.join(projectRoot, 'hq', 'generated', 'employees');
+      const targetPath = path.join(employeesDir, `${employeeId}.md`);
+      const relativePath = `hq/generated/employees/${employeeId}.md`;
 
       // Create agent markdown content
       const agentContent = generateAgentMarkdown(candidate, employeeId);
 
       // Write agent file
-      const fs = require('node:fs/promises');
-      await fs.mkdir(`hq/generated/employees`, { recursive: true });
+      await fs.mkdir(employeesDir, { recursive: true });
       await fs.writeFile(targetPath, agentContent, 'utf-8');
 
       // Update candidate status
@@ -384,7 +390,7 @@ export function registerMarketRoutes(
       return res.json({
         success: true,
         employeeId,
-        employeePath: targetPath,
+        employeePath: relativePath,
         candidate: updated,
       });
     } catch (error) {
