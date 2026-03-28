@@ -11,7 +11,7 @@ interface ConsultWorkflowInput {
 interface ConsultWorkflowDependencies {
   onProgress: (stage: 'matching-expert' | 'hiring-expert' | 'executing-expert' | 'completed') => void;
   hireExpert: (expertId: string) => void;
-  generateReply: (agent: Agent, assignment: string) => Promise<{ text: string; executor: 'claude' | 'codex' | 'openai' }>;
+  generateReply: (agent: Agent, assignment: string) => Promise<{ text: string; executor: 'claude' | 'codex' | 'openai' | 'deerflow' }>;
 }
 
 export async function runConsultWorkflow(input: ConsultWorkflowInput, dependencies: ConsultWorkflowDependencies) {

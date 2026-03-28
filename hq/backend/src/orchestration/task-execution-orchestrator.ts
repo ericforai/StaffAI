@@ -10,7 +10,7 @@ import { createAssignmentExecutor } from './assignment-executor';
 import { rebuildWorkflowBundleForSerialExecution } from './task-orchestrator';
 
 interface ExecuteTaskInput {
-  executor: 'claude' | 'codex' | 'openai';
+  executor: 'claude' | 'codex' | 'openai' | 'deerflow';
   summary: string;
   executionMode?: TaskExecutionMode;
   timeoutMs?: number;
@@ -55,7 +55,7 @@ async function runWorkflowPlanWithAssignments(input: {
   task: TaskRecord;
   workflowPlan: WorkflowPlan;
   assignments: TaskAssignment[];
-  executor: 'claude' | 'codex' | 'openai';
+  executor: 'claude' | 'codex' | 'openai' | 'deerflow';
   timeoutMs: number;
   maxRetries: number;
   memoryContextExcerpt?: string;

@@ -29,7 +29,7 @@ export interface WsMessage {
   message?: string;
   progress?: number;
   status?: 'started' | 'running' | 'completed' | 'failed';
-  executor?: 'claude' | 'codex' | 'openai';
+  executor?: 'claude' | 'codex' | 'openai' | 'deerflow';
   participantCount?: number;
   participants?: Array<{ id: string; name: string }>;
   hiredAgentIds?: string[];

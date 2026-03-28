@@ -18,7 +18,7 @@ interface TaskRouteDependencies {
   runAdvancedDiscussion?: (topic: string) => Promise<{ summary: string }>;
   onTaskCreated?: (task: TaskRecord) => void;
   onApprovalRequested?: (taskId: string) => Promise<void> | void;
-  onExecutionStarted?: (input: { taskId: string; executor: 'claude' | 'codex' | 'openai' }) => void;
+  onExecutionStarted?: (input: { taskId: string; executor: 'claude' | 'codex' | 'openai' | 'deerflow' }) => void;
   onExecutionFinished?: (execution: ExecutionLifecycleRecord) => void;
   loadMemoryContext?: (task: TaskRecord) => Promise<string | undefined | void> | string | undefined | void;
   writeExecutionSummary?: (task: TaskRecord, execution: ExecutionLifecycleRecord) => Promise<void> | void;
@@ -62,13 +62,13 @@ function pickLatestExecution(executions: ExecutionLifecycleRecord[]): ExecutionL
   })[0];
 }
 
-function resolveTaskExecutor(raw: unknown): 'claude' | 'codex' | 'openai' {
-  if (raw === 'claude' || raw === 'codex' || raw === 'openai') {
+function resolveTaskExecutor(raw: unknown): 'claude' | 'codex' | 'openai' | 'deerflow' {
+  if (raw === 'claude' || raw === 'codex' || raw === 'openai' || raw === 'deerflow') {
     return raw;
   }
 
   const envPreferred = process.env.AGENCY_TASK_EXECUTOR;
-  if (envPreferred === 'claude' || envPreferred === 'codex' || envPreferred === 'openai') {
+  if (envPreferred === 'claude' || envPreferred === 'codex' || envPreferred === 'openai' || envPreferred === 'deerflow') {
     return envPreferred;
   }
 

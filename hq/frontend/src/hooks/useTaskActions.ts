@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { API_CONFIG } from '../utils/constants';
 import type { TaskDetailPayload } from '../types';
 
-export type TaskExecutor = 'openai' | 'codex' | 'claude';
+export type TaskExecutor = 'openai' | 'codex' | 'claude' | 'deerflow';
 
 export function useTaskActions(taskId: string, onTaskUpdated?: (payload: TaskDetailPayload) => void) {
   const [submitting, setSubmitting] = useState(false);

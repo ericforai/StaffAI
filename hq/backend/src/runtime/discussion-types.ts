@@ -1,4 +1,4 @@
-export type ExecutorName = 'codex' | 'claude' | 'openai';
+export type ExecutorName = 'codex' | 'claude' | 'openai' | 'deerflow';
 export type ExecutorPreference = 'auto' | ExecutorName;
 
 export interface ExecutorCheck {

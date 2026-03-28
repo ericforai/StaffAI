@@ -15,7 +15,7 @@ export interface ApprovalExecutionBridgeDependencies {
 export async function executeTaskAfterApproval(
   input: {
     taskId: string;
-    executor: 'claude' | 'codex' | 'openai';
+    executor: 'claude' | 'codex' | 'openai' | 'deerflow';
     summary?: string;
     topic?: string;
     timeoutMs?: number;

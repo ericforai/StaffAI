@@ -146,18 +146,7 @@ function formatExecutionStatus(status: string) {
   }
 }
 
-function formatExecutor(executor?: string) {
-  switch (executor) {
-    case 'claude':
-      return 'Claude';
-    case 'codex':
-      return 'Codex';
-    case 'openai':
-      return 'OpenAI';
-    default:
-      return executor || '未知';
-  }
-}
+import { formatExecutor } from '../../../utils/formatters';
 
 /**
  * 清理多余的空行，只保留段落之间的单行空行
@@ -702,6 +691,7 @@ export default function TaskDetailPage() {
                     <option value="openai">OpenAI API</option>
                     <option value="codex">Codex CLI</option>
                     <option value="claude">Claude CLI</option>
+                    <option value="deerflow">DeerFlow Engine</option>
                   </select>
                 </label>
                 <button

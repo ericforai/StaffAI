@@ -48,50 +48,9 @@ function formatExecutionStatus(status: string) {
   }
 }
 
+import { formatExecutor, formatRiskLevel } from '../../../utils/formatters';
+
 function formatControlStatus(status: string) {
-  switch (status) {
-    case 'paused':
-      return '已暂停';
-    case 'resumed':
-      return '已恢复';
-    case 'cancelled':
-      return '已取消';
-    case 'completed':
-      return '已完成';
-    default:
-      return status;
-  }
-}
-
-function formatExecutor(executor?: string) {
-  switch (executor) {
-    case 'claude':
-      return 'Claude';
-    case 'codex':
-      return 'Codex';
-    case 'openai':
-      return 'OpenAI';
-    default:
-      return executor || '未知';
-  }
-}
-
-function formatRiskLevel(riskLevel?: string) {
-  if (!riskLevel) {
-    return '未标注';
-  }
-
-  switch (riskLevel) {
-    case 'low':
-      return '低风险';
-    case 'medium':
-      return '中风险';
-    case 'high':
-      return '高风险';
-    default:
-      return riskLevel;
-  }
-}
 
 function formatExecutionDisplayId(execution: { displayExecutionId?: string; id: string }) {
   if (execution.displayExecutionId && execution.displayExecutionId.trim()) {

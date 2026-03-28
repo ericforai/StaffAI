@@ -22,7 +22,7 @@ export interface SerialWorkflowBundle {
 
 export type ExecutionLifecycleRecord = ExecutionRecord;
 
-function resolveFallbackExecutors(preferred: 'claude' | 'codex' | 'openai'): Array<'claude' | 'codex' | 'openai'> {
+function resolveFallbackExecutors(preferred: 'claude' | 'codex' | 'openai' | 'deerflow'): Array<'claude' | 'codex' | 'openai' | 'deerflow'> {
   switch (preferred) {
     case 'claude':
       return ['openai', 'codex'];
@@ -231,7 +231,7 @@ export function buildSerialWorkflowPlan(input: {
 export async function runTaskExecution(
   input: {
     taskId: string;
-    executor: 'claude' | 'codex' | 'openai';
+    executor: 'claude' | 'codex' | 'openai' | 'deerflow';
     runtimeName?: string;
     summary: string;
     memoryContextExcerpt?: string;
@@ -327,7 +327,7 @@ export async function runTaskExecution(
   let finalizedExecution: ExecutionLifecycleRecord | null = null;
   let finalizedWorkflowArtifacts: { workflowPlan?: WorkflowPlan; assignments?: TaskAssignment[] } | undefined;
   let finalAttempt = 0;
-  let resolvedExecutor: 'claude' | 'codex' | 'openai' = input.executor;
+  let resolvedExecutor: 'claude' | 'codex' | 'openai' | 'deerflow' = input.executor;
   let resolvedRuntimeName = runtimeName;
 
   for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
@@ -632,7 +632,7 @@ export async function runTaskExecution(
 
 export function beginExecution(input: {
   taskId: string;
-  executor: 'claude' | 'codex' | 'openai';
+  executor: 'claude' | 'codex' | 'openai' | 'deerflow';
   displayExecutionId?: string;
   runtimeName?: string;
   degraded?: boolean;

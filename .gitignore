@@ -83,6 +83,7 @@ integrations/qwen/agents/
 .env.*
 !.env.example
 
-# HQ runtime state (local)
-hq/.ai/
-hq/backend/.ai/
+# Workshop
+workshop/venv/
+workshop/__pycache__/
+workshop/deer-flow/

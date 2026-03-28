@@ -161,9 +161,12 @@ export function registerApprovalRoutes(
       typeof req.body?.autoExecute === 'boolean'
         ? req.body.autoExecute
         : dependencies.autoExecuteAfterApproval ?? true;
-    const executor =
-      req.body?.executor === 'claude' || req.body?.executor === 'openai' ? req.body.executor : 'codex';
-    const summary = typeof req.body?.summary === 'string' ? req.body.summary : undefined;
+    const executor = 
+      req.body?.executor === 'claude' || 
+      req.body?.executor === 'openai' || 
+      req.body?.executor === 'deerflow' 
+        ? req.body.executor 
+        : 'codex';    const summary = typeof req.body?.summary === 'string' ? req.body.summary : undefined;
     const topic = typeof req.body?.topic === 'string' ? req.body.topic : undefined;
     const timeoutMs = typeof req.body?.timeoutMs === 'number' ? req.body.timeoutMs : undefined;
     const maxRetries = typeof req.body?.maxRetries === 'number' ? req.body.maxRetries : undefined;

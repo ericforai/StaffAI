@@ -2,10 +2,11 @@ import type { TaskExecutionMode, TaskRecord } from '../shared/task-types';
 import { ClaudeRuntimeAdapter } from './adapters/claude-adapter';
 import { CodexRuntimeAdapter } from './adapters/codex-adapter';
 import { OpenAIRuntimeAdapter } from './adapters/openai-adapter';
+import { DeerFlowRuntimeAdapter } from './adapters/deerflow-adapter';
 
 export interface RuntimeExecutionContext {
   task: TaskRecord;
-  executor: 'claude' | 'codex' | 'openai';
+  executor: 'claude' | 'codex' | 'openai' | 'deerflow';
   runtimeName: string;
   assignmentId?: string;
   workflowStepId?: string;
@@ -23,7 +24,7 @@ export interface RuntimeExecutionContext {
  */
 export interface RuntimeOutputSnapshot extends Record<string, unknown> {
   runtimeName: string;
-  executor: 'claude' | 'codex' | 'openai';
+  executor: 'claude' | 'codex' | 'openai' | 'deerflow';
   executionMode: TaskExecutionMode;
   tokensUsed?: number;
   modelVersion?: string;
@@ -59,23 +60,25 @@ export interface RuntimeAdapter {
   runParallel(contexts: RuntimeExecutionContext[]): Promise<RuntimeExecutionResult[]>;
 }
 
-function mapExecutorToRuntimeName(executor: 'claude' | 'codex' | 'openai'): string {
+function mapExecutorToRuntimeName(executor: 'claude' | 'codex' | 'openai' | 'deerflow'): string {
   if (executor === 'codex') return 'local_codex_cli';
   if (executor === 'claude') return 'local_claude_cli';
+  if (executor === 'deerflow') return 'python_deerflow_workshop';
   return 'openai_api';
 }
 
-const ADAPTERS: Record<'claude' | 'codex' | 'openai', RuntimeAdapter> = {
+const ADAPTERS: Record<'claude' | 'codex' | 'openai' | 'deerflow', RuntimeAdapter> = {
   claude: new ClaudeRuntimeAdapter(),
   codex: new CodexRuntimeAdapter(),
   openai: new OpenAIRuntimeAdapter(),
+  deerflow: new DeerFlowRuntimeAdapter(),
 };
 
-export function resolveRuntimeAdapter(executor: 'claude' | 'codex' | 'openai'): RuntimeAdapter {
+export function resolveRuntimeAdapter(executor: 'claude' | 'codex' | 'openai' | 'deerflow'): RuntimeAdapter {
   return ADAPTERS[executor];
 }
 
-export function resolveRuntimeName(executor: 'claude' | 'codex' | 'openai'): string {
+export function resolveRuntimeName(executor: 'claude' | 'codex' | 'openai' | 'deerflow'): string {
   return mapExecutorToRuntimeName(executor);
 }
 
@@ -83,3 +86,4 @@ export function resolveRuntimeName(executor: 'claude' | 'codex' | 'openai'): str
 export { ClaudeRuntimeAdapter } from './adapters/claude-adapter';
 export { CodexRuntimeAdapter } from './adapters/codex-adapter';
 export { OpenAIRuntimeAdapter } from './adapters/openai-adapter';
+export { DeerFlowRuntimeAdapter } from './adapters/deerflow-adapter';
