@@ -245,6 +245,7 @@ export async function runTaskExecution(
     maxRetries?: number;
     degraded?: boolean;
     inputSnapshot?: Record<string, unknown>;
+    onEvent?: (event: { type: string; data: any }) => void;
     runtimeRunner?: (context: RuntimeExecutionContext) => Promise<{
       outputSummary: string;
       outputSnapshot?: Record<string, unknown>;
@@ -361,6 +362,7 @@ export async function runTaskExecution(
         timeoutMs,
         maxRetries,
         inputSnapshot: input.inputSnapshot,
+        onEvent: input.onEvent,
       };
       const runtimeResult = await withTimeout(
         input.runtimeRunner ? input.runtimeRunner(runtimeContext) : runtimeAdapter.run(runtimeContext),
@@ -456,6 +458,7 @@ export async function runTaskExecution(
           timeoutMs,
           maxRetries,
           inputSnapshot: input.inputSnapshot,
+          onEvent: input.onEvent,
         };
         const fallbackResult = await withTimeout(fallbackAdapter.run(runtimeContext), timeoutMs);
 

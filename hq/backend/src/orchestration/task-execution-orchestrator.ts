@@ -22,6 +22,7 @@ interface TaskExecutionDependencies {
   loadMemoryContext?: (task: TaskRecord) => Promise<string | undefined | void> | string | undefined | void;
   writeExecutionSummary?: (task: TaskRecord, execution: ExecutionLifecycleRecord) => Promise<void> | void;
   sessionCapabilities?: SessionCapabilities;
+  onEvent?: (event: { type: string; data: any }) => void;
 }
 
 type TaskExecutionStore = Pick<Store, 'saveExecution' | 'updateExecution' | 'updateTask'> &
@@ -322,6 +323,7 @@ export async function executeTaskRecord(
         timeoutMs,
         maxRetries,
         degraded,
+        onEvent: dependencies.onEvent,
         runtimeRunner: async () =>
           runWorkflowPlanWithAssignments({
             task,
@@ -371,6 +373,7 @@ export async function executeTaskRecord(
       timeoutMs,
       maxRetries,
       degraded,
+      onEvent: dependencies.onEvent,
       runtimeRunner:
         appliedMode === 'parallel' && existingWorkflowPlan && existingAssignments.length > 0
           ? async () =>

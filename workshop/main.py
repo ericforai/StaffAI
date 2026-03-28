@@ -1,21 +1,35 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from sse_starlette.sse import EventSourceResponse
 import sys
 import os
+import asyncio
+import json
+import logging
+
+# 配置日志
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("workshop")
 
 # 确保 deer-flow 和相关的核心包可以被导入
-# 调整 sys.path 以指向正确的目录结构
 base_dir = os.path.dirname(__file__)
 deerflow_harness_path = os.path.join(base_dir, "deer-flow", "backend", "packages", "harness")
 sys.path.append(deerflow_harness_path)
+
+# 延迟导入 DeerFlowClient 以确保 sys.path 生效
+try:
+    from deerflow.client import DeerFlowClient
+except ImportError:
+    logger.error("Failed to import DeerFlowClient. Check sys.path configuration.")
+    DeerFlowClient = None
 
 app = FastAPI(title="StaffAI Workshop", description="Python Execution Core for StaffAI")
 
 # 配置 CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 开发环境下允许所有来源，生产环境建议指定端口
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -24,6 +38,9 @@ app.add_middleware(
 class TaskEnvelope(BaseModel):
     task_id: str
     action: str
+    agent_role: str | None = None
+    description: str | None = None
+    memory_context: str | None = None
     payload: dict = {}
 
 @app.get("/health")
@@ -31,38 +48,79 @@ def health_check():
     return {"status": "ok", "message": "Workshop execution core is running"}
 
 @app.post("/api/v1/tasks/execute")
-def execute_task(task: TaskEnvelope):
+async def execute_task(task: TaskEnvelope):
     """
-    用来验证连通性的执行端点。
+    旧的同步执行接口，保留用于兼容。
     """
+    if not DeerFlowClient:
+        raise HTTPException(status_code=500, detail="DeerFlow engine not initialized")
+    
     try:
-        # 尝试导入 deerflow，验证路径配置是否正确
-        try:
-            import deerflow
-            has_deer_flow = True
-            # 获取版本或模块路径以作验证
-            deer_flow_path = deerflow.__file__
-        except ImportError as e:
-            has_deer_flow = False
-            deer_flow_path = str(e)
-            
+        client = DeerFlowClient(agent_name=task.agent_role)
+        # 简单阻塞执行
+        # 组合提示词
+        prompt = f"任务标题: {task.action}\n描述: {task.description or ''}"
+        result = client.chat(prompt)
         return {
             "task_id": task.task_id,
             "status": "success",
-            "deer_flow_imported": has_deer_flow,
-            "deer_flow_path": deer_flow_path,
-            "result": f"Successfully received task '{task.action}'.",
-            "raw_output": task.payload
+            "result": result
         }
     except Exception as e:
-        # 记录详细错误到控制台，但返回精简信息给前端
-        print(f"Error executing task: {str(e)}")
-        raise HTTPException(
-            status_code=500, 
-            detail=f"Workshop execution failed: {type(e).__name__}"
-        )
+        logger.exception("Task execution failed")
+        raise HTTPException(status_code=500, detail=f"Workshop execution failed: {type(e).__name__}")
+
+@app.post("/api/v1/tasks/stream")
+async def stream_task(task: TaskEnvelope, request: Request):
+    """
+    新的 SSE 流式执行接口。
+    将 DeerFlow Agent 的内部推导过程流式回传给 TS 后端。
+    """
+    if not DeerFlowClient:
+        raise HTTPException(status_code=500, detail="DeerFlow engine not initialized")
+
+    async def event_generator():
+        try:
+            client = DeerFlowClient(agent_name=task.agent_role)
+            # 开启 DeerFlow 流
+            # 组合任务指令、描述和记忆上下文
+            full_prompt = f"任务标题: {task.action}\n"
+            if task.description:
+                full_prompt += f"任务描述: {task.description}\n"
+            if task.memory_context:
+                full_prompt += f"历史记忆上下文:\n{task.memory_context}\n"
+            
+            full_prompt += "\n请开始执行上述任务。"
+            
+            logger.info(f"Starting stream for task {task.task_id}")
+            
+            for event in client.stream(full_prompt, thread_id=task.task_id):
+                # 如果客户端断开，停止生成
+                if await request.is_disconnected():
+                    logger.info(f"Client disconnected for task {task.task_id}")
+                    break
+
+                # 映射 DeerFlow 事件到 StaffAI 协议
+                yield {
+                    "event": event.type,
+                    "data": json.dumps({
+                        "task_id": task.task_id,
+                        "payload": event.data
+                    })
+                }
+                
+                # 模拟小延迟防止占满 CPU
+                await asyncio.sleep(0.01)
+
+        except Exception as e:
+            logger.exception(f"Streaming failed for task {task.task_id}")
+            yield {
+                "event": "error",
+                "data": json.dumps({"error": str(e)})
+            }
+
+    return EventSourceResponse(event_generator())
 
 if __name__ == "__main__":
     import uvicorn
-    # 默认运行在 8000 端口
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

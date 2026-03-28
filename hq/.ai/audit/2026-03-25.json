@@ -1,0 +1,393 @@
+[
+  {
+    "id": "f938b072-9991-4a92-80ef-7a0b66e97ac7",
+    "timestamp": "2026-03-25T13:23:39.314Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
+  },
+  {
+    "id": "cd2b1fe2-d1a1-403d-be5e-68d660ff142a",
+    "timestamp": "2026-03-25T13:23:39.944Z",
+    "entityType": "approval",
+    "entityId": "bc0af778-46c1-4ed9-a1b9-0d2eb4903a75",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "e8319082-ad9d-4b1f-9a7f-d8f7a1e23d62"
+    }
+  },
+  {
+    "id": "3d981e46-9d62-4765-9dea-bbb5d6e56cbb",
+    "timestamp": "2026-03-25T13:23:40.074Z",
+    "entityType": "approval",
+    "entityId": "d6133c71-bb2e-44ee-8a31-f65f94c7e9fa",
+    "action": "approved",
+    "actor": "manager1",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "f2622d8f-b667-43b1-b907-f22e5b1b7357"
+    }
+  },
+  {
+    "id": "63e67979-e8c2-4595-a254-fedc07446bd2",
+    "timestamp": "2026-03-25T13:23:40.110Z",
+    "entityType": "approval",
+    "entityId": "19f61980-934c-49e2-bdba-3d91b686c469",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "42e2c7e1-6b3c-4d50-a089-6988912c0912"
+    }
+  },
+  {
+    "id": "c1c3d734-14ae-42b8-a19a-0d2292579a9d",
+    "timestamp": "2026-03-25T13:23:40.129Z",
+    "entityType": "approval",
+    "entityId": "796d638c-63c5-4263-ba5f-3a6a33335856",
+    "action": "rejected",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "rejected"
+    },
+    "metadata": {
+      "taskId": "9e4fa973-1f74-450b-8bfd-a64a2f95201e"
+    }
+  },
+  {
+    "id": "c25e102a-e974-4feb-b5b8-b0618b2b0b66",
+    "timestamp": "2026-03-25T13:23:40.140Z",
+    "entityType": "approval",
+    "entityId": "84564a6e-3e3f-4742-885e-1cf1597f4f85",
+    "action": "approved",
+    "actor": "manager1",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "989691a4-a943-428b-a036-ef2c2d5d97cb"
+    }
+  },
+  {
+    "id": "9e53f02e-8ee2-4e59-913d-99768bdccc2e",
+    "timestamp": "2026-03-25T13:24:16.797Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
+  },
+  {
+    "id": "61e24601-112a-4a66-8c23-6ad62fd3926a",
+    "timestamp": "2026-03-25T13:24:49.213Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
+  },
+  {
+    "id": "c728e958-e5ff-4f83-89f5-27cf596f2aa6",
+    "timestamp": "2026-03-25T13:24:52.274Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
+  },
+  {
+    "id": "bb5249cb-ab07-477e-be39-6054153be2a7",
+    "timestamp": "2026-03-25T13:47:48.108Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
+  },
+  {
+    "id": "8ae952ac-a64e-4778-bae8-bb37e784d4b8",
+    "timestamp": "2026-03-25T13:55:58.914Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
+  },
+  {
+    "id": "257bc6a7-47d4-4b44-9d47-00d7ada59d32",
+    "timestamp": "2026-03-25T13:57:38.836Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
+  },
+  {
+    "id": "35202482-36e2-4a22-bf32-8569078e32b3",
+    "timestamp": "2026-03-25T14:03:31.626Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
+  },
+  {
+    "id": "62814662-06e9-4c94-ad3b-a8b3ed7d3f28",
+    "timestamp": "2026-03-25T14:03:41.003Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
+  },
+  {
+    "id": "9a68a635-fc70-44f1-8f68-afb3d72b86f5",
+    "timestamp": "2026-03-25T14:03:46.462Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
+  },
+  {
+    "id": "75535601-d216-40cd-9ed0-7e8f00af74d0",
+    "timestamp": "2026-03-25T14:03:59.511Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
+  },
+  {
+    "id": "bd11aaa8-8f78-4f1f-98df-7f212f7cb842",
+    "timestamp": "2026-03-25T14:15:32.117Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
+  },
+  {
+    "id": "7edec8e2-e1ce-4b73-a817-21b5f19e507f",
+    "timestamp": "2026-03-25T14:21:43.699Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
+  },
+  {
+    "id": "ed139280-b6fd-4929-a65e-9591f9e8364b",
+    "timestamp": "2026-03-25T14:26:52.481Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
+  },
+  {
+    "id": "0a63f486-ccb4-4433-88fb-1479c3d18aca",
+    "timestamp": "2026-03-25T14:33:32.663Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
+  },
+  {
+    "id": "303a363b-6ea2-43b3-9b29-a00077c5f042",
+    "timestamp": "2026-03-25T14:40:51.193Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
+  },
+  {
+    "id": "1fe3e8fa-a244-4179-b9d2-9ce5d51b8358",
+    "timestamp": "2026-03-25T14:44:16.199Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
+  },
+  {
+    "id": "c05ab4b8-1dc3-4c69-a2b1-56be733eac65",
+    "timestamp": "2026-03-25T14:44:44.306Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
+  }
+]
