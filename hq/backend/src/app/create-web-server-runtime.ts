@@ -32,7 +32,15 @@ export interface WebServerRuntime {
 function setupWebSocket(server: http.Server) {
   const wss = new WebSocketServer({ server });
 
-  wss.on('connection', (ws) => {
+  wss.on('connection', (ws, req) => {
+    const origin = req.headers.origin;
+    const allowed = process.env.CORS_ORIGINS
+      ? process.env.CORS_ORIGINS.split(',').map((o) => o.trim())
+      : ['http://localhost:8888', 'http://127.0.0.1:8888'];
+    if (origin && !allowed.includes(origin)) {
+      ws.close(1008, 'Origin not allowed');
+      return;
+    }
     console.log('Dashboard connected via WebSocket');
     ws.send(JSON.stringify({ type: 'CONNECTED', message: 'The Agency HQ v2.0 Live' }));
   });
@@ -86,7 +94,10 @@ export function createWebServerRuntime({
   dependencies = {},
 }: WebServerRuntimeInput): WebServerRuntime {
   const app = express();
-  app.use(cors());
+  const allowedOrigins = process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(',').map((o) => o.trim())
+    : ['http://localhost:8888', 'http://127.0.0.1:8888'];
+  app.use(cors({ origin: allowedOrigins }));
   app.use(express.json());
 
   const server = http.createServer(app);

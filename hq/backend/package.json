@@ -1,6 +1,6 @@
 {
   "name": "backend",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "scripts": {
     "build": "node -e \"const fs=require('fs');try{fs.rmSync('dist',{recursive:true});}catch(e){if(e&&e.code!=='ENOENT')throw e;}\" && tsc",

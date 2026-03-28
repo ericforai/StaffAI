@@ -15,10 +15,7 @@ export function useAgents() {
     const fetchAgents = async () => {
       try {
         const url = `${API_CONFIG.BASE_URL}/agents`;
-        console.log('[useAgents] API_CONFIG.BASE_URL:', API_CONFIG.BASE_URL);
-        console.log('[useAgents] Fetching URL:', url);
         const res = await fetch(url);
-        console.log('[useAgents] Response:', res.status, res.statusText);
         if (!res.ok) throw new Error(`Fetch agents failed: ${res.status} ${res.statusText}`);
         const data = await res.json();
         setAgents(data);
@@ -88,7 +85,7 @@ export function useAgents() {
     try {
       const res = await fetch(`${API_CONFIG.BASE_URL}/squad`);
       const data = await res.json();
-      console.log('Syncing Squad from Backend:', data.activeAgentIds);
+      console.debug('[useAgents] Syncing squad:', data.activeAgentIds?.length ?? 0, 'agents');
       setActiveIds(data.activeAgentIds || []);
     } catch (err) {
       console.error('Failed to sync squad:', err);
