@@ -20,11 +20,46 @@ sys.path.append(deerflow_harness_path)
 # 延迟导入 DeerFlowClient 以确保 sys.path 生效
 try:
     from deerflow.client import DeerFlowClient
+    from deerflow.config.extensions_config import ExtensionsConfig, McpServerConfig, set_extensions_config
+    from deerflow.mcp.cache import initialize_mcp_tools
 except ImportError:
-    logger.error("Failed to import DeerFlowClient. Check sys.path configuration.")
+    logger.error("Failed to import DeerFlow core modules. Check sys.path configuration.")
     DeerFlowClient = None
 
 app = FastAPI(title="StaffAI Workshop", description="Python Execution Core for StaffAI")
+
+# 配置 MCP 桥接器
+async def setup_mcp_bridge():
+    if not DeerFlowClient:
+        return
+    
+    # 指向 TS 后端的 MCP SSE 接口
+    ts_mcp_url = os.getenv("TS_MCP_URL", "http://localhost:3333/api/mcp/sse")
+    
+    config = ExtensionsConfig(
+        mcp_servers={
+            "staffai-office": McpServerConfig(
+                enabled=True,
+                type="sse",
+                url=ts_mcp_url,
+                description="StaffAI Office Management Core (TS Tools)"
+            )
+        },
+        skills={}
+    )
+    set_extensions_config(config)
+    logger.info(f"MCP Bridge configured to: {ts_mcp_url}")
+    
+    # 初始化并缓存 MCP 工具
+    try:
+        await initialize_mcp_tools()
+        logger.info("MCP tools initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize MCP tools: {e}")
+
+@app.on_event("startup")
+async def startup_event():
+    await setup_mcp_bridge()
 
 # 配置 CORS
 app.add_middleware(

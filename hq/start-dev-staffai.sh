@@ -21,13 +21,13 @@ rm -rf "$SCRIPT_DIR/frontend/.next/dev/lock" 2>/dev/null || true
 # --- Start Python Workshop ---
 echo "--- Initializing Python Workshop ---"
 cd "$PARENT_DIR/workshop"
-if [ ! -d "venv" ]; then
-    echo "Creating Python venv..."
-    python3 -m venv venv
-    source venv/bin/activate
-    pip install -r requirements.txt
+if [ ! -d ".venv" ]; then
+    echo "Creating Python venv using uv..."
+    uv venv --python 3.12
+    source .venv/bin/activate
+    uv pip install -r requirements.txt
 else
-    source venv/bin/activate
+    source .venv/bin/activate
 fi
 
 # Run Workshop in background

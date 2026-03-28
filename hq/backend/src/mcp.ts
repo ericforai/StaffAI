@@ -1,5 +1,6 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import {
   ListResourcesRequestSchema,
   ReadResourceRequestSchema,
@@ -10,8 +11,10 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { Scanner } from './scanner';
 import { Store } from './store';
+import { ToolGateway } from './tools/tool-gateway';
 import { Agent } from './types';
 import http from 'http';
+import express from 'express';
 import {
   defaultSessionCapabilities,
   ExecutionDecision,
@@ -54,12 +57,15 @@ export class McpGateway {
   private server: Server;
   private scanner: Scanner;
   private store: Store;
+  private toolGateway: ToolGateway;
   private webServerPort: number;
   private userContextService: ReturnType<typeof createUserContextService>;
+  private sseTransport: SSEServerTransport | null = null;
 
-  constructor(scanner: Scanner, store: Store, webServerPort: number = 3333) {
+  constructor(scanner: Scanner, store: Store, toolGateway: ToolGateway, webServerPort: number = 3333) {
     this.scanner = scanner;
     this.store = store;
+    this.toolGateway = toolGateway;
     this.webServerPort = webServerPort;
 
     // Initialize user context service
@@ -84,6 +90,20 @@ export class McpGateway {
     );
 
     this.setupHandlers();
+  }
+
+  public async handleSse(req: express.Request, res: express.Response) {
+    this.sseTransport = new SSEServerTransport('/api/mcp/message', res);
+    await this.server.connect(this.sseTransport);
+    console.error('[MCP] SSE client connected');
+  }
+
+  public async handlePostMessage(req: express.Request, res: express.Response) {
+    if (!this.sseTransport) {
+      res.status(400).send('No active SSE connection');
+      return;
+    }
+    await this.sseTransport.handlePostMessage(req, res);
   }
 
   private notifyDashboard(event: DashboardEvent) {
@@ -171,8 +191,16 @@ export class McpGateway {
     });
 
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
+      const toolGatewayTools = this.toolGateway.listTools('system'); // Using 'system' role to export all default tools
+      const mcpTools = toolGatewayTools.map(tool => ({
+        name: tool.name,
+        description: tool.description || `Execute ${tool.name} tool.`,
+        inputSchema: tool.inputSchema || { type: 'object', properties: {} }
+      }));
+
       return {
         tools: [
+          ...mcpTools,
           {
             name: 'consult_the_agency',
             description: '统一专家门户。自动寻找最合适的专家，必要时完成入职后再分配任务。',
@@ -315,6 +343,25 @@ export class McpGateway {
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
       const userId = args?.user_id as string | undefined;
+
+      // First check ToolGateway for native tools
+      const tool = this.toolGateway.getTool(name);
+      if (tool) {
+        const result = await this.toolGateway.executeTool(name, args as Record<string, unknown>, {
+          actorRole: 'system', // Default role for MCP calls
+          taskId: 'mcp-call',
+          executionId: 'mcp-exec',
+          approvalGranted: true // MCP clients are trusted for now in dev
+        });
+
+        if (!result.ok) {
+          throw new McpError(ErrorCode.InternalError, result.error || 'Tool execution failed');
+        }
+
+        return {
+          content: [{ type: 'text', text: result.output?.summary || 'Success' }]
+        };
+      }
 
       if (name === 'find_experts') {
         return this.handleFindExperts(args?.topic as string, args?.max_experts as number | undefined, userId);

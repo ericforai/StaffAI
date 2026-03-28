@@ -8,6 +8,8 @@ import { SkillScanner } from '../skill-scanner';
 import { Store } from '../store';
 import { createDiscussionService } from './create-discussion-service';
 import { registerBackendRoutes } from './register-backend-routes';
+import { ToolGateway } from '../tools/tool-gateway';
+import { McpGateway } from '../mcp';
 import type { DashboardEvent } from '../observability/dashboard-events';
 import { createRuntimePaths } from '../runtime/runtime-state';
 import { initializeMemoryLayout, getMemoryDirectory } from '../memory/memory-initializer';
@@ -27,6 +29,7 @@ export interface WebServerRuntime {
   broadcast: (data: DashboardEvent) => void;
   listen: (port: number) => Promise<number>;
   stop: () => Promise<void>;
+  mcp: McpGateway;
 }
 
 function setupWebSocket(server: http.Server) {
@@ -104,6 +107,19 @@ export function createWebServerRuntime({
   const wss = setupWebSocket(server);
   const broadcast = (event: DashboardEvent) => broadcastToClients(wss, event);
 
+  // Initialize tool gateway and MCP gateway
+  const toolGateway = new ToolGateway(store);
+  const mcp = new McpGateway(scanner, store, toolGateway);
+
+  // Register MCP SSE routes
+  app.get('/api/mcp/sse', (req, res) => {
+    void mcp.handleSse(req, res);
+  });
+
+  app.post('/api/mcp/message', (req, res) => {
+    void mcp.handlePostMessage(req, res);
+  });
+
   // Initialize .ai/ memory directory structure
   const memoryRootDir = getMemoryDirectory();
   initializeMemoryLayout(memoryRootDir)
@@ -118,6 +134,7 @@ export function createWebServerRuntime({
 
   return {
     broadcast,
+    mcp,
     listen(port: number) {
       return new Promise((resolve, reject) => {
         const onError = (error: Error) => {

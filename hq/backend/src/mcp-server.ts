@@ -1,5 +1,6 @@
 import { Scanner } from './scanner';
 import { Store } from './store';
+import { ToolGateway } from './tools/tool-gateway';
 import { McpGateway } from './mcp';
 
 async function main() {
@@ -9,6 +10,7 @@ async function main() {
   console.error(`MCP Server: Scanned ${scanner.getAllAgents().length} agents.`);
 
   const store = new Store();
+  const toolGateway = new ToolGateway(store);
   
   // Optionally, we could watch the active_squad.json file for changes
   // so the IDE doesn't need to restart the MCP server to see new tools.
@@ -23,7 +25,7 @@ async function main() {
     });
   });
 
-  const mcp = new McpGateway(scanner, store);
+  const mcp = new McpGateway(scanner, store, toolGateway);
   await mcp.start();
 }
 
