@@ -144,6 +144,9 @@ export function registerBackendRoutes({
     onExecutionFinished: (execution) => {
       taskEvents.executionFinished(execution);
     },
+    onExecutionEvent: (input) => {
+      taskEvents.executionEvent(input);
+    },
     loadMemoryContext: (task) => {
       const retrieved = retrieveMemoryContext(`${task.title}\n${task.description}`, {
         memoryRootDir,
@@ -168,6 +171,9 @@ export function registerBackendRoutes({
     },
     onExecutionFinished: (execution) => {
       taskEvents.executionFinished(execution);
+    },
+    onExecutionEvent: (input) => {
+      taskEvents.executionEvent(input);
     },
     loadMemoryContext: (task) => {
       const retrieved = retrieveMemoryContext(`${task.title}\n${task.description}`, {

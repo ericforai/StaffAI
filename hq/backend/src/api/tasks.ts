@@ -20,6 +20,7 @@ interface TaskRouteDependencies {
   onApprovalRequested?: (taskId: string) => Promise<void> | void;
   onExecutionStarted?: (input: { taskId: string; executor: 'claude' | 'codex' | 'openai' | 'deerflow' }) => void;
   onExecutionFinished?: (execution: ExecutionLifecycleRecord) => void;
+  onExecutionEvent?: (input: { taskId: string; message: string; payload?: any }) => void;
   loadMemoryContext?: (task: TaskRecord) => Promise<string | undefined | void> | string | undefined | void;
   writeExecutionSummary?: (task: TaskRecord, execution: ExecutionLifecycleRecord) => Promise<void> | void;
   sessionCapabilities?: { sampling: boolean };
@@ -177,6 +178,13 @@ export function registerTaskRoutes(
         loadMemoryContext: dependencies.loadMemoryContext,
         writeExecutionSummary: dependencies.writeExecutionSummary,
         sessionCapabilities: dependencies.sessionCapabilities,
+        onEvent: (event) => {
+          dependencies.onExecutionEvent?.({
+            taskId: task.id,
+            message: `Execution chunk received: ${event.type}`,
+            payload: event.data,
+          });
+        },
       },
     );
 

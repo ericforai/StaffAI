@@ -1,0 +1,8 @@
+{
+  "taskTitle": "Critical deployment",
+  "riskLevel": "HIGH",
+  "id": "64d77864-8c83-4a93-b20b-2fd94e94a48b",
+  "approver": "manager1",
+  "approvedAt": "2026-03-27T08:04:48.585Z",
+  "reason": "Production deployment approved"
+}

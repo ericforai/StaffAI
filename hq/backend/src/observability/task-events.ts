@@ -7,7 +7,8 @@ type TaskEventType =
   | 'execution_started'
   | 'execution_completed'
   | 'execution_failed'
-  | 'execution_degraded';
+  | 'execution_degraded'
+  | 'execution_event';
 
 export interface TaskDashboardEvent {
   type: 'TASK_EVENT';
@@ -16,6 +17,7 @@ export interface TaskDashboardEvent {
   taskId?: string;
   approvalId?: string;
   executionId?: string;
+  payload?: any;
 }
 
 export function createTaskEventPublisher(publish: (event: TaskDashboardEvent) => void) {
@@ -74,6 +76,15 @@ export function createTaskEventPublisher(publish: (event: TaskDashboardEvent) =>
         taskId: execution.taskId,
         executionId: execution.id,
         message: `${statusMessage}：${execution.id}`,
+      });
+    },
+    executionEvent(input: { taskId: string; message: string; payload?: any }) {
+      publish({
+        type: 'TASK_EVENT',
+        taskEventType: 'execution_event',
+        taskId: input.taskId,
+        message: input.message,
+        payload: input.payload,
       });
     },
   };

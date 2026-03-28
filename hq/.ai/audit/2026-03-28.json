@@ -1,0 +1,121 @@
+[
+  {
+    "id": "5db9f2f8-2537-42a0-9841-2315f3470f32",
+    "timestamp": "2026-03-28T00:31:54.388Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
+  },
+  {
+    "id": "a4914432-b416-4fed-b03b-243b6120cf0f",
+    "timestamp": "2026-03-28T01:01:17.859Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
+  },
+  {
+    "id": "6b6fbb17-68a9-4c15-966e-f90d570b4f77",
+    "timestamp": "2026-03-28T01:06:55.556Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
+  },
+  {
+    "id": "da825dd5-0014-4616-a2b6-3cb3b48b5fc4",
+    "timestamp": "2026-03-28T01:08:27.704Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
+  },
+  {
+    "id": "69b164ff-50ec-4b99-b1cb-480e0cd13c36",
+    "timestamp": "2026-03-28T01:54:09.461Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
+  },
+  {
+    "id": "e2f6cb08-0566-48d8-aadc-ede89bc00dd5",
+    "timestamp": "2026-03-28T02:00:50.396Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
+  },
+  {
+    "id": "57da28d5-e89e-4c1d-a000-d67ddb7849af",
+    "timestamp": "2026-03-28T02:31:35.164Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
+  }
+]

@@ -144,10 +144,12 @@ export interface TaskEvent {
     | 'execution_started'
     | 'execution_completed'
     | 'execution_failed'
-    | 'execution_degraded';
+    | 'execution_degraded'
+    | 'execution_event';
   message: string;
   taskId?: string;
   approvalId?: string;
   executionId?: string;
   timestamp: string;
+  payload?: any;
 }

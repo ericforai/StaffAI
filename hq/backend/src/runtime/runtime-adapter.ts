@@ -16,6 +16,7 @@ export interface RuntimeExecutionContext {
   timeoutMs: number;
   maxRetries: number;
   inputSnapshot?: Record<string, unknown>;
+  onEvent?: (event: { type: string; data: any }) => void;
 }
 
 /**

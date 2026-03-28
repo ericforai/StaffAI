@@ -398,6 +398,8 @@ function formatTraceEventType(type: string) {
       return '执行取消';
     case 'execution_degraded':
       return '降级执行';
+    case 'execution_event':
+      return 'AI 实时推导';
     case 'cost_observed':
       return '成本统计';
     case 'tool_call_logged':
@@ -419,6 +421,8 @@ function formatTaskEventType(type: string) {
       return '执行取消';
     case 'execution_degraded':
       return '降级执行';
+    case 'execution_event':
+      return 'AI 实时推导';
     case 'cost_observed':
       return '成本统计';
     case 'tool_call_logged':
@@ -570,10 +574,10 @@ export default function TaskDetailPage() {
       approvalId: message.approvalId,
       executionId: message.executionId,
       timestamp: message.timestamp,
-    };
-    pushEvent(event);
-  }, [pushEvent]);
-
+      payload: message.payload,
+      };
+      pushEvent(event);
+      }, [pushEvent]);
   const { status: wsStatus } = useGlobalWebSocket({
     onMessage: handleWsMessage,
   });
@@ -1195,10 +1199,14 @@ export default function TaskDetailPage() {
                     <div key={`${event.taskEventType}-${event.timestamp}-${event.executionId || event.approvalId || 'task'}`} className="rounded-[1.1rem] border border-slate-200 bg-[#fcfaf5] p-4 text-sm text-slate-700">
                       <p className="font-black text-slate-900">{formatTaskEventType(event.taskEventType)}</p>
                       <p className="mt-1 text-sm text-slate-600">{event.message}</p>
+                      {event.taskEventType === 'execution_event' && event.payload?.content && (
+                        <div className="mt-2 prose prose-slate prose-xs max-w-full text-slate-600 bg-white/50 p-2 rounded-lg border border-slate-100">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{event.payload.content}</ReactMarkdown>
+                        </div>
+                      )}
                       <p className="mt-1 text-[11px] tracking-[0.16em] text-slate-500">{formatTimestamp(event.timestamp)}</p>
                     </div>
-                  ))}
-                </div>
+                  ))}                </div>
               </div>
             </section>
           </div>

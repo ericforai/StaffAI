@@ -1,0 +1,8 @@
+{
+  "taskTitle": "Delete data",
+  "riskLevel": "MEDIUM",
+  "id": "db3a9526-4271-4939-ab7b-67862c49a228",
+  "approver": "admin",
+  "approvedAt": "2026-03-26T04:16:52.935Z",
+  "reason": "Too risky"
+}

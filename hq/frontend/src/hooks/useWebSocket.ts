@@ -15,7 +15,9 @@ export interface WsMessage {
     | 'execution_started'
     | 'execution_completed'
     | 'execution_failed'
-    | 'execution_degraded';
+    | 'execution_degraded'
+    | 'execution_event';
+  payload?: any;
   taskId?: string;
   approvalId?: string;
   executionId?: string;
