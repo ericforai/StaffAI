@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { API_CONFIG } from '../utils/constants';
+import { API_CONFIG } from '../../utils/constants';
 
 // =============================================================================
 // Types
@@ -283,7 +283,7 @@ export default function MarketPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="mx-auto w-full max-w-[1800px] space-y-6">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">人才市场</h1>
@@ -476,8 +476,7 @@ export default function MarketPage() {
                     <>
                       <button
                         onClick={() => handleImport(candidate.id)}
-                        disabled={candidate.status === 'imported'}
-                        className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 disabled:bg-gray-300"
+                        className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
                       >
                         导入组织
                       </button>
