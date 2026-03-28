@@ -166,7 +166,7 @@ export interface ExecutionRecord {
   displayExecutionId?: string;
   taskId: string;
   status: ExecutionStatus | 'pending' | 'completed' | 'failed' | 'cancelled' | 'paused';
-  executor?: 'claude' | 'codex' | 'openai';
+  executor?: 'claude' | 'codex' | 'openai' | 'deerflow';
   runtimeName?: string;
   degraded?: boolean;
   retryCount?: number;
@@ -261,7 +261,7 @@ export interface CostLogEntry {
   executionId: string;
   recordedAt: string;
   source: 'runtime_output_snapshot' | 'manual' | 'unknown';
-  executor: 'claude' | 'codex' | 'openai';
+  executor: 'claude' | 'codex' | 'openai' | 'deerflow';
   runtimeName: string;
   tokensUsed?: number;
   modelVersion?: string;

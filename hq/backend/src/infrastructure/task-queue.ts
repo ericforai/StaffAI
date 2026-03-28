@@ -4,7 +4,7 @@ import type { TaskExecutionMode } from '../shared/task-types';
 
 export interface EnqueueTaskPayload {
   taskId: string;
-  executor: 'claude' | 'codex' | 'openai';
+  executor: 'claude' | 'codex' | 'openai' | 'deerflow';
   summary: string;
   executionMode?: TaskExecutionMode;
   timeoutMs?: number;
