@@ -1,0 +1,320 @@
+{
+  "executions": [
+    {
+      "id": "a1b2c3d4-e5f6-4a5b-8c7d-9e0f1a2b3c4d",
+      "displayExecutionId": "EXEC-0043",
+      "taskId": "2470e24e-4555-4c52-972f-76b7d3b9cbcf",
+      "status": "running",
+      "executor": "claude",
+      "runtimeName": "claude-3.7",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 120000,
+      "assignmentId": "assign-001",
+      "assignmentRole": "primary",
+      "workflowStepId": "step-001",
+      "workflowPlanId": "plan-001",
+      "inputSnapshot": {
+        "taskType": "code_review",
+        "priority": "high",
+        "description": "Security review of authentication module",
+        "files": ["auth.ts", "session.ts", "middleware.ts"]
+      },
+      "startedAt": "2026-03-27T10:30:00.000Z"
+    },
+    {
+      "id": "b2c3d4e5-f6a7-4b5c-9d8e-0f1a2b3c4d5e",
+      "displayExecutionId": "EXEC-0042",
+      "taskId": "2470e24e-4555-4c52-972f-76b7d3b9cbcf",
+      "status": "completed",
+      "executor": "codex",
+      "runtimeName": "codex-gpt4",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 90000,
+      "assignmentId": "assign-002",
+      "assignmentRole": "primary",
+      "workflowStepId": "step-002",
+      "workflowPlanId": "plan-002",
+      "inputSnapshot": {
+        "taskType": "refactoring",
+        "priority": "medium",
+        "description": "Optimize database query performance",
+        "targetFiles": ["queries.ts", "repository.ts"]
+      },
+      "outputSnapshot": {
+        "result": "success",
+        "metrics": {
+          "tokensUsed": 3456,
+          "responseTimeMs": 4521,
+          "queriesOptimized": 5
+        }
+      },
+      "outputSummary": "Refactored 5 database queries with index optimizations",
+      "memoryContextExcerpt": "Query performance improved by 67% on average",
+      "startedAt": "2026-03-27T09:45:00.000Z",
+      "endedAt": "2026-03-27T10:02:00.000Z",
+      "completedAt": "2026-03-27T10:02:00.000Z"
+    },
+    {
+      "id": "c3d4e5f6-a7b8-4c6d-0e9f-1a2b3c4d5e6f",
+      "displayExecutionId": "EXEC-0041",
+      "taskId": "2470e24e-4555-4c52-972f-76b7d3b9cbcf",
+      "status": "failed",
+      "executor": "openai",
+      "runtimeName": "claude-3.5",
+      "degraded": false,
+      "retryCount": 2,
+      "maxRetries": 3,
+      "timeoutMs": 60000,
+      "assignmentId": "assign-003",
+      "assignmentRole": "primary",
+      "workflowStepId": "step-003",
+      "workflowPlanId": "plan-003",
+      "inputSnapshot": {
+        "taskType": "testing",
+        "priority": "low",
+        "description": "Generate unit tests for payment service"
+      },
+      "structuredError": {
+        "code": "timeout",
+        "message": "Execution exceeded timeout limit",
+        "retriable": true,
+        "details": {
+          "attempt": "2",
+          "timeoutMs": 60000
+        }
+      },
+      "errorMessage": "Test generation timed out after 60 seconds",
+      "startedAt": "2026-03-27T09:15:00.000Z",
+      "endedAt": "2026-03-27T09:25:00.000Z",
+      "completedAt": "2026-03-27T09:25:00.000Z"
+    },
+    {
+      "id": "d4e5f6a7-b8c9-4d7e-1f0a-2b3c4d5e6f7a",
+      "displayExecutionId": "EXEC-0040",
+      "taskId": "2470e24e-4555-4c52-972f-76b7d3b9cbcf",
+      "status": "paused",
+      "executor": "claude",
+      "runtimeName": "claude-3.5",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 150000,
+      "assignmentId": "assign-004",
+      "assignmentRole": "primary",
+      "workflowStepId": "step-004",
+      "workflowPlanId": "plan-004",
+      "inputSnapshot": {
+        "taskType": "documentation",
+        "priority": "medium",
+        "description": "Generate API documentation for REST endpoints",
+        "endpoints": 45
+      },
+      "startedAt": "2026-03-27T08:30:00.000Z",
+      "endedAt": "2026-03-27T08:45:00.000Z"
+    },
+    {
+      "id": "e5f6a7b8-c9d0-4e8f-2a1b-3c4d5e6f7a8b",
+      "displayExecutionId": "EXEC-0039",
+      "taskId": "2470e24e-4555-4c52-972f-76b7d3b9cbcf",
+      "status": "cancelled",
+      "executor": "codex",
+      "runtimeName": "openai-gpt4",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 75000,
+      "assignmentId": "assign-005",
+      "assignmentRole": "primary",
+      "workflowStepId": "step-005",
+      "workflowPlanId": "plan-005",
+      "inputSnapshot": {
+        "taskType": "debugging",
+        "priority": "high",
+        "description": "Investigate memory leak in worker process"
+      },
+      "startedAt": "2026-03-27T07:50:00.000Z",
+      "endedAt": "2026-03-27T08:05:00.000Z",
+      "completedAt": "2026-03-27T08:05:00.000Z"
+    },
+    {
+      "id": "f6a7b8c9-d0e1-4f9a-3b2c-4d5e6f7a8b9c",
+      "displayExecutionId": "EXEC-0038",
+      "taskId": "2470e24e-4555-4c52-972f-76b7d3b9cbcf",
+      "status": "completed",
+      "executor": "openai",
+      "runtimeName": "claude-3.7",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 105000,
+      "assignmentId": "assign-006",
+      "assignmentRole": "primary",
+      "workflowStepId": "step-006",
+      "workflowPlanId": "plan-006",
+      "inputSnapshot": {
+        "taskType": "feature_implementation",
+        "priority": "high",
+        "description": "Implement WebSocket reconnection logic",
+        "requirements": ["exponential backoff", "max retries", "event notifications"]
+      },
+      "outputSnapshot": {
+        "result": "success",
+        "metrics": {
+          "tokensUsed": 5678,
+          "responseTimeMs": 8934,
+          "filesCreated": 3,
+          "linesOfCode": 245
+        }
+      },
+      "outputSummary": "WebSocket reconnection implemented with exponential backoff",
+      "memoryContextExcerpt": "Includes retry configuration and event emission",
+      "startedAt": "2026-03-27T07:00:00.000Z",
+      "endedAt": "2026-03-27T07:25:00.000Z",
+      "completedAt": "2026-03-27T07:25:00.000Z"
+    },
+    {
+      "id": "a7b8c9d0-e1f2-4a0b-4c5d-6e7f8a9b0c1d",
+      "displayExecutionId": "EXEC-0037",
+      "taskId": "2470e24e-4555-4c52-972f-76b7d3b9cbcf",
+      "status": "running",
+      "executor": "claude",
+      "runtimeName": "claude-3.5",
+      "degraded": true,
+      "retryCount": 1,
+      "maxRetries": 3,
+      "timeoutMs": 90000,
+      "assignmentId": "assign-007",
+      "assignmentRole": "primary",
+      "workflowStepId": "step-007",
+      "workflowPlanId": "plan-007",
+      "inputSnapshot": {
+        "taskType": "code_generation",
+        "priority": "medium",
+        "description": "Generate TypeScript interfaces for API models"
+      },
+      "startedAt": "2026-03-27T06:30:00.000Z"
+    },
+    {
+      "id": "b8c9d0e1-f2a3-4b1c-5d6e-8f9a0b1c2d3e",
+      "displayExecutionId": "EXEC-0036",
+      "taskId": "2470e24e-4555-4c52-972f-76b7d3b9cbcf",
+      "status": "completed",
+      "executor": "codex",
+      "runtimeName": "claude-3.5",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 120000,
+      "assignmentId": "assign-008",
+      "assignmentRole": "primary",
+      "workflowStepId": "step-008",
+      "workflowPlanId": "plan-008",
+      "inputSnapshot": {
+        "taskType": "migration",
+        "priority": "high",
+        "description": "Migrate authentication to OAuth2",
+        "scope": ["backend", "frontend"]
+      },
+      "outputSnapshot": {
+        "result": "success",
+        "metrics": {
+          "tokensUsed": 8934,
+          "responseTimeMs": 12456,
+          "filesModified": 12
+        }
+      },
+      "outputSummary": "OAuth2 migration completed for backend and frontend",
+      "memoryContextExcerpt": "All authentication flows updated to OAuth2 standard",
+      "startedAt": "2026-03-27T05:45:00.000Z",
+      "endedAt": "2026-03-27T06:15:00.000Z",
+      "completedAt": "2026-03-27T06:15:00.000Z"
+    },
+    {
+      "id": "c9d0e1f2-a3b4-4c2d-6e7f-0a1b2c3d4e5f",
+      "displayExecutionId": "EXEC-0035",
+      "taskId": "2470e24e-4555-4c52-972f-76b7d3b9cbcf",
+      "status": "failed",
+      "executor": "openai",
+      "runtimeName": "claude-3.7",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 60000,
+      "assignmentId": "assign-009",
+      "assignmentRole": "primary",
+      "workflowStepId": "step-009",
+      "workflowPlanId": "plan-009",
+      "inputSnapshot": {
+        "taskType": "testing",
+        "priority": "medium",
+        "description": "Generate E2E tests for checkout flow"
+      },
+      "structuredError": {
+        "code": "validation_error",
+        "message": "Invalid test configuration",
+        "retriable": false,
+        "details": {
+          "errors": ["Missing page objects", "Invalid selectors"]
+        }
+      },
+      "errorMessage": "Test configuration validation failed",
+      "startedAt": "2026-03-27T05:00:00.000Z",
+      "endedAt": "2026-03-27T05:08:00.000Z",
+      "completedAt": "2026-03-27T05:08:00.000Z"
+    },
+    {
+      "id": "d0e1f2a3-b4c5-4d3e-7f8a-1b2c3d4e5f6a",
+      "displayExecutionId": "EXEC-0034",
+      "taskId": "2470e24e-4555-4c52-972f-76b7d3b9cbcf",
+      "status": "completed",
+      "executor": "claude",
+      "runtimeName": "codex-gpt4",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 135000,
+      "assignmentId": "assign-010",
+      "assignmentRole": "primary",
+      "workflowStepId": "step-010",
+      "workflowPlanId": "plan-010",
+      "inputSnapshot": {
+        "taskType": "architecture",
+        "priority": "high",
+        "description": "Design microservices architecture for scalability",
+        "constraints": ["stateless", "event-driven", "fault-tolerant"]
+      },
+      "outputSnapshot": {
+        "result": "success",
+        "metrics": {
+          "tokensUsed": 12456,
+          "responseTimeMs": 18234,
+          "diagramsGenerated": 5
+        }
+      },
+      "outputSummary": "Microservices architecture design completed with 5 service boundaries",
+      "memoryContextExcerpt": "Includes API gateway, event bus, and service mesh recommendations",
+      "startedAt": "2026-03-27T04:00:00.000Z",
+      "endedAt": "2026-03-27T04:35:00.000Z",
+      "completedAt": "2026-03-27T04:35:00.000Z"
+    }
+  ],
+  "summary": {
+    "total": 10,
+    "statusCounts": {
+      "running": 2,
+      "completed": 5,
+      "failed": 2,
+      "paused": 1,
+      "cancelled": 0
+    },
+    "executorCounts": {
+      "claude": 4,
+      "codex": 3,
+      "openai": 3
+    }
+  }
+}

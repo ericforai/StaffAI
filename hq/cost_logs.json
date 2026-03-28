@@ -1,0 +1,98 @@
+[
+  {
+    "id": "dedb54e0-bcf8-40f7-bdd6-23955f3d1d41",
+    "taskId": "8d5112d3-9510-43d6-bea7-e429b0af200f",
+    "executionId": "fb318d65-57e2-4dc5-b962-4936c4c81449",
+    "recordedAt": "2026-03-26T09:41:31.959Z",
+    "source": "runtime_output_snapshot",
+    "executor": "openai",
+    "runtimeName": "openai_api",
+    "tokensUsed": 50,
+    "modelVersion": "glm-4-flash",
+    "responseTimeMs": 953
+  },
+  {
+    "id": "26f82921-326e-4b4d-ace5-2e1fd39d1ea2",
+    "taskId": "b0a00193-f032-4f08-957c-2be6af5840b2",
+    "executionId": "8241869f-b3d6-49b3-ade4-54010f162c2d",
+    "recordedAt": "2026-03-26T09:43:35.696Z",
+    "source": "runtime_output_snapshot",
+    "executor": "openai",
+    "runtimeName": "openai_api",
+    "tokensUsed": 426,
+    "modelVersion": "glm-4-flash",
+    "responseTimeMs": 17507
+  },
+  {
+    "id": "9e4fc68f-8393-4ce8-8303-4dd459e08835",
+    "taskId": "20260327001",
+    "executionId": "c4521212-eb44-4123-87fe-c35909bea715",
+    "recordedAt": "2026-03-27T02:17:02.488Z",
+    "source": "runtime_output_snapshot",
+    "executor": "openai",
+    "runtimeName": "openai_api",
+    "tokensUsed": 106,
+    "modelVersion": "glm-4-flash",
+    "responseTimeMs": 3069
+  },
+  {
+    "id": "ff0790ce-e565-42b1-b691-d386a16d44d8",
+    "taskId": "20260327005",
+    "executionId": "f9257991-576a-451b-90f3-78d9d3890e60",
+    "recordedAt": "2026-03-27T03:16:07.400Z",
+    "source": "runtime_output_snapshot",
+    "executor": "openai",
+    "runtimeName": "openai_api",
+    "tokensUsed": 195,
+    "modelVersion": "glm-4-flash",
+    "responseTimeMs": 6235
+  },
+  {
+    "id": "ea99401c-c714-49b5-a375-22cd4b5c169c",
+    "taskId": "20260327007",
+    "executionId": "6d3124f5-981a-416c-a760-bb4821932f94",
+    "recordedAt": "2026-03-27T03:20:43.940Z",
+    "source": "runtime_output_snapshot",
+    "executor": "openai",
+    "runtimeName": "openai_api",
+    "tokensUsed": 284,
+    "modelVersion": "glm-4-flash",
+    "responseTimeMs": 8853
+  },
+  {
+    "id": "43170350-6daf-4152-b8e7-d5e4d9b654a6",
+    "taskId": "20260327001",
+    "executionId": "ae1de8f0-5fa2-40a4-b9d8-69a89b831f0b",
+    "recordedAt": "2026-03-27T04:06:23.684Z",
+    "source": "runtime_output_snapshot",
+    "executor": "openai",
+    "runtimeName": "openai_api",
+    "tokensUsed": 373,
+    "modelVersion": "glm-4-flash",
+    "responseTimeMs": 14005
+  },
+  {
+    "id": "35870c0b-3e98-4dcb-a9f0-f2b3f410f511",
+    "taskId": "20260327024",
+    "executionId": "f106e707-c4b8-4802-ba05-7ed8c8781f0c",
+    "recordedAt": "2026-03-27T05:20:01.423Z",
+    "source": "runtime_output_snapshot",
+    "executor": "openai",
+    "runtimeName": "openai_api",
+    "tokensUsed": 578,
+    "modelVersion": "glm-4-flash",
+    "responseTimeMs": 20291
+  },
+  {
+    "id": "ea72e064-3f7d-4e5c-9551-88a092144a3a",
+    "taskId": "20260327029",
+    "executionId": "bdcc3863-04ce-4d28-96c6-3c5e0947656e",
+    "recordedAt": "2026-03-27T05:58:46.200Z",
+    "source": "runtime_output_snapshot",
+    "executor": "openai",
+    "runtimeName": "openai_api",
+    "tokensUsed": 94,
+    "modelVersion": "glm-4-flash",
+    "responseTimeMs": 2254
+  }
+]

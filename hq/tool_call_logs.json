@@ -1,0 +1,15 @@
+[
+  {
+    "id": "34a1c745-1222-4b05-a6b6-7fe597b80cdc",
+    "executionId": "c7f45f36-cda5-469f-ba67-d5c92962075e",
+    "taskId": "20260327021",
+    "toolName": "test_runner",
+    "actorRole": "backend-developer",
+    "status": "completed",
+    "riskLevel": "medium",
+    "inputSummary": "{\"target\":\"backend\"}",
+    "createdAt": "2026-03-27T04:08:53.988Z",
+    "updatedAt": "2026-03-27T04:08:53.988Z",
+    "outputSummary": "Tests for backend failed."
+  }
+]

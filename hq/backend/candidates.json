@@ -1,0 +1,1882 @@
+[
+  {
+    "source": "github",
+    "url": "https://github.com/eigent-ai/eigent",
+    "owner": "eigent-ai",
+    "name": "eigent",
+    "description": "Eigent: The Open Source Cowork Desktop to Unlock Your Exceptional Productivity. Local and Free Alternative to Claude Cowork.",
+    "language": "TypeScript",
+    "score": {
+      "stars": 13276,
+      "forks": 1545,
+      "lastUpdated": "2026-03-28T02:09:46Z"
+    },
+    "topics": [
+      "agent-framework",
+      "agent-skills",
+      "agentic-ai",
+      "agentic-workflow",
+      "claude-cowork",
+      "claude-cowork-alternative",
+      "claude-cowork-free",
+      "desktop-agent",
+      "multi-agent-systems"
+    ],
+    "evaluation": {
+      "score": 51,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Strong community adoption",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T00:40:05.529Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "agent-framework",
+        "agent-skills",
+        "agentic-ai",
+        "agentic-workflow",
+        "claude-cowork"
+      ],
+      "description": "Eigent: The Open Source Cowork Desktop to Unlock Your Exceptional Productivity. Local and Free Alternative to Claude Cowork.",
+      "skills": [
+        "TypeScript"
+      ]
+    },
+    "status": "imported",
+    "id": "candidate_1774658405530_q3vdrpmkq",
+    "createdAt": "2026-03-28T00:40:05.530Z",
+    "updatedAt": "2026-03-28T03:20:37.152Z",
+    "observeNotes": "高潜力Agent框架",
+    "observedAt": "2026-03-28T00:40:44.234Z",
+    "importedAs": {
+      "employeeId": "emp_eigent_ai_eigent",
+      "importedAt": "2026-03-28T00:40:44.307Z"
+    }
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/open-gitagent/gitagent",
+    "owner": "open-gitagent",
+    "name": "gitagent",
+    "description": "A framework-agnostic, git-native standard for defining AI agents",
+    "language": "TypeScript",
+    "score": {
+      "stars": 1998,
+      "forks": 206,
+      "lastUpdated": "2026-03-28T03:03:34Z"
+    },
+    "topics": [
+      "agent",
+      "agent-framework",
+      "agent-skills",
+      "agents",
+      "assistant",
+      "claude-code",
+      "gitagent",
+      "open-standard",
+      "openclaw",
+      "skills"
+    ],
+    "evaluation": {
+      "score": 48,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Strong community adoption",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T00:40:45.303Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "agent-framework",
+        "agent-skills",
+        "agents",
+        "assistant",
+        "claude-code"
+      ],
+      "description": "A framework-agnostic, git-native standard for defining AI agents",
+      "skills": [
+        "TypeScript"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774658405530_bpf5b7h33",
+    "createdAt": "2026-03-28T00:40:05.530Z",
+    "updatedAt": "2026-03-28T03:20:37.152Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/langwatch/better-agents",
+    "owner": "langwatch",
+    "name": "better-agents",
+    "description": "Standards for building agents, better",
+    "language": "TypeScript",
+    "score": {
+      "stars": 1506,
+      "forks": 152,
+      "lastUpdated": "2026-03-26T00:00:59Z"
+    },
+    "topics": [
+      "agent-framework",
+      "agent-testing",
+      "ai-agents",
+      "cli",
+      "dev-tool",
+      "lllm",
+      "llmops",
+      "mcp",
+      "python",
+      "typescript"
+    ],
+    "evaluation": {
+      "score": 46,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Strong community adoption",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T00:40:05.529Z"
+    },
+    "capability": {
+      "category": "testing",
+      "specialties": [
+        "agent-framework",
+        "agent-testing",
+        "ai-agents",
+        "cli",
+        "dev-tool"
+      ],
+      "description": "Standards for building agents, better",
+      "skills": [
+        "TypeScript",
+        "mcp",
+        "python",
+        "typescript"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774658405530_2pvxa1nlf",
+    "createdAt": "2026-03-28T00:40:05.530Z",
+    "updatedAt": "2026-03-28T03:20:37.152Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/SmythOS/sre",
+    "owner": "SmythOS",
+    "name": "sre",
+    "description": "The SmythOS Runtime Environment (SRE) is an open-source, cloud-native runtime for agentic AI. Secure, modular, and production-ready, it lets developers build, run, and manage intelligent agents across local, cloud, and edge environments.",
+    "language": "TypeScript",
+    "score": {
+      "stars": 1246,
+      "forks": 188,
+      "lastUpdated": "2026-03-27T03:21:23Z"
+    },
+    "topics": [
+      "agent-framework",
+      "agents",
+      "agi",
+      "ai",
+      "ai-agents",
+      "artificial-intelligence",
+      "autogpt",
+      "autonomous-agents",
+      "chatgpt",
+      "langchain",
+      "llm",
+      "llmops",
+      "mcp",
+      "multi-agent",
+      "multi-agent-systems",
+      "n8n",
+      "openai",
+      "orchestration",
+      "rag",
+      "retrieval-augmented-generation"
+    ],
+    "evaluation": {
+      "score": 48,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Strong community adoption",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T00:40:05.529Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "agent-framework",
+        "agents",
+        "agi",
+        "ai-agents",
+        "artificial-intelligence"
+      ],
+      "description": "The SmythOS Runtime Environment (SRE) is an open-source, cloud-native runtime for agentic AI. Secure, modular, and production-ready, it lets developers build, run, and manage intelligent agents across local, cloud, and edge environments.",
+      "skills": [
+        "TypeScript",
+        "mcp"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774658405530_qfy2a817k",
+    "createdAt": "2026-03-28T00:40:05.530Z",
+    "updatedAt": "2026-03-28T03:20:37.152Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/inkeep/agents",
+    "owner": "inkeep",
+    "name": "agents",
+    "description": "Create AI Agents in a No-Code Visual Builder or TypeScript SDK with full 2-way sync. For shipping AI assistants and multi-agent AI workflows.",
+    "language": "TypeScript",
+    "score": {
+      "stars": 1030,
+      "forks": 115,
+      "lastUpdated": "2026-03-27T23:42:48Z"
+    },
+    "topics": [
+      "agent",
+      "agent-builder",
+      "agent-framework",
+      "agents-sdk",
+      "ai",
+      "ai-agent",
+      "ai-agents",
+      "aiagentframework",
+      "developer-sdk",
+      "inkeep",
+      "llms",
+      "low-code",
+      "mcp",
+      "mcp-server",
+      "mulit-agent",
+      "no-code",
+      "self-hosted",
+      "typescript",
+      "workflow",
+      "workflows"
+    ],
+    "evaluation": {
+      "score": 47,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Strong community adoption",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T00:40:05.529Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "agent-builder",
+        "agent-framework",
+        "agents-sdk",
+        "ai-agent",
+        "ai-agents"
+      ],
+      "description": "Create AI Agents in a No-Code Visual Builder or TypeScript SDK with full 2-way sync. For shipping AI assistants and multi-agent AI workflows.",
+      "skills": [
+        "TypeScript",
+        "mcp",
+        "typescript"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774658405530_h7kqf267f",
+    "createdAt": "2026-03-28T00:40:05.530Z",
+    "updatedAt": "2026-03-28T03:20:37.152Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/daydreamsai/daydreams",
+    "owner": "daydreamsai",
+    "name": "daydreams",
+    "description": "Daydreams is a set of tools for building agents for commerce",
+    "language": "TypeScript",
+    "score": {
+      "stars": 606,
+      "forks": 130,
+      "lastUpdated": "2026-03-19T18:22:07Z"
+    },
+    "topics": [
+      "8004",
+      "agent-framework",
+      "agent-frameworks",
+      "agents",
+      "ai",
+      "cdp",
+      "erc8004",
+      "gaming",
+      "llm",
+      "mcp",
+      "x402"
+    ],
+    "evaluation": {
+      "score": 45,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T00:40:05.529Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "8004",
+        "agent-framework",
+        "agent-frameworks",
+        "agents",
+        "cdp"
+      ],
+      "description": "Daydreams is a set of tools for building agents for commerce",
+      "skills": [
+        "TypeScript",
+        "mcp"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774658405530_ovxdp0lqy",
+    "createdAt": "2026-03-28T00:40:05.530Z",
+    "updatedAt": "2026-03-28T03:20:37.152Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/poly-mcp/PolyMCP",
+    "owner": "poly-mcp",
+    "name": "PolyMCP",
+    "description": "Polymcp provides a simple and efficient way to interact with MCP servers using custom agents",
+    "language": "TypeScript",
+    "score": {
+      "stars": 162,
+      "forks": 10,
+      "lastUpdated": "2026-03-21T21:53:44Z"
+    },
+    "topics": [
+      "agent-framework",
+      "ai-agent",
+      "anthropic",
+      "code-mode-mcp",
+      "llm-integration",
+      "mcp",
+      "mcp-client",
+      "mcp-inspector",
+      "mcp-server",
+      "model-context-protocol",
+      "ollama",
+      "open-source",
+      "openai",
+      "polymcp",
+      "python",
+      "skills",
+      "stdio-mcp",
+      "tool-orchestration",
+      "typescript",
+      "wasm"
+    ],
+    "evaluation": {
+      "score": 41,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T00:40:05.529Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "agent-framework",
+        "ai-agent",
+        "anthropic",
+        "code-mode-mcp",
+        "llm-integration"
+      ],
+      "description": "Polymcp provides a simple and efficient way to interact with MCP servers using custom agents",
+      "skills": [
+        "TypeScript",
+        "mcp",
+        "python",
+        "typescript"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774658405530_ddhnq3trg",
+    "createdAt": "2026-03-28T00:40:05.530Z",
+    "updatedAt": "2026-03-28T03:20:37.152Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/axar-ai/axar",
+    "owner": "axar-ai",
+    "name": "axar",
+    "description": "Minimal typescript agent framework that keeps it simple and gives you control - no BS",
+    "language": "TypeScript",
+    "score": {
+      "stars": 157,
+      "forks": 14,
+      "lastUpdated": "2026-03-23T18:33:45Z"
+    },
+    "topics": [
+      "agent-framework",
+      "agent-framework-javascript",
+      "agentic-ai",
+      "agents",
+      "ai",
+      "generative-ai",
+      "javascript",
+      "llm",
+      "llm-framework",
+      "nodejs",
+      "typescript",
+      "workflows"
+    ],
+    "evaluation": {
+      "score": 41,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T00:40:05.529Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "agent-framework",
+        "agent-framework-javascript",
+        "agentic-ai",
+        "agents",
+        "generative-ai"
+      ],
+      "description": "Minimal typescript agent framework that keeps it simple and gives you control - no BS",
+      "skills": [
+        "TypeScript",
+        "javascript",
+        "typescript"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774658405530_ua2htv3pq",
+    "createdAt": "2026-03-28T00:40:05.530Z",
+    "updatedAt": "2026-03-28T03:20:37.152Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/beidald/liliumai",
+    "owner": "beidald",
+    "name": "liliumai",
+    "description": "Lilium AI: The ultimate personal AI agent framework for autonomous computer control. Featuring browser automation, shell execution, and multi-channel integration (WeChat/Telegram/Discord).",
+    "language": "TypeScript",
+    "score": {
+      "stars": 99,
+      "forks": 11,
+      "lastUpdated": "2026-03-28T01:36:36Z"
+    },
+    "topics": [
+      "agent-framework",
+      "ai-agent",
+      "ai-agents",
+      "automation",
+      "autonomous-agents",
+      "browser-automation",
+      "chatbot",
+      "llm",
+      "llm-productivity",
+      "local-ai",
+      "nodejs",
+      "ollama",
+      "openai",
+      "personal-assistant",
+      "typescript",
+      "wechaty",
+      "wechaty-robot"
+    ],
+    "evaluation": {
+      "score": 43,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T00:40:05.529Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "agent-framework",
+        "ai-agent",
+        "ai-agents",
+        "autonomous-agents",
+        "browser-automation"
+      ],
+      "description": "Lilium AI: The ultimate personal AI agent framework for autonomous computer control. Featuring browser automation, shell execution, and multi-channel integration (WeChat/Telegram/Discord).",
+      "skills": [
+        "TypeScript",
+        "typescript"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774658405530_mn6pm2zzw",
+    "createdAt": "2026-03-28T00:40:05.530Z",
+    "updatedAt": "2026-03-28T03:20:37.152Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/agentailor/fullstack-langgraph-nextjs-agent",
+    "owner": "agentailor",
+    "name": "fullstack-langgraph-nextjs-agent",
+    "description": "  Production-ready Next.js template for building AI agents with LangGraph.js. Features MCP integration for dynamic tool loading, human-in-the-loop tool approval, persistent conversation memory   with PostgreSQL, and real-time streaming responses. Built with TypeScript, React, Prisma, and Tailwind CSS.",
+    "language": "TypeScript",
+    "score": {
+      "stars": 91,
+      "forks": 26,
+      "lastUpdated": "2026-03-25T05:44:59Z"
+    },
+    "topics": [
+      "agent-framework",
+      "ai-agent",
+      "langchain",
+      "langgraph",
+      "llm",
+      "mcp",
+      "model-context-protocol",
+      "nextjs",
+      "openai",
+      "postgresql",
+      "prisma",
+      "react"
+    ],
+    "evaluation": {
+      "score": 44,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T00:40:05.529Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "agent-framework",
+        "ai-agent",
+        "langchain",
+        "langgraph",
+        "mcp"
+      ],
+      "description": "  Production-ready Next.js template for building AI agents with LangGraph.js. Features MCP integration for dynamic tool loading, human-in-the-loop tool approval, persistent conversation memory   with PostgreSQL, and real-time streaming responses. Built with TypeScript, React, Prisma, and Tailwind CSS.",
+      "skills": [
+        "TypeScript",
+        "mcp"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774658405530_8zuemp1r0",
+    "createdAt": "2026-03-28T00:40:05.530Z",
+    "updatedAt": "2026-03-28T03:20:37.152Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/zhayujie/chatgpt-on-wechat",
+    "owner": "zhayujie",
+    "name": "chatgpt-on-wechat",
+    "description": "CowAgent是基于大模型的超级AI助理，能主动思考和任务规划、访问操作系统和外部资源、创造和执行Skills、拥有长期记忆并不断成长，比OpenClaw更轻量和便捷。同时支持微信、飞书、钉钉、企微、QQ、公众号、网页等接入，可选择OpenAI/Claude/Gemini/DeepSeek/ Qwen/GLM/Kimi/LinkAI，能处理文本、语音、图片和文件，可快速搭建个人AI助理和企业数字员工。",
+    "language": "Python",
+    "score": {
+      "stars": 42593,
+      "forks": 9866,
+      "lastUpdated": "2026-03-28T03:10:00Z"
+    },
+    "topics": [
+      "ai",
+      "ai-agent",
+      "chatgpt",
+      "claude",
+      "deepseek",
+      "dingtalk",
+      "feishu-bot",
+      "gemini",
+      "kimi",
+      "linkai",
+      "llm",
+      "mcp",
+      "multi-agent",
+      "openai",
+      "openclaw",
+      "python3",
+      "qwen",
+      "skills",
+      "wechat",
+      "weixin"
+    ],
+    "evaluation": {
+      "score": 51,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Strong community adoption",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T03:20:19.857Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "ai-agent",
+        "chatgpt",
+        "claude",
+        "deepseek",
+        "dingtalk"
+      ],
+      "description": "CowAgent是基于大模型的超级AI助理，能主动思考和任务规划、访问操作系统和外部资源、创造和执行Skills、拥有长期记忆并不断成长，比OpenClaw更轻量和便捷。同时支持微信、飞书、钉钉、企微、QQ、公众号、网页等接入，可选择OpenAI/Claude/Gemini/DeepSeek/ Qwen/GLM/Kimi/LinkAI，能处理文本、语音、图片和文件，可快速搭建个人AI助理和企业数字员工。",
+      "skills": [
+        "Python",
+        "mcp"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774668019858_hvfbafcyg",
+    "createdAt": "2026-03-28T03:20:19.858Z",
+    "updatedAt": "2026-03-28T03:20:19.858Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/activepieces/activepieces",
+    "owner": "activepieces",
+    "name": "activepieces",
+    "description": "AI Agents & MCPs & AI Workflow Automation • (~400 MCP servers for AI agents) • AI Automation / AI Agent with MCPs • AI Workflows & AI Agents • MCPs for AI Agents",
+    "language": "TypeScript",
+    "score": {
+      "stars": 21456,
+      "forks": 3470,
+      "lastUpdated": "2026-03-28T01:58:19Z"
+    },
+    "topics": [
+      "ai-agent",
+      "ai-agent-tools",
+      "ai-agents",
+      "ai-agents-framework",
+      "mcp",
+      "mcp-server",
+      "mcp-tools",
+      "mcps",
+      "n8n-alternative",
+      "no-code-automation",
+      "workflow",
+      "workflow-automation",
+      "workflows"
+    ],
+    "evaluation": {
+      "score": 51,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Strong community adoption",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T03:20:19.857Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "ai-agent",
+        "ai-agent-tools",
+        "ai-agents",
+        "ai-agents-framework",
+        "mcp"
+      ],
+      "description": "AI Agents & MCPs & AI Workflow Automation • (~400 MCP servers for AI agents) • AI Automation / AI Agent with MCPs • AI Workflows & AI Agents • MCPs for AI Agents",
+      "skills": [
+        "TypeScript",
+        "mcp"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774668019859_e11iv1d72",
+    "createdAt": "2026-03-28T03:20:19.858Z",
+    "updatedAt": "2026-03-28T03:20:19.858Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/Panniantong/Agent-Reach",
+    "owner": "Panniantong",
+    "name": "Agent-Reach",
+    "description": "Give your AI agent eyes to see the entire internet. Read & search Twitter, Reddit, YouTube, GitHub, Bilibili, XiaoHongShu — one CLI, zero API fees.",
+    "language": "Python",
+    "score": {
+      "stars": 10988,
+      "forks": 807,
+      "lastUpdated": "2026-03-28T02:36:03Z"
+    },
+    "topics": [
+      "agent-infrastructure",
+      "ai-agent",
+      "ai-search",
+      "automation",
+      "bilibili",
+      "claude-code",
+      "cli",
+      "cursor",
+      "free-api",
+      "llm-tools",
+      "mcp",
+      "python",
+      "reddit-scraper",
+      "twitter-scraper",
+      "web-scraper",
+      "xiaohongshu",
+      "youtube-transcript"
+    ],
+    "evaluation": {
+      "score": 49,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Strong community adoption",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T03:20:19.857Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "agent-infrastructure",
+        "ai-agent",
+        "ai-search",
+        "bilibili",
+        "claude-code"
+      ],
+      "description": "Give your AI agent eyes to see the entire internet. Read & search Twitter, Reddit, YouTube, GitHub, Bilibili, XiaoHongShu — one CLI, zero API fees.",
+      "skills": [
+        "Python",
+        "mcp",
+        "python"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774668019859_k35kyxlig",
+    "createdAt": "2026-03-28T03:20:19.858Z",
+    "updatedAt": "2026-03-28T03:20:19.858Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/UnicomAI/wanwu",
+    "owner": "UnicomAI",
+    "name": "wanwu",
+    "description": "China Unicom's Yuanjing Wanwu Agent Platform is an enterprise-grade, multi-tenant AI agent development platform. It helps users build applications such as intelligent agents, workflows, and rag, and also supports model management. The platform features a developer-friendly license, and we welcome all developers to build upon the platform.",
+    "language": "Go",
+    "score": {
+      "stars": 4277,
+      "forks": 85,
+      "lastUpdated": "2026-03-28T02:47:01Z"
+    },
+    "topics": [
+      "agent",
+      "agentic-ai",
+      "agentic-framework",
+      "ai",
+      "ai-agent",
+      "ai-agent-development-framework",
+      "ai-agents-framework",
+      "development",
+      "genai",
+      "golang",
+      "llm",
+      "mcp",
+      "open-ai",
+      "rag",
+      "wanwu",
+      "workflow"
+    ],
+    "evaluation": {
+      "score": 46,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Strong community adoption",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T03:20:19.858Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "agentic-ai",
+        "agentic-framework",
+        "ai-agent",
+        "ai-agent-development-framework",
+        "ai-agents-framework"
+      ],
+      "description": "China Unicom's Yuanjing Wanwu Agent Platform is an enterprise-grade, multi-tenant AI agent development platform. It helps users build applications such as intelligent agents, workflows, and rag, and also supports model management. The platform features a developer-friendly license, and we welcome all developers to build upon the platform.",
+      "skills": [
+        "Go",
+        "mcp"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774668019859_qqy8u6adw",
+    "createdAt": "2026-03-28T03:20:19.858Z",
+    "updatedAt": "2026-03-28T03:20:19.858Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/groupultra/telegram-search",
+    "owner": "groupultra",
+    "name": "telegram-search",
+    "description": "🔍 导出并模糊搜索 Telegram 聊天记录 | Export and fuzzy search your Telegram chat history",
+    "language": "TypeScript",
+    "score": {
+      "stars": 3849,
+      "forks": 246,
+      "lastUpdated": "2026-03-27T21:31:29Z"
+    },
+    "topics": [
+      "ai",
+      "ai-agent",
+      "embedding",
+      "mcp",
+      "telegram",
+      "telegram-bot"
+    ],
+    "evaluation": {
+      "score": 47,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Strong community adoption",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T03:20:19.858Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "ai-agent",
+        "embedding",
+        "mcp",
+        "telegram",
+        "telegram-bot"
+      ],
+      "description": "🔍 导出并模糊搜索 Telegram 聊天记录 | Export and fuzzy search your Telegram chat history",
+      "skills": [
+        "TypeScript",
+        "mcp"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774668019859_ko8fsofue",
+    "createdAt": "2026-03-28T03:20:19.858Z",
+    "updatedAt": "2026-03-28T03:20:19.858Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/zebbern/claude-code-guide",
+    "owner": "zebbern",
+    "name": "claude-code-guide",
+    "description": "Claude Code Guide - Setup, Commands, workflows, agents, skills & tips-n-tricks go from beginner to power user!",
+    "score": {
+      "stars": 3739,
+      "forks": 346,
+      "lastUpdated": "2026-03-28T02:55:05Z"
+    },
+    "topics": [
+      "ai",
+      "ai-agent",
+      "ai-agent-tools",
+      "anthropic-claude",
+      "claude",
+      "claude-ai",
+      "claude-api",
+      "claude-code",
+      "claude-code-communication",
+      "claude-code-guide",
+      "claude-code-skills",
+      "claude-commands",
+      "claude-desktop",
+      "claude-mcp",
+      "claude-sonnet",
+      "code",
+      "mcp",
+      "mcp-agents",
+      "mcp-tools",
+      "vscode-extension"
+    ],
+    "evaluation": {
+      "score": 47,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Strong community adoption",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T03:20:19.858Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "ai-agent",
+        "ai-agent-tools",
+        "anthropic-claude",
+        "claude",
+        "claude-ai"
+      ],
+      "description": "Claude Code Guide - Setup, Commands, workflows, agents, skills & tips-n-tricks go from beginner to power user!",
+      "skills": [
+        "mcp"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774668019859_ejtgqkxrp",
+    "createdAt": "2026-03-28T03:20:19.858Z",
+    "updatedAt": "2026-03-28T03:20:19.858Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/can1357/oh-my-pi",
+    "owner": "can1357",
+    "name": "oh-my-pi",
+    "description": "⌥  AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more",
+    "language": "TypeScript",
+    "score": {
+      "stars": 2423,
+      "forks": 214,
+      "lastUpdated": "2026-03-28T01:45:31Z"
+    },
+    "topics": [
+      "ai-agent",
+      "ai-coding-agent",
+      "anthropic",
+      "bun",
+      "claude",
+      "cli",
+      "coding-assistant",
+      "llm",
+      "mcp",
+      "multi-provider",
+      "openai",
+      "rust",
+      "terminal",
+      "tui",
+      "typescript"
+    ],
+    "evaluation": {
+      "score": 46,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Strong community adoption",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T03:20:19.858Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "ai-agent",
+        "ai-coding-agent",
+        "anthropic",
+        "bun",
+        "claude"
+      ],
+      "description": "⌥  AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more",
+      "skills": [
+        "TypeScript",
+        "mcp",
+        "rust",
+        "typescript"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774668019859_87z6sscbm",
+    "createdAt": "2026-03-28T03:20:19.858Z",
+    "updatedAt": "2026-03-28T03:20:19.858Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/moltis-org/moltis",
+    "owner": "moltis-org",
+    "name": "moltis",
+    "description": "A Rust-native claw you can trust. One binary — sandboxed, secure, auditable. Voice, memory, MCP tools, and multi-channel access built-in.",
+    "language": "Rust",
+    "score": {
+      "stars": 2377,
+      "forks": 276,
+      "lastUpdated": "2026-03-28T03:14:09Z"
+    },
+    "topics": [
+      "ai-agent",
+      "ai-assistant",
+      "clawdbot",
+      "llm",
+      "mcp",
+      "openclaw",
+      "rust",
+      "sandbox",
+      "self-hosted",
+      "single-binary",
+      "telegram-bot",
+      "voice-assistant"
+    ],
+    "evaluation": {
+      "score": 49,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Strong community adoption",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T03:20:19.858Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "ai-agent",
+        "ai-assistant",
+        "clawdbot",
+        "mcp",
+        "openclaw"
+      ],
+      "description": "A Rust-native claw you can trust. One binary — sandboxed, secure, auditable. Voice, memory, MCP tools, and multi-channel access built-in.",
+      "skills": [
+        "Rust",
+        "mcp",
+        "rust"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774668019859_8fyg6f19o",
+    "createdAt": "2026-03-28T03:20:19.858Z",
+    "updatedAt": "2026-03-28T03:20:19.858Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/Q00/ouroboros",
+    "owner": "Q00",
+    "name": "ouroboros",
+    "description": "Stop prompting. Start specifying.",
+    "language": "Python",
+    "score": {
+      "stars": 1874,
+      "forks": 165,
+      "lastUpdated": "2026-03-27T20:47:24Z"
+    },
+    "topics": [
+      "ai-agent",
+      "claude-code",
+      "codex-cli",
+      "devtools",
+      "evaluation",
+      "llm",
+      "mcp",
+      "multi-agent",
+      "prompt-engineering",
+      "python",
+      "spec-driven-development",
+      "workflow-automation"
+    ],
+    "evaluation": {
+      "score": 44,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Strong community adoption",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T03:20:19.858Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "ai-agent",
+        "claude-code",
+        "codex-cli",
+        "devtools",
+        "evaluation"
+      ],
+      "description": "Stop prompting. Start specifying.",
+      "skills": [
+        "Python",
+        "mcp",
+        "python"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774668019859_516hnyxp1",
+    "createdAt": "2026-03-28T03:20:19.858Z",
+    "updatedAt": "2026-03-28T03:20:19.858Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/asheshgoplani/agent-deck",
+    "owner": "asheshgoplani",
+    "name": "agent-deck",
+    "description": "Terminal session manager for AI coding agents. One TUI for Claude, Gemini, OpenCode, Codex, and more.",
+    "language": "Go",
+    "score": {
+      "stars": 1764,
+      "forks": 188,
+      "lastUpdated": "2026-03-28T02:50:08Z"
+    },
+    "topics": [
+      "ai-agent",
+      "ai-agents",
+      "ai-coding-assistant",
+      "aider",
+      "bubble-tea",
+      "claude-code",
+      "cli",
+      "codex",
+      "developer-tools",
+      "discord",
+      "gemini-cli",
+      "golang",
+      "mcp",
+      "productivity",
+      "session-manager",
+      "terminal",
+      "tmux",
+      "tui"
+    ],
+    "evaluation": {
+      "score": 48,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Strong community adoption",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T03:20:19.858Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "ai-agent",
+        "ai-agents",
+        "ai-coding-assistant",
+        "aider",
+        "bubble-tea"
+      ],
+      "description": "Terminal session manager for AI coding agents. One TUI for Claude, Gemini, OpenCode, Codex, and more.",
+      "skills": [
+        "Go",
+        "mcp"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774668019859_ksbykfzt0",
+    "createdAt": "2026-03-28T03:20:19.858Z",
+    "updatedAt": "2026-03-28T03:20:19.858Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/microsoft/autogen",
+    "owner": "microsoft",
+    "name": "autogen",
+    "description": "A programming framework for agentic AI",
+    "language": "Python",
+    "score": {
+      "stars": 56309,
+      "forks": 8457,
+      "lastUpdated": "2026-03-28T03:17:11Z"
+    },
+    "topics": [
+      "agentic",
+      "agentic-agi",
+      "agents",
+      "ai",
+      "autogen",
+      "autogen-ecosystem",
+      "chatgpt",
+      "framework",
+      "llm-agent",
+      "llm-framework"
+    ],
+    "evaluation": {
+      "score": 50,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Strong community adoption",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T03:20:31.234Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "agentic",
+        "agentic-agi",
+        "agents",
+        "autogen",
+        "autogen-ecosystem"
+      ],
+      "description": "A programming framework for agentic AI",
+      "skills": [
+        "Python"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774668031236_5iyhqob6r",
+    "createdAt": "2026-03-28T03:20:31.236Z",
+    "updatedAt": "2026-03-28T03:20:31.236Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/2noise/ChatTTS",
+    "owner": "2noise",
+    "name": "ChatTTS",
+    "description": "A generative speech model for daily dialogue.",
+    "language": "Python",
+    "score": {
+      "stars": 38998,
+      "forks": 4231,
+      "lastUpdated": "2026-03-28T02:44:20Z"
+    },
+    "topics": [
+      "agent",
+      "chat",
+      "chatgpt",
+      "chattts",
+      "chinese",
+      "chinese-language",
+      "english",
+      "english-language",
+      "gpt",
+      "llm",
+      "llm-agent",
+      "natural-language-inference",
+      "python",
+      "text-to-speech",
+      "torch",
+      "torchaudio",
+      "tts"
+    ],
+    "evaluation": {
+      "score": 50,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Strong community adoption",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T03:20:31.234Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "chat",
+        "chatgpt",
+        "chattts",
+        "chinese",
+        "chinese-language"
+      ],
+      "description": "A generative speech model for daily dialogue.",
+      "skills": [
+        "Python",
+        "python"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774668031236_xyjjha8vb",
+    "createdAt": "2026-03-28T03:20:31.236Z",
+    "updatedAt": "2026-03-28T03:20:31.236Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/letta-ai/letta",
+    "owner": "letta-ai",
+    "name": "letta",
+    "description": "Letta is the platform for building stateful agents: AI with advanced memory that can learn and self-improve over time.",
+    "language": "Python",
+    "score": {
+      "stars": 21778,
+      "forks": 2300,
+      "lastUpdated": "2026-03-28T01:16:32Z"
+    },
+    "topics": [
+      "ai",
+      "ai-agents",
+      "llm",
+      "llm-agent"
+    ],
+    "evaluation": {
+      "score": 51,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Strong community adoption",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T03:20:31.235Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "ai-agents",
+        "llm-agent"
+      ],
+      "description": "Letta is the platform for building stateful agents: AI with advanced memory that can learn and self-improve over time.",
+      "skills": [
+        "Python"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774668031236_6w9b2f33y",
+    "createdAt": "2026-03-28T03:20:31.236Z",
+    "updatedAt": "2026-03-28T03:20:31.236Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/agentscope-ai/agentscope",
+    "owner": "agentscope-ai",
+    "name": "agentscope",
+    "description": "Build and run agents you can see, understand and trust.",
+    "language": "Python",
+    "score": {
+      "stars": 21231,
+      "forks": 2086,
+      "lastUpdated": "2026-03-28T03:16:27Z"
+    },
+    "topics": [
+      "agent",
+      "chatbot",
+      "large-language-models",
+      "llm",
+      "llm-agent",
+      "mcp",
+      "multi-agent",
+      "multi-modal",
+      "react-agent"
+    ],
+    "evaluation": {
+      "score": 49,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Strong community adoption",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T03:20:31.235Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "chatbot",
+        "large-language-models",
+        "llm-agent",
+        "mcp",
+        "multi-agent"
+      ],
+      "description": "Build and run agents you can see, understand and trust.",
+      "skills": [
+        "Python",
+        "mcp"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774668031236_b6lplx1mj",
+    "createdAt": "2026-03-28T03:20:31.236Z",
+    "updatedAt": "2026-03-28T03:20:31.236Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/HKUDS/DeepCode",
+    "owner": "HKUDS",
+    "name": "DeepCode",
+    "description": "\"DeepCode: Open Agentic Coding (Paper2Code & Text2Web & Text2Backend)\"",
+    "language": "Python",
+    "score": {
+      "stars": 15033,
+      "forks": 2025,
+      "lastUpdated": "2026-03-27T18:37:29Z"
+    },
+    "topics": [
+      "agentic-coding",
+      "llm-agent"
+    ],
+    "evaluation": {
+      "score": 50,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Strong community adoption",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T03:20:31.235Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "agentic-coding",
+        "llm-agent"
+      ],
+      "description": "\"DeepCode: Open Agentic Coding (Paper2Code & Text2Web & Text2Backend)\"",
+      "skills": [
+        "Python"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774668031236_4x86bwyaj",
+    "createdAt": "2026-03-28T03:20:31.236Z",
+    "updatedAt": "2026-03-28T03:20:31.236Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/The-Pocket/PocketFlow-Tutorial-Codebase-Knowledge",
+    "owner": "The-Pocket",
+    "name": "PocketFlow-Tutorial-Codebase-Knowledge",
+    "description": "Pocket Flow: Codebase to Tutorial",
+    "language": "Python",
+    "score": {
+      "stars": 12163,
+      "forks": 1390,
+      "lastUpdated": "2026-03-27T13:21:06Z"
+    },
+    "topics": [
+      "coding",
+      "large-language-model",
+      "large-language-models",
+      "llm",
+      "llm-agent",
+      "llm-agents",
+      "llm-application",
+      "llm-apps",
+      "llm-framework",
+      "llm-frameworks",
+      "llms",
+      "pocket-flow",
+      "pocketflow"
+    ],
+    "evaluation": {
+      "score": 50,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Strong community adoption",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T03:20:31.235Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "coding",
+        "large-language-model",
+        "large-language-models",
+        "llm-agent",
+        "llm-agents"
+      ],
+      "description": "Pocket Flow: Codebase to Tutorial",
+      "skills": [
+        "Python"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774668031236_xxrg0adzn",
+    "createdAt": "2026-03-28T03:20:31.236Z",
+    "updatedAt": "2026-03-28T03:20:31.236Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/The-Pocket/PocketFlow",
+    "owner": "The-Pocket",
+    "name": "PocketFlow",
+    "description": "Pocket Flow: 100-line LLM framework. Let Agents build Agents!",
+    "language": "Python",
+    "score": {
+      "stars": 10286,
+      "forks": 1118,
+      "lastUpdated": "2026-03-27T18:48:47Z"
+    },
+    "topics": [
+      "agentic-ai",
+      "agentic-framework",
+      "agentic-workflow",
+      "agents",
+      "ai-framework",
+      "ai-frameworks",
+      "aiagent",
+      "aiagents",
+      "artificial-intelligence",
+      "flow-based-programming",
+      "flow-engineering",
+      "large-language-model",
+      "large-language-models",
+      "llm-agent",
+      "llm-framework",
+      "pocket-flow",
+      "pocketflow",
+      "retrieval-augmented-generation",
+      "workflow",
+      "workflow-orchestration"
+    ],
+    "evaluation": {
+      "score": 51,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Strong community adoption",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T03:20:31.235Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "agentic-ai",
+        "agentic-framework",
+        "agentic-workflow",
+        "agents",
+        "ai-framework"
+      ],
+      "description": "Pocket Flow: 100-line LLM framework. Let Agents build Agents!",
+      "skills": [
+        "Python"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774668031236_uvta6d8a0",
+    "createdAt": "2026-03-28T03:20:31.236Z",
+    "updatedAt": "2026-03-28T03:20:31.236Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/jeinlee1991/chinese-llm-benchmark",
+    "owner": "jeinlee1991",
+    "name": "chinese-llm-benchmark",
+    "description": "ReLE评测：中文AI大模型能力评测（持续更新）：目前已囊括359个大模型，覆盖chatgpt、gpt-5.2、o4-mini、谷歌gemini-3-pro、Claude-4.6、文心ERNIE-X1.1、ERNIE-5.0、qwen3-max、qwen3.5-plus、百川、讯飞星火、商汤senseChat等商用模型， 以及step3.5-flash、kimi-k2.5、ernie4.5、MiniMax-M2.5、deepseek-v3.2、Qwen3.5、llama4、智谱GLM-5、GLM-4.7、LongCat、gemma3、mistral等开源大模型。不仅提供排行榜，也提供规模超200万的大模型缺陷库！方便广大社区研究分析、改进大模型。",
+    "score": {
+      "stars": 5763,
+      "forks": 233,
+      "lastUpdated": "2026-03-28T02:53:11Z"
+    },
+    "topics": [
+      "agentic-ai",
+      "artificial-intelligence",
+      "llm-agent",
+      "llm-evaluation"
+    ],
+    "evaluation": {
+      "score": 47,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Strong community adoption",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T03:20:31.235Z"
+    },
+    "capability": {
+      "category": "specialized",
+      "specialties": [
+        "agentic-ai",
+        "artificial-intelligence",
+        "llm-agent",
+        "llm-evaluation"
+      ],
+      "description": "ReLE评测：中文AI大模型能力评测（持续更新）：目前已囊括359个大模型，覆盖chatgpt、gpt-5.2、o4-mini、谷歌gemini-3-pro、Claude-4.6、文心ERNIE-X1.1、ERNIE-5.0、qwen3-max、qwen3.5-plus、百川、讯飞星火、商汤senseChat等商用模型， 以及step3.5-flash、kimi-k2.5、ernie4.5、MiniMax-M2.5、deepseek-v3.2、Qwen3.5、llama4、智谱GLM-5、GLM-4.7、LongCat、gemma3、mistral等开源大模型。不仅提供排行榜，也提供规模超200万的大模型缺陷库！方便广大社区研究分析、改进大模型。",
+      "skills": []
+    },
+    "status": "candidate",
+    "id": "candidate_1774668031236_hbuicy2je",
+    "createdAt": "2026-03-28T03:20:31.236Z",
+    "updatedAt": "2026-03-28T03:20:31.236Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/inclusionAI/AReaL",
+    "owner": "inclusionAI",
+    "name": "AReaL",
+    "description": "Lightning-Fast RL for LLM Reasoning and Agents. Made Simple & Flexible.",
+    "language": "Python",
+    "score": {
+      "stars": 4928,
+      "forks": 434,
+      "lastUpdated": "2026-03-28T01:34:25Z"
+    },
+    "topics": [
+      "agent",
+      "llm",
+      "llm-agent",
+      "llm-reasoning",
+      "machine-learning-systems",
+      "mlsys",
+      "reinforcement-learning",
+      "rl"
+    ],
+    "evaluation": {
+      "score": 47,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Strong community adoption",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T03:20:31.235Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "llm-agent",
+        "llm-reasoning",
+        "machine-learning-systems",
+        "mlsys",
+        "reinforcement-learning"
+      ],
+      "description": "Lightning-Fast RL for LLM Reasoning and Agents. Made Simple & Flexible.",
+      "skills": [
+        "Python"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774668031236_w00fkx6ha",
+    "createdAt": "2026-03-28T03:20:31.236Z",
+    "updatedAt": "2026-03-28T03:20:31.236Z"
+  },
+  {
+    "source": "github",
+    "url": "https://github.com/AIDC-AI/ComfyUI-Copilot",
+    "owner": "AIDC-AI",
+    "name": "ComfyUI-Copilot",
+    "description": "An AI-powered custom node for ComfyUI designed to enhance workflow automation and provide intelligent assistance",
+    "language": "TypeScript",
+    "score": {
+      "stars": 4804,
+      "forks": 294,
+      "lastUpdated": "2026-03-28T02:50:17Z"
+    },
+    "topics": [
+      "agent",
+      "ai",
+      "comfy-ui",
+      "comfyui",
+      "comfyui-nodes",
+      "copilot",
+      "deepseek",
+      "deepseek-v3",
+      "flux",
+      "gpt-4",
+      "llm-agent",
+      "rag",
+      "stable-diffusion"
+    ],
+    "evaluation": {
+      "score": 47,
+      "rating": "consider",
+      "tier": "fair",
+      "strengths": [
+        "Active maintenance",
+        "Strong community adoption",
+        "Established project"
+      ],
+      "concerns": [
+        "Missing README",
+        "No contribution guidelines",
+        "Limited code quality signals"
+      ],
+      "evaluatedAt": "2026-03-28T03:20:31.235Z"
+    },
+    "capability": {
+      "category": "engineering",
+      "specialties": [
+        "comfy-ui",
+        "comfyui",
+        "comfyui-nodes",
+        "copilot",
+        "deepseek"
+      ],
+      "description": "An AI-powered custom node for ComfyUI designed to enhance workflow automation and provide intelligent assistance",
+      "skills": [
+        "TypeScript"
+      ]
+    },
+    "status": "candidate",
+    "id": "candidate_1774668031236_aojm2cdf0",
+    "createdAt": "2026-03-28T03:20:31.236Z",
+    "updatedAt": "2026-03-28T03:20:31.236Z"
+  }
+]

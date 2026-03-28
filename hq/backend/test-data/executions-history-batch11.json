@@ -1,0 +1,155 @@
+[
+  {
+    "id": "exec-1774602041711-0000",
+    "displayExecutionId": "EXEC-00001",
+    "taskId": "task-1774602041711-0000",
+    "status": "completed",
+    "executor": "claude",
+    "runtimeName": "claude-desktop-app",
+    "degraded": false,
+    "retryCount": 0,
+    "maxRetries": 3,
+    "timeoutMs": 300000,
+    "assignmentId": "assign-0",
+    "assignmentRole": "secondary",
+    "inputSnapshot": {
+      "task": "general task 1",
+      "description": "Sample general task for execution history testing",
+      "agentId": "code-reviewer",
+      "mode": "serial"
+    },
+    "outputSnapshot": {
+      "result": "Successfully completed general task",
+      "summary": "Task executed by claude on code-reviewer",
+      "artifacts": [
+        "artifact-0-1.txt",
+        "artifact-0-2.json"
+      ]
+    },
+    "outputSummary": "Completed general analysis and generated recommendations",
+    "memoryContextExcerpt": "Retrieved 3 knowledge entries from previous general tasks",
+    "startedAt": "2026-03-22T19:40:54.465Z",
+    "endedAt": "2026-03-25T23:48:27.177Z",
+    "completedAt": "2026-03-25T23:48:27.177Z"
+  },
+  {
+    "id": "exec-1774602041712-0001",
+    "displayExecutionId": "EXEC-00002",
+    "taskId": "task-1774602041712-0001",
+    "status": "paused",
+    "executor": "openai",
+    "runtimeName": "openai-api",
+    "degraded": false,
+    "retryCount": 0,
+    "maxRetries": 3,
+    "timeoutMs": 300000,
+    "assignmentId": "assign-1",
+    "assignmentRole": "primary",
+    "inputSnapshot": {
+      "task": "architecture analysis task 2",
+      "description": "Sample architecture_analysis task for execution history testing",
+      "agentId": "devops-engineer",
+      "mode": "single"
+    },
+    "outputSummary": "Execution paused",
+    "startedAt": "2026-03-24T03:42:43.037Z"
+  },
+  {
+    "id": "exec-1774602041712-0002",
+    "displayExecutionId": "EXEC-00003",
+    "taskId": "task-1774602041712-0002",
+    "status": "completed",
+    "executor": "openai",
+    "runtimeName": "openai-api",
+    "degraded": false,
+    "retryCount": 0,
+    "maxRetries": 3,
+    "timeoutMs": 300000,
+    "assignmentId": "assign-2",
+    "assignmentRole": "secondary",
+    "inputSnapshot": {
+      "task": "general task 3",
+      "description": "Sample general task for execution history testing",
+      "agentId": "devops-engineer",
+      "mode": "single"
+    },
+    "outputSnapshot": {
+      "result": "Successfully completed general task",
+      "summary": "Task executed by openai on devops-engineer",
+      "artifacts": [
+        "artifact-2-1.txt",
+        "artifact-2-2.json"
+      ]
+    },
+    "outputSummary": "Completed general analysis and generated recommendations",
+    "memoryContextExcerpt": "Retrieved 3 knowledge entries from previous general tasks",
+    "startedAt": "2026-03-23T08:05:35.174Z",
+    "endedAt": "2026-03-25T15:13:59.809Z",
+    "completedAt": "2026-03-25T15:13:59.809Z"
+  },
+  {
+    "id": "exec-1774602041712-0003",
+    "displayExecutionId": "EXEC-00004",
+    "taskId": "task-1774602041712-0003",
+    "status": "completed",
+    "executor": "codex",
+    "runtimeName": "codex-cli",
+    "degraded": false,
+    "retryCount": 0,
+    "maxRetries": 3,
+    "timeoutMs": 300000,
+    "assignmentId": "assign-3",
+    "assignmentRole": "primary",
+    "inputSnapshot": {
+      "task": "general task 4",
+      "description": "Sample general task for execution history testing",
+      "agentId": "product-manager",
+      "mode": "parallel"
+    },
+    "outputSnapshot": {
+      "result": "Successfully completed general task",
+      "summary": "Task executed by codex on product-manager",
+      "artifacts": [
+        "artifact-3-1.txt",
+        "artifact-3-2.json"
+      ]
+    },
+    "outputSummary": "Completed general analysis and generated recommendations",
+    "memoryContextExcerpt": "Retrieved 3 knowledge entries from previous general tasks",
+    "startedAt": "2026-03-23T21:02:49.729Z",
+    "endedAt": "2026-03-25T21:19:33.813Z",
+    "completedAt": "2026-03-25T21:19:33.813Z"
+  },
+  {
+    "id": "exec-1774602041712-0004",
+    "displayExecutionId": "EXEC-00005",
+    "taskId": "task-1774602041712-0004",
+    "status": "completed",
+    "executor": "openai",
+    "runtimeName": "openai-api",
+    "degraded": false,
+    "retryCount": 0,
+    "maxRetries": 3,
+    "timeoutMs": 300000,
+    "assignmentId": "assign-4",
+    "assignmentRole": "dispatcher",
+    "inputSnapshot": {
+      "task": "general task 5",
+      "description": "Sample general task for execution history testing",
+      "agentId": "product-manager",
+      "mode": "serial"
+    },
+    "outputSnapshot": {
+      "result": "Successfully completed general task",
+      "summary": "Task executed by openai on product-manager",
+      "artifacts": [
+        "artifact-4-1.txt",
+        "artifact-4-2.json"
+      ]
+    },
+    "outputSummary": "Completed general analysis and generated recommendations",
+    "startedAt": "2026-03-23T21:33:58.597Z",
+    "endedAt": "2026-03-25T19:24:41.935Z",
+    "completedAt": "2026-03-25T19:24:41.935Z"
+  }
+]

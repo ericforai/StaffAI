@@ -3,6 +3,10 @@
 import { useState, useEffect } from 'react';
 import { Search, Users, TrendingUp, Clipboard, RefreshCw, Download, Eye, Trash2, ExternalLink } from 'lucide-react';
 import { API_CONFIG } from '../../utils/constants';
+<<<<<<< HEAD
+=======
+import DashboardLayout from '../../components/DashboardLayout';
+>>>>>>> origin/fix/code-review-security-quality
 
 // =============================================================================
 // Types
@@ -302,6 +306,7 @@ export default function MarketPage() {
   }
 
   return (
+<<<<<<< HEAD
     <div className="mx-auto w-full max-w-[1400px] space-y-6">
       {/* Stats */}
       {stats && (
@@ -369,13 +374,107 @@ export default function MarketPage() {
                 onClick={() => handlePresetSearch(preset)}
                 disabled={loading}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer text-sm font-medium"
+=======
+    <DashboardLayout>
+      <div className="mx-auto w-full max-w-[1400px] space-y-6">
+        {/* Stats */}
+        {stats && (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-violet-100 rounded-lg">
+                  <Users className="w-5 h-5 text-violet-600" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-slate-900">{stats.total}</div>
+                  <div className="text-sm text-slate-500">候选总数</div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-emerald-100 rounded-lg text-emerald-600">
+                  <TrendingUp className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-emerald-600">{stats.byRating.recommended}</div>
+                  <div className="text-sm text-slate-500">强烈推荐</div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-amber-100 rounded-lg text-amber-600">
+                  <Search className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-amber-600">{stats.byRating.consider}</div>
+                  <div className="text-sm text-slate-500">可以考虑</div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-rose-100 rounded-lg text-rose-600">
+                  <Clipboard className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-rose-600">{stats.byRating['not-recommended']}</div>
+                  <div className="text-sm text-slate-500">不推荐</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Search Section */}
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+            <Search className="w-5 h-5" />
+            发现候选
+          </h2>
+
+          <div className="mb-5">
+            <label className="text-sm font-medium text-slate-700 mb-2 block">预设搜索</label>
+            <div className="flex flex-wrap gap-2">
+              {PRESET_SEARCHES.map((preset) => (
+                <button
+                  key={preset.key}
+                  onClick={() => handlePresetSearch(preset)}
+                  disabled={loading}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer text-sm font-medium"
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-slate-700 mb-2 block">自定义 URL</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={searchUrl}
+                onChange={(e) => setSearchUrl(e.target.value)}
+                placeholder="https://github.com/owner/repo"
+                className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors duration-200 text-sm"
+                onKeyDown={(e) => e.key === 'Enter' && handleCustomUrlSearch()}
+              />
+              <button
+                onClick={handleCustomUrlSearch}
+                disabled={loading || !searchUrl.trim()}
+                className="inline-flex items-center gap-2 px-5 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer text-sm font-medium"
+>>>>>>> origin/fix/code-review-security-quality
               >
-                {preset.label}
+                <Search className="w-4 h-4" />
+                搜索
               </button>
-            ))}
+            </div>
           </div>
         </div>
 
+<<<<<<< HEAD
         <div>
           <label className="text-sm font-medium text-slate-700 mb-2 block">自定义 URL</label>
           <div className="flex gap-2">
@@ -394,11 +493,44 @@ export default function MarketPage() {
             >
               <Search className="w-4 h-4" />
               搜索
+=======
+        {/* Error */}
+        {error && (
+          <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg flex items-center justify-between">
+            <span>{error}</span>
+            <button
+              onClick={() => setError(null)}
+              className="ml-4 text-rose-600 hover:text-rose-800 transition-colors duration-200 cursor-pointer text-sm underline"
+            >
+              关闭
+>>>>>>> origin/fix/code-review-security-quality
             </button>
           </div>
-        </div>
-      </div>
+        )}
 
+        {/* Filter Tabs */}
+        <div className="flex flex-wrap gap-2 bg-white rounded-xl p-1.5 border border-slate-200 shadow-sm">
+          {[
+            { key: 'all', label: '全部', count: stats?.total || 0 },
+            { key: 'candidate', label: '候选中', count: stats?.byStatus.candidate || 0 },
+            { key: 'observing', label: '观察中', count: stats?.byStatus.observing || 0 },
+            { key: 'imported', label: '已导入', count: stats?.byStatus.imported || 0 },
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setFilterStatus(tab.key)}
+              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 cursor-pointer text-sm ${
+                filterStatus === tab.key
+                  ? 'bg-violet-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              {tab.label} ({tab.count})
+            </button>
+          ))}
+        </div>
+
+<<<<<<< HEAD
       {/* Error */}
       {error && (
         <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg flex items-center justify-between">
@@ -462,6 +594,168 @@ export default function MarketPage() {
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getRatingColor(candidate.evaluation.rating)}`}>
                           {getRatingLabel(candidate.evaluation.rating)}
                         </span>
+=======
+        {/* Candidate List */}
+        {loading ? (
+          <div className="text-center py-16">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-slate-200 border-t-violet-600 mb-4"></div>
+            <p className="text-slate-500">加载中...</p>
+          </div>
+        ) : candidates.length === 0 ? (
+          <div className="text-center py-16 bg-white rounded-xl border border-dashed border-slate-300">
+            <div className="inline-block p-4 bg-slate-100 rounded-full mb-4">
+              <Search className="w-6 h-6 text-slate-400" />
+            </div>
+            <p className="text-slate-500">暂无候选，请先搜索</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {candidates.map((candidate) => (
+              <div
+                key={candidate.id}
+                className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-violet-300 transition-all duration-200"
+              >
+                <div className="p-4">
+                  <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        {candidate.evaluation && (
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getRatingColor(candidate.evaluation.rating)}`}>
+                            {getRatingLabel(candidate.evaluation.rating)}
+                          </span>
+                        )}
+                        <a
+                          href={candidate.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-base font-semibold text-violet-600 hover:text-violet-800 transition-colors duration-200"
+                        >
+                          {candidate.owner}/{candidate.name}
+                          <ExternalLink className="w-3 h-3 inline ml-1" />
+                        </a>
+                        <span className="text-sm text-slate-500">
+                          ⭐ {formatNumber(candidate.score.stars || 0)}
+                        </span>
+                        <span className="text-sm text-slate-500">
+                          🍴 {formatNumber(candidate.score.forks || 0)}
+                        </span>
+                        {candidate.language && (
+                          <span className="inline-flex items-center px-2 py-0.5 bg-slate-100 text-slate-700 text-xs rounded">
+                            {candidate.language}
+                          </span>
+                        )}
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(candidate.status)}`}>
+                          {getStatusLabel(candidate.status)}
+                        </span>
+                      </div>
+
+                      {candidate.description && (
+                        <p className="text-slate-700 text-sm mb-2">{candidate.description}</p>
+                      )}
+
+                      {candidate.capability && (
+                        <div className="text-sm text-slate-600 mb-2">
+                          <span className="font-medium">分类：</span>
+                          <span className="capitalize">{candidate.capability.category}</span>
+                          {candidate.capability.specialties.length > 0 && (
+                            <> • {candidate.capability.specialties.join('、')}</>
+                          )}
+                        </div>
+                      )}
+
+                      {candidate.capability?.skills && candidate.capability.skills.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-1.5 text-sm text-slate-600 mb-2">
+                          <span className="font-medium">Skills：</span>
+                          {candidate.capability.skills.slice(0, 5).map((skill, idx) => (
+                            <span
+                              key={idx}
+                              className="inline-flex items-center px-2 py-0.5 bg-slate-100 text-slate-700 text-xs rounded"
+                            >
+                              {skill}
+                            </span>
+                          ))}
+                          {candidate.capability.skills.length > 5 && (
+                            <span className="text-xs text-slate-400">+{candidate.capability.skills.length - 5}</span>
+                          )}
+                        </div>
+                      )}
+
+                      {candidate.evaluation && (
+                        <div className="text-sm text-slate-600 mb-1">
+                          <span className="font-medium">评分：</span>
+                          <span className={`font-semibold ${
+                            candidate.evaluation.score >= 80 ? 'text-emerald-600' :
+                            candidate.evaluation.score >= 60 ? 'text-amber-600' :
+                            'text-rose-600'
+                          }`}>
+                            {candidate.evaluation.score}/100
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="text-xs text-slate-400">
+                        更新于 {formatDate(candidate.updatedAt)}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      {candidate.status === 'candidate' || candidate.status === 'observing' ? (
+                        <>
+                          <button
+                            onClick={() => handleImport(candidate.id)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 text-white text-sm font-medium rounded-lg hover:bg-violet-700 transition-colors duration-200 cursor-pointer"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                            导入
+                          </button>
+                          <button
+                            onClick={() => handleObserve(candidate.id)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 text-white text-sm font-medium rounded-lg hover:bg-amber-600 transition-colors duration-200 cursor-pointer"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            {candidate.status === 'observing' ? '观察中' : '观察'}
+                          </button>
+                        </>
+                      ) : null}
+                      <button
+                        onClick={() => handleRefresh(candidate.id)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-200 transition-colors duration-200 cursor-pointer"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5" />
+                        刷新
+                      </button>
+                      <button
+                        onClick={() => handleRemove(candidate.id)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-100 text-rose-700 text-sm font-medium rounded-lg hover:bg-rose-200 transition-colors duration-200 cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        移除
+                      </button>
+                    </div>
+                  </div>
+
+                  {candidate.evaluation && (candidate.evaluation.strengths.length > 0 || candidate.evaluation.concerns.length > 0) && (
+                    <div className="mt-3 pt-3 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                      {candidate.evaluation.strengths.length > 0 && (
+                        <div className="bg-emerald-50 rounded-lg p-2.5">
+                          <div className="font-medium text-emerald-700 mb-1.5 text-xs">优势</div>
+                          <ul className="text-slate-700 space-y-0.5 text-xs">
+                            {candidate.evaluation.strengths.slice(0, 3).map((s, i) => (
+                              <li key={i}>• {s}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {candidate.evaluation.concerns.length > 0 && (
+                        <div className="bg-rose-50 rounded-lg p-2.5">
+                          <div className="font-medium text-rose-700 mb-1.5 text-xs">关注点</div>
+                          <ul className="text-slate-700 space-y-0.5 text-xs">
+                            {candidate.evaluation.concerns.slice(0, 3).map((c, i) => (
+                              <li key={i}>• {c}</li>
+                            ))}
+                          </ul>
+                        </div>
+>>>>>>> origin/fix/code-review-security-quality
                       )}
                       <a
                         href={candidate.url}
@@ -487,6 +781,7 @@ export default function MarketPage() {
                         {getStatusLabel(candidate.status)}
                       </span>
                     </div>
+<<<<<<< HEAD
 
                     {candidate.description && (
                       <p className="text-slate-700 text-sm mb-2">{candidate.description}</p>
@@ -603,5 +898,15 @@ export default function MarketPage() {
         </div>
       )}
     </div>
+=======
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </DashboardLayout>
+>>>>>>> origin/fix/code-review-security-quality
   );
 }

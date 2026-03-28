@@ -1,0 +1,918 @@
+{
+  "task": {
+    "id": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+    "title": "Test Task 5530209b",
+    "description": "Generated test task for execution history",
+    "taskType": "general",
+    "priority": "low",
+    "status": "completed",
+    "executionMode": "single",
+    "approvalRequired": false,
+    "riskLevel": "low",
+    "requestedBy": "test-user",
+    "requestedAt": "2026-03-27T01:05:57.968Z",
+    "recommendedAgentRole": "general",
+    "candidateAgentRoles": [
+      "general"
+    ],
+    "routeReason": "Test task routing",
+    "routingStatus": "matched",
+    "createdAt": "2026-03-27T00:05:57.968Z",
+    "updatedAt": "2026-03-28T00:05:57.968Z"
+  },
+  "executions": [
+    {
+      "id": "dcaca2c6-3940-4221-8dcb-b096d153ef49",
+      "displayExecutionId": "EXEC-0001",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "completed",
+      "executor": "openai",
+      "runtimeName": "claude-3.7",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 149893,
+      "assignmentId": "17b8a133-fc91-4965-9548-aae6cd42b531",
+      "assignmentRole": "primary",
+      "workflowStepId": "2e322896-25f5-4dc0-8a26-452d921d6b9d",
+      "workflowPlanId": "4fa65724-60f4-4e41-b3c9-5e52a890f1a4",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 1"
+      },
+      "outputSnapshot": {
+        "result": "success",
+        "metrics": {
+          "tokensUsed": 3090,
+          "responseTimeMs": 2571
+        }
+      },
+      "outputSummary": "Successfully completed task execution",
+      "memoryContextExcerpt": "Task completed successfully with all requirements met",
+      "startedAt": "2026-03-28T00:55:57.968Z",
+      "endedAt": "2026-03-28T01:12:57.968Z",
+      "completedAt": "2026-03-28T01:12:57.968Z"
+    },
+    {
+      "id": "f24948d4-a326-4756-96b8-41b924aad7ee",
+      "displayExecutionId": "EXEC-0003",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "completed",
+      "executor": "codex",
+      "runtimeName": "claude-3.7",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 82869,
+      "assignmentId": "43491a78-1f69-448f-b580-18413fc21b4e",
+      "assignmentRole": "primary",
+      "workflowStepId": "e2405d0e-e287-4565-8d7b-1691000b3154",
+      "workflowPlanId": "ef4407ed-ce3c-4188-a4eb-fd449a3329c9",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 3"
+      },
+      "outputSnapshot": {
+        "result": "success",
+        "metrics": {
+          "tokensUsed": 5453,
+          "responseTimeMs": 1844
+        }
+      },
+      "outputSummary": "Successfully completed task execution",
+      "memoryContextExcerpt": "Task completed successfully with all requirements met",
+      "startedAt": "2026-03-27T23:52:57.968Z",
+      "endedAt": "2026-03-28T00:12:57.968Z",
+      "completedAt": "2026-03-28T00:12:57.968Z"
+    },
+    {
+      "id": "5d47a267-a956-4993-a36b-05a3fe7d0060",
+      "displayExecutionId": "EXEC-0002",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "cancelled",
+      "executor": "codex",
+      "runtimeName": "claude-3.7",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 61309,
+      "assignmentId": "1de78dd5-c123-47a9-a7f4-2429d3da8632",
+      "assignmentRole": "primary",
+      "workflowStepId": "218246eb-878d-46ad-a8a5-1931a2b80268",
+      "workflowPlanId": "9107d714-c87f-48af-83a0-0764aa179016",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 2"
+      },
+      "startedAt": "2026-03-27T23:46:57.968Z",
+      "endedAt": "2026-03-28T00:09:57.968Z",
+      "completedAt": "2026-03-28T00:09:57.968Z"
+    },
+    {
+      "id": "a27f9a5f-f1d2-4f8a-9abd-2090230b4581",
+      "displayExecutionId": "EXEC-0004",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "pending",
+      "executor": "codex",
+      "runtimeName": "claude-3.5",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 121506,
+      "assignmentId": "d6175040-6f3a-4f38-9cd1-ba668ceceeee",
+      "assignmentRole": "primary",
+      "workflowStepId": "4aee1fd1-297e-4459-887d-5f0e56ceb1f8",
+      "workflowPlanId": "cca928bf-37fa-49a0-8160-78bcd7eab7e8",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 4"
+      },
+      "startedAt": "2026-03-27T22:48:57.968Z"
+    },
+    {
+      "id": "832e294c-f2d4-4a0c-b2a4-b1bb23b04ed0",
+      "displayExecutionId": "EXEC-0005",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "cancelled",
+      "executor": "claude",
+      "runtimeName": "openai-gpt4",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 49329,
+      "assignmentId": "0b9a3493-38d0-4518-b2c3-9d373d703806",
+      "assignmentRole": "primary",
+      "workflowStepId": "53148c1c-d983-40db-a778-4f521fae703a",
+      "workflowPlanId": "d6ba9009-7062-418b-a0e3-b90b01c6eb0a",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 5"
+      },
+      "startedAt": "2026-03-27T22:38:57.968Z",
+      "endedAt": "2026-03-27T22:55:57.968Z",
+      "completedAt": "2026-03-27T22:55:57.968Z"
+    },
+    {
+      "id": "ff03b2e0-bf97-4237-8f14-d77a6953a3cb",
+      "displayExecutionId": "EXEC-0007",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "completed",
+      "executor": "claude",
+      "runtimeName": "codex-gpt4",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 81627,
+      "assignmentId": "6af892b7-aa2b-441a-bed1-fd7520f7b517",
+      "assignmentRole": "primary",
+      "workflowStepId": "7b8ba406-effe-4ea7-8272-c34e45bf88e9",
+      "workflowPlanId": "85e420a1-9314-4aa1-a7cc-0ae6122ce188",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 7"
+      },
+      "outputSnapshot": {
+        "result": "success",
+        "metrics": {
+          "tokensUsed": 1889,
+          "responseTimeMs": 2921
+        }
+      },
+      "outputSummary": "Optimization completed: 3 files processed",
+      "memoryContextExcerpt": "Task completed successfully with all requirements met",
+      "startedAt": "2026-03-27T22:00:57.968Z",
+      "endedAt": "2026-03-27T22:15:57.968Z",
+      "completedAt": "2026-03-27T22:15:57.968Z"
+    },
+    {
+      "id": "8cb56343-9ee9-423c-8df4-db3a96090e0f",
+      "displayExecutionId": "EXEC-0006",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "completed",
+      "executor": "codex",
+      "runtimeName": "openai-gpt4",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 43105,
+      "assignmentId": "6eeeb681-54f8-48b7-ac30-aca8ee60fb36",
+      "assignmentRole": "primary",
+      "workflowStepId": "51e818a0-20d2-46a4-9844-d8169441f178",
+      "workflowPlanId": "c0aab3fb-716e-4728-b030-a65988cc80eb",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 6"
+      },
+      "outputSnapshot": {
+        "result": "success",
+        "metrics": {
+          "tokensUsed": 5341,
+          "responseTimeMs": 3420
+        }
+      },
+      "outputSummary": "Code review completed: 12 suggestions provided",
+      "memoryContextExcerpt": "Task completed successfully with all requirements met",
+      "startedAt": "2026-03-27T21:44:57.968Z",
+      "endedAt": "2026-03-27T21:55:57.968Z",
+      "completedAt": "2026-03-27T21:55:57.968Z"
+    },
+    {
+      "id": "58c3add3-eb49-4c54-b608-b91b578e0be0",
+      "displayExecutionId": "EXEC-0008",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "failed",
+      "executor": "codex",
+      "runtimeName": "claude-3.7",
+      "degraded": false,
+      "retryCount": 2,
+      "maxRetries": 3,
+      "timeoutMs": 132257,
+      "assignmentId": "dbe5cb00-89f2-4a4c-b828-f5179f72bdb8",
+      "assignmentRole": "primary",
+      "workflowStepId": "71378ec3-a51a-4d12-896f-81d18d80ce2d",
+      "workflowPlanId": "69c8cd8d-f778-44a5-b24a-638847fd1fd0",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 8"
+      },
+      "structuredError": {
+        "code": "degraded",
+        "message": "Fallback mode activated",
+        "retriable": true,
+        "details": {
+          "attempt": "1",
+          "lastError": "Process terminated with exit code 1"
+        }
+      },
+      "errorMessage": "Fallback mode activated",
+      "startedAt": "2026-03-27T21:35:57.968Z",
+      "endedAt": "2026-03-27T21:36:57.968Z",
+      "completedAt": "2026-03-27T21:36:57.968Z"
+    },
+    {
+      "id": "cf5bb123-76d7-44e7-8654-162832bd1926",
+      "displayExecutionId": "EXEC-0009",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "completed",
+      "executor": "openai",
+      "runtimeName": "codex-gpt4",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 133687,
+      "assignmentId": "91eaa717-70d9-420d-92a8-63fd98cb3dde",
+      "assignmentRole": "primary",
+      "workflowStepId": "c5c9d021-84a3-4f87-af36-6c285bb9ccfe",
+      "workflowPlanId": "1f17a483-3720-48e4-a1da-86575bf0b2a3",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 9"
+      },
+      "outputSnapshot": {
+        "result": "success",
+        "metrics": {
+          "tokensUsed": 5215,
+          "responseTimeMs": 4877
+        }
+      },
+      "outputSummary": "Task execution completed with warnings",
+      "memoryContextExcerpt": "Task completed successfully with all requirements met",
+      "startedAt": "2026-03-27T20:21:57.968Z",
+      "endedAt": "2026-03-27T20:41:57.968Z",
+      "completedAt": "2026-03-27T20:41:57.968Z"
+    },
+    {
+      "id": "825f43b0-4f34-4464-8591-a9f920918dcb",
+      "displayExecutionId": "EXEC-0010",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "paused",
+      "executor": "openai",
+      "runtimeName": "claude-3.5",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 113666,
+      "assignmentId": "43443661-816f-49b8-b71e-2aa2fb730758",
+      "assignmentRole": "primary",
+      "workflowStepId": "29ff83a3-ba67-4e4d-a931-4acda4168060",
+      "workflowPlanId": "4db66d85-c33d-4fa3-909c-82ef18e8d405",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 10"
+      },
+      "startedAt": "2026-03-27T19:53:57.968Z",
+      "endedAt": "2026-03-27T20:20:57.968Z"
+    },
+    {
+      "id": "8fd1ea65-aa12-471c-919c-1f9ac139f392",
+      "displayExecutionId": "EXEC-0011",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "completed",
+      "executor": "claude",
+      "runtimeName": "claude-3.7",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 96824,
+      "assignmentId": "c3f3c0e5-ae39-4d93-a26d-ad53ec4fbefa",
+      "assignmentRole": "primary",
+      "workflowStepId": "85ec0af6-accb-4300-ae41-d1252eaa9be1",
+      "workflowPlanId": "044124d1-ad91-483a-b0d6-d0b330528816",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 11"
+      },
+      "outputSnapshot": {
+        "result": "success",
+        "metrics": {
+          "tokensUsed": 2033,
+          "responseTimeMs": 2460
+        }
+      },
+      "outputSummary": "Task execution completed with warnings",
+      "memoryContextExcerpt": "Task completed successfully with all requirements met",
+      "startedAt": "2026-03-27T19:53:57.968Z",
+      "endedAt": "2026-03-27T20:03:57.968Z",
+      "completedAt": "2026-03-27T20:03:57.968Z"
+    },
+    {
+      "id": "e019e27e-cbfa-478d-8915-6e88b05ff204",
+      "displayExecutionId": "EXEC-0012",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "cancelled",
+      "executor": "codex",
+      "runtimeName": "claude-3.7",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 82505,
+      "assignmentId": "0fc44282-d7e3-42f5-9945-e5965a20a299",
+      "assignmentRole": "primary",
+      "workflowStepId": "ab06177a-bd39-4d24-aaa1-2d7daa2f3d19",
+      "workflowPlanId": "b7313257-dba5-42df-934b-c5d31008ae3a",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 12"
+      },
+      "startedAt": "2026-03-27T18:55:57.968Z",
+      "endedAt": "2026-03-27T19:16:57.968Z",
+      "completedAt": "2026-03-27T19:16:57.968Z"
+    },
+    {
+      "id": "4c96f75c-b717-4a45-89e1-421c7cdc406b",
+      "displayExecutionId": "EXEC-0013",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "failed",
+      "executor": "claude",
+      "runtimeName": "claude-3.7",
+      "degraded": false,
+      "retryCount": 2,
+      "maxRetries": 3,
+      "timeoutMs": 85541,
+      "assignmentId": "40d5cefd-a148-4e14-a68a-534627244ec3",
+      "assignmentRole": "primary",
+      "workflowStepId": "1fb2e487-5366-4e77-bef1-9f5a8905b475",
+      "workflowPlanId": "12dea3f2-5ed0-4544-aa88-700986024d48",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 13"
+      },
+      "structuredError": {
+        "code": "timeout",
+        "message": "Upstream service timeout",
+        "retriable": true,
+        "details": {
+          "attempt": "2",
+          "lastError": "Process terminated with exit code 1"
+        }
+      },
+      "errorMessage": "Upstream service timeout",
+      "startedAt": "2026-03-27T18:51:57.968Z",
+      "endedAt": "2026-03-27T19:09:57.968Z",
+      "completedAt": "2026-03-27T19:09:57.968Z"
+    },
+    {
+      "id": "82c95696-2a57-4f7f-8af4-d9d6d616d668",
+      "displayExecutionId": "EXEC-0014",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "completed",
+      "executor": "claude",
+      "runtimeName": "openai-gpt4",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 75933,
+      "assignmentId": "2aa24519-4048-447e-a4b0-ee8480a853b2",
+      "assignmentRole": "primary",
+      "workflowStepId": "764958d8-e50d-4cb0-b00c-89cb70abb12c",
+      "workflowPlanId": "dd70ebc8-97ec-49e5-8c5a-2fd1a8181516",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 14"
+      },
+      "outputSnapshot": {
+        "result": "success",
+        "metrics": {
+          "tokensUsed": 4421,
+          "responseTimeMs": 1825
+        }
+      },
+      "outputSummary": "Task execution completed with warnings",
+      "memoryContextExcerpt": "Task completed successfully with all requirements met",
+      "startedAt": "2026-03-27T17:42:57.968Z",
+      "endedAt": "2026-03-27T17:55:57.968Z",
+      "completedAt": "2026-03-27T17:55:57.968Z"
+    },
+    {
+      "id": "c253488d-be58-4725-bb77-f57be896b16b",
+      "displayExecutionId": "EXEC-0015",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "completed",
+      "executor": "claude",
+      "runtimeName": "claude-3.7",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 35486,
+      "assignmentId": "69f2b163-86e1-4029-88ca-b1dcffa84475",
+      "assignmentRole": "primary",
+      "workflowStepId": "02a0c77a-e154-472f-9dd7-ca26f599b3e4",
+      "workflowPlanId": "84613f24-5349-49f9-9f46-ed3afd8cd9a9",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 15"
+      },
+      "outputSnapshot": {
+        "result": "success",
+        "metrics": {
+          "tokensUsed": 2206,
+          "responseTimeMs": 2022
+        }
+      },
+      "outputSummary": "Code review completed: 12 suggestions provided",
+      "memoryContextExcerpt": "Task completed successfully with all requirements met",
+      "startedAt": "2026-03-27T17:32:57.968Z",
+      "endedAt": "2026-03-27T17:41:57.968Z",
+      "completedAt": "2026-03-27T17:41:57.968Z"
+    },
+    {
+      "id": "b8fe8621-8074-4890-94da-73f1b6b1cce7",
+      "displayExecutionId": "EXEC-0017",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "completed",
+      "executor": "openai",
+      "runtimeName": "openai-gpt4",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 34961,
+      "assignmentId": "43397241-3691-4aae-b391-a7fd3b6b6c53",
+      "assignmentRole": "primary",
+      "workflowStepId": "975be053-de0b-43d1-8d3a-90db3c5d2b63",
+      "workflowPlanId": "c68fbab5-ad3f-4758-98ac-fbf835609194",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 17"
+      },
+      "outputSnapshot": {
+        "result": "success",
+        "metrics": {
+          "tokensUsed": 1061,
+          "responseTimeMs": 3615
+        }
+      },
+      "outputSummary": "All workflow steps completed successfully",
+      "memoryContextExcerpt": "Task completed successfully with all requirements met",
+      "startedAt": "2026-03-27T16:58:57.968Z",
+      "endedAt": "2026-03-27T17:00:57.968Z",
+      "completedAt": "2026-03-27T17:00:57.968Z"
+    },
+    {
+      "id": "7922bc83-410f-47a3-8a4c-70950bdec1e0",
+      "displayExecutionId": "EXEC-0016",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "completed",
+      "executor": "codex",
+      "runtimeName": "claude-3.7",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 134439,
+      "assignmentId": "1f4df4d1-ec57-4cc5-8e95-1cfcd417eb15",
+      "assignmentRole": "primary",
+      "workflowStepId": "9de74a0f-5ef9-47d1-8b1d-ce68943ac6ea",
+      "workflowPlanId": "3ad9f687-dcde-4e76-baff-683bcf37e14d",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 16"
+      },
+      "outputSnapshot": {
+        "result": "success",
+        "metrics": {
+          "tokensUsed": 4180,
+          "responseTimeMs": 663
+        }
+      },
+      "outputSummary": "Code review completed: 12 suggestions provided",
+      "memoryContextExcerpt": "Task completed successfully with all requirements met",
+      "startedAt": "2026-03-27T16:51:57.968Z",
+      "endedAt": "2026-03-27T16:56:57.968Z",
+      "completedAt": "2026-03-27T16:56:57.968Z"
+    },
+    {
+      "id": "3da8b56a-7aff-4ff7-a453-64b21bdb40e1",
+      "displayExecutionId": "EXEC-0018",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "completed",
+      "executor": "codex",
+      "runtimeName": "claude-3.5",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 140774,
+      "assignmentId": "d11243c1-c9b7-4e7d-8f30-dbee8cd81609",
+      "assignmentRole": "primary",
+      "workflowStepId": "3be1c0ed-5371-47d6-b0c1-784d636f5206",
+      "workflowPlanId": "0b5b970e-9971-4b5a-b0d9-ac15a2e6bffd",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 18"
+      },
+      "outputSnapshot": {
+        "result": "success",
+        "metrics": {
+          "tokensUsed": 1794,
+          "responseTimeMs": 2592
+        }
+      },
+      "outputSummary": "API integration test passed",
+      "memoryContextExcerpt": "Task completed successfully with all requirements met",
+      "startedAt": "2026-03-27T15:50:57.968Z",
+      "endedAt": "2026-03-27T16:14:57.968Z",
+      "completedAt": "2026-03-27T16:14:57.968Z"
+    },
+    {
+      "id": "ce5fa821-16a8-4aa0-bae3-065cd8b3eb90",
+      "displayExecutionId": "EXEC-0019",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "completed",
+      "executor": "openai",
+      "runtimeName": "openai-gpt4",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 121678,
+      "assignmentId": "81b96ca3-8d10-4d0b-89e5-6705330ee6a1",
+      "assignmentRole": "primary",
+      "workflowStepId": "3c55fffa-a85d-4124-a545-1bea7bebb4ed",
+      "workflowPlanId": "aa3c5947-85be-4f14-957a-57657f6ea208",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 19"
+      },
+      "outputSnapshot": {
+        "result": "success",
+        "metrics": {
+          "tokensUsed": 5405,
+          "responseTimeMs": 4059
+        }
+      },
+      "outputSummary": "Documentation generated successfully",
+      "memoryContextExcerpt": "Task completed successfully with all requirements met",
+      "startedAt": "2026-03-27T15:10:57.968Z",
+      "endedAt": "2026-03-27T15:20:57.968Z",
+      "completedAt": "2026-03-27T15:20:57.968Z"
+    },
+    {
+      "id": "20975446-e9a0-468d-af0d-b3b2a126a80b",
+      "displayExecutionId": "EXEC-0021",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "cancelled",
+      "executor": "openai",
+      "runtimeName": "openai-gpt4",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 32535,
+      "assignmentId": "0434668a-c5ab-40be-9393-252d83960426",
+      "assignmentRole": "primary",
+      "workflowStepId": "66940628-e4d0-43ee-8253-158375088594",
+      "workflowPlanId": "49130e48-4c90-4c44-af57-e4875a14878d",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 21"
+      },
+      "startedAt": "2026-03-27T14:55:57.968Z",
+      "endedAt": "2026-03-27T15:16:57.968Z",
+      "completedAt": "2026-03-27T15:16:57.968Z"
+    },
+    {
+      "id": "4876b605-3f6a-4505-bff6-96861c18cbbb",
+      "displayExecutionId": "EXEC-0020",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "pending",
+      "executor": "codex",
+      "runtimeName": "openai-gpt4",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 116909,
+      "assignmentId": "71f57dd8-2cab-4f31-9b08-8208184acf8d",
+      "assignmentRole": "primary",
+      "workflowStepId": "942363f1-2400-40b2-b9e6-7674da226b74",
+      "workflowPlanId": "071791b6-1569-43e6-8a07-922a6aa46b6f",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 20"
+      },
+      "startedAt": "2026-03-27T14:46:57.968Z"
+    },
+    {
+      "id": "7f19d1b7-eb27-4092-9466-34dec4294ded",
+      "displayExecutionId": "EXEC-0022",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "completed",
+      "executor": "codex",
+      "runtimeName": "claude-3.5",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 140596,
+      "assignmentId": "0c93712a-71cb-4f6c-b381-5b4fe5613986",
+      "assignmentRole": "primary",
+      "workflowStepId": "6ad2f156-c8c5-4119-8a91-ea83d329c242",
+      "workflowPlanId": "efe86041-8706-493d-b33b-1d23ca331485",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 22"
+      },
+      "outputSnapshot": {
+        "result": "success",
+        "metrics": {
+          "tokensUsed": 5234,
+          "responseTimeMs": 561
+        }
+      },
+      "outputSummary": "Successfully completed task execution",
+      "memoryContextExcerpt": "Task completed successfully with all requirements met",
+      "startedAt": "2026-03-27T14:31:57.968Z",
+      "endedAt": "2026-03-27T14:56:57.968Z",
+      "completedAt": "2026-03-27T14:56:57.968Z"
+    },
+    {
+      "id": "8a77594a-569b-4fba-ad5d-93d864679e68",
+      "displayExecutionId": "EXEC-0023",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "running",
+      "executor": "openai",
+      "runtimeName": "claude-3.5",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 69451,
+      "assignmentId": "d0396301-be70-4bb1-9b9b-d6e724d0e586",
+      "assignmentRole": "primary",
+      "workflowStepId": "afb89dff-53bd-4950-91a3-f9b95ceff26e",
+      "workflowPlanId": "dd676900-ad59-4cde-a5c6-0fc4a2df1d23",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 23"
+      },
+      "startedAt": "2026-03-27T13:47:57.968Z"
+    },
+    {
+      "id": "1dd8fc9c-4023-437f-a823-df33218b4171",
+      "displayExecutionId": "EXEC-0024",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "completed",
+      "executor": "claude",
+      "runtimeName": "openai-gpt4",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 44592,
+      "assignmentId": "a2a5fca6-19bb-489b-aac2-1409da2bbbeb",
+      "assignmentRole": "primary",
+      "workflowStepId": "57f0fca0-7190-4594-ad17-c07721fffd5f",
+      "workflowPlanId": "8973b06e-9761-446f-b64a-1010a58f09f3",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 24"
+      },
+      "outputSnapshot": {
+        "result": "success",
+        "metrics": {
+          "tokensUsed": 1137,
+          "responseTimeMs": 2040
+        }
+      },
+      "outputSummary": "API integration test passed",
+      "memoryContextExcerpt": "Task completed successfully with all requirements met",
+      "startedAt": "2026-03-27T13:29:57.968Z",
+      "endedAt": "2026-03-27T13:34:57.968Z",
+      "completedAt": "2026-03-27T13:34:57.968Z"
+    },
+    {
+      "id": "e0ec0aed-4d10-4442-8899-015f146d0707",
+      "displayExecutionId": "EXEC-0025",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "cancelled",
+      "executor": "codex",
+      "runtimeName": "claude-3.7",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 102858,
+      "assignmentId": "8d74268b-497b-4c61-809d-56e0cb46381e",
+      "assignmentRole": "primary",
+      "workflowStepId": "54994c79-dba7-4380-b9ba-46dcde104b80",
+      "workflowPlanId": "1e87e732-64a1-4b39-a66a-87a22ac80a96",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 25"
+      },
+      "startedAt": "2026-03-27T13:05:57.968Z",
+      "endedAt": "2026-03-27T13:28:57.968Z",
+      "completedAt": "2026-03-27T13:28:57.968Z"
+    },
+    {
+      "id": "f6506106-f5bf-4524-91c7-706300d720f1",
+      "displayExecutionId": "EXEC-0027",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "cancelled",
+      "executor": "openai",
+      "runtimeName": "codex-gpt4",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 69626,
+      "assignmentId": "25269ecc-0f20-41b4-b639-2383382e6e3a",
+      "assignmentRole": "primary",
+      "workflowStepId": "9e2d857a-ae00-47ad-be42-776f71ded289",
+      "workflowPlanId": "9ca2dcc5-530f-4e09-9d40-32b4783cc36c",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 27"
+      },
+      "startedAt": "2026-03-27T12:02:57.968Z",
+      "endedAt": "2026-03-27T12:31:57.968Z",
+      "completedAt": "2026-03-27T12:31:57.968Z"
+    },
+    {
+      "id": "794d526f-6c5d-4314-85d1-7af0541d2bdf",
+      "displayExecutionId": "EXEC-0026",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "completed",
+      "executor": "codex",
+      "runtimeName": "claude-3.5",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 96848,
+      "assignmentId": "09cfbe22-e75f-4972-9abb-8e09e8c13a95",
+      "assignmentRole": "primary",
+      "workflowStepId": "bbf35ce7-886e-4a03-9c0f-5995d7fcd3a2",
+      "workflowPlanId": "2cb0b015-6d36-4faf-a12f-36ba82edef5b",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 26"
+      },
+      "outputSnapshot": {
+        "result": "success",
+        "metrics": {
+          "tokensUsed": 2546,
+          "responseTimeMs": 2460
+        }
+      },
+      "outputSummary": "All workflow steps completed successfully",
+      "memoryContextExcerpt": "Task completed successfully with all requirements met",
+      "startedAt": "2026-03-27T11:46:57.968Z",
+      "endedAt": "2026-03-27T11:55:57.968Z",
+      "completedAt": "2026-03-27T11:55:57.968Z"
+    },
+    {
+      "id": "0b60e48b-ebe8-4ffb-84fa-c9a953d003b0",
+      "displayExecutionId": "EXEC-0028",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "cancelled",
+      "executor": "claude",
+      "runtimeName": "openai-gpt4",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 135326,
+      "assignmentId": "ac5c7636-1682-4c3a-b030-3c5ec83f7d02",
+      "assignmentRole": "primary",
+      "workflowStepId": "80476ab7-4f8b-4693-930a-d4fb4d69f057",
+      "workflowPlanId": "6e1d984f-b376-46ed-9666-3cef190d08da",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 28"
+      },
+      "startedAt": "2026-03-27T10:40:57.968Z",
+      "endedAt": "2026-03-27T10:50:57.968Z",
+      "completedAt": "2026-03-27T10:50:57.968Z"
+    },
+    {
+      "id": "53807bc5-276d-4f82-be77-9bb286139316",
+      "displayExecutionId": "EXEC-0029",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "failed",
+      "executor": "claude",
+      "runtimeName": "openai-gpt4",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 44049,
+      "assignmentId": "ac06f6f2-76bf-4fc4-8b17-87f20b8c6c9a",
+      "assignmentRole": "primary",
+      "workflowStepId": "3f747c1d-9f59-4e6f-b901-40680a0418e7",
+      "workflowPlanId": "0338ca0b-3dc6-41fd-b2de-88a6870c023b",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 29"
+      },
+      "structuredError": {
+        "code": "unknown",
+        "message": "Unexpected failure condition",
+        "retriable": false,
+        "details": {
+          "attempt": "3",
+          "lastError": "Process terminated with exit code 1"
+        }
+      },
+      "errorMessage": "Unexpected failure condition",
+      "startedAt": "2026-03-27T10:08:57.968Z",
+      "endedAt": "2026-03-27T10:35:57.968Z",
+      "completedAt": "2026-03-27T10:35:57.968Z"
+    },
+    {
+      "id": "8a63ed54-c604-4bfc-90d1-2a346d1c1673",
+      "displayExecutionId": "EXEC-0030",
+      "taskId": "5530209b-f7ad-46ef-8099-768b53e04fe5",
+      "status": "paused",
+      "executor": "claude",
+      "runtimeName": "claude-3.7",
+      "degraded": false,
+      "retryCount": 0,
+      "maxRetries": 3,
+      "timeoutMs": 115581,
+      "assignmentId": "ab246c8e-35c3-474f-acb1-a0045cffd483",
+      "assignmentRole": "primary",
+      "workflowStepId": "b7cfeefb-fae5-4ff9-a4ac-65491e36d9e6",
+      "workflowPlanId": "6f053853-2f86-4ec4-9850-4f247a9f079b",
+      "inputSnapshot": {
+        "taskType": "general",
+        "priority": "medium",
+        "description": "Test execution 30"
+      },
+      "startedAt": "2026-03-27T09:45:57.968Z",
+      "endedAt": "2026-03-27T10:00:57.968Z"
+    }
+  ],
+  "summary": {
+    "total": 30,
+    "statusCounts": {
+      "completed": 15,
+      "cancelled": 7,
+      "pending": 2,
+      "failed": 3,
+      "paused": 2,
+      "running": 1
+    },
+    "executorCounts": {
+      "openai": 8,
+      "codex": 12,
+      "claude": 10
+    }
+  }
+}

@@ -1,0 +1,238 @@
+{
+  "exec-1774602041711-0000": [
+    {
+      "id": "tool-exec-1774602041711-0000-0",
+      "toolName": "web_search",
+      "actorRole": "code-reviewer",
+      "riskLevel": "low",
+      "taskId": "exec",
+      "executionId": "exec-1774602041711-0000",
+      "status": "failed",
+      "inputSummary": "Tool call 1 input",
+      "outputSummary": "Tool call 1 output",
+      "createdAt": "2026-03-24T02:33:34.232Z"
+    },
+    {
+      "id": "tool-exec-1774602041711-0000-1",
+      "toolName": "web_search",
+      "actorRole": "frontend-developer",
+      "riskLevel": "medium",
+      "taskId": "exec",
+      "executionId": "exec-1774602041711-0000",
+      "status": "running",
+      "inputSummary": "Tool call 2 input",
+      "outputSummary": "Tool call 2 output",
+      "createdAt": "2026-03-23T23:06:07.833Z"
+    },
+    {
+      "id": "tool-exec-1774602041711-0000-2",
+      "toolName": "read_file",
+      "actorRole": "frontend-developer",
+      "riskLevel": "high",
+      "taskId": "exec",
+      "executionId": "exec-1774602041711-0000",
+      "status": "blocked",
+      "inputSummary": "Tool call 3 input",
+      "outputSummary": "Tool call 3 output",
+      "createdAt": "2026-03-24T07:28:21.541Z"
+    },
+    {
+      "id": "tool-exec-1774602041711-0000-3",
+      "toolName": "bash",
+      "actorRole": "qa-specialist",
+      "riskLevel": "high",
+      "taskId": "exec",
+      "executionId": "exec-1774602041711-0000",
+      "status": "running",
+      "inputSummary": "Tool call 4 input",
+      "outputSummary": "Tool call 4 output",
+      "createdAt": "2026-03-24T05:04:12.099Z"
+    }
+  ],
+  "exec-1774602041712-0002": [
+    {
+      "id": "tool-exec-1774602041712-0002-0",
+      "toolName": "agent_invoke",
+      "actorRole": "ux-designer",
+      "riskLevel": "low",
+      "taskId": "exec",
+      "executionId": "exec-1774602041712-0002",
+      "status": "pending",
+      "inputSummary": "Tool call 1 input",
+      "outputSummary": "Tool call 1 output",
+      "createdAt": "2026-03-24T00:28:24.973Z"
+    },
+    {
+      "id": "tool-exec-1774602041712-0002-1",
+      "toolName": "web_search",
+      "actorRole": "code-reviewer",
+      "riskLevel": "low",
+      "taskId": "exec",
+      "executionId": "exec-1774602041712-0002",
+      "status": "blocked",
+      "inputSummary": "Tool call 2 input",
+      "outputSummary": "Tool call 2 output",
+      "createdAt": "2026-03-25T03:28:57.493Z"
+    },
+    {
+      "id": "tool-exec-1774602041712-0002-2",
+      "toolName": "write_file",
+      "actorRole": "qa-specialist",
+      "riskLevel": "low",
+      "taskId": "exec",
+      "executionId": "exec-1774602041712-0002",
+      "status": "pending",
+      "inputSummary": "Tool call 3 input",
+      "outputSummary": "Tool call 3 output",
+      "createdAt": "2026-03-24T03:29:51.737Z"
+    },
+    {
+      "id": "tool-exec-1774602041712-0002-3",
+      "toolName": "read_file",
+      "actorRole": "frontend-developer",
+      "riskLevel": "high",
+      "taskId": "exec",
+      "executionId": "exec-1774602041712-0002",
+      "status": "running",
+      "inputSummary": "Tool call 4 input",
+      "outputSummary": "Tool call 4 output",
+      "createdAt": "2026-03-25T02:03:17.651Z"
+    },
+    {
+      "id": "tool-exec-1774602041712-0002-4",
+      "toolName": "bash",
+      "actorRole": "product-manager",
+      "riskLevel": "high",
+      "taskId": "exec",
+      "executionId": "exec-1774602041712-0002",
+      "status": "failed",
+      "inputSummary": "Tool call 5 input",
+      "outputSummary": "Tool call 5 output",
+      "createdAt": "2026-03-23T14:21:32.086Z"
+    }
+  ],
+  "exec-1774602041712-0003": [
+    {
+      "id": "tool-exec-1774602041712-0003-0",
+      "toolName": "bash",
+      "actorRole": "qa-specialist",
+      "riskLevel": "high",
+      "taskId": "exec",
+      "executionId": "exec-1774602041712-0003",
+      "status": "blocked",
+      "inputSummary": "Tool call 1 input",
+      "outputSummary": "Tool call 1 output",
+      "createdAt": "2026-03-24T19:09:55.572Z"
+    },
+    {
+      "id": "tool-exec-1774602041712-0003-1",
+      "toolName": "write_file",
+      "actorRole": "qa-specialist",
+      "riskLevel": "low",
+      "taskId": "exec",
+      "executionId": "exec-1774602041712-0003",
+      "status": "blocked",
+      "inputSummary": "Tool call 2 input",
+      "outputSummary": "Tool call 2 output",
+      "createdAt": "2026-03-24T22:23:08.682Z"
+    },
+    {
+      "id": "tool-exec-1774602041712-0003-2",
+      "toolName": "write_file",
+      "actorRole": "product-manager",
+      "riskLevel": "high",
+      "taskId": "exec",
+      "executionId": "exec-1774602041712-0003",
+      "status": "failed",
+      "inputSummary": "Tool call 3 input",
+      "outputSummary": "Tool call 3 output",
+      "createdAt": "2026-03-23T23:34:05.701Z"
+    },
+    {
+      "id": "tool-exec-1774602041712-0003-3",
+      "toolName": "read_file",
+      "actorRole": "qa-specialist",
+      "riskLevel": "high",
+      "taskId": "exec",
+      "executionId": "exec-1774602041712-0003",
+      "status": "completed",
+      "inputSummary": "Tool call 4 input",
+      "outputSummary": "Tool call 4 output",
+      "createdAt": "2026-03-25T08:50:35.312Z"
+    },
+    {
+      "id": "tool-exec-1774602041712-0003-4",
+      "toolName": "web_search",
+      "actorRole": "frontend-developer",
+      "riskLevel": "medium",
+      "taskId": "exec",
+      "executionId": "exec-1774602041712-0003",
+      "status": "completed",
+      "inputSummary": "Tool call 5 input",
+      "outputSummary": "Tool call 5 output",
+      "createdAt": "2026-03-23T18:44:13.172Z"
+    }
+  ],
+  "exec-1774602041712-0004": [
+    {
+      "id": "tool-exec-1774602041712-0004-0",
+      "toolName": "bash",
+      "actorRole": "ux-designer",
+      "riskLevel": "high",
+      "taskId": "exec",
+      "executionId": "exec-1774602041712-0004",
+      "status": "failed",
+      "inputSummary": "Tool call 1 input",
+      "outputSummary": "Tool call 1 output",
+      "createdAt": "2026-03-23T13:35:30.915Z"
+    },
+    {
+      "id": "tool-exec-1774602041712-0004-1",
+      "toolName": "read_file",
+      "actorRole": "devops-engineer",
+      "riskLevel": "medium",
+      "taskId": "exec",
+      "executionId": "exec-1774602041712-0004",
+      "status": "completed",
+      "inputSummary": "Tool call 2 input",
+      "outputSummary": "Tool call 2 output",
+      "createdAt": "2026-03-24T10:40:26.271Z"
+    },
+    {
+      "id": "tool-exec-1774602041712-0004-2",
+      "toolName": "write_file",
+      "actorRole": "frontend-developer",
+      "riskLevel": "low",
+      "taskId": "exec",
+      "executionId": "exec-1774602041712-0004",
+      "status": "blocked",
+      "inputSummary": "Tool call 3 input",
+      "outputSummary": "Tool call 3 output",
+      "createdAt": "2026-03-23T23:42:05.550Z"
+    },
+    {
+      "id": "tool-exec-1774602041712-0004-3",
+      "toolName": "web_search",
+      "actorRole": "ux-designer",
+      "riskLevel": "medium",
+      "taskId": "exec",
+      "executionId": "exec-1774602041712-0004",
+      "status": "running",
+      "inputSummary": "Tool call 4 input",
+      "outputSummary": "Tool call 4 output",
+      "createdAt": "2026-03-24T22:45:09.387Z"
+    },
+    {
+      "id": "tool-exec-1774602041712-0004-4",
+      "toolName": "web_search",
+      "actorRole": "ux-designer",
+      "riskLevel": "medium",
+      "taskId": "exec",
+      "executionId": "exec-1774602041712-0004",
+      "status": "blocked",
+      "inputSummary": "Tool call 5 input",
+      "outputSummary": "Tool call 5 output",
+      "createdAt": "2026-03-24T05:53:59.036Z"
+    }
+  ]
+}
