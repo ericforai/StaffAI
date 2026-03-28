@@ -123,6 +123,7 @@ runtime foundation 接口：
 - `AGENCY_DISCUSSION_CLAUDE_PATH=/absolute/path/to/claude`
 - `AGENCY_DISCUSSION_CODEX_PATH=/absolute/path/to/codex`
 - `AGENCY_DISCUSSION_TIMEOUT_MS=240000`
+- `AGENCY_TASK_TIMEOUT_MS=180000`（任务执行默认超时，避免本地 CLI 慢响应被 30s 误判）
 - `AGENCY_MCP_SAMPLING_POLICY=client|force_on|force_off`
 - 只有启用 API 回退时才需要 `OPENAI_API_KEY`
 
