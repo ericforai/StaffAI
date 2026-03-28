@@ -4,8 +4,9 @@ import type { TaskRecord } from '../shared/task-types';
 import { executeTaskRecord } from './task-execution-orchestrator';
 
 export interface ApprovalExecutionBridgeDependencies {
-  onExecutionStarted?: (input: { taskId: string; executor: string }) => void;
+  onExecutionStarted?: (input: { taskId: string; executor: 'claude' | 'codex' | 'openai' | 'deerflow' }) => void;
   onExecutionFinished?: (execution: ExecutionLifecycleRecord) => void;
+  onEvent?: (event: { type: string; data: any }) => void;
   loadMemoryContext?: (task: TaskRecord) => Promise<string | undefined | void> | string | undefined | void;
   writeExecutionSummary?: (task: TaskRecord, execution: ExecutionLifecycleRecord) => Promise<void> | void;
   sessionCapabilities?: { sampling: boolean };
@@ -64,6 +65,7 @@ export async function executeTaskAfterApproval(
       loadMemoryContext: deps.loadMemoryContext,
       writeExecutionSummary: deps.writeExecutionSummary,
       sessionCapabilities: deps.sessionCapabilities,
+      onEvent: deps.onEvent,
     }
   );
 

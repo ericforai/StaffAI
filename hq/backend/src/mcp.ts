@@ -22,9 +22,9 @@ import {
   resolveExecutionDecision,
   SessionCapabilities,
 } from './execution-strategy';
-import { createUserRepository } from './identity/user-repository.js';
-import { createPermissionChecker } from './identity/permission-checker.js';
-import { createUserContextService } from './identity/user-context.js';
+import { createUserRepository } from './identity/user-repository';
+import { createPermissionChecker } from './identity/permission-checker';
+import { createUserContextService } from './identity/user-context';
 
 interface RankedExpert {
   agent: Agent;

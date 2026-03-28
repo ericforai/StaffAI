@@ -13,8 +13,9 @@ import { executeTaskAfterApproval } from '../orchestration/approval-execution-br
 
 interface ApprovalRouteDependencies {
   onApprovalResolved?: (approval: ApprovalRecord) => void;
-  onExecutionStarted?: (input: { taskId: string; executor: string }) => void;
+  onExecutionStarted?: (input: { taskId: string; executor: 'claude' | 'codex' | 'openai' | 'deerflow' }) => void;
   onExecutionFinished?: (execution: ExecutionLifecycleRecord) => void;
+  onExecutionEvent?: (input: { taskId: string; message: string; payload?: any }) => void;
   loadMemoryContext?: (task: TaskRecord) => Promise<string | undefined | void> | string | undefined | void;
   writeExecutionSummary?: (task: TaskRecord, execution: ExecutionLifecycleRecord) => Promise<void> | void;
   sessionCapabilities?: { sampling: boolean };
@@ -222,6 +223,13 @@ export function registerApprovalRoutes(
             writeExecutionSummary: dependencies.writeExecutionSummary,
             sessionCapabilities: dependencies.sessionCapabilities,
             runAdvancedDiscussion: dependencies.runAdvancedDiscussion,
+            onEvent: (event) => {
+              dependencies.onExecutionEvent?.({
+                taskId: task.id,
+                message: `Execution chunk received: ${event.type}`,
+                payload: event.data,
+              });
+            },
           }
         );
         execution = result.execution;
