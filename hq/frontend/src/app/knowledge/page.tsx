@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { Search, BookOpenText } from 'lucide-react';
-import { useWebSocket } from '../../hooks/useWebSocket';
+import { useGlobalWebSocket } from '../../hooks/useGlobalWebSocket';
 import { API_CONFIG } from '../../utils/constants';
 
 type KnowledgeSource = 'discussion' | 'consult' | 'report';
@@ -36,7 +36,7 @@ export default function KnowledgePage() {
   const [knowledgeAgentFilter, setKnowledgeAgentFilter] = useState<'all' | string>('all');
   const [selectedKnowledgeId, setSelectedKnowledgeId] = useState<string | null>(null);
 
-  const { status: wsStatus } = useWebSocket({ onMessage: () => {} });
+  const { status: wsStatus } = useGlobalWebSocket({ onMessage: () => {} });
 
   useEffect(() => {
     fetch(`${API_CONFIG.BASE_URL}/memory/retrieve?q=*&limit=50`)

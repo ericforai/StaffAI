@@ -2,7 +2,7 @@
  * 专家卡片组件（侧边栏和主区域通用）
  */
 import { motion } from 'framer-motion';
-import { UserMinus, Loader2, Zap, BriefcaseBusiness } from 'lucide-react';
+import { UserMinus, Loader2, Zap, BriefcaseBusiness, UserPlus, Check } from 'lucide-react';
 import { DEPT_MAP } from '../utils/constants';
 import { Agent } from '../types';
 
@@ -13,9 +13,11 @@ export interface AgentCardProps {
   variant: 'sidebar' | 'grid';
   onToggle?: (id: string) => void;
   onClick?: (id: string) => void;
+  /** Show hire/fire button for market page */
+  showHireButton?: boolean;
 }
 
-export function AgentCard({ agent, isActive, isWorking, variant, onToggle, onClick }: AgentCardProps) {
+export function AgentCard({ agent, isActive, isWorking, variant, onToggle, onClick, showHireButton }: AgentCardProps) {
   const department = DEPT_MAP[agent.department];
   const DeptIcon = department?.icon;
 
@@ -89,11 +91,24 @@ export function AgentCard({ agent, isActive, isWorking, variant, onToggle, onCli
             <BriefcaseBusiness className="h-5 w-5 text-slate-600" />
           )}
         </div>
-        <div className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[10px] font-semibold tracking-wide ${
-          isActive ? 'bg-sky-50 text-sky-700 border border-sky-100' : 'bg-slate-50 text-slate-500 border border-slate-100'
-        }`}>
-          {DeptIcon ? <DeptIcon className="w-3 h-3" /> : null}
-          {department?.label}
+        <div className="flex items-center gap-2">
+          {/* 入职状态标签 */}
+          {isActive ? (
+            <div className="flex items-center gap-1 rounded-md bg-sky-50 px-2 py-1 text-[10px] font-semibold text-sky-700 border border-sky-100">
+              <Check className="w-3 h-3" />
+              <span>已入职</span>
+            </div>
+          ) : (
+            <div className="rounded-md bg-slate-50 px-2 py-1 text-[10px] font-medium text-slate-500 border border-slate-100">
+              待入职
+            </div>
+          )}
+          <div className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[10px] font-semibold tracking-wide ${
+            isActive ? 'bg-sky-50 text-sky-700 border border-sky-100' : 'bg-slate-50 text-slate-500 border border-slate-100'
+          }`}>
+            {DeptIcon ? <DeptIcon className="w-3 h-3" /> : null}
+            {department?.label}
+          </div>
         </div>
       </div>
       <h3 className="mb-1.5 text-sm font-bold leading-snug text-slate-900">
@@ -103,7 +118,39 @@ export function AgentCard({ agent, isActive, isWorking, variant, onToggle, onCli
         {agent.frontmatter.description}
       </p>
 
-      {isActive && (
+      {/* 入职/解聘按钮 */}
+      {showHireButton && (
+        <div className="mt-3 flex items-center justify-between">
+          <div className="flex-1" />
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggle?.(agent.id);
+            }}
+            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+              isActive
+                ? 'border border-rose-200 bg-rose-50 text-rose-700 hover:border-rose-300 hover:bg-rose-100'
+                : 'border border-slate-900 bg-slate-900 text-white hover:border-slate-800 hover:bg-slate-800'
+            }`}
+          >
+            {isActive ? (
+              <>
+                <UserMinus className="w-3.5 h-3.5" />
+                解聘
+              </>
+            ) : (
+              <>
+                <UserPlus className="w-3.5 h-3.5" />
+                入职
+              </>
+            )}
+          </motion.button>
+        </div>
+      )}
+
+      {isActive && !showHireButton && (
         <div className="absolute bottom-3 right-3">
           <Zap className={`h-4 w-4 ${isWorking ? 'animate-pulse text-sky-500 fill-sky-500' : 'text-slate-300'}`} />
         </div>

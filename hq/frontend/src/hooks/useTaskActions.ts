@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { API_CONFIG } from '../utils/constants';
 import type { TaskDetailPayload } from '../types';
 
+export type TaskExecutor = 'openai' | 'codex' | 'claude';
+
 export function useTaskActions(taskId: string, onTaskUpdated?: (payload: TaskDetailPayload) => void) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -17,7 +19,7 @@ export function useTaskActions(taskId: string, onTaskUpdated?: (payload: TaskDet
     onTaskUpdated?.(payload);
   }
 
-  async function executeTask() {
+  async function executeTask(executor: TaskExecutor = 'claude') {
     try {
       setSubmitting(true);
       setError(null);
@@ -25,7 +27,7 @@ export function useTaskActions(taskId: string, onTaskUpdated?: (payload: TaskDet
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          executor: 'codex',
+          executor,
           summary: 'Execution finished from the task workspace',
         }),
       });

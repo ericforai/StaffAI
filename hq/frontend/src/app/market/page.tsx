@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { API_CONFIG } from '../utils/constants';
+import { Search, Users, TrendingUp, Clipboard, RefreshCw, Download, Eye, Trash2, ExternalLink } from 'lucide-react';
+import { API_CONFIG } from '../../utils/constants';
+import DashboardLayout from '../../components/DashboardLayout';
 
 // =============================================================================
 // Types
@@ -56,10 +58,6 @@ interface MarketStats {
   avgScore: number;
 }
 
-// =============================================================================
-// Preset Searches
-// =============================================================================
-
 const PRESET_SEARCHES = [
   { key: 'agent-framework', label: 'Agent 框架', query: 'topic:agent-framework language:typescript' },
   { key: 'mcp', label: 'MCP 工具', query: 'topic:ai-agent topic:mcp' },
@@ -70,12 +68,12 @@ const PRESET_SEARCHES = [
 // Helper Functions
 // =============================================================================
 
-function getRatingEmoji(rating: string): string {
+function getRatingColor(rating: string): string {
   switch (rating) {
-    case 'recommended': return '🟢';
-    case 'consider': return '🟡';
-    case 'not-recommended': return '🔴';
-    default: return '⚪';
+    case 'recommended': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+    case 'consider': return 'bg-amber-100 text-amber-700 border-amber-200';
+    case 'not-recommended': return 'bg-rose-100 text-rose-700 border-rose-200';
+    default: return 'bg-gray-100 text-gray-700 border-gray-200';
   }
 }
 
@@ -85,6 +83,26 @@ function getRatingLabel(rating: string): string {
     case 'consider': return '可以考虑';
     case 'not-recommended': return '不推荐';
     default: return '未评估';
+  }
+}
+
+function getStatusColor(status: string): string {
+  switch (status) {
+    case 'candidate': return 'bg-blue-50 text-blue-700 border-blue-200';
+    case 'observing': return 'bg-purple-50 text-purple-700 border-purple-200';
+    case 'imported': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    case 'removed': return 'bg-gray-50 text-gray-500 border-gray-200';
+    default: return 'bg-gray-50 text-gray-700 border-gray-200';
+  }
+}
+
+function getStatusLabel(status: string): string {
+  switch (status) {
+    case 'candidate': return '候选中';
+    case 'observing': return '观察中';
+    case 'imported': return '已导入';
+    case 'removed': return '已移除';
+    default: return status;
   }
 }
 
@@ -102,8 +120,14 @@ function formatDate(isoString: string): string {
   return `${Math.floor(diffDays / 365)} 年前`;
 }
 
+function formatNumber(num: number): string {
+  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+  return num.toString();
+}
+
 // =============================================================================
-// Page Component
+// Market Page Component
 // =============================================================================
 
 export default function MarketPage() {
@@ -114,7 +138,6 @@ export default function MarketPage() {
   const [error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
 
-  // Fetch candidates on mount
   useEffect(() => {
     fetchCandidates();
     fetchStats();
@@ -129,9 +152,7 @@ export default function MarketPage() {
       }
 
       const response = await fetch(`${API_CONFIG.BASE_URL}/market/candidates?${params}`);
-      if (!response.ok) {
-        throw new Error('获取候选列表失败');
-      }
+      if (!response.ok) throw new Error('获取候选列表失败');
 
       const data = await response.json();
       setCandidates(data.candidates || []);
@@ -146,7 +167,6 @@ export default function MarketPage() {
     try {
       const response = await fetch(`${API_CONFIG.BASE_URL}/market/stats`);
       if (!response.ok) return;
-
       const data = await response.json();
       setStats(data);
     } catch {
@@ -283,256 +303,308 @@ export default function MarketPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">人才市场</h1>
-        <p className="text-gray-600">从 GitHub 发现并评估外部 Agent 候选</p>
-      </div>
+    <DashboardLayout>
+      <div className="mx-auto w-full max-w-[1400px] space-y-6">
+        {/* Stats */}
+        {stats && (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-violet-100 rounded-lg">
+                  <Users className="w-5 h-5 text-violet-600" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-slate-900">{stats.total}</div>
+                  <div className="text-sm text-slate-500">候选总数</div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-emerald-100 rounded-lg text-emerald-600">
+                  <TrendingUp className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-emerald-600">{stats.byRating.recommended}</div>
+                  <div className="text-sm text-slate-500">强烈推荐</div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-amber-100 rounded-lg text-amber-600">
+                  <Search className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-amber-600">{stats.byRating.consider}</div>
+                  <div className="text-sm text-slate-500">可以考虑</div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-rose-100 rounded-lg text-rose-600">
+                  <Clipboard className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-rose-600">{stats.byRating['not-recommended']}</div>
+                  <div className="text-sm text-slate-500">不推荐</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
-      {/* Stats */}
-      {stats && (
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-lg p-4 border">
-            <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
-            <div className="text-sm text-gray-500">候选总数</div>
-          </div>
-          <div className="bg-white rounded-lg p-4 border">
-            <div className="text-2xl font-bold text-green-600">{stats.byRating.recommended}</div>
-            <div className="text-sm text-gray-500">🟢 强烈推荐</div>
-          </div>
-          <div className="bg-white rounded-lg p-4 border">
-            <div className="text-2xl font-bold text-yellow-600">{stats.byRating.consider}</div>
-            <div className="text-sm text-gray-500">🟡 可以考虑</div>
-          </div>
-          <div className="bg-white rounded-lg p-4 border">
-            <div className="text-2xl font-bold text-red-600">{stats.byRating['not-recommended']}</div>
-            <div className="text-sm text-gray-500">🔴 不推荐</div>
-          </div>
-        </div>
-      )}
+        {/* Search Section */}
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+            <Search className="w-5 h-5" />
+            发现候选
+          </h2>
 
-      {/* Search Section */}
-      <div className="bg-white rounded-lg border p-6 mb-6">
-        <h2 className="text-lg font-semibold mb-4">发现候选</h2>
+          <div className="mb-5">
+            <label className="text-sm font-medium text-slate-700 mb-2 block">预设搜索</label>
+            <div className="flex flex-wrap gap-2">
+              {PRESET_SEARCHES.map((preset) => (
+                <button
+                  key={preset.key}
+                  onClick={() => handlePresetSearch(preset)}
+                  disabled={loading}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer text-sm font-medium"
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
-        {/* Preset Searches */}
-        <div className="mb-4">
-          <label className="text-sm font-medium text-gray-700 mb-2 block">预设搜索</label>
-          <div className="flex gap-2">
-            {PRESET_SEARCHES.map((preset) => (
+          <div>
+            <label className="text-sm font-medium text-slate-700 mb-2 block">自定义 URL</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={searchUrl}
+                onChange={(e) => setSearchUrl(e.target.value)}
+                placeholder="https://github.com/owner/repo"
+                className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors duration-200 text-sm"
+                onKeyDown={(e) => e.key === 'Enter' && handleCustomUrlSearch()}
+              />
               <button
-                key={preset.key}
-                onClick={() => handlePresetSearch(preset)}
-                disabled={loading}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                onClick={handleCustomUrlSearch}
+                disabled={loading || !searchUrl.trim()}
+                className="inline-flex items-center gap-2 px-5 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer text-sm font-medium"
               >
-                {preset.label}
+                <Search className="w-4 h-4" />
+                搜索
               </button>
-            ))}
+            </div>
           </div>
         </div>
 
-        {/* Custom URL */}
-        <div>
-          <label className="text-sm font-medium text-gray-700 mb-2 block">自定义 URL</label>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={searchUrl}
-              onChange={(e) => setSearchUrl(e.target.value)}
-              placeholder="https://github.com/owner/repo"
-              className="flex-1 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              onKeyPress={(e) => e.key === 'Enter' && handleCustomUrlSearch()}
-            />
+        {/* Error */}
+        {error && (
+          <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg flex items-center justify-between">
+            <span>{error}</span>
             <button
-              onClick={handleCustomUrlSearch}
-              disabled={loading || !searchUrl.trim()}
-              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              onClick={() => setError(null)}
+              className="ml-4 text-rose-600 hover:text-rose-800 transition-colors duration-200 cursor-pointer text-sm underline"
             >
-              搜索
+              关闭
             </button>
           </div>
+        )}
+
+        {/* Filter Tabs */}
+        <div className="flex flex-wrap gap-2 bg-white rounded-xl p-1.5 border border-slate-200 shadow-sm">
+          {[
+            { key: 'all', label: '全部', count: stats?.total || 0 },
+            { key: 'candidate', label: '候选中', count: stats?.byStatus.candidate || 0 },
+            { key: 'observing', label: '观察中', count: stats?.byStatus.observing || 0 },
+            { key: 'imported', label: '已导入', count: stats?.byStatus.imported || 0 },
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setFilterStatus(tab.key)}
+              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 cursor-pointer text-sm ${
+                filterStatus === tab.key
+                  ? 'bg-violet-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              {tab.label} ({tab.count})
+            </button>
+          ))}
         </div>
-      </div>
 
-      {/* Error */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded mb-6">
-          {error}
-          <button onClick={() => setError(null)} className="ml-2 underline">关闭</button>
-        </div>
-      )}
+        {/* Candidate List */}
+        {loading ? (
+          <div className="text-center py-16">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-slate-200 border-t-violet-600 mb-4"></div>
+            <p className="text-slate-500">加载中...</p>
+          </div>
+        ) : candidates.length === 0 ? (
+          <div className="text-center py-16 bg-white rounded-xl border border-dashed border-slate-300">
+            <div className="inline-block p-4 bg-slate-100 rounded-full mb-4">
+              <Search className="w-6 h-6 text-slate-400" />
+            </div>
+            <p className="text-slate-500">暂无候选，请先搜索</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {candidates.map((candidate) => (
+              <div
+                key={candidate.id}
+                className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-violet-300 transition-all duration-200"
+              >
+                <div className="p-4">
+                  <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        {candidate.evaluation && (
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getRatingColor(candidate.evaluation.rating)}`}>
+                            {getRatingLabel(candidate.evaluation.rating)}
+                          </span>
+                        )}
+                        <a
+                          href={candidate.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-base font-semibold text-violet-600 hover:text-violet-800 transition-colors duration-200"
+                        >
+                          {candidate.owner}/{candidate.name}
+                          <ExternalLink className="w-3 h-3 inline ml-1" />
+                        </a>
+                        <span className="text-sm text-slate-500">
+                          ⭐ {formatNumber(candidate.score.stars || 0)}
+                        </span>
+                        <span className="text-sm text-slate-500">
+                          🍴 {formatNumber(candidate.score.forks || 0)}
+                        </span>
+                        {candidate.language && (
+                          <span className="inline-flex items-center px-2 py-0.5 bg-slate-100 text-slate-700 text-xs rounded">
+                            {candidate.language}
+                          </span>
+                        )}
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(candidate.status)}`}>
+                          {getStatusLabel(candidate.status)}
+                        </span>
+                      </div>
 
-      {/* Filter */}
-      <div className="flex gap-2 mb-4">
-        <button
-          onClick={() => setFilterStatus('all')}
-          className={`px-3 py-1 rounded ${filterStatus === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-        >
-          全部 ({stats?.total || 0})
-        </button>
-        <button
-          onClick={() => setFilterStatus('candidate')}
-          className={`px-3 py-1 rounded ${filterStatus === 'candidate' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-        >
-          候选中 ({stats?.byStatus.candidate || 0})
-        </button>
-        <button
-          onClick={() => setFilterStatus('observing')}
-          className={`px-3 py-1 rounded ${filterStatus === 'observing' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-        >
-          观察中 ({stats?.byStatus.observing || 0})
-        </button>
-        <button
-          onClick={() => setFilterStatus('imported')}
-          className={`px-3 py-1 rounded ${filterStatus === 'imported' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-        >
-          已导入 ({stats?.byStatus.imported || 0})
-        </button>
-      </div>
+                      {candidate.description && (
+                        <p className="text-slate-700 text-sm mb-2">{candidate.description}</p>
+                      )}
 
-      {/* Candidate List */}
-      {loading ? (
-        <div className="text-center py-8 text-gray-500">加载中...</div>
-      ) : candidates.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">暂无候选，请先搜索</div>
-      ) : (
-        <div className="space-y-4">
-          {candidates.map((candidate) => (
-            <div key={candidate.id} className="bg-white rounded-lg border p-4">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  {/* Header */}
-                  <div className="flex items-center gap-2 mb-2">
-                    {candidate.evaluation && (
-                      <span className="text-xl">{getRatingEmoji(candidate.evaluation.rating)}</span>
-                    )}
-                    <a
-                      href={candidate.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-lg font-semibold text-blue-600 hover:underline"
-                    >
-                      {candidate.owner}/{candidate.name}
-                    </a>
-                    <span className="text-gray-400">⭐ {candidate.score.stars || 0}</span>
-                    <span className="text-gray-400">🍴 {candidate.score.forks || 0}</span>
-                    {candidate.language && (
-                      <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">
-                        {candidate.language}
-                      </span>
-                    )}
+                      {candidate.capability && (
+                        <div className="text-sm text-slate-600 mb-2">
+                          <span className="font-medium">分类：</span>
+                          <span className="capitalize">{candidate.capability.category}</span>
+                          {candidate.capability.specialties.length > 0 && (
+                            <> • {candidate.capability.specialties.join('、')}</>
+                          )}
+                        </div>
+                      )}
+
+                      {candidate.capability?.skills && candidate.capability.skills.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-1.5 text-sm text-slate-600 mb-2">
+                          <span className="font-medium">Skills：</span>
+                          {candidate.capability.skills.slice(0, 5).map((skill, idx) => (
+                            <span
+                              key={idx}
+                              className="inline-flex items-center px-2 py-0.5 bg-slate-100 text-slate-700 text-xs rounded"
+                            >
+                              {skill}
+                            </span>
+                          ))}
+                          {candidate.capability.skills.length > 5 && (
+                            <span className="text-xs text-slate-400">+{candidate.capability.skills.length - 5}</span>
+                          )}
+                        </div>
+                      )}
+
+                      {candidate.evaluation && (
+                        <div className="text-sm text-slate-600 mb-1">
+                          <span className="font-medium">评分：</span>
+                          <span className={`font-semibold ${
+                            candidate.evaluation.score >= 80 ? 'text-emerald-600' :
+                            candidate.evaluation.score >= 60 ? 'text-amber-600' :
+                            'text-rose-600'
+                          }`}>
+                            {candidate.evaluation.score}/100
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="text-xs text-slate-400">
+                        更新于 {formatDate(candidate.updatedAt)}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      {candidate.status === 'candidate' || candidate.status === 'observing' ? (
+                        <>
+                          <button
+                            onClick={() => handleImport(candidate.id)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 text-white text-sm font-medium rounded-lg hover:bg-violet-700 transition-colors duration-200 cursor-pointer"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                            导入
+                          </button>
+                          <button
+                            onClick={() => handleObserve(candidate.id)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 text-white text-sm font-medium rounded-lg hover:bg-amber-600 transition-colors duration-200 cursor-pointer"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            {candidate.status === 'observing' ? '观察中' : '观察'}
+                          </button>
+                        </>
+                      ) : null}
+                      <button
+                        onClick={() => handleRefresh(candidate.id)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-200 transition-colors duration-200 cursor-pointer"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5" />
+                        刷新
+                      </button>
+                      <button
+                        onClick={() => handleRemove(candidate.id)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-100 text-rose-700 text-sm font-medium rounded-lg hover:bg-rose-200 transition-colors duration-200 cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        移除
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Description */}
-                  {candidate.description && (
-                    <p className="text-gray-700 text-sm mb-2">{candidate.description}</p>
-                  )}
-
-                  {/* Capability */}
-                  {candidate.capability && (
-                    <div className="text-sm text-gray-600 mb-2">
-                      <span className="font-medium">分类：</span>
-                      <span className="capitalize">{candidate.capability.category}</span>
-                      {candidate.capability.specialties.length > 0 && (
-                        <>
-                          {' | '}
-                          {candidate.capability.specialties.map((s) => s).join('、')}
-                        </>
+                  {candidate.evaluation && (candidate.evaluation.strengths.length > 0 || candidate.evaluation.concerns.length > 0) && (
+                    <div className="mt-3 pt-3 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                      {candidate.evaluation.strengths.length > 0 && (
+                        <div className="bg-emerald-50 rounded-lg p-2.5">
+                          <div className="font-medium text-emerald-700 mb-1.5 text-xs">优势</div>
+                          <ul className="text-slate-700 space-y-0.5 text-xs">
+                            {candidate.evaluation.strengths.slice(0, 3).map((s, i) => (
+                              <li key={i}>• {s}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {candidate.evaluation.concerns.length > 0 && (
+                        <div className="bg-rose-50 rounded-lg p-2.5">
+                          <div className="font-medium text-rose-700 mb-1.5 text-xs">关注点</div>
+                          <ul className="text-slate-700 space-y-0.5 text-xs">
+                            {candidate.evaluation.concerns.slice(0, 3).map((c, i) => (
+                              <li key={i}>• {c}</li>
+                            ))}
+                          </ul>
+                        </div>
                       )}
                     </div>
                   )}
-
-                  {/* Skills */}
-                  {candidate.capability?.skills && candidate.capability.skills.length > 0 && (
-                    <div className="text-sm text-gray-600 mb-2">
-                      <span className="font-medium">Skills：</span>
-                      {candidate.capability.skills.join(', ')}
-                    </div>
-                  )}
-
-                  {/* Evaluation */}
-                  {candidate.evaluation && (
-                    <div className="text-sm mb-2">
-                      <span className="font-medium">评级：</span>
-                      {getRatingLabel(candidate.evaluation.rating)} ({candidate.evaluation.score}/100)
-                    </div>
-                  )}
-
-                  {/* Status Badge */}
-                  <div className="text-xs text-gray-400">
-                    状态：{candidate.status === 'candidate' ? '候选中' :
-                           candidate.status === 'observing' ? '观察中' :
-                           candidate.status === 'imported' ? '已导入' : '已移除'}
-                    {' • '}
-                    更新于 {formatDate(candidate.updatedAt)}
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-2 ml-4">
-                  {candidate.status === 'candidate' || candidate.status === 'observing' ? (
-                    <>
-                      <button
-                        onClick={() => handleImport(candidate.id)}
-                        disabled={candidate.status === 'imported'}
-                        className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 disabled:bg-gray-300"
-                      >
-                        导入组织
-                      </button>
-                      <button
-                        onClick={() => handleObserve(candidate.id)}
-                        className="px-3 py-1 bg-yellow-500 text-white text-sm rounded hover:bg-yellow-600"
-                      >
-                        {candidate.status === 'observing' ? '保持观察' : '添加观察'}
-                      </button>
-                    </>
-                  ) : null}
-                  <button
-                    onClick={() => handleRefresh(candidate.id)}
-                    className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600"
-                  >
-                    刷新
-                  </button>
-                  <button
-                    onClick={() => handleRemove(candidate.id)}
-                    className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600"
-                  >
-                    移除
-                  </button>
                 </div>
               </div>
-
-              {/* Strengths & Concerns */}
-              {candidate.evaluation && (
-                <div className="mt-3 pt-3 border-t grid grid-cols-2 gap-4 text-sm">
-                  {candidate.evaluation.strengths.length > 0 && (
-                    <div>
-                      <div className="font-medium text-green-700 mb-1">优势：</div>
-                      <ul className="text-gray-600 list-disc list-inside">
-                        {candidate.evaluation.strengths.map((s, i) => (
-                          <li key={i}>{s}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {candidate.evaluation.concerns.length > 0 && (
-                    <div>
-                      <div className="font-medium text-red-700 mb-1">关注点：</div>
-                      <ul className="text-gray-600 list-disc list-inside">
-                        {candidate.evaluation.concerns.map((c, i) => (
-                          <li key={i}>{c}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </DashboardLayout>
   );
 }

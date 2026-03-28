@@ -63,6 +63,8 @@ export interface TaskSummary {
   riskLevel: string;
   recommendedAgentRole: string;
   routingStatus: string;
+  assigneeId?: string;
+  assigneeName?: string;
   createdAt: string;
   updatedAt: string;
   latestApproval?: ApprovalSummary | null;
@@ -83,9 +85,12 @@ export interface ApprovalSummary {
 
 export interface ExecutionSummary {
   id: string;
+  displayExecutionId?: string;
   taskId: string;
   status: string;
   executor?: 'claude' | 'codex' | 'openai';
+  runtimeName?: string;
+  degraded?: boolean;
   outputSummary?: string;
   errorMessage?: string;
   memoryContextExcerpt?: string;
