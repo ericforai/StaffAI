@@ -233,6 +233,7 @@ export const EXECUTION_TRACE_EVENT_TYPES = [
   'execution_paused',
   'execution_resumed',
   'execution_cancelled',
+  'execution_event',
   'tool_call_logged',
   'approval_requested',
   'approval_resolved',

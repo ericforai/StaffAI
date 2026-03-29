@@ -30,7 +30,7 @@ function getBrowserBackendHost() {
 
 function getDefaultWsUrl() {
   const host = getBrowserBackendHost();
-  const actualHost = host === 'localhost' || !host ? '127.0.0.1' : host;
+  const actualHost = host === 'localhost' || !host ? 'localhost' : host;
 
   const protocol = typeof window !== 'undefined' && window.location.protocol === 'https:' && actualHost !== '127.0.0.1' ? 'wss' : 'ws';
   return `${protocol}://${actualHost}:${DEFAULT_BACKEND_PORT}`;
@@ -38,7 +38,7 @@ function getDefaultWsUrl() {
 
 function getDefaultApiUrl() {
   const host = getBrowserBackendHost();
-  const actualHost = host === 'localhost' || !host ? '127.0.0.1' : host;
+  const actualHost = host === 'localhost' || !host ? 'localhost' : host;
 
   const protocol = typeof window !== 'undefined' && window.location.protocol === 'https:' && actualHost !== '127.0.0.1' ? 'https' : 'http';
   return `${protocol}://${actualHost}:${DEFAULT_BACKEND_PORT}/api`;

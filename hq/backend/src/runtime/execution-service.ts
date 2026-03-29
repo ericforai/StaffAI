@@ -324,6 +324,55 @@ export async function runTaskExecution(
       },
     });
   }
+
+  // Wrap onEvent to persist intermediate SSE events as trace records
+  const storeHasTrace = typeof storeWithObservability.appendExecutionTraceEvent === 'function';
+  let lastSseTraceTime = 0;
+  const SSE_TRACE_THROTTLE_MS = 2000;
+
+  const traceAwareOnEvent: ((event: { type: string; data: any }) => void) | undefined =
+    storeHasTrace
+      ? (event) => {
+          // Forward to original callback (WebSocket)
+          if (input.onEvent) {
+            input.onEvent(event);
+          }
+
+          // Throttled persistence — only meaningful, non-noise events
+          const now = Date.now();
+          if (now - lastSseTraceTime < SSE_TRACE_THROTTLE_MS) return;
+
+          let summary = '';
+          const data = event.data;
+
+          if (event.type === 'values' && data?.messages) {
+            const aiMsgs = (data.messages as Array<{ type: string; content?: string; tool_calls?: any }>)
+              .filter((m) => m.type === 'ai' && m.content && !m.tool_calls);
+            if (aiMsgs.length > 0) {
+              summary = aiMsgs[aiMsgs.length - 1].content!.slice(0, 150);
+            }
+          } else if (data?.content && typeof data.content === 'string' && data.content.length > 20) {
+            summary = data.content.slice(0, 150);
+          } else if (event.type === 'tool_call' || event.type === 'tool_calls') {
+            summary = `工具调用: ${JSON.stringify(data).slice(0, 80)}`;
+          }
+
+          if (summary) {
+            lastSseTraceTime = now;
+            storeWithObservability.appendExecutionTraceEvent!({
+              id: `trace_sse_${started.id}_${now}`,
+              type: 'execution_event',
+              taskId: input.taskId,
+              executionId: started.id,
+              occurredAt: new Date().toISOString(),
+              actor: input.executor,
+              summary,
+              data: { sseType: event.type },
+            }).catch(() => {});
+          }
+        }
+      : input.onEvent;
+
   let lastError: RuntimeExecutionError | undefined;
   let finalizedExecution: ExecutionLifecycleRecord | null = null;
   let finalizedWorkflowArtifacts: { workflowPlan?: WorkflowPlan; assignments?: TaskAssignment[] } | undefined;
@@ -362,7 +411,7 @@ export async function runTaskExecution(
         timeoutMs,
         maxRetries,
         inputSnapshot: input.inputSnapshot,
-        onEvent: input.onEvent,
+        onEvent: traceAwareOnEvent,
       };
       const runtimeResult = await withTimeout(
         input.runtimeRunner ? input.runtimeRunner(runtimeContext) : runtimeAdapter.run(runtimeContext),
@@ -458,7 +507,7 @@ export async function runTaskExecution(
           timeoutMs,
           maxRetries,
           inputSnapshot: input.inputSnapshot,
-          onEvent: input.onEvent,
+          onEvent: traceAwareOnEvent,
         };
         const fallbackResult = await withTimeout(fallbackAdapter.run(runtimeContext), timeoutMs);
 

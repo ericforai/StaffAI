@@ -1351,10 +1351,11 @@
         "Python"
       ]
     },
-    "status": "candidate",
+    "status": "observing",
     "id": "candidate_1774668031236_5iyhqob6r",
     "createdAt": "2026-03-28T03:20:31.236Z",
-    "updatedAt": "2026-03-28T03:20:31.236Z"
+    "updatedAt": "2026-03-29T02:39:51.887Z",
+    "observedAt": "2026-03-29T02:39:51.887Z"
   },
   {
     "source": "github",

@@ -6,7 +6,7 @@ export class RuntimeExecutorTool extends BaseTool<{ task: string; executor?: str
   description = 'Run executor-backed implementation work.';
   category = 'runtime' as const;
   riskLevel = 'high' as const;
-  allowedRoles = ['software-architect', 'backend-developer'];
+  allowedRoles = ['software-architect', 'backend-developer', 'system'];
   schema = z.object({
     task: z.string().describe('Implementation task description.'),
     executor: z.string().optional().describe('Prefered executor (claude, codex).'),

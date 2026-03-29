@@ -1,6 +1,6 @@
 ---
-name: eigent
-description: Eigent: The Open Source Cowork Desktop to Unlock Your Exceptional Productivity. Local and Free Alternative to Claude Cowork.
+name: "eigent"
+description: "Eigent: The Open Source Cowork Desktop to Unlock Your Exceptional Productivity. Local and Free Alternative to Claude Cowork."
 category: engineering
 emoji: 🤖
 color: blue

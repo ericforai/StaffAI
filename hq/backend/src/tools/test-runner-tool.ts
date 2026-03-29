@@ -10,7 +10,7 @@ export class TestRunnerTool extends BaseTool<{ target: string }> {
   description = 'Run bounded project verification commands.';
   category = 'quality' as const;
   riskLevel = 'medium' as const;
-  allowedRoles = ['reviewer', 'software-architect', 'backend-developer'];
+  allowedRoles = ['reviewer', 'software-architect', 'backend-developer', 'system'];
   schema = z.object({
     target: z.string().describe('Test target or suite name (e.g. "backend", "frontend").'),
   });

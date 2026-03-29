@@ -7,7 +7,7 @@ export class FileReadTool extends BaseTool<{ path: string }> {
   description = 'Read workspace files.';
   category = 'filesystem' as const;
   riskLevel = 'low' as const;
-  allowedRoles = ['reviewer', 'software-architect', 'backend-developer', 'technical-writer', 'dispatcher'];
+  allowedRoles = ['reviewer', 'software-architect', 'backend-developer', 'technical-writer', 'dispatcher', 'system'];
   schema = z.object({
     path: z.string().describe('Relative path to the file to read.'),
   });

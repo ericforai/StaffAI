@@ -3,6 +3,7 @@
 # This script starts the full StaffAI dual-core environment:
 # 1. TS Office (Backend & Frontend)
 # 2. Python Workshop (DeerFlow Execution Core)
+# 3. DeerFlow Native Frontend (Sandbox View)
 
 set -euo pipefail
 
@@ -14,6 +15,7 @@ echo "--- Cleaning up previous processes and locks ---"
 lsof -ti :8000 | xargs kill -9 2>/dev/null || true
 lsof -ti :3333 | xargs kill -9 2>/dev/null || true
 lsof -ti :3008 | xargs kill -9 2>/dev/null || true
+lsof -ti :3001 | xargs kill -9 2>/dev/null || true
 
 # Force remove Next.js dev lock if it exists
 rm -rf "$SCRIPT_DIR/frontend/.next/dev/lock" 2>/dev/null || true
@@ -38,27 +40,38 @@ echo "Python Workshop PID: $WORKSHOP_PID"
 # --- Start TS Backend ---
 echo "--- Initializing Backend ---"
 cd "$SCRIPT_DIR/backend"
-# Use 'dev:web' instead of 'dev' as per backend package.json
 npm run dev:web &
 BACKEND_PID=$!
 echo "Backend PID: $BACKEND_PID"
 
 # --- Start TS Frontend ---
-echo "--- Initializing Frontend ---"
+echo "--- Initializing StaffAI Frontend ---"
 cd "$SCRIPT_DIR/frontend"
-# Check if we should use port 3000 or 3008 (based on your error log)
 PORT=3008 npm run dev &
 FRONTEND_PID=$!
-echo "Frontend PID: $FRONTEND_PID"
+echo "StaffAI Frontend PID: $FRONTEND_PID"
+
+# --- Start DeerFlow Native Frontend ---
+echo "--- Initializing DeerFlow Native Frontend ---"
+cd "$PARENT_DIR/workshop/deer-flow/frontend"
+if [ ! -d "node_modules" ]; then
+    echo "Installing DeerFlow Frontend dependencies (pnpm)..."
+    pnpm install || echo "pnpm install failed, please run manually."
+fi
+# 使用 3001 端口启动，修复 Next.js 参数传递语法
+PORT=3001 pnpm run dev &
+DEERFLOW_FE_PID=$!
+echo "DeerFlow Frontend PID: $DEERFLOW_FE_PID"
 
 echo "============================================================"
-echo "StaffAI Environment is running!"
-echo "Workshop (Python): http://localhost:8000"
-echo "Backend (TS):      http://localhost:3333"
-echo "Frontend (TS):     http://localhost:3008"
+echo "StaffAI Full Stack is running!"
+echo "Workshop (Python):   http://localhost:8000"
+echo "Backend (TS):        http://localhost:3333"
+echo "StaffAI UI (Main):   http://localhost:3008"
+echo "DeerFlow UI (Debug): http://localhost:3001"
 echo "============================================================"
 
 # Cleanup on exit
-trap "kill $WORKSHOP_PID $BACKEND_PID $FRONTEND_PID; exit" SIGINT SIGTERM
+trap "kill $WORKSHOP_PID $BACKEND_PID $FRONTEND_PID $DEERFLOW_FE_PID; exit" SIGINT SIGTERM
 
-wait $WORKSHOP_PID $BACKEND_PID $FRONTEND_PID
+wait $WORKSHOP_PID $BACKEND_PID $FRONTEND_PID $DEERFLOW_FE_PID

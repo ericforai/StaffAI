@@ -6,7 +6,7 @@ export class DocsSearchTool extends BaseTool<{ query: string }> {
   description = 'Search project and platform documentation context.';
   category = 'knowledge' as const;
   riskLevel = 'low' as const;
-  allowedRoles = ['reviewer', 'software-architect', 'backend-developer', 'technical-writer', 'dispatcher'];
+  allowedRoles = ['reviewer', 'software-architect', 'backend-developer', 'technical-writer', 'dispatcher', 'system'];
   schema = z.object({
     query: z.string().describe('Search query for documentation.'),
   });

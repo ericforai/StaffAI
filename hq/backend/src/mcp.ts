@@ -351,7 +351,8 @@ export class McpGateway {
           actorRole: 'system', // Default role for MCP calls
           taskId: 'mcp-call',
           executionId: 'mcp-exec',
-          approvalGranted: true // MCP clients are trusted for now in dev
+          // Use riskLevel to decide if approval is granted
+          approvalGranted: tool.definition.riskLevel !== 'high'
         });
 
         if (!result.ok) {

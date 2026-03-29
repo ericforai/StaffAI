@@ -29,7 +29,7 @@ const DEFAULT_TOOLS_BY_ROLE: Record<string, string[]> = {
   'frontend-developer': ['docs_search', 'git_diff', 'file_read', 'runtime_executor'],
   'technical-writer': ['docs_search', 'git_diff', 'file_read'],
   'code-reviewer': ['git_diff', 'file_read', 'docs_search'],
-  dispatcher: ['docs_search', 'runtime_executor'],
+  dispatcher: ['docs_search', 'runtime_executor', 'file_read'],
 };
 
 const DEFAULT_TASK_TYPES_BY_ROLE: Record<string, AgentTaskType[]> = {
@@ -78,28 +78,37 @@ export class Scanner {
   }
 
   private parseAgentFile(filePath: string, department: string) {
+    const rawContent = fs.readFileSync(filePath, 'utf-8');
+    let name = '';
+    let description = '';
+    let data: any = {};
+    let content = '';
+
     try {
-      const rawContent = fs.readFileSync(filePath, 'utf-8');
-      
-      // Attempt to fix some common YAML issues before parsing
-      // For example, descriptions with quotes but no wrapping quotes
-      const content = rawContent; 
-      
-      const parsed = matter(content);
+      const parsed = matter(rawContent);
+      data = parsed.data;
+      content = parsed.content;
+      name = data.name;
+      description = data.description;
+    } catch (err) {
+      // Graceful fallback to regex if YAML parser fails
+      const nameMatch = rawContent.match(/^name:\s*(.*)$/m);
+      const descMatch = rawContent.match(/^description:\s*(.*)$/m);
+      name = nameMatch ? nameMatch[1].trim().replace(/^["']|["']$/g, '') : '';
+      description = descMatch ? descMatch[1].trim().replace(/^["']|["']$/g, '') : '';
+      content = rawContent.replace(/^---[\s\S]*?---/, '');
+      console.warn(`[Scanner] YAML parse error at ${filePath}, using regex fallback.`);
+    }
 
-      let name = parsed.data.name;
-      let description = parsed.data.description;
+    if (!name) {
+      // Try one more time with a broader match if name field was totally missing from data
+      const nameMatch = rawContent.match(/name:\s*["']?([^"'\n]+)["']?/);
+      name = nameMatch ? nameMatch[1].trim() : '';
+    }
 
-      if (!name || !description) {
-        // Fallback: try manual regex extraction if matter() fails to find fields
-        const nameMatch = content.match(/^name:\s*(.*)$/m);
-        const descMatch = content.match(/^description:\s*(.*)$/m);
-        name = nameMatch ? nameMatch[1].trim() : '';
-        description = descMatch ? descMatch[1].trim() : '';
-      }
+    if (!name) return;
 
-      if (!name) return;
-
+    try {
       const slug = this.slugify(name);
       
       // Apply Chinese translations if available
@@ -115,27 +124,27 @@ export class Scanner {
         filePath,
         department,
         frontmatter: {
-          ...parsed.data,
+          ...data,
           name,
           description
         } as AgentFrontmatter,
-        content: parsed.content,
-        systemPrompt: this.extractSystemPrompt(parsed.content),
+        content: content,
+        systemPrompt: this.extractSystemPrompt(content),
         profile: this.buildAgentProfile({
           id: slug,
           department,
           frontmatter: {
-            ...parsed.data,
+            ...data,
             name,
             description,
           } as AgentFrontmatter,
-          content: parsed.content,
+          content: content,
         }),
       };
 
       this.agents.set(slug, agent);
     } catch (err) {
-      console.error(`Error parsing agent at ${filePath}:`, err);
+      console.error(`Error building agent profile at ${filePath}:`, err);
     }
   }
 

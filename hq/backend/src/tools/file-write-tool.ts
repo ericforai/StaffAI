@@ -8,7 +8,7 @@ export class FileWriteTool extends BaseTool<{ path: string; content: string }> {
   description = 'Write or overwrite workspace files.';
   category = 'filesystem' as const;
   riskLevel = 'medium' as const;
-  allowedRoles = ['software-architect', 'backend-developer', 'technical-writer'];
+  allowedRoles = ['software-architect', 'backend-developer', 'technical-writer', 'system'];
   schema = z.object({
     path: z.string().describe('Relative path to the file to write.'),
     content: z.string().describe('The content to write to the file.'),

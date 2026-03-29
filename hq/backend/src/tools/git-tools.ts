@@ -11,7 +11,7 @@ export class GitReadTool extends BaseTool<{ command: string; args?: string[] }> 
   public readonly description = 'Read git repository information (branch, status, log).';
   public readonly category: ToolCategory = 'repository';
   public readonly riskLevel: ToolRiskLevel = 'low';
-  public readonly allowedRoles = ['reviewer', 'software-architect', 'backend-developer', 'technical-writer', 'dispatcher'];
+  public readonly allowedRoles = ['reviewer', 'software-architect', 'backend-developer', 'technical-writer', 'dispatcher', 'system'];
 
   public readonly schema = z.object({
     command: z.enum(['branch', 'status', 'log', 'show']).default('status'),
@@ -52,7 +52,7 @@ export class GitDiffTool extends BaseTool<{ ref?: string }> {
   public readonly description = 'Get git diff summary.';
   public readonly category: ToolCategory = 'repository';
   public readonly riskLevel: ToolRiskLevel = 'low';
-  public readonly allowedRoles = ['reviewer', 'software-architect', 'backend-developer', 'technical-writer'];
+  public readonly allowedRoles = ['reviewer', 'software-architect', 'backend-developer', 'technical-writer', 'system'];
 
   public readonly schema = z.object({
     ref: z.string().optional().describe('The git ref to diff against (e.g. HEAD, origin/main).'),

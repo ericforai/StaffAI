@@ -40702,5 +40702,303 @@
       "executor": "openai",
       "runtimeName": "openai_api"
     }
+  },
+  {
+    "id": "trace_exec_48011b35-ce57-48ef-aed9-6ad6afea0308_1774692990108",
+    "type": "execution_started",
+    "taskId": "20260328001",
+    "executionId": "48011b35-ce57-48ef-aed9-6ad6afea0308",
+    "occurredAt": "2026-03-28T10:16:30.108Z",
+    "actor": "claude",
+    "summary": "开始执行任务：20260328001",
+    "data": {
+      "executor": "claude",
+      "runtimeName": "local_claude_cli",
+      "executionMode": "single"
+    }
+  },
+  {
+    "id": "trace_exec_b834f214-ac84-474e-989c-72f4e1fd06a1_1774693143764",
+    "type": "execution_started",
+    "taskId": "20260328002",
+    "executionId": "b834f214-ac84-474e-989c-72f4e1fd06a1",
+    "occurredAt": "2026-03-28T10:19:03.764Z",
+    "actor": "deerflow",
+    "summary": "开始执行任务：20260328002",
+    "data": {
+      "executor": "deerflow",
+      "runtimeName": "python_deerflow_workshop",
+      "executionMode": "single"
+    }
+  },
+  {
+    "id": "trace_exec_b834f214-ac84-474e-989c-72f4e1fd06a1_1774693143836",
+    "type": "execution_completed",
+    "taskId": "20260328002",
+    "executionId": "b834f214-ac84-474e-989c-72f4e1fd06a1",
+    "occurredAt": "2026-03-28T10:19:03.836Z",
+    "actor": "deerflow",
+    "summary": "完成任务：20260328002",
+    "data": {
+      "status": "completed",
+      "degraded": false,
+      "retryCount": 0,
+      "executor": "deerflow",
+      "runtimeName": "python_deerflow_workshop"
+    }
+  },
+  {
+    "id": "trace_exec_47ef7a6b-8a44-4417-adbc-890e64450275_1774693296283",
+    "type": "execution_started",
+    "taskId": "20260328003",
+    "executionId": "47ef7a6b-8a44-4417-adbc-890e64450275",
+    "occurredAt": "2026-03-28T10:21:36.283Z",
+    "actor": "deerflow",
+    "summary": "开始执行任务：20260328003",
+    "data": {
+      "executor": "deerflow",
+      "runtimeName": "python_deerflow_workshop",
+      "executionMode": "single"
+    }
+  },
+  {
+    "id": "trace_exec_47ef7a6b-8a44-4417-adbc-890e64450275_1774693296367",
+    "type": "execution_completed",
+    "taskId": "20260328003",
+    "executionId": "47ef7a6b-8a44-4417-adbc-890e64450275",
+    "occurredAt": "2026-03-28T10:21:36.367Z",
+    "actor": "deerflow",
+    "summary": "完成任务：20260328003",
+    "data": {
+      "status": "completed",
+      "degraded": false,
+      "retryCount": 0,
+      "executor": "deerflow",
+      "runtimeName": "python_deerflow_workshop"
+    }
+  },
+  {
+    "id": "trace_exec_2a3de33e-c91c-4ae8-bc2f-8113c135ff81_1774693480834",
+    "type": "execution_started",
+    "taskId": "20260328004",
+    "executionId": "2a3de33e-c91c-4ae8-bc2f-8113c135ff81",
+    "occurredAt": "2026-03-28T10:24:40.834Z",
+    "actor": "deerflow",
+    "summary": "开始执行任务：20260328004",
+    "data": {
+      "executor": "deerflow",
+      "runtimeName": "python_deerflow_workshop",
+      "executionMode": "single"
+    }
+  },
+  {
+    "id": "trace_exec_2a3de33e-c91c-4ae8-bc2f-8113c135ff81_1774693480894",
+    "type": "execution_failed",
+    "taskId": "20260328004",
+    "executionId": "2a3de33e-c91c-4ae8-bc2f-8113c135ff81",
+    "occurredAt": "2026-03-28T10:24:40.894Z",
+    "actor": "deerflow",
+    "summary": "失败任务：20260328004",
+    "data": {
+      "status": "failed",
+      "degraded": false,
+      "retryCount": 1,
+      "executor": "deerflow",
+      "runtimeName": "python_deerflow_workshop"
+    }
+  },
+  {
+    "id": "trace_exec_83b46d43-0067-47f9-a041-33872ebdaa8a_1774693710948",
+    "type": "execution_started",
+    "taskId": "20260328005",
+    "executionId": "83b46d43-0067-47f9-a041-33872ebdaa8a",
+    "occurredAt": "2026-03-28T10:28:30.948Z",
+    "actor": "deerflow",
+    "summary": "开始执行任务：20260328005",
+    "data": {
+      "executor": "deerflow",
+      "runtimeName": "python_deerflow_workshop",
+      "executionMode": "single"
+    }
+  },
+  {
+    "id": "trace_exec_83b46d43-0067-47f9-a041-33872ebdaa8a_1774693720637",
+    "type": "execution_completed",
+    "taskId": "20260328005",
+    "executionId": "83b46d43-0067-47f9-a041-33872ebdaa8a",
+    "occurredAt": "2026-03-28T10:28:40.637Z",
+    "actor": "deerflow",
+    "summary": "完成任务：20260328005",
+    "data": {
+      "status": "completed",
+      "degraded": false,
+      "retryCount": 0,
+      "executor": "deerflow",
+      "runtimeName": "python_deerflow_workshop"
+    }
+  },
+  {
+    "id": "trace_tool_5ab9da46-eb41-4baa-9f09-f31395b3b1af_1774705963720",
+    "type": "tool_call_logged",
+    "taskId": "mcp-call",
+    "executionId": "mcp-exec",
+    "toolCallLogId": "5ab9da46-eb41-4baa-9f09-f31395b3b1af",
+    "occurredAt": "2026-03-28T13:52:43.720Z",
+    "actor": "system",
+    "summary": "工具调用完成：file_write",
+    "data": {
+      "status": "completed",
+      "riskLevel": "medium"
+    }
+  },
+  {
+    "id": "trace_exec_621b6992-9ae0-4492-91f6-f57a363adef1_1774707045035",
+    "type": "execution_started",
+    "taskId": "20260328006",
+    "executionId": "621b6992-9ae0-4492-91f6-f57a363adef1",
+    "occurredAt": "2026-03-28T14:10:45.035Z",
+    "actor": "deerflow",
+    "summary": "开始执行任务：20260328006",
+    "data": {
+      "executor": "deerflow",
+      "runtimeName": "python_deerflow_workshop",
+      "executionMode": "single"
+    }
+  },
+  {
+    "id": "trace_exec_621b6992-9ae0-4492-91f6-f57a363adef1_1774707116750",
+    "type": "execution_completed",
+    "taskId": "20260328006",
+    "executionId": "621b6992-9ae0-4492-91f6-f57a363adef1",
+    "occurredAt": "2026-03-28T14:11:56.750Z",
+    "actor": "deerflow",
+    "summary": "完成任务：20260328006",
+    "data": {
+      "status": "completed",
+      "degraded": false,
+      "retryCount": 0,
+      "executor": "deerflow",
+      "runtimeName": "python_deerflow_workshop"
+    }
+  },
+  {
+    "id": "trace_exec_e474e662-85e7-48f0-b7f7-0c1daf20bb77_1774709440998",
+    "type": "execution_started",
+    "taskId": "20260328007",
+    "executionId": "e474e662-85e7-48f0-b7f7-0c1daf20bb77",
+    "occurredAt": "2026-03-28T14:50:40.998Z",
+    "actor": "deerflow",
+    "summary": "开始执行任务：20260328007",
+    "data": {
+      "executor": "deerflow",
+      "runtimeName": "python_deerflow_workshop",
+      "executionMode": "single"
+    }
+  },
+  {
+    "id": "trace_exec_e474e662-85e7-48f0-b7f7-0c1daf20bb77_1774709487615",
+    "type": "execution_completed",
+    "taskId": "20260328007",
+    "executionId": "e474e662-85e7-48f0-b7f7-0c1daf20bb77",
+    "occurredAt": "2026-03-28T14:51:27.615Z",
+    "actor": "deerflow",
+    "summary": "完成任务：20260328007",
+    "data": {
+      "status": "completed",
+      "degraded": false,
+      "retryCount": 0,
+      "executor": "deerflow",
+      "runtimeName": "python_deerflow_workshop"
+    }
+  },
+  {
+    "id": "trace_exec_90513299-e0cb-4990-87b1-20f366379bfe_1774750044559",
+    "type": "execution_started",
+    "taskId": "20260329001",
+    "executionId": "90513299-e0cb-4990-87b1-20f366379bfe",
+    "occurredAt": "2026-03-29T02:07:24.559Z",
+    "actor": "deerflow",
+    "summary": "开始执行任务：20260329001",
+    "data": {
+      "executor": "deerflow",
+      "runtimeName": "python_deerflow_workshop",
+      "executionMode": "single"
+    }
+  },
+  {
+    "id": "trace_exec_90513299-e0cb-4990-87b1-20f366379bfe_1774750078697",
+    "type": "execution_completed",
+    "taskId": "20260329001",
+    "executionId": "90513299-e0cb-4990-87b1-20f366379bfe",
+    "occurredAt": "2026-03-29T02:07:58.697Z",
+    "actor": "deerflow",
+    "summary": "完成任务：20260329001",
+    "data": {
+      "status": "completed",
+      "degraded": false,
+      "retryCount": 0,
+      "executor": "deerflow",
+      "runtimeName": "python_deerflow_workshop"
+    }
+  },
+  {
+    "id": "trace_exec_99f3ec70-2bf1-4350-8646-91b7c8593827_1774752039168",
+    "type": "execution_started",
+    "taskId": "20260329002",
+    "executionId": "99f3ec70-2bf1-4350-8646-91b7c8593827",
+    "occurredAt": "2026-03-29T02:40:39.168Z",
+    "actor": "deerflow",
+    "summary": "开始执行任务：20260329002",
+    "data": {
+      "executor": "deerflow",
+      "runtimeName": "python_deerflow_workshop",
+      "executionMode": "single"
+    }
+  },
+  {
+    "id": "trace_exec_99f3ec70-2bf1-4350-8646-91b7c8593827_1774752117953",
+    "type": "execution_completed",
+    "taskId": "20260329002",
+    "executionId": "99f3ec70-2bf1-4350-8646-91b7c8593827",
+    "occurredAt": "2026-03-29T02:41:57.953Z",
+    "actor": "deerflow",
+    "summary": "完成任务：20260329002",
+    "data": {
+      "status": "completed",
+      "degraded": false,
+      "retryCount": 0,
+      "executor": "deerflow",
+      "runtimeName": "python_deerflow_workshop"
+    }
+  },
+  {
+    "id": "trace_exec_a24a5595-fd7b-4229-a443-b79fa877419b_1774752331580",
+    "type": "execution_started",
+    "taskId": "20260329003",
+    "executionId": "a24a5595-fd7b-4229-a443-b79fa877419b",
+    "occurredAt": "2026-03-29T02:45:31.580Z",
+    "actor": "deerflow",
+    "summary": "开始执行任务：20260329003",
+    "data": {
+      "executor": "deerflow",
+      "runtimeName": "python_deerflow_workshop",
+      "executionMode": "single"
+    }
+  },
+  {
+    "id": "trace_exec_a24a5595-fd7b-4229-a443-b79fa877419b_1774752449483",
+    "type": "execution_completed",
+    "taskId": "20260329003",
+    "executionId": "a24a5595-fd7b-4229-a443-b79fa877419b",
+    "occurredAt": "2026-03-29T02:47:29.483Z",
+    "actor": "deerflow",
+    "summary": "完成任务：20260329003",
+    "data": {
+      "status": "completed",
+      "degraded": false,
+      "retryCount": 0,
+      "executor": "deerflow",
+      "runtimeName": "python_deerflow_workshop"
+    }
   }
 ]

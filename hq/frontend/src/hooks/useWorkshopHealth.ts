@@ -8,7 +8,7 @@ export function useWorkshopHealth() {
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        const response = await fetch('http://localhost:8000/health', {
+        const response = await fetch('http://127.0.0.1:8000/health', {
           // Add a short timeout to avoid hanging
           signal: AbortController.timeout ? AbortController.timeout(3000) : undefined,
         });

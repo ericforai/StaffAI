@@ -69,8 +69,8 @@ async function main() {
   const server = new WebServer(scanner, store, skillScanner);
   
   const port = process.env.PORT ? parseInt(process.env.PORT) : 3333;
-  server.start(port);
-  console.log(`Backend fully initialized on 127.0.0.1:${port}`);
+  await server.listen(port);
+  console.log(`Backend fully initialized and listening on 0.0.0.0:${port}`);
   console.log(`Discussion executor default: ${process.env.AGENCY_DISCUSSION_EXECUTOR}`);
 }
 

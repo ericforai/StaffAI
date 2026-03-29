@@ -62908,7 +62908,7 @@
     "synthesisRequired": false,
     "status": "completed",
     "createdAt": "2026-03-27T17:27:21.130Z",
-    "updatedAt": "2026-03-28T00:56:32.435Z",
+    "updatedAt": "2026-03-28T10:19:03.729Z",
     "steps": [
       {
         "id": "5b2d9517-e5c6-444a-a28d-0a959c4dc34b",
@@ -66490,6 +66490,216 @@
         "agentId": "brand-guardian",
         "assignmentRole": "primary",
         "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "f503cd78-738c-45b7-b98a-f1fd4f5d06fd",
+    "taskId": "20260328001",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-03-28T10:16:26.381Z",
+    "updatedAt": "2026-03-28T10:16:26.381Z",
+    "steps": [
+      {
+        "id": "3401f34b-62e7-47ad-b422-e77cdd29e138",
+        "title": "执行任务",
+        "description": "为任务「小红书获客」执行步骤 1",
+        "assignmentId": "776ce1c9-71ff-4da3-8cf3-aefd880db937",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "35d7321c-830e-47bd-b349-9ebdfe196aa9",
+    "taskId": "20260328002",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-03-28T10:18:56.873Z",
+    "updatedAt": "2026-03-28T10:18:56.873Z",
+    "steps": [
+      {
+        "id": "fb23c61b-d21d-4c87-8e9e-6e2cb68180c2",
+        "title": "执行任务",
+        "description": "为任务「测试」执行步骤 1",
+        "assignmentId": "13f4d317-27ce-4677-8022-3487e475d0ca",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "b66b937d-54f5-4324-a796-14a0d4e76741",
+    "taskId": "20260328003",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "completed",
+    "createdAt": "2026-03-28T10:21:30.286Z",
+    "updatedAt": "2026-03-28T10:21:36.255Z",
+    "steps": [
+      {
+        "id": "b2bff6e5-4278-4d08-856b-4b4c4228a0c9",
+        "title": "执行任务",
+        "description": "为任务「测试1」执行步骤 1",
+        "assignmentId": "a2052f13-a204-483a-bde2-229f3af9ed65",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "completed",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "ac43a9f3-0f10-4965-b8cd-df506576ed2f",
+    "taskId": "20260328004",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-03-28T10:24:35.561Z",
+    "updatedAt": "2026-03-28T10:24:35.561Z",
+    "steps": [
+      {
+        "id": "16078ce1-b043-4a43-9d78-834d515a43ab",
+        "title": "执行任务",
+        "description": "为任务「测试2」执行步骤 1",
+        "assignmentId": "32ac2745-74fa-451c-85e3-e40c646ddcd2",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "95e9a4ca-b34b-4104-a5ed-cf25203c5cba",
+    "taskId": "20260328005",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "completed",
+    "createdAt": "2026-03-28T10:28:26.491Z",
+    "updatedAt": "2026-03-28T10:28:30.920Z",
+    "steps": [
+      {
+        "id": "4c712673-bc8a-468a-a8ca-fc7f1e027d82",
+        "title": "执行任务",
+        "description": "为任务「测试3」执行步骤 1",
+        "assignmentId": "3e69ff5c-775a-411a-8308-4159eae20a76",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "completed",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "ffef2538-60b6-44be-bdd5-d71ed382d94b",
+    "taskId": "20260328006",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "completed",
+    "createdAt": "2026-03-28T14:10:39.626Z",
+    "updatedAt": "2026-03-28T14:10:45.009Z",
+    "steps": [
+      {
+        "id": "610bdf75-d881-4d4b-9341-3a57c9f81f14",
+        "title": "执行任务",
+        "description": "为任务「测试2」执行步骤 1",
+        "assignmentId": "d0989e9a-b6b2-44ca-a725-8fbda93a4f4c",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "completed",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "898357dc-8e49-4893-acc1-a705c464b58e",
+    "taskId": "20260328007",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "completed",
+    "createdAt": "2026-03-28T14:48:37.110Z",
+    "updatedAt": "2026-03-28T14:50:40.482Z",
+    "steps": [
+      {
+        "id": "8140637b-1b9f-4dbd-8308-5d5ccaf94a37",
+        "title": "执行任务",
+        "description": "为任务「泊冉官网优化」执行步骤 1",
+        "assignmentId": "b9ba880e-b0a2-460d-94a1-c770a016078c",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "completed",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "912dfe35-44a0-48cc-80bd-eb56ab64ddc6",
+    "taskId": "20260329001",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "completed",
+    "createdAt": "2026-03-29T02:07:13.321Z",
+    "updatedAt": "2026-03-29T02:07:24.447Z",
+    "steps": [
+      {
+        "id": "afad546a-0ac9-49da-a5a4-aa070731ad32",
+        "title": "执行任务",
+        "description": "为任务「泊冉获客」执行步骤 1",
+        "assignmentId": "da70bad0-35bd-4434-afc7-a6ecbfa11143",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "completed",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "93be71d3-04b4-4c7b-b5c5-0f48458c9147",
+    "taskId": "20260329002",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "completed",
+    "createdAt": "2026-03-29T02:40:31.572Z",
+    "updatedAt": "2026-03-29T02:40:39.074Z",
+    "steps": [
+      {
+        "id": "dad75dec-a199-45de-aca2-fdfcf6aeedaa",
+        "title": "执行任务",
+        "description": "为任务「全球 AI Agent 平台对标分析与 StaffAI 演进建议」执行步骤 1",
+        "assignmentId": "458be707-7bcf-4601-abb6-20491fa0bf1a",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "completed",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "2f23a81b-9e85-4e37-bece-d0a367793540",
+    "taskId": "20260329003",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "completed",
+    "createdAt": "2026-03-29T02:45:19.247Z",
+    "updatedAt": "2026-03-29T02:45:31.418Z",
+    "steps": [
+      {
+        "id": "c6948130-779a-49c0-bcd8-f43e35203120",
+        "title": "执行任务",
+        "description": "为任务「全球 AI Agent 平台对标分析与 StaffAI 演进建议」执行步骤 1",
+        "assignmentId": "052c7a95-67e3-4b04-949f-1e7a3f6a414c",
+        "agentId": "brand-guardian",
+        "assignmentRole": "primary",
+        "status": "completed",
         "order": 1
       }
     ]

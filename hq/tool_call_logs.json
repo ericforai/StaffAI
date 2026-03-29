@@ -11,5 +11,57 @@
     "createdAt": "2026-03-27T04:08:53.988Z",
     "updatedAt": "2026-03-27T04:08:53.988Z",
     "outputSummary": "Tests for backend failed."
+  },
+  {
+    "id": "bc5f9790-5d42-4939-84b2-3457c8ae0ca8",
+    "executionId": "mcp-exec",
+    "taskId": "mcp-call",
+    "toolName": "file_write",
+    "actorRole": "system",
+    "status": "blocked",
+    "riskLevel": "medium",
+    "inputSummary": "{\"path\":\"hq/backend/test-output.txt\",\"content\":\"This is a test file for medium risk.\"}",
+    "createdAt": "2026-03-28T13:49:52.485Z",
+    "updatedAt": "2026-03-28T13:49:52.485Z",
+    "errorMessage": "role is not allowed"
+  },
+  {
+    "id": "89435f1c-68bb-4884-b71f-20d0b8900e05",
+    "executionId": "mcp-exec",
+    "taskId": "mcp-call",
+    "toolName": "runtime_executor",
+    "actorRole": "system",
+    "status": "blocked",
+    "riskLevel": "high",
+    "inputSummary": "{\"task\":\"echo \\\"This should be blocked\\\"\"}",
+    "createdAt": "2026-03-28T13:49:52.492Z",
+    "updatedAt": "2026-03-28T13:49:52.492Z",
+    "errorMessage": "role is not allowed"
+  },
+  {
+    "id": "5ab9da46-eb41-4baa-9f09-f31395b3b1af",
+    "executionId": "mcp-exec",
+    "taskId": "mcp-call",
+    "toolName": "file_write",
+    "actorRole": "system",
+    "status": "completed",
+    "riskLevel": "medium",
+    "inputSummary": "{\"path\":\"hq/backend/test-output.txt\",\"content\":\"This is a test file for medium risk.\"}",
+    "createdAt": "2026-03-28T13:52:43.717Z",
+    "updatedAt": "2026-03-28T13:52:43.717Z",
+    "outputSummary": "Wrote 36 characters to hq/backend/test-output.txt."
+  },
+  {
+    "id": "14e65939-a9d7-4474-8e12-5936346f4c50",
+    "executionId": "mcp-exec",
+    "taskId": "mcp-call",
+    "toolName": "runtime_executor",
+    "actorRole": "system",
+    "status": "blocked",
+    "riskLevel": "high",
+    "inputSummary": "{\"task\":\"echo \\\"This should be blocked\\\"\"}",
+    "createdAt": "2026-03-28T13:52:43.755Z",
+    "updatedAt": "2026-03-28T13:52:43.755Z",
+    "errorMessage": "high-risk tool requires approval"
   }
 ]

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useTaskDetail } from '../../../hooks/useTaskDetail';
 import { useTaskActions } from '../../../hooks/useTaskActions';
 import type { TaskExecutor } from '../../../hooks/useTaskActions';
@@ -17,6 +17,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ChevronDown, ChevronRight, FileText, AlertCircle, CheckCircle2, Info, Copy, Check } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { formatExecutor } from '../../../utils/formatters';
 
 // 图标映射：把字符串名称映射到实际的 Lucide 图标组件
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -145,8 +146,6 @@ function formatExecutionStatus(status: string) {
       return status;
   }
 }
-
-import { formatExecutor } from '../../../utils/formatters';
 
 /**
  * 清理多余的空行，只保留段落之间的单行空行
@@ -533,9 +532,19 @@ export default function TaskDetailPage() {
 
   const [selectedExecutor, setSelectedExecutor] = useState<TaskExecutor>('openai');
   const [showDebugInfo, setShowDebugInfo] = useState(false);
-  const [expandedExecutionId, setExpandedExecutionId] = useState<string | null>(
-    data?.executions && data.executions.length > 0 ? data.executions[0].id : null
-  );
+  const [expandedExecutionId, setExpandedExecutionId] = useState<string | null>(null);
+
+  // 当数据加载完成时，自动展开最新的执行记录
+  useEffect(() => {
+    try {
+      const executions = data?.executions;
+      if (executions && Array.isArray(executions) && executions.length > 0 && !expandedExecutionId) {
+        setExpandedExecutionId(executions[0].id);
+      }
+    } catch (err) {
+      console.error('Failed to auto-expand execution:', err);
+    }
+  }, [data, expandedExecutionId]);
 
   // 复制状态
   const [copiedExecutionId, setCopiedExecutionId] = useState<string | null>(null);
