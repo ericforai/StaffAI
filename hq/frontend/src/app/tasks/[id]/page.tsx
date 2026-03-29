@@ -687,6 +687,27 @@ export default function TaskDetailPage() {
                 </div>
               </div>
 
+              {/* Budget Usage Bar */}
+              {latestExecution && (
+                <div className="mt-6 rounded-[1.2rem] border border-slate-200 bg-[#fcfaf5] p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-[11px] tracking-[0.2em] text-slate-500">预算使用</p>
+                    <span className="text-[10px] font-medium text-slate-400">token 消耗统计</span>
+                  </div>
+                  <div className="relative h-2 bg-slate-200 rounded-full overflow-hidden">
+                    <div
+                      className="absolute left-0 top-0 h-full bg-gradient-to-r from-sky-400 to-sky-500 rounded-full transition-all duration-300"
+                      style={{ width: '0%' }}
+                      title="预算数据暂未可用"
+                    />
+                  </div>
+                  <div className="mt-2 flex items-center justify-between text-[10px] text-slate-500">
+                    <span>已用: 计算中...</span>
+                    <span>限制: 未设置</span>
+                  </div>
+                </div>
+              )}
+
               <div
                 className={`mt-6 rounded-[1.4rem] border px-4 py-4 ${taskStatusMessage?.tone ?? ''}`}
               >
@@ -952,6 +973,17 @@ export default function TaskDetailPage() {
 
                         {isExpanded && (
                           <div className="border-t border-slate-200 p-3 space-y-4">
+                            {/* Memory Context */}
+                            {execution.memoryContextExcerpt && (
+                              <div className="rounded-[1rem] border border-slate-200 bg-slate-50 p-3">
+                                <div className="flex items-center justify-between mb-2">
+                                  <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">记忆上下文</p>
+                                  <span className="text-[10px] font-medium text-slate-400">L1/L2 加载数据</span>
+                                </div>
+                                <p className="text-xs text-slate-700 whitespace-pre-wrap leading-relaxed">{execution.memoryContextExcerpt}</p>
+                              </div>
+                            )}
+
                             {/* 输出摘要 */}
                             {execution.outputSummary && (
                               <div>

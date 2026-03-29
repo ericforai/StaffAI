@@ -2,12 +2,15 @@ import path from 'node:path';
 import type express from 'express';
 import { registerAgencyRoutes } from '../api/agency';
 import { registerApprovalRoutes } from '../api/approvals';
+import { registerApprovalChainRoutes } from '../api/approval-chains';
+import { registerBudgetRoutes } from '../api/budget';
 import { registerDiscussionRoutes } from '../api/discussions';
 import { registerMarketRoutes } from '../api/market';
 import { registerExecutionRoutes } from '../api/executions';
 import { registerMemoryRoutes } from '../api/memory';
 import { registerRuntimeRoutes } from '../api/runtime';
 import { registerStartupRoutes } from '../api/startup';
+import { registerSquadTemplateRoutes } from '../api/squad-templates';
 import { registerTaskEventRoutes } from '../api/task-events';
 import { registerTaskRoutes, registerScenarioRoutes } from '../api/tasks';
 import { registerToolRoutes } from '../api/tools';
@@ -16,7 +19,9 @@ import { registerAuditRoutes } from '../api/audit';
 import { registerPresetRoutes } from '../api/presets';
 import { retrieveMemoryContext } from '../memory/memory-retriever';
 import { createWriteBackService } from '../memory/write-back-service';
+import { BudgetService } from '../governance/budget-service';
 import { createMemoryLayerService } from '../orchestration/memory-layer-service';
+import { createSquadTemplateService } from '../orchestration/squad-template-service';
 import {
   createTaskEventPublisher,
   type TaskDashboardEvent,
@@ -221,4 +226,24 @@ export function registerBackendRoutes({
 
   // Register talent market routes
   registerMarketRoutes(app, { store });
+
+  // Initialize BudgetService
+  const budgetService = new BudgetService();
+
+  // Register budget routes
+  registerBudgetRoutes(app, { budgetService });
+
+  // Initialize SquadTemplateService
+  const squadTemplateService = createSquadTemplateService({
+    getAgent: (id: string) => scanner.getAgent(id),
+  });
+
+  // Register squad template routes
+  registerSquadTemplateRoutes(app, {
+    squadTemplateService,
+    getAgent: (id: string) => scanner.getAgent(id),
+  });
+
+  // Register approval chain routes
+  registerApprovalChainRoutes(app);
 }

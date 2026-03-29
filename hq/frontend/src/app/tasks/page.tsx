@@ -55,7 +55,7 @@ export default function TasksPage() {
   const { tasks, loading, error, setTasks, reload } = useTasks();
   const { latestSummaryByTaskId } = useTaskEventFeed();
   const { agents, activeIds } = useAgents();
-  const { title, setTitle, description, setDescription, assigneeId, setAssigneeId, assigneeName, setAssigneeName, submitting, error: composeError, createTask } = useTaskComposer((task) =>
+  const { title, setTitle, description, setDescription, assigneeId, setAssigneeId, assigneeName, setAssigneeName, priority, setPriority, submitting, error: composeError, createTask } = useTaskComposer((task) =>
     setTasks((current) => [task, ...current])
   );
   const [viewMode, setViewMode] = useState<'all' | 'active'>('all');
@@ -259,6 +259,23 @@ export default function TasksPage() {
           {!assigneeId && (
             <p className="mt-1.5 text-xs text-rose-500">请先选择负责人</p>
           )}
+        </div>
+
+        {/* 优先级选择 */}
+        <div className="mt-3">
+          <label className="block text-xs font-medium text-slate-700 mb-2">
+            优先级
+          </label>
+          <select
+            value={priority}
+            onChange={(event) => setPriority(event.target.value as 'low' | 'medium' | 'high' | 'urgent')}
+            className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-base text-slate-800 outline-none"
+          >
+            <option value="low">低优先级</option>
+            <option value="medium">中优先级</option>
+            <option value="high">高优先级</option>
+            <option value="urgent">紧急</option>
+          </select>
         </div>
 
         {composeError && <p className="mt-3 text-sm text-rose-500">{composeError}</p>}
