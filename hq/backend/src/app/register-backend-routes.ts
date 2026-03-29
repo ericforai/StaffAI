@@ -30,6 +30,9 @@ import { createUserRepository } from '../identity/user-repository';
 import { createPermissionChecker } from '../identity/permission-checker';
 import { createUserContextService } from '../identity/user-context';
 import { createUserContextMiddleware } from '../middleware/user-context.middleware';
+import { HitlService } from '../orchestration/hitl-service';
+import { TaskStateMachine } from '../orchestration/task-state-machine';
+import { TaskRepositoryAdapter } from '../shared/task-repository-adapter';
 
 interface RouteRegistrationDependencies {
   app: express.Application;
@@ -118,6 +121,10 @@ export function registerBackendRoutes({
     discussionService,
     runtimePaths,
   });
+
+  const taskStateMachine = new TaskStateMachine(new TaskRepositoryAdapter(store));
+  const hitlService = new HitlService({ store, stateMachine: taskStateMachine });
+  app.set('hitlService', hitlService);
 
   registerTaskRoutes(app, store, {
     getAgentProfiles: () =>

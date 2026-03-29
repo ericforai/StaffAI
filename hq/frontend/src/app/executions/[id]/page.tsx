@@ -51,6 +51,8 @@ function formatExecutionStatus(status: string) {
 import { formatExecutor, formatRiskLevel } from '../../../utils/formatters';
 
 function formatControlStatus(status: string) {
+  return status;
+}
 
 function formatExecutionDisplayId(execution: { displayExecutionId?: string; id: string }) {
   if (execution.displayExecutionId && execution.displayExecutionId.trim()) {

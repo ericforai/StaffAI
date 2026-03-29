@@ -2,25 +2,19 @@ import type { TaskRepository } from '../persistence/file-repositories';
 import type { AuditLogger } from '../governance/audit-logger';
 import type { TaskRecord, TaskStatus } from '../shared/task-types';
 
-/**
- * State transition map defining valid state transitions
- * Maps current status to array of allowed events
- */
 export const TASK_STATE_TRANSITIONS: Record<TaskStatus, string[]> = {
   created: ['route', 'request_approval', 'start_execution', 'cancel'],
   routed: ['request_approval', 'enqueue_task', 'start_execution', 'cancel'],
   queued: ['start_execution', 'fail_execution', 'cancel'],
   waiting_approval: ['approve', 'reject', 'cancel'],
   running: ['complete_execution', 'fail_execution', 'cancel'],
+  suspended: ['resume', 'cancel'],
   completed: [],
   failed: [],
   cancelled: [],
 };
 
-/**
- * Maps events to resulting status for each starting state
- */
-const EVENT_TO_STATUS: Record<TaskStatus, Record<string, TaskStatus>> = {
+const EVENT_TO_STATUS: Record<TaskStatus, Record<string, TaskStatus | undefined>> = {
   created: {
     route: 'routed',
     request_approval: 'waiting_approval',
@@ -49,14 +43,15 @@ const EVENT_TO_STATUS: Record<TaskStatus, Record<string, TaskStatus>> = {
     fail_execution: 'failed',
     cancel: 'cancelled',
   },
+  suspended: {
+    resume: 'running',
+    cancel: 'cancelled',
+  },
   completed: {},
   failed: {},
   cancelled: {},
 };
 
-/**
- * Events that can trigger state transitions
- */
 export type TaskEvent =
   | 'create'
   | 'route'
@@ -68,11 +63,10 @@ export type TaskEvent =
   | 'start_execution'
   | 'complete_execution'
   | 'fail_execution'
-  | 'cancel';
+  | 'cancel'
+  | 'suspend'
+  | 'resume';
 
-/**
- * Result of a state transition attempt
- */
 export interface TaskTransitionResult {
   success: boolean;
   previousStatus: TaskStatus;
@@ -81,22 +75,12 @@ export interface TaskTransitionResult {
   error?: string;
 }
 
-/**
- * State machine for task lifecycle management
- * Validates and executes state transitions with audit logging
- */
 export class TaskStateMachine {
   constructor(
     private readonly taskRepository: TaskRepository,
     private readonly auditLogger: AuditLogger | null = null
   ) {}
 
-  /**
-   * Check if a transition is valid without executing it
-   * @param taskId ID of the task to check
-   * @param toStatus Target status to transition to
-   * @returns true if transition is valid, false otherwise
-   */
   async canTransition(taskId: string, toStatus: TaskStatus): Promise<boolean> {
     const task = await this.taskRepository.getById(taskId);
     if (!task) {
@@ -107,11 +91,6 @@ export class TaskStateMachine {
     return availableTransitions.includes(toStatus);
   }
 
-  /**
-   * Get all possible target statuses for a task's current state
-   * @param taskId ID of the task
-   * @returns Array of valid target statuses
-   */
   async getAvailableTransitions(taskId: string): Promise<TaskStatus[]> {
     const task = await this.taskRepository.getById(taskId);
     if (!task) {
@@ -124,21 +103,13 @@ export class TaskStateMachine {
     for (const event of events) {
       const statusMap = EVENT_TO_STATUS[task.status];
       if (statusMap && statusMap[event]) {
-        statuses.push(statusMap[event]);
+        statuses.push(statusMap[event]!);
       }
     }
 
     return statuses;
   }
 
-  /**
-   * Execute a state transition for a task
-   * @param taskId ID of the task to transition
-   * @param event Event triggering the transition
-   * @param actor User or system performing the transition
-   * @param reason Optional reason for the transition
-   * @returns Result of the transition attempt
-   */
   async transition(
     taskId: string,
     event: TaskEvent,
@@ -160,8 +131,6 @@ export class TaskStateMachine {
     const allowedEvents = TASK_STATE_TRANSITIONS[previousStatus] || [];
 
     if (!allowedEvents.includes(event)) {
-      // Build a helpful error message showing what status would result from this event
-      // if it were allowed (e.g., 'complete_execution' -> 'completed')
       const eventToStatusMap: Record<string, TaskStatus> = {
         route: 'routed',
         request_approval: 'waiting_approval',
@@ -212,7 +181,6 @@ export class TaskStateMachine {
       };
     }
 
-    // Log audit event
     if (this.auditLogger) {
       await this.auditLogger.log({
         entityType: 'task',
@@ -234,12 +202,6 @@ export class TaskStateMachine {
   }
 }
 
-/**
- * Factory function to create a TaskStateMachine instance
- * @param taskRepository Repository for task persistence
- * @param auditLogger Optional audit logger for state change tracking
- * @returns Configured TaskStateMachine instance
- */
 export function createTaskStateMachine(
   taskRepository: TaskRepository,
   auditLogger: AuditLogger | null = null

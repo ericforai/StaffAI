@@ -45,8 +45,58 @@ export function useTaskActions(taskId: string, onTaskUpdated?: (payload: TaskDet
     }
   }
 
+  async function suspendTask(reason: string) {
+    setSubmitting(true);
+    setError(null);
+    try {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/tasks/${taskId}/suspend`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason, message: reason }),
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || `Suspend failed: ${response.status}`);
+      }
+      const data = await response.json();
+      if (onTaskUpdated && data.task) {
+        onTaskUpdated(data.task);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Suspend failed');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function resumeTask(feedbackText: string) {
+    setSubmitting(true);
+    setError(null);
+    try {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/tasks/${taskId}/resume`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ feedbackText, feedbackType: 'approval' }),
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || `Resume failed: ${response.status}`);
+      }
+      const data = await response.json();
+      if (onTaskUpdated && data.task) {
+        onTaskUpdated(data.task);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Resume failed');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return {
     executeTask,
+    suspendTask,
+    resumeTask,
     submitting,
     error,
   };

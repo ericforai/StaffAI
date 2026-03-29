@@ -19,7 +19,6 @@ export interface SquadState {
 
 export type TaskExecutionMode = 'single' | 'serial' | 'parallel' | 'advanced_discussion';
 
-/** Matches backend `WORKFLOW_PLAN_MODES` — plans do not use `advanced_discussion`. */
 export type WorkflowPlanMode = 'single' | 'serial' | 'parallel';
 
 export interface WorkflowPlanStep {
@@ -145,6 +144,8 @@ export interface TaskEvent {
     | 'execution_completed'
     | 'execution_failed'
     | 'execution_degraded'
+    | 'task_suspended'
+    | 'task_resumed'
     | 'execution_event';
   message: string;
   taskId?: string;

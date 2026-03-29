@@ -42,7 +42,6 @@ function readPositiveInt(value: unknown): number | undefined {
   return Math.floor(value);
 }
 
-// Simple in-memory rate limiter for execution endpoints
 const executionRateLimit = new Map<string, { count: number; resetAt: number }>();
 function checkRateLimit(key: string, maxPerMinute = 10): boolean {
   const now = Date.now();
@@ -73,8 +72,6 @@ function resolveTaskExecutor(raw: unknown): 'claude' | 'codex' | 'openai' | 'dee
     return envPreferred;
   }
 
-  // Default to claude since it supports MCP tools (web search, document reading)
-  // Only use openai if explicitly configured via AGENCY_TASK_EXECUTOR
   return 'claude';
 }
 
@@ -190,9 +187,7 @@ export function registerTaskRoutes(
 
     dependencies.onExecutionFinished?.(result.execution);
 
-    return res.status(201).json({
-      ...result,
-    });
+    return res.status(201).json(result);
   });
 
   app.post('/api/tasks', async (req, res) => {
@@ -230,16 +225,75 @@ export function registerTaskRoutes(
       await dependencies.onApprovalRequested?.(task.id);
     }
 
-    return res.status(201).json({
-      task,
-    });
+    return res.status(201).json({ task });
+  });
+
+  app.post('/api/tasks/:taskId/suspend', async (req, res) => {
+    const { taskId } = req.params;
+    const { reason, message } = req.body;
+
+    try {
+      const hitlService = req.app.get('hitlService') as import('../orchestration/hitl-service').HitlService | undefined;
+      if (!hitlService) {
+        return res.status(503).json({ error: 'HITL service not available' });
+      }
+
+      const result = await hitlService.suspend(
+        taskId,
+        reason || 'missing_information',
+        message || 'Task suspended for human review',
+        'human_operator'
+      );
+
+      return res.json({ task: result.task });
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      if (msg.includes('not found')) {
+        return res.status(404).json({ error: msg });
+      } else if (msg.includes('not running')) {
+        return res.status(409).json({ error: msg });
+      } else {
+        return res.status(500).json({ error: 'Suspend operation failed' });
+      }
+    }
+  });
+
+  app.post('/api/tasks/:taskId/resume', async (req, res) => {
+    const { taskId } = req.params;
+    const { feedbackText, feedbackType } = req.body;
+
+    try {
+      const hitlService = req.app.get('hitlService') as import('../orchestration/hitl-service').HitlService | undefined;
+      if (!hitlService) {
+        return res.status(503).json({ error: 'HITL service not available' });
+      }
+
+      const result = await hitlService.resume(
+        taskId,
+        {
+          feedbackText: feedbackText || '',
+          feedbackType: feedbackType || 'approval',
+          attachments: [],
+          responder: 'human_operator',
+          respondedAt: new Date().toISOString(),
+        },
+        'human_operator'
+      );
+
+      return res.json({ task: result.task });
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      if (msg.includes('not found')) {
+        return res.status(404).json({ error: msg });
+      } else if (msg.includes('not suspended')) {
+        return res.status(409).json({ error: msg });
+      } else {
+        return res.status(500).json({ error: 'Resume operation failed' });
+      }
+    }
   });
 }
 
-/**
- * Register the MVP scenario endpoint.
- * Separate from registerTaskRoutes to avoid breaking existing callers.
- */
 export function registerScenarioRoutes(
   app: express.Application,
   store: Store,

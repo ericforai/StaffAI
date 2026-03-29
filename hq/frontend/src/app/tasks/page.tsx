@@ -20,6 +20,8 @@ function formatTaskStatus(status: string) {
       return '已完成';
     case 'running':
       return '执行中';
+    case 'suspended':
+      return '已暂停';
     case 'failed':
       return '执行失败';
     case 'cancelled':
@@ -55,16 +57,14 @@ export default function TasksPage() {
   const { tasks, loading, error, setTasks, reload } = useTasks();
   const { latestSummaryByTaskId } = useTaskEventFeed();
   const { agents, activeIds } = useAgents();
-  const { title, setTitle, description, setDescription, assigneeId, setAssigneeId, assigneeName, setAssigneeName, submitting, error: composeError, createTask } = useTaskComposer((task) =>
+  const { title, setTitle, description, setDescription, priority, setPriority, assigneeId, setAssigneeId, assigneeName, setAssigneeName, submitting, error: composeError, createTask } = useTaskComposer((task) =>
     setTasks((current) => [task, ...current])
   );
   const [viewMode, setViewMode] = useState<'all' | 'active'>('all');
 
-  // 负责人选择状态
   const [assigneeDropdownOpen, setAssigneeDropdownOpen] = useState(false);
   const [expandedDepartments, setExpandedDepartments] = useState<Set<string>>(new Set());
 
-  // 切换部门展开/收起
   function toggleDepartment(dept: string) {
     setExpandedDepartments(prev => {
       const newSet = new Set(prev);
@@ -77,7 +77,6 @@ export default function TasksPage() {
     });
   }
 
-  // 按部门分组活跃员工
   const agentsByDepartment = useMemo(() => {
     const grouped: Record<string, typeof agents> = {};
     agents
@@ -92,11 +91,9 @@ export default function TasksPage() {
     return grouped;
   }, [agents, activeIds]);
 
-  // 新创建任务后的执行确认状态
   const [newTaskId, setNewTaskId] = useState<string | null>(null);
   const [executing, setExecuting] = useState(false);
 
-  // 执行任务
   async function executeTask(taskId: string) {
     setExecuting(true);
     try {
@@ -112,7 +109,6 @@ export default function TasksPage() {
         const payload = (await response.json()) as { error?: string };
         throw new Error(payload.error || '任务执行失败');
       }
-      // 执行成功后跳转到详情页
       router.push(`/tasks/${taskId}`);
     } catch (err) {
       console.error('执行失败:', err);
@@ -120,7 +116,6 @@ export default function TasksPage() {
     }
   }
 
-  // 创建任务后的处理
   async function handleCreateTask() {
     const result = await createTask();
     if (result) {
@@ -128,7 +123,6 @@ export default function TasksPage() {
     }
   }
 
-  // 关闭确认弹窗
   function closeConfirmModal() {
     setNewTaskId(null);
   }
@@ -163,6 +157,16 @@ export default function TasksPage() {
             placeholder="任务描述"
             className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-base text-slate-800 outline-none placeholder:text-slate-400"
           />
+          <select
+            value={priority}
+            onChange={(event) => setPriority(event.target.value)}
+            className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-base text-slate-800 outline-none"
+          >
+            <option value="low">低优先级</option>
+            <option value="medium">中优先级</option>
+            <option value="high">高优先级</option>
+            <option value="urgent">紧急</option>
+          </select>
           <button
             type="button"
             onClick={() => void handleCreateTask()}
@@ -173,7 +177,6 @@ export default function TasksPage() {
           </button>
         </div>
 
-        {/* 负责人选择 - 部门-人员二级结构 */}
         <div className="mt-3">
           <label className="block text-xs font-medium text-slate-700 mb-2">
             负责人 <span className="text-rose-500">*</span>
@@ -393,7 +396,6 @@ export default function TasksPage() {
         </div>
       </div>
 
-      {/* 创建成功后的确认弹窗 */}
       {newTaskId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="mx-4 max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">

@@ -108,6 +108,7 @@ export async function buildTaskWorkspaceSummary(tasksOrStore: TaskListReadStore 
     routed: 0,
     queued: 0,
     running: 0,
+    suspended: 0,
     waiting_approval: 0,
     completed: 0,
     failed: 0,
@@ -136,7 +137,7 @@ export async function buildTaskWorkspaceSummary(tasksOrStore: TaskListReadStore 
       waitingApprovalTasks += 1;
     }
 
-    if (task.status === 'created' || task.status === 'routed' || task.status === 'queued' || task.status === 'running' || task.status === 'waiting_approval') {
+    if (task.status === 'created' || task.status === 'routed' || task.status === 'queued' || task.status === 'running' || task.status === 'waiting_approval' || task.status === 'suspended') {
       activeTasks += 1;
     }
 

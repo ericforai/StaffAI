@@ -32,7 +32,6 @@ export interface TaskDraftInput {
   priority?: string;
   requestedBy?: string;
   executionMode?: string;
-  // 任务负责人（从组织架构选择的员工）
   assigneeId?: string;
   assigneeName?: string;
 }
@@ -51,13 +50,6 @@ export type TaskCreationStore = Pick<
   'saveTask' | 'saveApproval' | 'saveTaskAssignment' | 'saveWorkflowPlan' | 'getTasks' | 'getTaskById'
 >;
 
-/**
- * Generate a sequential task ID based on current date (YYYYMMDDNNN)
- * e.g., 20260326001
- *
- * Uses getById-based probing to avoid the read-then-max race condition
- * under concurrent access. Falls back to UUID if 10 sequential slots are taken.
- */
 export async function generateTaskId(
   store: Pick<Store, 'getTasks' | 'getTaskById'>,
 ): Promise<string> {
@@ -67,14 +59,12 @@ export async function generateTaskId(
     String(today.getMonth() + 1).padStart(2, '0') +
     String(today.getDate()).padStart(2, '0');
 
-  // Try up to 10 sequential IDs, probing for uniqueness each time
   for (let seq = 1; seq <= 10; seq++) {
     const candidate = `${dateStr}${String(seq).padStart(3, '0')}`;
     const existing = await store.getTaskById(candidate);
     if (!existing) return candidate;
   }
 
-  // Fallback to UUID if all sequential IDs taken
   const { randomUUID } = await import('node:crypto');
   return randomUUID();
 }
@@ -84,6 +74,7 @@ const TASK_STATE_TRANSITIONS: Record<TaskStatus, TaskStatus[]> = {
   routed: ['running', 'waiting_approval', 'cancelled'],
   queued: ['running', 'waiting_approval', 'cancelled'],
   running: ['completed', 'failed', 'cancelled'],
+  suspended: ['running', 'cancelled'],
   waiting_approval: ['created', 'routed', 'cancelled'],
   completed: [],
   failed: ['running', 'cancelled'],
@@ -204,10 +195,6 @@ export function routeTask(input: TaskDraftInput): TaskRouteDecision {
   });
 }
 
-/**
- * Rebuild workflow plan + assignments for serial execution from the task's routing metadata.
- * Used when persisted plans are missing, parallel, or inconsistent (e.g. parallel degraded to serial).
- */
 export function rebuildWorkflowBundleForSerialExecution(
   task: TaskRecord,
   profiles: AgentProfile[] = [],
@@ -340,7 +327,6 @@ export async function createTask(
   const now = new Date().toISOString();
   const routeDecision = routeTask(input);
 
-  // Use ApprovalServiceV2 for enhanced risk assessment
   const approvalDecision = evaluateApprovalRequirementV2({
     title: input.title.trim(),
     description: input.description.trim(),

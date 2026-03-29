@@ -4,6 +4,7 @@ export const TASK_STATUSES = [
   'queued',
   'running',
   'waiting_approval',
+  'suspended',
   'completed',
   'failed',
   'cancelled',
@@ -14,7 +15,6 @@ export type TaskStatus = (typeof TASK_STATUSES)[number];
 export const APPROVAL_STATUSES = ['pending', 'approved', 'rejected', 'cancelled'] as const;
 export type ApprovalStatus = (typeof APPROVAL_STATUSES)[number];
 
-// Risk levels for approval assessment
 export const APPROVAL_RISK_LEVELS = ['LOW', 'MEDIUM', 'HIGH'] as const;
 export type ApprovalRiskLevel = (typeof APPROVAL_RISK_LEVELS)[number];
 
@@ -80,7 +80,6 @@ export interface TaskRecord {
   candidateAgentRoles: string[];
   routeReason: string;
   routingStatus: 'matched' | 'manual_review';
-  // 任务负责人（从组织架构选择的员工）
   assigneeId?: string;
   assigneeName?: string;
   createdAt: string;
@@ -107,15 +106,15 @@ export interface TaskRouteDecision {
 export interface ApprovalRecord {
   id: string;
   taskId: string;
-  taskTitle?: string;           // NEW: Task title for display
+  taskTitle?: string;
   status: ApprovalStatus;
   requestedBy: string;
   requestedAt: string;
-  riskLevel?: ApprovalRiskLevel;  // NEW: Risk level assessment
-  approver?: string;           // NEW: Approver name/ID
-  approvedAt?: string;         // NEW: When approval was granted/denied
-  reason?: string;             // NEW: Reason for decision
-  decisionContext?: Record<string, unknown>;  // NEW: Additional context
+  riskLevel?: ApprovalRiskLevel;
+  approver?: string;
+  approvedAt?: string;
+  reason?: string;
+  decisionContext?: Record<string, unknown>;
   resolvedAt?: string;
 }
 
@@ -202,7 +201,7 @@ export interface ToolDefinition {
   description?: string;
   inputSchema?: Record<string, unknown>;
   outputSchema?: Record<string, unknown>;
-  parameters?: any;
+  parameters?: unknown;
 }
 
 export interface ToolCallLog {
@@ -219,8 +218,8 @@ export interface ToolCallLog {
   toolId?: string;
   input?: string;
   output?: string;
-  fullInput?: any;
-  fullOutput?: any;
+  fullInput?: unknown;
+  fullOutput?: unknown;
   createdAt: string;
   updatedAt?: string;
 }

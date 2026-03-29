@@ -13,7 +13,7 @@ import {
 } from '../shared/task-types';
 
 test('shared task vocabulary exports explicit status collections', () => {
-  assert.deepEqual(TASK_STATUSES, ['created', 'routed', 'queued', 'running', 'waiting_approval', 'completed', 'failed', 'cancelled']);
+  assert.deepEqual(TASK_STATUSES, ['created', 'routed', 'queued', 'running', 'waiting_approval', 'suspended', 'completed', 'failed', 'cancelled']);
   assert.deepEqual(APPROVAL_STATUSES, ['pending', 'approved', 'rejected', 'cancelled']);
   assert.deepEqual(EXECUTION_STATUSES, ['pending', 'running', 'paused', 'cancelled', 'completed', 'failed', 'degraded']);
 });

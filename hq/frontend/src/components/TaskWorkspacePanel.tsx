@@ -36,6 +36,8 @@ function formatTaskStatus(status: string) {
       return '已完成';
     case 'running':
       return '执行中';
+    case 'suspended':
+      return '已暂停';
     case 'failed':
       return '执行失败';
     case 'cancelled':

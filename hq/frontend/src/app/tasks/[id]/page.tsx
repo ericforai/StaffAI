@@ -18,8 +18,8 @@ import remarkGfm from 'remark-gfm';
 import { ChevronDown, ChevronRight, FileText, AlertCircle, CheckCircle2, Info, Copy, Check } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { formatExecutor } from '../../../utils/formatters';
+import { SuspendedTaskPanel } from '../../../components/SuspendedTaskPanel';
 
-// 图标映射：把字符串名称映射到实际的 Lucide 图标组件
 const ICON_MAP: Record<string, LucideIcon> = {
   FileText,
   AlertCircle,
@@ -39,6 +39,8 @@ function formatTaskStatus(status: string) {
       return '已完成';
     case 'running':
       return '执行中';
+    case 'suspended':
+      return '已暂停';
     case 'failed':
       return '执行失败';
     case 'pending':
@@ -147,18 +149,14 @@ function formatExecutionStatus(status: string) {
   }
 }
 
-/**
- * 清理多余的空行，只保留段落之间的单行空行
- */
 function cleanupExtraEmptyLines(text: string): string {
   return text
     .split('\n')
     .reduce((lines: string[], line) => {
-      // 移除完全空行的连续重复，最多保留一个
       if (line.trim() === '') {
         const lastLine = lines[lines.length - 1];
         if (lastLine && lastLine.trim() !== '') {
-          lines.push('');  // 只保留段落间的单行空行
+          lines.push('');
         }
       } else {
         lines.push(line);
@@ -169,12 +167,7 @@ function cleanupExtraEmptyLines(text: string): string {
     .trim();
 }
 
-/**
- * Parse output summary and extract structured sections
- * 检测 ## 开头的标题，根据关键词分配图标和级别
- */
-function parseOutputSummary(summary: string): { title?: string; sections: Array<{ title: string; icon: LucideIcon; content: string; level: 'good' | 'warning' | 'error' }> } {
-  // 先清理多余的空行
+function parseOutputSummary(summary: string): { sections: Array<{ title: string; icon: LucideIcon; content: string; level: 'good' | 'warning' | 'error' }> } {
   const cleanedSummary = cleanupExtraEmptyLines(summary);
   const lines = cleanedSummary.split('\n');
   const sections: Array<{ title: string; icon: LucideIcon; content: string; level: 'good' | 'warning' | 'error' }> = [];
@@ -182,11 +175,9 @@ function parseOutputSummary(summary: string): { title?: string; sections: Array<
   let currentSection: { title: string; icon: LucideIcon; content: string; level: 'good' | 'warning' | 'error' } | null = null;
   let currentContent: string[] = [];
 
-  // 增强的标题检测：支持多种模式
   function detectSectionLevel(title: string): { iconName: string; level: 'good' | 'warning' | 'error' } {
     const lowerTitle = title.toLowerCase();
 
-    // 错误级别 - 关键词检测
     const errorKeywords = ['🚨', 'critical', '问题', '错误', '失败', 'error', 'failed', 'bug', '缺失', 'missing', 'fix', '修复'];
     for (const keyword of errorKeywords) {
       if (lowerTitle.includes(keyword.toLowerCase()) || title.includes(keyword)) {
@@ -194,7 +185,6 @@ function parseOutputSummary(summary: string): { title?: string; sections: Array<
       }
     }
 
-    // 警告级别
     const warningKeywords = ['⚠️', 'issues', '建议', '注意', 'warning', '建议改进', '可以改进', '推荐', 'recommend'];
     for (const keyword of warningKeywords) {
       if (lowerTitle.includes(keyword.toLowerCase()) || title.includes(keyword)) {
@@ -202,7 +192,6 @@ function parseOutputSummary(summary: string): { title?: string; sections: Array<
       }
     }
 
-    // 成功/正常级别
     const goodKeywords = ['✅', '成功', 'working', '正确', '已完成', '分析', 'analysis', '结果', 'result', '优化', 'optimize'];
     for (const keyword of goodKeywords) {
       if (lowerTitle.includes(keyword.toLowerCase()) || title.includes(keyword)) {
@@ -210,25 +199,20 @@ function parseOutputSummary(summary: string): { title?: string; sections: Array<
       }
     }
 
-    // 默认使用 Info 图标
     return { iconName: 'Info', level: 'good' };
   }
 
   for (const line of lines) {
-    // 跳过主标题 (# Title)，只处理 ## 二级标题
     if (line.startsWith('# ') && !line.startsWith('##')) {
       continue;
     }
 
-    // 检测二级标题 (## Title)
     if (line.startsWith('## ')) {
-      // 保存当前section
       if (currentSection) {
         currentSection.content = currentContent.join('\n').trim();
         sections.push(currentSection);
       }
 
-      // 解析新标题
       const title = line.slice(3).trim();
       const { iconName, level } = detectSectionLevel(title);
 
@@ -239,13 +223,11 @@ function parseOutputSummary(summary: string): { title?: string; sections: Array<
     }
   }
 
-  // 保存最后一个section
   if (currentSection) {
     currentSection.content = currentContent.join('\n').trim();
     sections.push(currentSection);
   }
 
-  // 如果没有检测到任何section，创建一个默认的
   if (sections.length === 0 && summary.trim()) {
     sections.push({
       title: '执行结果',
@@ -258,10 +240,6 @@ function parseOutputSummary(summary: string): { title?: string; sections: Array<
   return { sections };
 }
 
-/**
- * Render a single section with appropriate styling
- * 可折叠的章节卡片，根据级别显示不同颜色
- */
 function OutputSection({ title, icon: Icon, content, level }: { title: string; icon: LucideIcon; content: string; level: 'good' | 'warning' | 'error' }) {
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -302,7 +280,6 @@ function OutputSection({ title, icon: Icon, content, level }: { title: string; i
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
-                // 表格样式优化
                 table: ({ children }) => (
                   <div className="overflow-x-auto my-3">
                     <table className="min-w-full divide-y divide-slate-200 border border-slate-300 rounded-lg overflow-hidden">
@@ -329,7 +306,6 @@ function OutputSection({ title, icon: Icon, content, level }: { title: string; i
                     {children}
                   </td>
                 ),
-                // 代码块样式
                 code: ({ className, children, ...props }: any) => {
                   const match = /language-(\w+)/.exec(className || '');
                   return match ? (
@@ -347,14 +323,12 @@ function OutputSection({ title, icon: Icon, content, level }: { title: string; i
                     <code className="text-xs font-mono text-slate-100 whitespace-pre-wrap">{children}</code>
                   </pre>
                 ),
-                // 段落和列表样式 - normal 会折叠多余空白
                 p: ({ children }) => (
                   <p className="my-3 leading-7 whitespace-normal">{children}</p>
                 ),
                 li: ({ children }) => (
                   <li className="my-1 leading-7 whitespace-normal">{children}</li>
                 ),
-                // 标题样式
                 h1: ({ children }) => (
                   <h1 className="text-lg font-bold mt-4 mb-2">{children}</h1>
                 ),
@@ -379,7 +353,6 @@ function formatExecutionDisplayId(execution: { displayExecutionId?: string; id: 
   if (execution.displayExecutionId && execution.displayExecutionId.trim()) {
     return execution.displayExecutionId;
   }
-  // 从 startedAt 提取日期，从 id 提取短 ID
   const date = execution.startedAt ? new Date(execution.startedAt).toISOString().slice(0, 10).replace(/-/g, '') : '000000';
   const shortId = execution.id.slice(0, 8);
   return `${date}—${shortId}`;
@@ -534,7 +507,6 @@ export default function TaskDetailPage() {
   const [showDebugInfo, setShowDebugInfo] = useState(false);
   const [expandedExecutionId, setExpandedExecutionId] = useState<string | null>(null);
 
-  // 当数据加载完成时，自动展开最新的执行记录
   useEffect(() => {
     try {
       const executions = data?.executions;
@@ -546,17 +518,14 @@ export default function TaskDetailPage() {
     }
   }, [data, expandedExecutionId]);
 
-  // 复制状态
   const [copiedExecutionId, setCopiedExecutionId] = useState<string | null>(null);
 
-  // 复制输出摘要到剪贴板
   async function copyOutputSummary(executionId: string, content: string) {
     try {
       await navigator.clipboard.writeText(content);
       setCopiedExecutionId(executionId);
       setTimeout(() => setCopiedExecutionId(null), 2000);
     } catch {
-      // 降级方案
       const textArea = document.createElement('textarea');
       textArea.value = content;
       document.body.appendChild(textArea);
@@ -568,7 +537,6 @@ export default function TaskDetailPage() {
     }
   }
 
-  // 获取展开的执行记录的轨迹数据
   const { trace, loading: traceLoading, error: traceError, reload: reloadTrace } = useExecutionTrace(expandedExecutionId ?? '');
 
   const handleWsMessage = useCallback((message: WsMessage) => {
@@ -592,7 +560,6 @@ export default function TaskDetailPage() {
   });
 
   async function handleExecuteTask() {
-    // 检查是否有缺失的专家
     const missingAgents = assignments.filter(
       a => !agents.some(agent => agent.id === a.agentId) && !a.agentName
     );
@@ -710,7 +677,7 @@ export default function TaskDetailPage() {
                 <button
                   type="button"
                   onClick={() => void handleExecuteTask()}
-                  disabled={submitting || data.task.status === 'completed' || data.task.status === 'waiting_approval'}
+                  disabled={submitting || data.task.status === 'completed' || data.task.status === 'waiting_approval' || data.task.status === 'suspended'}
                   className="rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-black text-sky-700 transition-all hover:border-sky-300 hover:bg-sky-100 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400"
                 >
                   {submitting
@@ -719,6 +686,30 @@ export default function TaskDetailPage() {
                       ? '运行高级讨论'
                       : '执行任务'}
                 </button>
+                {data.task.status === 'running' && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        const response = await fetch(`${API_CONFIG.BASE_URL}/tasks/${data.task.id}/suspend`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ reason: 'missing_information', message: 'Task suspended by user' }),
+                        });
+                        if (!response.ok) {
+                          const data = await response.json().catch(() => ({}));
+                          throw new Error(data.error || 'Suspend failed');
+                        }
+                        await reload();
+                      } catch (err) {
+                        alert(err instanceof Error ? err.message : 'Suspend failed');
+                      }
+                    }}
+                    className="rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-black text-amber-700 transition-all hover:border-amber-300 hover:bg-amber-100"
+                  >
+                    暂停任务
+                  </button>
+                )}
                 {data.task.status === 'waiting_approval' && (
                   <Link
                     href="/approvals"
@@ -734,6 +725,15 @@ export default function TaskDetailPage() {
                   查看审批队列
                 </Link>
               </div>
+
+              {data.task.status === 'suspended' && (
+                <SuspendedTaskPanel
+                  taskId={data.task.id}
+                  onResumed={async (updatedTask) => {
+                    await reload();
+                  }}
+                />
+              )}
 
               <div className="mt-4">
                 <button
@@ -945,7 +945,6 @@ export default function TaskDetailPage() {
 
                         {isExpanded && (
                           <div className="border-t border-slate-200 p-3 space-y-4">
-                            {/* 输出摘要 */}
                             {execution.outputSummary && (
                               <div>
                                 <div className="flex items-center justify-between">
@@ -973,7 +972,6 @@ export default function TaskDetailPage() {
                                   {(() => {
                                     const { sections } = parseOutputSummary(execution.outputSummary);
                                     if (sections.length > 0) {
-                                      // 有结构化的章节，使用卡片式展示
                                       return sections.map((section) => (
                                         <OutputSection
                                           key={section.title}
@@ -984,7 +982,6 @@ export default function TaskDetailPage() {
                                         />
                                       ));
                                     } else {
-                                      // 无明确结构，使用默认 prose 渲染
                                       return (
                                         <div className="prose prose-slate prose-sm max-w-3xl text-sm text-slate-700">
                                           <ReactMarkdown
@@ -1031,7 +1028,6 @@ export default function TaskDetailPage() {
                               </div>
                             )}
 
-                            {/* 错误信息 */}
                             {execution.errorMessage && (
                               <div className="rounded-[1rem] border border-rose-200 bg-rose-50 p-3">
                                 <p className="text-[10px] uppercase tracking-[0.2em] text-rose-400">失败原因</p>
@@ -1039,7 +1035,6 @@ export default function TaskDetailPage() {
                               </div>
                             )}
 
-                            {/* 工具调用 */}
                             {execution.toolCalls && execution.toolCalls.length > 0 && (
                               <div>
                                 <p className="text-[11px] tracking-[0.16em] text-slate-500">工具调用</p>
@@ -1088,7 +1083,6 @@ export default function TaskDetailPage() {
                               </div>
                             )}
 
-                            {/* 执行流程记录 */}
                             <div>
                               <div className="flex items-center justify-between">
                                 <p className="text-[11px] tracking-[0.16em] text-slate-500">执行流程记录</p>
@@ -1131,7 +1125,6 @@ export default function TaskDetailPage() {
                               )}
                             </div>
 
-                            {/* 控制按钮 */}
                             <div className="flex flex-wrap gap-2">
                               <button
                                 type="button"

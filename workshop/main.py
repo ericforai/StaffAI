@@ -129,6 +129,7 @@ def _update_thread_values(thread_id: str, values_overrides: dict) -> dict:
 # ---------------------------------------------------------------------------
 
 class TaskEnvelope(BaseModel):
+    """Legacy v1 envelope (backward compatible)."""
     task_id: str
     action: str
     agent_role: str | None = None
@@ -136,6 +137,44 @@ class TaskEnvelope(BaseModel):
     description: str | None = None
     memory_context: str | None = None
     payload: dict = {}
+
+
+class TaskEnvelopeV2(BaseModel):
+    """Unified v2 envelope from TaskMainChainService."""
+    version: str = "2.0"
+    task_metadata: dict = {}
+    routing: dict = {}
+    approval_context: dict = {}
+    memory_context: dict = {}
+    budget_control: dict = {}
+    tool_policy: dict = {}
+    checkpoint: dict = {}
+    runtime_control: dict = {}
+
+
+def parse_task_envelope(body: dict) -> TaskEnvelope:
+    """Parse either v1 or v2 envelope into the legacy TaskEnvelope shape."""
+    if body.get("version") == "2.0" and "taskMetadata" in body:
+        # v2 envelope - extract v1-compatible fields
+        meta = body.get("taskMetadata", {})
+        routing = body.get("routing", {})
+        memory = body.get("memoryContext", {})
+        runtime = body.get("runtimeControl", {})
+
+        return TaskEnvelope(
+            task_id=meta.get("taskId", ""),
+            action=meta.get("title", "Unknown Task"),
+            agent_role=routing.get("recommendedAgentRole"),
+            identity_context=routing.get("recommendedAgentRole")
+                and f"You are acting as: {routing.get('recommendedAgentRole')}. {meta.get('description', '')}"
+                or meta.get("description", ""),
+            description=meta.get("description"),
+            memory_context=memory.get("profileExcerpt"),
+            payload=meta.get("payload", {}),
+        )
+    else:
+        # v1 envelope - parse directly
+        return TaskEnvelope(**body)
 
 
 class CreateThreadRequest(BaseModel):
@@ -249,10 +288,13 @@ async def execute_task(task: TaskEnvelope):
 
 
 @app.post("/api/v1/tasks/stream")
-async def stream_task(task: TaskEnvelope, request: Request):
-    """新的 SSE 流式执行接口。"""
+async def stream_task(request: Request):
+    """SSE 流式执行接口。支持 v1 (TaskEnvelope) 和 v2 (TaskEnvelopeV2) 协议。"""
     if not DeerFlowClient:
         raise HTTPException(status_code=500, detail="DeerFlow engine not initialized")
+
+    body = await request.json()
+    task = parse_task_envelope(body)
 
     async def event_generator():
         try:
