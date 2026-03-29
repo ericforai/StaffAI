@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Building2, ClipboardList, BrainCircuit, BookOpenText, Clipboard, Store } from 'lucide-react';
+import { Building2, ClipboardList, BrainCircuit, BookOpenText, Clipboard, Store, BarChart3 } from 'lucide-react';
 import { useAgents } from '../hooks/useAgents';
 import { useTasks } from '../hooks/useTasks';
 import { useGlobalWebSocket, WsMessage } from '../hooks/useGlobalWebSocket';
@@ -52,6 +52,7 @@ export default function DashboardLayout({
     { href: '/tasks', label: '工作任务', icon: ClipboardList },
     { href: '/brainstorm', label: '专家协作', icon: BrainCircuit },
     { href: '/knowledge', label: '知识资产', icon: BookOpenText },
+    { href: '/tower', label: '战略控制塔', icon: BarChart3 },
   ];
 
   return (

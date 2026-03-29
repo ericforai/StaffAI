@@ -6,6 +6,7 @@ import { useApprovals } from '../../hooks/useApprovals';
 import { useApprovalActions } from '../../hooks/useApprovalActions';
 import { useTaskEventFeed } from '../../hooks/useTaskEventFeed';
 import { formatTimestamp } from '../../utils/dateFormatter';
+import { SuspendedTaskPanel } from '../../components/SuspendedTaskPanel';
 
 type FilterStatus = 'all' | 'pending' | 'approved' | 'rejected';
 
@@ -237,6 +238,10 @@ export default function ApprovalsPage() {
                 <p className="text-sm font-bold text-slate-900">{formatApprovalStatus(approval.status)}</p>
                 <p className="mt-1 text-xs text-slate-500">{formatTimestamp(approval.requestedAt)}</p>
               </div>
+            </div>
+
+            <div className="mt-4">
+              <SuspendedTaskPanel taskId={approval.taskId} />
             </div>
 
             <div className="mt-4 flex gap-3">

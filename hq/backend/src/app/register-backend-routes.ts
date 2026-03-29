@@ -16,6 +16,7 @@ import { registerAuditRoutes } from '../api/audit';
 import { registerPresetRoutes } from '../api/presets';
 import { retrieveMemoryContext } from '../memory/memory-retriever';
 import { createWriteBackService } from '../memory/write-back-service';
+import { createMemoryLayerService } from '../orchestration/memory-layer-service';
 import {
   createTaskEventPublisher,
   type TaskDashboardEvent,
@@ -65,6 +66,11 @@ export function registerBackendRoutes({
     enableDecisionRecords: true,
     retainLegacyTaskSummaries: true,
     markdownTemplateFormat: 'frontmatter',
+  });
+
+  // Initialize memory layer service (L1/L2/L3 hierarchy)
+  const memoryLayerService = createMemoryLayerService({
+    memoryRootDir,
   });
 
   const taskEventFeed: Array<TaskDashboardEvent & { timestamp: string }> = [];
@@ -147,15 +153,12 @@ export function registerBackendRoutes({
     onExecutionEvent: (input) => {
       taskEvents.executionEvent(input);
     },
-    loadMemoryContext: (task) => {
-      const retrieved = retrieveMemoryContext(`${task.title}\n${task.description}`, {
-        memoryRootDir,
-        limit: 2,
-      });
-      return retrieved.context || undefined;
+    loadMemoryContext: async (task) => {
+      const result = await memoryLayerService.loadMemory(task);
+      return result.context || undefined;
     },
-    writeExecutionSummary: (task, execution) => {
-      writeBackService.writeExecutionSummary(task, execution);
+    writeExecutionSummary: async (task, execution) => {
+      await memoryLayerService.writeback(task, execution);
     },
     sessionCapabilities: {
       sampling: samplingEnabled,
@@ -175,15 +178,12 @@ export function registerBackendRoutes({
     onExecutionEvent: (input) => {
       taskEvents.executionEvent(input);
     },
-    loadMemoryContext: (task) => {
-      const retrieved = retrieveMemoryContext(`${task.title}\n${task.description}`, {
-        memoryRootDir,
-        limit: 2,
-      });
-      return retrieved.context || undefined;
+    loadMemoryContext: async (task) => {
+      const result = await memoryLayerService.loadMemory(task);
+      return result.context || undefined;
     },
-    writeExecutionSummary: (task, execution) => {
-      writeBackService.writeExecutionSummary(task, execution);
+    writeExecutionSummary: async (task, execution) => {
+      await memoryLayerService.writeback(task, execution);
     },
     sessionCapabilities: {
       sampling: samplingEnabled,

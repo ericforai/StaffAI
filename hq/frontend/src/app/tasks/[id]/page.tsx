@@ -10,6 +10,7 @@ import { useTaskEvents } from '../../../hooks/useTaskEvents';
 import { useGlobalWebSocket, type WsMessage } from '../../../hooks/useGlobalWebSocket';
 import { useAgents } from '../../../hooks/useAgents';
 import { useExecutionTrace } from '../../../hooks/useExecutionTrace';
+import { SuspendedTaskPanel } from '../../../components/SuspendedTaskPanel';
 import type { TaskEvent, WorkflowPlanMode } from '../../../types';
 import { formatTimestamp } from '../../../utils/dateFormatter';
 import { API_CONFIG } from '../../../utils/constants';
@@ -692,6 +693,12 @@ export default function TaskDetailPage() {
                 <p className="text-xs font-black tracking-[0.2em]">{taskStatusMessage?.title}</p>
                 <p className="mt-2 text-sm leading-7">{taskStatusMessage?.body}</p>
               </div>
+
+              {data.task.status === 'waiting_approval' && (
+                <div className="mt-4">
+                  <SuspendedTaskPanel taskId={data.task.id} />
+                </div>
+              )}
 
               <div className="mt-6 flex flex-wrap gap-3">
                 <label className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-black tracking-[0.16em] text-slate-700">

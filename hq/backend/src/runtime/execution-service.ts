@@ -7,6 +7,7 @@ import type {
   TaskRecord,
   WorkflowPlan,
 } from '../shared/task-types';
+import type { BudgetConfig } from '../shared/budget-types';
 import {
   resolveRuntimeAdapter,
   resolveRuntimeName,
@@ -14,6 +15,7 @@ import {
   type RuntimeExecutionError,
 } from './runtime-adapter';
 import { resolveTaskTimeoutMs } from './task-execution-config';
+import { BudgetService } from '../governance/budget-service';
 
 export interface SerialWorkflowBundle {
   workflowPlan: WorkflowPlan;
@@ -250,6 +252,7 @@ export async function runTaskExecution(
       outputSummary: string;
       outputSnapshot?: Record<string, unknown>;
     }>;
+    budgetConfig?: BudgetConfig;
   },
   store: Pick<Store, 'saveExecution' | 'updateExecution' | 'updateTask'> &
     Partial<
@@ -269,6 +272,93 @@ export async function runTaskExecution(
   const runtimeName = input.runtimeName || resolveRuntimeName(input.executor);
   const runtimeAdapter = resolveRuntimeAdapter(input.executor);
   const displayExecutionId = await generateExecutionDisplayId(store);
+
+  // Initialize budget service with warning callback
+  const budgetService = new BudgetService({
+    onBudgetWarning: async (event) => {
+      if (typeof storeWithObservability.appendExecutionTraceEvent === 'function') {
+        await storeWithObservability.appendExecutionTraceEvent({
+          id: `trace_budget_warning_${input.taskId}_${Date.now()}`,
+          type: 'budget_warning',
+          taskId: input.taskId,
+          occurredAt: new Date().toISOString(),
+          actor: input.executor,
+          summary: `Budget warning: ${Math.round(event.currentPct * 100)}% of limit used`,
+          data: {
+            budgetUsage: event.usage,
+            thresholdPct: event.thresholdPct,
+            currentPct: event.currentPct,
+          },
+        });
+      }
+    },
+  });
+
+  // Check budget before execution
+  if (input.budgetConfig) {
+    const budgetStatus = await budgetService.checkBudget(input.taskId, input.budgetConfig);
+    if (!budgetStatus.withinBudget) {
+      const reason = budgetStatus.reason === 'tokens_exceeded'
+        ? `Token limit exceeded: ${budgetStatus.usage.tokensUsed}/${input.budgetConfig.maxTokens ?? 'unlimited'}`
+        : `Cost limit exceeded: $${budgetStatus.usage.estimatedCostUsd.toFixed(2)}/$${(input.budgetConfig.maxCostUsd ?? 0).toFixed(2)}`;
+
+      const failedExecution = beginExecution({
+        taskId: input.taskId,
+        executor: input.executor,
+        displayExecutionId,
+        runtimeName,
+        degraded: false,
+        timeoutMs,
+        maxRetries,
+        inputSnapshot: input.inputSnapshot,
+        memoryContextExcerpt: input.memoryContextExcerpt,
+        workflowPlan: undefined,
+        assignments: undefined,
+      });
+
+      const budgetFailed = failExecution(failedExecution, {
+        errorMessage: `Budget exceeded for task ${input.taskId}: ${reason}`,
+        retryCount: 0,
+        maxRetries,
+        timeoutMs,
+        degraded: false,
+        structuredError: {
+          code: 'execution_failed',
+          message: `Budget exceeded for task ${input.taskId}: ${reason}`,
+          retriable: false,
+        },
+      });
+
+      await store.saveExecution(budgetFailed);
+
+      if (typeof storeWithObservability.appendExecutionTraceEvent === 'function') {
+        await storeWithObservability.appendExecutionTraceEvent({
+          id: `trace_budget_exceeded_${input.taskId}_${Date.now()}`,
+          type: 'execution_failed',
+          taskId: input.taskId,
+          executionId: budgetFailed.id,
+          occurredAt: new Date().toISOString(),
+          actor: input.executor,
+          summary: `Budget exceeded: ${reason}`,
+          data: {
+            reason: budgetStatus.reason,
+            budgetUsage: budgetStatus.usage,
+          },
+        });
+      }
+
+      const task = await store.updateTask(input.taskId, (currentTask) => ({
+        ...currentTask,
+        status: 'failed',
+        updatedAt: new Date().toISOString(),
+      }));
+
+      return {
+        execution: budgetFailed,
+        task,
+      };
+    }
+  }
 
   const serialBundle =
     input.executionMode === 'serial'
@@ -639,6 +729,14 @@ export async function runTaskExecution(
           responseTimeMs: costEntry.responseTimeMs,
         },
       });
+    }
+
+    // Record usage to budget service if budget tracking is enabled
+    if (input.budgetConfig && tokensUsed > 0) {
+      // Estimate cost: rough approximation of $0.003 per 1K tokens for Claude
+      // This can be refined based on actual model pricing
+      const estimatedCostUsd = (tokensUsed / 1000) * 0.003;
+      await budgetService.recordUsage(input.taskId, tokensUsed, estimatedCostUsd);
     }
   }
 

@@ -51,6 +51,17 @@ function formatExecutionStatus(status: string) {
 import { formatExecutor, formatRiskLevel } from '../../../utils/formatters';
 
 function formatControlStatus(status: string) {
+  switch (status) {
+    case 'paused':
+      return '已暂停';
+    case 'resumed':
+      return '已恢复';
+    case 'cancelled':
+      return '已取消';
+    default:
+      return status;
+  }
+}
 
 function formatExecutionDisplayId(execution: { displayExecutionId?: string; id: string }) {
   if (execution.displayExecutionId && execution.displayExecutionId.trim()) {

@@ -8,6 +8,7 @@ import { cancelWorkflow } from './workflow-execution-cancel';
 import { TaskController, type ExecutionState, type PauseOptions } from '../runtime/task-controller';
 import { ExecutionStateStore } from '../runtime/execution-store';
 import { createRuntimePaths } from '../runtime/runtime-state';
+import { createSelfHealingService, type SelfHealingService, type HealingAttempt } from '../runtime/self-healing-service';
 
 /**
  * Status of workflow execution
@@ -105,6 +106,7 @@ export interface WorkflowExecutionEngineConfig {
   >;
   assignmentExecutor: AssignmentExecutor;
   auditLogger: AuditLogger | null;
+  scanner?: any; // Scanner for agent replacement
 }
 
 /**
@@ -121,6 +123,7 @@ export class DefaultWorkflowExecutionEngine implements WorkflowExecutionEngine {
   >();
   private readonly taskController: TaskController;
   private readonly executionStore: ExecutionStateStore;
+  private readonly selfHealingService: SelfHealingService;
 
   constructor(config: WorkflowExecutionEngineConfig) {
     this.store = config.store;
@@ -131,6 +134,7 @@ export class DefaultWorkflowExecutionEngine implements WorkflowExecutionEngine {
     const stateDir = path.join(runtimePaths.sessionsDir, 'executions');
     this.executionStore = new ExecutionStateStore(stateDir);
     this.taskController = new TaskController(this.executionStore);
+    this.selfHealingService = createSelfHealingService({}, config.scanner);
 
     this.initialize().catch((error) => {
       console.error('Failed to initialize WorkflowExecutionEngine:', error);
@@ -236,7 +240,8 @@ export class DefaultWorkflowExecutionEngine implements WorkflowExecutionEngine {
           assignments,
           task,
           this.assignmentExecutor,
-          this.runningWorkflows
+          this.runningWorkflows,
+          this.selfHealingService
         );
       }
     } catch (error) {
@@ -251,6 +256,9 @@ export class DefaultWorkflowExecutionEngine implements WorkflowExecutionEngine {
     }
 
     await this.finalizeExecution(workflowPlan, result);
+
+    // Clear healing attempts after workflow completion
+    this.selfHealingService.clearAttempts(workflowPlan.taskId);
 
     return result;
   }
