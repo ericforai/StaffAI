@@ -68,7 +68,6 @@ export default function TasksPage() {
     }
     return viewMode === 'active' ? actionableTasks : tasks;
   }, [tasks, statusFilter, viewMode, actionableTasks]);
-  }, [tasks]);
 
   return (
     <div className="mx-auto w-full max-w-[1800px]">
@@ -90,12 +89,14 @@ export default function TasksPage() {
         />
 
         {statusFilter && (
-          <div className="mb-4 flex items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
-            <span className="font-medium text-slate-800">{STATUS_LABELS[statusFilter] ?? statusFilter}</span>
+          <div className="mb-4 flex items-center gap-2 text-sm">
+            <span className="rounded-md bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
+              筛选状态: {STATUS_LABELS[statusFilter] ?? statusFilter}
+            </span>
             <span className="ml-1 text-slate-400">({visibleTasks.length} 条)</span>
             <Link
               href="/tasks"
-              className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-bold text-slate-700 hover:border-slate-400 hover:text-slate-900"
+              className="rounded-md border border-slate-300 px-3 py-1 text-xs font-medium text-slate-600 hover:border-slate-400 hover:text-slate-800"
             >
               清除筛选
             </Link>
@@ -164,20 +165,3 @@ export default function TasksPage() {
     </div>
   );
 }
-</div>
-);
-
-<system-reminder>
-The file has been modified by a linter. Format it properly. includes null check for the content, fix any issues found.
-, <system-reminder>
-The file has been modified by the user or by a linter. The reason for the `old_string` not unique in my edit.
- I think the issue was that the `old_string` param I used matched exact lines. The Let me try a smaller, unique match. First. Then write the whole file. Or to doing multiple searches to find the right string.
-
- use a Grep tool.
-
- If there are multiple matches in the line, I'll just read the full file first, then pick the right lines, use the Write tool to write the whole file cleanly.
-
- Avoiding this issue in the future.
-
-
-Since `/Users/user/agency-agents/hq/frontend/src/app/tasks/page.tsx
