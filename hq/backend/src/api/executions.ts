@@ -176,11 +176,89 @@ async function loadExecutionToolCalls(store: Store, execution: ExecutionRecord):
   return executionWithToolCalls.toolCalls;
 }
 
-export function registerExecutionRoutes(app: express.Application, store: Store) {
+import type { WorkflowExecutionEngine } from '../orchestration/workflow-execution-engine';
+
+export function registerExecutionRoutes(
+  app: express.Application,
+  store: Store,
+  dependencies: { workflowExecutionEngine?: WorkflowExecutionEngine } = {}
+) {
+  const { workflowExecutionEngine } = dependencies;
   const runtimePaths = createRuntimePaths();
   const stateDir = path.join(runtimePaths.sessionsDir, 'executions');
   const executionStateStore = new ExecutionStateStore(stateDir);
   const taskController = new TaskController(executionStateStore);
+
+  // ... (existing routes unchanged)
+
+  /**
+   * POST /api/workflows/:id/pause
+   * 
+   * Pause a running workflow.
+   */
+  app.post('/api/workflows/:id/pause', async (req, res) => {
+    if (!requireExecutionControlAccess(req, res)) {
+      return;
+    }
+    
+    if (!workflowExecutionEngine) {
+      return res.status(501).json({ error: 'workflow engine not available' });
+    }
+
+    const workflowPlanId = req.params.id;
+    try {
+      await workflowExecutionEngine.pause(workflowPlanId);
+      return res.json({ 
+        success: true, 
+        workflowPlanId,
+        status: workflowExecutionEngine.getStatus(workflowPlanId)
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'failed to pause workflow';
+      return res.status(500).json({ error: message });
+    }
+  });
+
+  /**
+   * POST /api/workflows/:id/resume
+   * 
+   * Resume a paused workflow or resume from a manual checkpoint (HITL).
+   */
+  app.post('/api/workflows/:id/resume', async (req, res) => {
+    if (!requireExecutionControlAccess(req, res)) {
+      return;
+    }
+
+    if (!workflowExecutionEngine) {
+      return res.status(501).json({ error: 'workflow engine not available' });
+    }
+
+    const workflowPlanId = req.params.id;
+    const { checkpointData } = req.body;
+
+    try {
+      if (checkpointData) {
+        // HITL: Resume from manual checkpoint
+        const result = await workflowExecutionEngine.resumeFromCheckpoint(workflowPlanId, checkpointData);
+        return res.json({ 
+          success: true, 
+          workflowPlanId, 
+          result 
+        });
+      } else {
+        // Normal resume
+        await workflowExecutionEngine.resume(workflowPlanId);
+        return res.json({ 
+          success: true, 
+          workflowPlanId,
+          status: workflowExecutionEngine.getStatus(workflowPlanId)
+        });
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'failed to resume workflow';
+      return res.status(500).json({ error: message });
+    }
+  });
 
   app.get('/api/executions', async (req, res) => {
     const taskId = readStringQuery(req.query.taskId);

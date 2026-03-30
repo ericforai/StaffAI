@@ -1,3 +1,9 @@
+/**
+ * StaffAI Domain Entities
+ * These types represent the core business logic and data structures.
+ * They should align closely with the backend domain models.
+ */
+
 export interface AgentFrontmatter {
   name: string;
   description: string;
@@ -13,13 +19,9 @@ export interface Agent {
   frontmatter: AgentFrontmatter;
 }
 
-export interface SquadState {
-  activeAgentIds: string[];
-}
-
 export type TaskExecutionMode = 'single' | 'serial' | 'parallel' | 'advanced_discussion';
 
-/** Matches backend `WORKFLOW_PLAN_MODES` — plans do not use `advanced_discussion`. */
+/** Matches backend `WORKFLOW_PLAN_MODES` */
 export type WorkflowPlanMode = 'single' | 'serial' | 'parallel';
 
 export interface WorkflowPlanStep {
@@ -33,7 +35,7 @@ export interface WorkflowPlanStep {
   order?: number;
 }
 
-export interface WorkflowPlanSummary {
+export interface WorkflowPlan {
   id: string;
   taskId: string;
   mode: WorkflowPlanMode;
@@ -41,7 +43,7 @@ export interface WorkflowPlanSummary {
   steps: WorkflowPlanStep[];
 }
 
-export interface TaskAssignmentSummary {
+export interface TaskAssignment {
   id: string;
   taskId: string;
   agentId: string;
@@ -53,7 +55,7 @@ export interface TaskAssignmentSummary {
   resultSummary?: string;
 }
 
-export interface TaskSummary {
+export interface Task {
   id: string;
   title: string;
   description: string;
@@ -67,14 +69,14 @@ export interface TaskSummary {
   assigneeName?: string;
   createdAt: string;
   updatedAt: string;
-  latestApproval?: ApprovalSummary | null;
-  latestExecution?: ExecutionSummary | null;
+  latestApproval?: Approval | null;
+  latestExecution?: TaskExecution | null;
   canExecute?: boolean;
-  workflowPlan?: WorkflowPlanSummary | null;
-  assignments?: TaskAssignmentSummary[];
+  workflowPlan?: WorkflowPlan | null;
+  assignments?: TaskAssignment[];
 }
 
-export interface ApprovalSummary {
+export interface Approval {
   id: string;
   taskId: string;
   status: string;
@@ -83,7 +85,7 @@ export interface ApprovalSummary {
   resolvedAt?: string;
 }
 
-export interface ExecutionSummary {
+export interface TaskExecution {
   id: string;
   displayExecutionId?: string;
   taskId: string;
@@ -100,21 +102,21 @@ export interface ExecutionSummary {
   assignmentRole?: string;
   workflowStepId?: string;
   workflowPlanId?: string;
-  toolCalls?: ToolCallSummary[];
-  toolCallLogs?: ToolCallSummary[];
-  toolCallLog?: ToolCallSummary[];
-  controlState?: {
-    executionId: string;
-    status: string;
-    taskId: string;
-    pausedAt?: string;
-    resumedAt?: string;
-    cancelledAt?: string;
-    completedAt?: string;
-  };
+  toolCalls?: ToolCall[];
+  controlState?: ExecutionControlState;
 }
 
-export interface ToolCallSummary {
+export interface ExecutionControlState {
+  executionId: string;
+  status: string;
+  taskId: string;
+  pausedAt?: string;
+  resumedAt?: string;
+  cancelledAt?: string;
+  completedAt?: string;
+}
+
+export interface ToolCall {
   id: string;
   toolName: string;
   status: string;
@@ -127,29 +129,15 @@ export interface ToolCallSummary {
   timestamp?: string;
 }
 
-export interface TaskDetailPayload {
-  task: TaskSummary;
-  approvals: ApprovalSummary[];
-  executions: ExecutionSummary[];
-  workflowPlan?: WorkflowPlanSummary | null;
-  assignments?: TaskAssignmentSummary[];
+export interface ExecutionTrace {
+  executionId: string;
+  traceEvents: TraceEvent[];
 }
 
-export interface TaskEvent {
-  type: 'TASK_EVENT';
-  taskEventType:
-    | 'task_created'
-    | 'approval_requested'
-    | 'approval_resolved'
-    | 'execution_started'
-    | 'execution_completed'
-    | 'execution_failed'
-    | 'execution_degraded'
-    | 'execution_event';
-  message: string;
-  taskId?: string;
-  approvalId?: string;
-  executionId?: string;
-  timestamp: string;
+export interface TraceEvent {
+  id: string;
+  type: string;
+  summary: string;
+  occurredAt: string;
   payload?: any;
 }

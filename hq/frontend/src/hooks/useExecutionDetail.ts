@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { API_CONFIG } from '../utils/constants';
+import { apiFetch, ApiError } from '../utils/apiFetch';
 import type { ExecutionSummary } from '../types';
 
 export function useExecutionDetail(executionId: string) {
@@ -28,18 +28,7 @@ export function useExecutionDetail(executionId: string) {
     setError(null);
     setNotFound(false);
     try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}/executions/${executionId}`);
-      const payload = (await response.json()) as { execution?: ExecutionSummary | null; error?: string };
-      if (response.status === 404) {
-        if (!cancelledRef.current) {
-          setExecution(null);
-          setNotFound(true);
-        }
-        return;
-      }
-      if (!response.ok) {
-        throw new Error(payload.error || '执行详情加载失败。');
-      }
+      const payload = await apiFetch<{ execution?: ExecutionSummary | null }>(`/executions/${executionId}`);
       if (!cancelledRef.current) {
         setExecution(payload.execution || null);
         setNotFound(!(payload.execution || null));
@@ -47,7 +36,7 @@ export function useExecutionDetail(executionId: string) {
     } catch (requestError) {
       if (!cancelledRef.current) {
         setExecution(null);
-        setNotFound(false);
+        setNotFound(requestError instanceof ApiError && requestError.status === 404);
         setError(requestError instanceof Error ? requestError.message : '执行详情加载失败。');
       }
     } finally {

@@ -2,20 +2,27 @@ import path from 'node:path';
 import type express from 'express';
 import { registerAgencyRoutes } from '../api/agency';
 import { registerApprovalRoutes } from '../api/approvals';
+import { registerApprovalChainRoutes } from '../api/approval-chains';
+import { registerBudgetRoutes } from '../api/budget';
 import { registerDiscussionRoutes } from '../api/discussions';
 import { registerMarketRoutes } from '../api/market';
 import { registerExecutionRoutes } from '../api/executions';
 import { registerMemoryRoutes } from '../api/memory';
 import { registerRuntimeRoutes } from '../api/runtime';
 import { registerStartupRoutes } from '../api/startup';
+import { registerSquadTemplateRoutes } from '../api/squad-templates';
 import { registerTaskEventRoutes } from '../api/task-events';
 import { registerTaskRoutes, registerScenarioRoutes } from '../api/tasks';
 import { registerToolRoutes } from '../api/tools';
 import { registerTemplateRoutes } from '../api/templates';
 import { registerAuditRoutes } from '../api/audit';
 import { registerPresetRoutes } from '../api/presets';
+import { registerIntentRoutes } from '../api/intents';
 import { retrieveMemoryContext } from '../memory/memory-retriever';
 import { createWriteBackService } from '../memory/write-back-service';
+import { BudgetService } from '../governance/budget-service';
+import { createMemoryLayerService } from '../orchestration/memory-layer-service';
+import { createSquadTemplateService } from '../orchestration/squad-template-service';
 import {
   createTaskEventPublisher,
   type TaskDashboardEvent,
@@ -26,6 +33,8 @@ import { SkillScanner } from '../skill-scanner';
 import { Store } from '../store';
 import type { DiscussionServiceContract } from '../shared/discussion-service-contract';
 import type { RuntimePaths } from '../runtime/runtime-state';
+import type { ExecutionLifecycleRecord } from '../runtime/execution-service';
+import type { TaskRecord } from '../shared/task-types';
 import { createUserRepository } from '../identity/user-repository';
 import { createPermissionChecker } from '../identity/permission-checker';
 import { createUserContextService } from '../identity/user-context';
@@ -41,6 +50,9 @@ interface RouteRegistrationDependencies {
   broadcast: (event: DashboardEvent) => void;
   runAdvancedDiscussion?: (topic: string) => Promise<{ summary: string }>;
 }
+
+import { createWorkflowExecutionEngine } from '../orchestration/workflow-execution-engine';
+import { createAssignmentExecutor } from '../orchestration/assignment-executor';
 
 export function registerBackendRoutes({
   app,
@@ -58,6 +70,21 @@ export function registerBackendRoutes({
   const memoryRootDir =
     process.env.AGENCY_MEMORY_DIR || path.resolve(process.cwd(), '.ai');
 
+  // Initialize assignment executor
+  const assignmentExecutor = createAssignmentExecutor({
+    store,
+    auditLogger: null,
+    executor: 'claude',
+  });
+
+  // Initialize workflow execution engine
+  const workflowExecutionEngine = createWorkflowExecutionEngine({
+    store,
+    assignmentExecutor,
+    auditLogger: null, // auditLogger placeholder
+    scanner,
+  });
+
   // Initialize enhanced write-back service
   const writeBackService = createWriteBackService({
     memoryRootDir,
@@ -65,6 +92,11 @@ export function registerBackendRoutes({
     enableDecisionRecords: true,
     retainLegacyTaskSummaries: true,
     markdownTemplateFormat: 'frontmatter',
+  });
+
+  // Initialize memory layer service (L1/L2/L3 hierarchy)
+  const memoryLayerService = createMemoryLayerService({
+    memoryRootDir,
   });
 
   const taskEventFeed: Array<TaskDashboardEvent & { timestamp: string }> = [];
@@ -119,15 +151,40 @@ export function registerBackendRoutes({
     runtimePaths,
   });
 
+  // Shared execution base properties to avoid duplication
+  const executionBase = {
+    onExecutionStarted: (input: any) => {
+      taskEvents.executionStarted(input);
+    },
+    onExecutionFinished: (execution: any) => {
+      taskEvents.executionFinished(execution);
+    },
+    onExecutionEvent: (input: any) => {
+      taskEvents.executionEvent(input);
+    },
+    loadMemoryContext: (task: TaskRecord) => {
+      const result = memoryLayerService.loadMemory(task);
+      return result.context || undefined;
+    },
+    writeExecutionSummary: (task: TaskRecord, execution: ExecutionLifecycleRecord) => {
+      memoryLayerService.writeback(task, execution);
+    },
+    sessionCapabilities: {
+      sampling: samplingEnabled,
+    },
+    runAdvancedDiscussion: runAdvancedDiscussion
+      ? runAdvancedDiscussion
+      : async (topic: any) => discussionService.runDiscussionSummary(topic),
+  };
+
+  // Register task routes
   registerTaskRoutes(app, store, {
+    ...executionBase,
     getAgentProfiles: () =>
       scanner
         .getAllAgents()
         .map((agent) => agent.profile)
         .filter((profile): profile is NonNullable<typeof profile> => Boolean(profile)),
-    runAdvancedDiscussion: runAdvancedDiscussion
-      ? runAdvancedDiscussion
-      : async (topic) => discussionService.runDiscussionSummary(topic),
     onTaskCreated: (task) => {
       taskEvents.taskCreated(task);
     },
@@ -138,63 +195,17 @@ export function registerBackendRoutes({
         taskEvents.approvalRequested(latestApproval);
       }
     },
-    onExecutionStarted: (input) => {
-      taskEvents.executionStarted(input);
-    },
-    onExecutionFinished: (execution) => {
-      taskEvents.executionFinished(execution);
-    },
-    onExecutionEvent: (input) => {
-      taskEvents.executionEvent(input);
-    },
-    loadMemoryContext: (task) => {
-      const retrieved = retrieveMemoryContext(`${task.title}\n${task.description}`, {
-        memoryRootDir,
-        limit: 2,
-      });
-      return retrieved.context || undefined;
-    },
-    writeExecutionSummary: (task, execution) => {
-      writeBackService.writeExecutionSummary(task, execution);
-    },
-    sessionCapabilities: {
-      sampling: samplingEnabled,
-    },
   });
 
   registerApprovalRoutes(app, store, {
+    ...executionBase,
     onApprovalResolved: (approval) => {
       taskEvents.approvalResolved(approval);
     },
-    onExecutionStarted: (input) => {
-      taskEvents.executionStarted(input);
-    },
-    onExecutionFinished: (execution) => {
-      taskEvents.executionFinished(execution);
-    },
-    onExecutionEvent: (input) => {
-      taskEvents.executionEvent(input);
-    },
-    loadMemoryContext: (task) => {
-      const retrieved = retrieveMemoryContext(`${task.title}\n${task.description}`, {
-        memoryRootDir,
-        limit: 2,
-      });
-      return retrieved.context || undefined;
-    },
-    writeExecutionSummary: (task, execution) => {
-      writeBackService.writeExecutionSummary(task, execution);
-    },
-    sessionCapabilities: {
-      sampling: samplingEnabled,
-    },
-    runAdvancedDiscussion: runAdvancedDiscussion
-      ? runAdvancedDiscussion
-      : async (topic) => discussionService.runDiscussionSummary(topic),
     autoExecuteAfterApproval: true,
   });
 
-  registerExecutionRoutes(app, store);
+  registerExecutionRoutes(app, store, { workflowExecutionEngine });
   registerToolRoutes(app, store);
   registerMemoryRoutes(app, { memoryRootDir });
 
@@ -213,6 +224,9 @@ export function registerBackendRoutes({
   // Register template routes
   registerTemplateRoutes(app, { store });
 
+  // Register intent routes
+  registerIntentRoutes(app, store);
+
   registerDiscussionRoutes(app, {
     discussionService,
     store,
@@ -221,4 +235,24 @@ export function registerBackendRoutes({
 
   // Register talent market routes
   registerMarketRoutes(app, { store });
+
+  // Initialize BudgetService (Singleton)
+  const budgetService = BudgetService.getInstance();
+
+  // Register budget routes
+  registerBudgetRoutes(app, { budgetService });
+
+  // Initialize SquadTemplateService
+  const squadTemplateService = createSquadTemplateService({
+    getAgent: (id: string) => scanner.getAgent(id),
+  });
+
+  // Register squad template routes
+  registerSquadTemplateRoutes(app, {
+    squadTemplateService,
+    getAgent: (id: string) => scanner.getAgent(id),
+  });
+
+  // Register approval chain routes
+  registerApprovalChainRoutes(app, store);
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { API_CONFIG } from '../utils/constants';
+import { apiFetch } from '../utils/apiFetch';
 import type { ApprovalSummary } from '../types';
 
 export function useApprovals() {
@@ -21,11 +21,7 @@ export function useApprovals() {
     }
 
     try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}/approvals`);
-      const payload = (await response.json()) as { approvals?: ApprovalSummary[]; error?: string };
-      if (!response.ok) {
-        throw new Error(payload.error || '审批列表加载失败。');
-      }
+      const payload = await apiFetch<{ approvals?: ApprovalSummary[] }>('/approvals');
       if (!cancelledRef.current) {
         setApprovals(payload.approvals || []);
       }

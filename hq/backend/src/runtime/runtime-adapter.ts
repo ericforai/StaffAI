@@ -83,6 +83,28 @@ export function resolveRuntimeName(executor: 'claude' | 'codex' | 'openai' | 'de
   return mapExecutorToRuntimeName(executor);
 }
 
+/**
+ * Common list of error keywords that indicate a retriable condition.
+ */
+export const RETRIABLE_ERROR_KEYWORDS = [
+  'timed out',
+  'timeout',
+  'unavailable',
+  'network',
+  'rate limit',
+  'overloaded',
+  'busy',
+];
+
+/**
+ * Determines if an error message or object is retriable based on common keywords.
+ */
+export function isRetriableError(error: unknown): boolean {
+  if (!error) return false;
+  const message = (error instanceof Error ? error.message : String(error)).toLowerCase();
+  return RETRIABLE_ERROR_KEYWORDS.some((keyword) => message.includes(keyword));
+}
+
 // Re-export adapter classes for external use
 export { ClaudeRuntimeAdapter } from './adapters/claude-adapter';
 export { CodexRuntimeAdapter } from './adapters/codex-adapter';

@@ -18,6 +18,7 @@ const TASK_EVENT_TYPE_SET: ReadonlySet<TaskEvent['taskEventType']> = new Set([
   'execution_completed',
   'execution_failed',
   'execution_degraded',
+  'execution_event',
 ]);
 
 const TASK_EVENT_METADATA: Record<TaskEvent['taskEventType'], { label: string; tone: TaskEventSummaryTone }> = {
@@ -28,6 +29,7 @@ const TASK_EVENT_METADATA: Record<TaskEvent['taskEventType'], { label: string; t
   execution_completed: { label: '执行完成', tone: 'success' },
   execution_failed: { label: '执行失败', tone: 'danger' },
   execution_degraded: { label: '执行降级完成', tone: 'warning' },
+  execution_event: { label: '执行事件', tone: 'info' },
 };
 
 function asRecord(value: unknown): Record<string, unknown> | null {

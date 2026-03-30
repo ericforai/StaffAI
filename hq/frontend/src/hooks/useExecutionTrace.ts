@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { API_CONFIG } from '../utils/constants';
+import { apiFetch } from '../utils/apiFetch';
 
 export interface ExecutionTracePayload {
   trace?: {
@@ -31,11 +31,7 @@ export function useExecutionTrace(executionId: string) {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}/executions/${executionId}/trace`);
-      const payload = (await response.json()) as ExecutionTracePayload;
-      if (!response.ok) {
-        throw new Error(payload.error || '执行轨迹加载失败。');
-      }
+      const payload = await apiFetch<ExecutionTracePayload>(`/executions/${executionId}/trace`);
       if (!cancelledRef.current) {
         setData(payload.trace ?? null);
       }

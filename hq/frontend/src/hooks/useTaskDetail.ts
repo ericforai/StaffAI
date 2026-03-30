@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { API_CONFIG } from '../utils/constants';
+import { apiFetch } from '../utils/apiFetch';
 import type { TaskDetailPayload } from '../types';
 
 export function useTaskDetail(taskId: string) {
@@ -18,11 +18,7 @@ export function useTaskDetail(taskId: string) {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}/tasks/${taskId}`);
-      const payload = (await response.json()) as TaskDetailPayload & { error?: string };
-      if (!response.ok) {
-        throw new Error(payload.error || '任务详情加载失败。');
-      }
+      const payload = await apiFetch<TaskDetailPayload>(`/tasks/${taskId}`);
       if (!cancelledRef.current) {
         setData(payload);
       }

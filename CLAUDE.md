@@ -13,12 +13,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Quick Start
 
 ```bash
-# Start both backend (3333) and frontend (8888)
+# Start both backend (3333) and frontend (3008)
 cd hq && ./start.sh
 
 # Or start individually:
-cd hq/backend && npm run build && npm run start:web
-cd hq/frontend && npm run dev
+cd hq/backend && npm run build && npm run start:web        # port 3333
+cd hq/frontend && PORT=3008 npm run dev                     # port 3008
 ```
 
 ---

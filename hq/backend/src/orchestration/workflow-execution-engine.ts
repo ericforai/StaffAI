@@ -8,6 +8,7 @@ import { cancelWorkflow } from './workflow-execution-cancel';
 import { TaskController, type ExecutionState, type PauseOptions } from '../runtime/task-controller';
 import { ExecutionStateStore } from '../runtime/execution-store';
 import { createRuntimePaths } from '../runtime/runtime-state';
+import { createSelfHealingService, type SelfHealingService, type HealingAttempt } from '../runtime/self-healing-service';
 
 /**
  * Status of workflow execution
@@ -54,6 +55,11 @@ export interface WorkflowExecutionEngine {
    * Resume a previously paused or cancelled workflow
    */
   resume(workflowPlanId: string): Promise<void>;
+
+  /**
+   * Resume a workflow from a specific checkpoint (HITL)
+   */
+  resumeFromCheckpoint(workflowPlanId: string, checkpointData: any): Promise<WorkflowExecutionResult>;
 
   /**
    * Cancel a running workflow
@@ -105,6 +111,7 @@ export interface WorkflowExecutionEngineConfig {
   >;
   assignmentExecutor: AssignmentExecutor;
   auditLogger: AuditLogger | null;
+  scanner?: any; // Scanner for agent replacement
 }
 
 /**
@@ -121,6 +128,7 @@ export class DefaultWorkflowExecutionEngine implements WorkflowExecutionEngine {
   >();
   private readonly taskController: TaskController;
   private readonly executionStore: ExecutionStateStore;
+  private readonly selfHealingService: SelfHealingService;
 
   constructor(config: WorkflowExecutionEngineConfig) {
     this.store = config.store;
@@ -131,6 +139,7 @@ export class DefaultWorkflowExecutionEngine implements WorkflowExecutionEngine {
     const stateDir = path.join(runtimePaths.sessionsDir, 'executions');
     this.executionStore = new ExecutionStateStore(stateDir);
     this.taskController = new TaskController(this.executionStore);
+    this.selfHealingService = createSelfHealingService({}, config.scanner);
 
     this.initialize().catch((error) => {
       console.error('Failed to initialize WorkflowExecutionEngine:', error);
@@ -228,7 +237,8 @@ export class DefaultWorkflowExecutionEngine implements WorkflowExecutionEngine {
           assignments,
           task,
           this.assignmentExecutor,
-          this.runningWorkflows
+          this.runningWorkflows,
+          this.selfHealingService
         );
       } else {
         result = await executeSerialWorkflow(
@@ -236,7 +246,8 @@ export class DefaultWorkflowExecutionEngine implements WorkflowExecutionEngine {
           assignments,
           task,
           this.assignmentExecutor,
-          this.runningWorkflows
+          this.runningWorkflows,
+          this.selfHealingService
         );
       }
     } catch (error) {
@@ -251,6 +262,9 @@ export class DefaultWorkflowExecutionEngine implements WorkflowExecutionEngine {
     }
 
     await this.finalizeExecution(workflowPlan, result);
+
+    // Clear healing attempts after workflow completion
+    this.selfHealingService.clearAttempts(workflowPlan.taskId);
 
     return result;
   }
@@ -327,6 +341,71 @@ export class DefaultWorkflowExecutionEngine implements WorkflowExecutionEngine {
       previousState: { status: 'paused' },
       newState: { status: 'running' },
     });
+  }
+
+  async resumeFromCheckpoint(workflowPlanId: string, checkpointData: any): Promise<WorkflowExecutionResult> {
+    const workflowPlan = await this.store.getWorkflowPlanByTaskId(checkpointData.taskId);
+    const task = await this.store.getTaskById(checkpointData.taskId);
+    const assignments = await this.store.getTaskAssignmentsByTaskId(checkpointData.taskId);
+
+    if (!workflowPlan || !task || !assignments.length) {
+      throw new Error(`Cannot resume workflow ${workflowPlanId}: missing core data`);
+    }
+
+    // Set as running in engine
+    this.runningWorkflows.set(workflowPlanId, {
+      workflowPlanId,
+      status: 'running',
+      startedAt: new Date().toISOString(),
+      completedSteps: new Set(checkpointData.completedSteps || []),
+      currentStep: checkpointData.currentStep,
+    });
+
+    await this.updateWorkflowStatus(task.id, 'running');
+
+    await this.logAuditEvent({
+      entityType: 'execution',
+      entityId: workflowPlanId,
+      action: 'resumed_from_checkpoint',
+      actor: 'system',
+      newState: { status: 'running', checkpointData },
+    });
+
+    let result: WorkflowExecutionResult;
+
+    try {
+      if (workflowPlan.mode === 'parallel') {
+        result = await executeParallelWorkflow(
+          workflowPlan,
+          assignments,
+          task,
+          this.assignmentExecutor,
+          this.runningWorkflows,
+          this.selfHealingService
+        );
+      } else {
+        result = await executeSerialWorkflow(
+          workflowPlan,
+          assignments,
+          task,
+          this.assignmentExecutor,
+          this.runningWorkflows,
+          this.selfHealingService
+        );
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      result = {
+        workflowPlanId,
+        status: 'failed',
+        completedSteps: Array.from(this.runningWorkflows.get(workflowPlanId)?.completedSteps || []),
+        assignments,
+        error: errorMessage,
+      };
+    }
+
+    await this.finalizeExecution(workflowPlan, result);
+    return result;
   }
 
   async cancel(workflowPlanId: string): Promise<void> {

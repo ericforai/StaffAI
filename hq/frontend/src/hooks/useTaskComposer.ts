@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { API_CONFIG } from '../utils/constants';
+import { apiClient } from '../lib/api-client';
 import type { TaskSummary } from '../types';
 
 export function useTaskComposer(onTaskCreated?: (task: TaskSummary) => void) {
@@ -9,6 +9,7 @@ export function useTaskComposer(onTaskCreated?: (task: TaskSummary) => void) {
   const [description, setDescription] = useState('');
   const [assigneeId, setAssigneeId] = useState('');
   const [assigneeName, setAssigneeName] = useState('');
+  const [priority, setPriority] = useState<'low' | 'medium' | 'high' | 'urgent'>('medium');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,20 +17,17 @@ export function useTaskComposer(onTaskCreated?: (task: TaskSummary) => void) {
     try {
       setSubmitting(true);
       setError(null);
-      const response = await fetch(`${API_CONFIG.BASE_URL}/tasks`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title,
-          description,
-          assigneeId: assigneeId || undefined,
-          assigneeName: assigneeName || undefined,
-        }),
+      
+      const payload = await apiClient.post<{ task: TaskSummary }>(`/tasks`, {
+        title,
+        description,
+        assigneeId: assigneeId || undefined,
+        assigneeName: assigneeName || undefined,
+        priority,
       });
 
-      const payload = (await response.json()) as { task?: TaskSummary; error?: string };
-      if (!response.ok || !payload.task) {
-        throw new Error(payload.error || '任务创建失败。');
+      if (!payload.task) {
+        throw new Error('服务器未返回任务数据');
       }
 
       onTaskCreated?.(payload.task);
@@ -37,6 +35,7 @@ export function useTaskComposer(onTaskCreated?: (task: TaskSummary) => void) {
       setDescription('');
       setAssigneeId('');
       setAssigneeName('');
+      setPriority('medium');
       return payload.task;
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : '任务创建失败。');
@@ -55,6 +54,8 @@ export function useTaskComposer(onTaskCreated?: (task: TaskSummary) => void) {
     setAssigneeId,
     assigneeName,
     setAssigneeName,
+    priority,
+    setPriority,
     submitting,
     error,
     createTask,

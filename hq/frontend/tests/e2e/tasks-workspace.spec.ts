@@ -230,7 +230,7 @@ function mockTaskWorkspaceApi(page: Page) {
         taskId: 'task-1',
         executionId: 'execution-1',
         timestamp: '2026-03-24T00:00:01.000Z',
-      });
+      } as any);
 
       await route.fulfill({
         status: 201,

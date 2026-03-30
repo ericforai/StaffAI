@@ -9,6 +9,8 @@ import type {
   ToolCallLog,
   WorkflowPlan,
 } from '../shared/task-types';
+import type { ApprovalChain } from '../shared/approval-chain-types';
+import type { RequirementDraft } from '../shared/intent-types';
 
 function readJsonFile<T>(filePath: string, fallback: T): T {
   if (!fs.existsSync(filePath)) {
@@ -33,6 +35,13 @@ export interface ApprovalRepository {
   listByTaskId(taskId: string): Promise<ApprovalRecord[]>;
   save(approval: ApprovalRecord): Promise<void>;
   updateStatus(approvalId: string, status: ApprovalRecord['status']): Promise<ApprovalRecord | null>;
+}
+
+export interface ApprovalChainRepository {
+  list(): Promise<ApprovalChain[]>;
+  getByTaskId(taskId: string): Promise<ApprovalChain | null>;
+  save(chain: ApprovalChain): Promise<void>;
+  delete(taskId: string): Promise<boolean>;
 }
 
 export interface ExecutionRepository {
@@ -87,6 +96,14 @@ export interface CostLogRepository {
   save(entry: CostLogEntry): Promise<void>;
 }
 
+export interface RequirementDraftRepository {
+  list(): Promise<RequirementDraft[]>;
+  getById(id: string): Promise<RequirementDraft | null>;
+  save(draft: RequirementDraft): Promise<void>;
+  update(id: string, updater: (draft: RequirementDraft) => RequirementDraft): Promise<RequirementDraft | null>;
+  delete(id: string): Promise<boolean>;
+}
+
 export function createFileTaskRepository(filePath: string): TaskRepository {
   return {
     async list() {
@@ -139,6 +156,36 @@ export function createFileApprovalRepository(filePath: string): ApprovalReposito
       target.resolvedAt = new Date().toISOString();
       writeJsonFile(filePath, approvals);
       return target;
+    },
+  };
+}
+
+export function createFileApprovalChainRepository(filePath: string): ApprovalChainRepository {
+  return {
+    async list() {
+      return readJsonFile<ApprovalChain[]>(filePath, []);
+    },
+    async getByTaskId(taskId) {
+      return (await this.list()).find((chain) => chain.taskId === taskId) || null;
+    },
+    async save(chain) {
+      const chains = await this.list();
+      const index = chains.findIndex((c) => c.taskId === chain.taskId);
+      if (index >= 0) {
+        chains[index] = chain;
+      } else {
+        chains.push(chain);
+      }
+      writeJsonFile(filePath, chains);
+    },
+    async delete(taskId) {
+      const chains = await this.list();
+      const filtered = chains.filter((c) => c.taskId !== taskId);
+      if (filtered.length === chains.length) {
+        return false;
+      }
+      writeJsonFile(filePath, filtered);
+      return true;
     },
   };
 }
@@ -217,6 +264,34 @@ export function createInMemoryApprovalRepository(seed: ApprovalRecord[] = []): A
       target.status = status;
       target.resolvedAt = new Date().toISOString();
       return target;
+    },
+  };
+}
+
+export function createInMemoryApprovalChainRepository(seed: ApprovalChain[] = []): ApprovalChainRepository {
+  const chains = [...seed];
+  return {
+    async list() {
+      return [...chains];
+    },
+    async getByTaskId(taskId) {
+      return chains.find((chain) => chain.taskId === taskId) || null;
+    },
+    async save(chain) {
+      const index = chains.findIndex((c) => c.taskId === chain.taskId);
+      if (index >= 0) {
+        chains[index] = chain;
+      } else {
+        chains.push(chain);
+      }
+    },
+    async delete(taskId) {
+      const index = chains.findIndex((c) => c.taskId === taskId);
+      if (index < 0) {
+        return false;
+      }
+      chains.splice(index, 1);
+      return true;
     },
   };
 }
@@ -488,6 +563,75 @@ export function createInMemoryToolCallLogRepository(seed: ToolCallLog[] = []): T
       }
       toolCallLogs[index] = updater(toolCallLogs[index]);
       return toolCallLogs[index];
+    },
+  };
+}
+
+export function createFileRequirementDraftRepository(filePath: string): RequirementDraftRepository {
+  return {
+    async list() {
+      return readJsonFile<RequirementDraft[]>(filePath, []);
+    },
+    async getById(id) {
+      return (await this.list()).find((draft) => draft.id === id) || null;
+    },
+    async save(draft) {
+      const drafts = await this.list();
+      drafts.push(draft);
+      writeJsonFile(filePath, drafts);
+    },
+    async update(id, updater) {
+      const drafts = await this.list();
+      const index = drafts.findIndex((draft) => draft.id === id);
+      if (index < 0) {
+        return null;
+      }
+
+      const updated = updater(drafts[index]);
+      drafts[index] = updated;
+      writeJsonFile(filePath, drafts);
+      return updated;
+    },
+    async delete(id) {
+      const drafts = await this.list();
+      const index = drafts.findIndex((draft) => draft.id === id);
+      if (index < 0) {
+        return false;
+      }
+      drafts.splice(index, 1);
+      writeJsonFile(filePath, drafts);
+      return true;
+    },
+  };
+}
+
+export function createInMemoryRequirementDraftRepository(seed: RequirementDraft[] = []): RequirementDraftRepository {
+  const drafts = [...seed];
+  return {
+    async list() {
+      return [...drafts];
+    },
+    async getById(id) {
+      return drafts.find((draft) => draft.id === id) || null;
+    },
+    async save(draft) {
+      drafts.push(draft);
+    },
+    async update(id, updater) {
+      const index = drafts.findIndex((draft) => draft.id === id);
+      if (index < 0) {
+        return null;
+      }
+      drafts[index] = updater(drafts[index]);
+      return drafts[index];
+    },
+    async delete(id) {
+      const index = drafts.findIndex((draft) => draft.id === id);
+      if (index < 0) {
+        return false;
+      }
+      drafts.splice(index, 1);
+      return true;
     },
   };
 }

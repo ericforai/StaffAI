@@ -12,9 +12,12 @@ import {
   ToolCallLog,
   WorkflowPlan,
 } from './shared/task-types';
+import type { RequirementDraft } from './shared/intent-types';
 import {
+  ApprovalChainRepository,
   ApprovalRepository,
   CostLogRepository,
+  createFileApprovalChainRepository,
   createFileApprovalRepository,
   createFileCostLogRepository,
   createFileExecutionRepository,
@@ -23,6 +26,7 @@ import {
   createFileTaskRepository,
   createFileToolCallLogRepository,
   createFileWorkflowPlanRepository,
+  createInMemoryApprovalChainRepository,
   createInMemoryApprovalRepository,
   createInMemoryCostLogRepository,
   createInMemoryExecutionRepository,
@@ -33,6 +37,9 @@ import {
   createInMemoryWorkflowPlanRepository,
   ExecutionTraceRepository,
   ExecutionRepository,
+  RequirementDraftRepository,
+  createFileRequirementDraftRepository,
+  createInMemoryRequirementDraftRepository,
   TaskAssignmentRepository,
   TaskRepository,
   ToolCallLogRepository,
@@ -69,11 +76,13 @@ import {
   createPostgresAuditLogRepository,
   type AuditLogRepository,
 } from './persistence/audit-log-repositories';
+import { ApprovalChain } from './shared/approval-chain-types';
 
 const STORE_FILE = path.join(__dirname, '../../active_squad.json');
 const TEMPLATES_FILE = path.join(__dirname, '../../templates.json');
 const KNOWLEDGE_FILE = path.join(__dirname, '../../company_knowledge.json');
 const APPROVALS_FILE = process.env.AGENCY_APPROVALS_FILE || path.join(__dirname, '../../approvals.json');
+const APPROVAL_CHAINS_FILE = process.env.AGENCY_APPROVAL_CHAINS_FILE || path.join(__dirname, '../../approval_chains.json');
 const EXECUTIONS_FILE = process.env.AGENCY_EXECUTIONS_FILE || path.join(__dirname, '../../executions.json');
 const ASSIGNMENTS_FILE = process.env.AGENCY_TASK_ASSIGNMENTS_FILE || path.join(__dirname, '../../task_assignments.json');
 const WORKFLOW_PLANS_FILE = process.env.AGENCY_WORKFLOW_PLANS_FILE || path.join(__dirname, '../../workflow_plans.json');
@@ -91,6 +100,10 @@ function getTasksFilePath() {
 
 function getApprovalsFilePath() {
   return process.env.AGENCY_APPROVALS_FILE || APPROVALS_FILE;
+}
+
+function getApprovalChainsFilePath() {
+  return process.env.AGENCY_APPROVAL_CHAINS_FILE || APPROVAL_CHAINS_FILE;
 }
 
 function getExecutionsFilePath() {
@@ -117,6 +130,10 @@ function getCostLogsFilePath() {
   return process.env.AGENCY_COST_LOGS_FILE || COST_LOGS_FILE;
 }
 
+function getRequirementDraftsFilePath(dataDir: string) {
+  return process.env.AGENCY_REQUIREMENT_DRAFTS_FILE || path.join(dataDir, 'requirement_drafts.json');
+}
+
 export interface Template {
   name: string;
   activeAgentIds: string[];
@@ -132,12 +149,14 @@ export interface KnowledgeEntry {
 interface StorePersistenceDependencies {
   taskRepository?: TaskRepository;
   approvalRepository?: ApprovalRepository;
+  approvalChainRepository?: ApprovalChainRepository;
   executionRepository?: ExecutionRepository;
   taskAssignmentRepository?: TaskAssignmentRepository;
   workflowPlanRepository?: WorkflowPlanRepository;
   toolCallLogRepository?: ToolCallLogRepository;
   executionTraceRepository?: ExecutionTraceRepository;
   costLogRepository?: CostLogRepository;
+  requirementDraftRepository?: RequirementDraftRepository;
   knowledgeAdapter?: KnowledgeRepository;
   auditLogRepository?: AuditLogRepository;
 }
@@ -164,12 +183,14 @@ export class Store extends EventEmitter {
   private state: SquadState = { activeAgentIds: [] };
   private taskRepository: TaskRepository;
   private approvalRepository: ApprovalRepository;
+  private approvalChainRepository: ApprovalChainRepository;
   private executionRepository: ExecutionRepository;
   private taskAssignmentRepository: TaskAssignmentRepository;
   private workflowPlanRepository: WorkflowPlanRepository;
   private toolCallLogRepository: ToolCallLogRepository;
   private executionTraceRepository: ExecutionTraceRepository;
   private costLogRepository: CostLogRepository;
+  private requirementDraftRepository: RequirementDraftRepository;
   private knowledgeAdapter: KnowledgeRepository | null;
   private auditLogger: AuditLogger | null;
 
@@ -203,6 +224,13 @@ export class Store extends EventEmitter {
         : mode === 'postgres'
           ? createPostgresApprovalRepository(postgresOptions!)
           : createFileApprovalRepository(getApprovalsFilePath()));
+    this.approvalChainRepository =
+      dependencies.approvalChainRepository ??
+      (mode === 'memory'
+        ? createInMemoryApprovalChainRepository()
+        : mode === 'postgres'
+          ? (() => { throw new Error('Postgres not implemented for ApprovalChainRepository yet'); })()
+          : createFileApprovalChainRepository(getApprovalChainsFilePath()));
     this.executionRepository =
       dependencies.executionRepository ??
       (mode === 'memory'
@@ -241,6 +269,12 @@ export class Store extends EventEmitter {
     this.costLogRepository =
       dependencies.costLogRepository ??
       (mode === 'memory' ? createInMemoryCostLogRepository() : createFileCostLogRepository(getCostLogsFilePath()));
+
+    this.requirementDraftRepository =
+      dependencies.requirementDraftRepository ??
+      (mode === 'memory'
+        ? createInMemoryRequirementDraftRepository()
+        : createFileRequirementDraftRepository(getRequirementDraftsFilePath(process.env.AGENCY_MEMORY_ROOT_DIR || path.join(__dirname, '../../.ai'))));
 
     // Initialize knowledge adapter (optional - backward compatible)
     this.knowledgeAdapter =
@@ -596,6 +630,24 @@ export class Store extends EventEmitter {
     return await this.approvalRepository.listByTaskId(taskId);
   }
 
+  // --- Approval Chain Logic ---
+
+  public async getApprovalChains(): Promise<ApprovalChain[]> {
+    return await this.approvalChainRepository.list();
+  }
+
+  public async getApprovalChainByTaskId(taskId: string): Promise<ApprovalChain | null> {
+    return await this.approvalChainRepository.getByTaskId(taskId);
+  }
+
+  public async saveApprovalChain(chain: ApprovalChain): Promise<void> {
+    await this.approvalChainRepository.save(chain);
+  }
+
+  public async deleteApprovalChain(taskId: string): Promise<boolean> {
+    return await this.approvalChainRepository.delete(taskId);
+  }
+
   // --- Execution Logic ---
 
   public async getExecutions(): Promise<ExecutionRecord[]> {
@@ -733,5 +785,36 @@ export class Store extends EventEmitter {
 
   public async getCostLogsByTaskId(taskId: string): Promise<CostLogEntry[]> {
     return await this.costLogRepository.listByTaskId(taskId);
+  }
+
+  // --- Requirement Draft Logic ---
+
+  public async getRequirementDrafts(): Promise<RequirementDraft[]> {
+    try {
+      return await this.requirementDraftRepository.list();
+    } catch (err) {
+      console.error('Failed to load requirement drafts:', err);
+    }
+
+    return [];
+  }
+
+  public async saveRequirementDraft(draft: RequirementDraft): Promise<void> {
+    await this.requirementDraftRepository.save(draft);
+  }
+
+  public async getRequirementDraftById(id: string): Promise<RequirementDraft | null> {
+    return await this.requirementDraftRepository.getById(id);
+  }
+
+  public async updateRequirementDraft(
+    id: string,
+    updater: (draft: RequirementDraft) => RequirementDraft
+  ): Promise<RequirementDraft | null> {
+    return await this.requirementDraftRepository.update(id, updater);
+  }
+
+  public async deleteRequirementDraft(id: string): Promise<boolean> {
+    return await this.requirementDraftRepository.delete(id);
   }
 }

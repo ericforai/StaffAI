@@ -119,7 +119,14 @@ export interface ApprovalRecord {
   resolvedAt?: string;
 }
 
-export type TaskAssignmentRole = 'primary' | 'secondary' | 'reviewer' | 'dispatcher';
+export type TaskAssignmentRole =
+  | 'primary'
+  | 'secondary'
+  | 'reviewer'
+  | 'dispatcher'
+  | 'commander'
+  | 'executor'
+  | 'critic';
 
 export interface TaskAssignment {
   id: string;
@@ -239,6 +246,7 @@ export const EXECUTION_TRACE_EVENT_TYPES = [
   'approval_resolved',
   'memory_retrieval',
   'cost_observed',
+  'budget_warning',
 ] as const;
 
 export type ExecutionTraceEventType = (typeof EXECUTION_TRACE_EVENT_TYPES)[number];
