@@ -174,16 +174,17 @@ test('MemoryLayerService: loadMemory uses task description for relevance', async
 
   initializeAiDirectory({ rootDir: root, force: false, templates: true });
 
-  // Create relevant content
+  // Create context/ directory and relevant content (maps to PROJECT doc type, included in L2)
+  fs.mkdirSync(path.join(memoryRootDir, 'context'), { recursive: true });
   fs.writeFileSync(
-    path.join(memoryRootDir, 'notes', 'api-gateway.md'),
+    path.join(memoryRootDir, 'context', 'api-gateway.md'),
     '# API Gateway\nRate limiting and JWT authentication setup.\n',
     'utf8'
   );
 
   // Create irrelevant content
   fs.writeFileSync(
-    path.join(memoryRootDir, 'notes', 'frontend.md'),
+    path.join(memoryRootDir, 'context', 'frontend.md'),
     '# Frontend\nReact component library.\n',
     'utf8'
   );
@@ -196,9 +197,12 @@ test('MemoryLayerService: loadMemory uses task description for relevance', async
 
   const result = await service.loadMemory(task);
 
-  // Should find the relevant API gateway content
-  assert.ok(result.context.length > 0);
-  assert.ok(result.entries.some((e) => e.relativePath.includes('api-gateway')));
+  // Should find the relevant API gateway content in L2 (PROJECT doc type)
+  assert.ok(result.context.length > 0, 'Expected non-empty context from L2 layer');
+  assert.ok(
+    result.entries.some((e) => e.relativePath.includes('api-gateway')),
+    `Expected api-gateway in entries: ${result.entries.map((e) => e.relativePath).join(', ')}`
+  );
 
   fs.rmSync(root, { recursive: true, force: true });
 });
