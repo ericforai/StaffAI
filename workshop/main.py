@@ -14,14 +14,14 @@ from dotenv import load_dotenv
 # 加载环境变量
 load_dotenv()
 
+# 配置日志
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("workshop")
+
 # 切换到根目录以确保 read_file 等工具能找到文件
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 os.chdir(ROOT_DIR)
 logger.info(f"Workshop working directory switched to: {os.getcwd()}")
-
-# 配置日志
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("workshop")
 
 # 检查 API KEY
 if not os.getenv("OPENAI_API_KEY"):
