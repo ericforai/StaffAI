@@ -1,0 +1,161 @@
+[
+  {
+    "id": "intent_1774907788415_kznjfyj",
+    "rawInput": "添加用户登录功能",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "c3b8e214-26ae-48ce-bd57-59e183e7b777",
+        "role": "assistant",
+        "content": "Who are the primary users?",
+        "timestamp": "2026-03-30T21:56:28.415Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-03-30T21:56:28.415Z",
+    "updatedAt": "2026-03-30T21:56:28.415Z"
+  },
+  {
+    "id": "intent_1774908548469_6qan458",
+    "rawInput": "帮我做一个CRM",
+    "status": "design_ready",
+    "clarificationMessages": [
+      {
+        "id": "895a3376-0c03-42a2-b83f-7a039c3d60cb",
+        "role": "assistant",
+        "content": "Who are the primary users?",
+        "timestamp": "2026-03-30T22:09:08.469Z"
+      },
+      {
+        "id": "e309138f-13e3-4d0c-b98a-e2dd47a56594",
+        "role": "user",
+        "content": "我自己用",
+        "timestamp": "2026-03-30T22:09:21.500Z"
+      },
+      {
+        "id": "f7fdf5f6-9761-4176-bdee-9fa8d7ccae1d",
+        "role": "assistant",
+        "content": "Who are the primary users?",
+        "timestamp": "2026-03-30T22:09:21.500Z"
+      },
+      {
+        "id": "17f4d4b5-c886-4058-a4dc-6db9e1f04723",
+        "role": "user",
+        "content": "我自己用",
+        "timestamp": "2026-03-30T22:09:33.127Z"
+      }
+    ],
+    "designSummary": {
+      "goal": "我自己用",
+      "targetUser": "",
+      "coreFlow": "",
+      "scope": "",
+      "outOfScope": "",
+      "deliverables": "",
+      "constraints": "",
+      "risks": ""
+    },
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0.4,
+    "createdTaskId": null,
+    "createdAt": "2026-03-30T22:09:08.469Z",
+    "updatedAt": "2026-03-30T22:09:33.127Z"
+  },
+  {
+    "id": "intent_1774908613256_c9hnboi",
+    "rawInput": "test",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "c2772e45-a142-4e28-b6b7-a9d7f44185e0",
+        "role": "assistant",
+        "content": "What is the main goal you want to achieve?",
+        "timestamp": "2026-03-30T22:10:13.257Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-03-30T22:10:13.256Z",
+    "updatedAt": "2026-03-30T22:10:13.256Z"
+  },
+  {
+    "id": "intent_1774908675578_jdq69xl",
+    "rawInput": "test",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "578f7d5a-d3fe-4435-9d05-82a91f95bce8",
+        "role": "assistant",
+        "content": "What is the main goal you want to achieve?",
+        "timestamp": "2026-03-30T22:11:15.578Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-03-30T22:11:15.578Z",
+    "updatedAt": "2026-03-30T22:11:15.578Z"
+  },
+  {
+    "id": "intent_1774908696076_168ril1",
+    "rawInput": "做一个CRM",
+    "status": "design_ready",
+    "clarificationMessages": [
+      {
+        "id": "641552e3-7a5d-475f-bcdd-2d3dba1c2771",
+        "role": "assistant",
+        "content": "Who are the primary users?",
+        "timestamp": "2026-03-30T22:11:36.076Z"
+      },
+      {
+        "id": "5ca07ba1-a5ac-45cc-8078-d05cf7d68cba",
+        "role": "user",
+        "content": "我自己用",
+        "timestamp": "2026-03-30T22:11:40.796Z"
+      },
+      {
+        "id": "c6de974b-5988-45de-af0e-239ef104ce8a",
+        "role": "assistant",
+        "content": "Who are the primary users?",
+        "timestamp": "2026-03-30T22:11:40.796Z"
+      },
+      {
+        "id": "1261bb5b-5583-4189-9e01-af824a48a2ff",
+        "role": "user",
+        "content": "我自己用",
+        "timestamp": "2026-03-30T22:11:47.648Z"
+      }
+    ],
+    "designSummary": {
+      "goal": "我自己用",
+      "targetUser": "",
+      "coreFlow": "",
+      "scope": "",
+      "outOfScope": "",
+      "deliverables": "",
+      "constraints": "",
+      "risks": ""
+    },
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0.4,
+    "createdTaskId": null,
+    "createdAt": "2026-03-30T22:11:36.076Z",
+    "updatedAt": "2026-03-30T22:11:47.648Z"
+  }
+]

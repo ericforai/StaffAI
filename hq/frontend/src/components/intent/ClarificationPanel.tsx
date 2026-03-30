@@ -1,0 +1,115 @@
+'use client';
+
+import { useState, useRef, useEffect } from 'react';
+import type { RequirementDraft } from '@/types/domain';
+
+interface Props {
+  draft: RequirementDraft;
+  onSendMessage: (message: string) => void;
+  loading: boolean;
+}
+
+export function ClarificationPanel({ draft, onSendMessage, loading }: Props) {
+  const [input, setInput] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [draft.clarificationMessages]);
+
+  const handleSend = () => {
+    if (!input.trim() || loading) return;
+    onSendMessage(input.trim());
+    setInput('');
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Chat Panel */}
+      <div className="lg:col-span-2 bg-gray-900 rounded-lg border border-gray-700 flex flex-col h-[600px]">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {draft.clarificationMessages.map((msg) => (
+            <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                msg.role === 'user'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-800 text-gray-200 border border-gray-600'
+              }`}>
+                <p className="text-sm">{msg.content}</p>
+              </div>
+            </div>
+          ))}
+          {loading && (
+            <div className="flex justify-start">
+              <div className="bg-gray-800 text-gray-400 rounded-lg px-4 py-2 border border-gray-600">
+                <p className="text-sm animate-pulse">Thinking...</p>
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+        <div className="border-t border-gray-700 p-4">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              className="flex-1 bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+              placeholder="Type your answer..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              disabled={loading}
+            />
+            <button
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              onClick={handleSend}
+              disabled={loading || !input.trim()}
+            >
+              Send
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Summary Card */}
+      <div className="bg-gray-900 rounded-lg border border-gray-700 p-4">
+        <h3 className="text-sm font-semibold text-gray-300 mb-4">Requirement Summary</h3>
+        <div className="space-y-3">
+          <SummaryField label="Goal" value={draft.designSummary?.goal} />
+          <SummaryField label="Target User" value={draft.designSummary?.targetUser} />
+          <SummaryField label="Deliverables" value={draft.designSummary?.deliverables} />
+          <SummaryField label="Constraints" value={draft.designSummary?.constraints} />
+          <SummaryField label="Scope" value={draft.designSummary?.scope} />
+        </div>
+        <div className="mt-4 pt-4 border-t border-gray-700">
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>Confidence</span>
+            <span>{Math.round(draft.confidenceScore * 100)}%</span>
+          </div>
+          <div className="mt-1 h-2 bg-gray-800 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-blue-600 rounded-full transition-all duration-500"
+              style={{ width: `${draft.confidenceScore * 100}%` }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SummaryField({ label, value }: { label: string; value?: string }) {
+  if (!value) return null;
+  return (
+    <div>
+      <dt className="text-xs text-gray-500">{label}</dt>
+      <dd className="text-sm text-gray-300 mt-0.5">{value}</dd>
+    </div>
+  );
+}

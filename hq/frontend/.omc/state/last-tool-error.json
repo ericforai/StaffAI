@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"ls /Users/user/agency-agents/hq/frontend/src/hooks/useIntentWizard.ts 2>&1\",\"description\":\"Check if hook exists\"}",
+  "error": "Exit code 1\nls: /Users/user/agency-agents/hq/frontend/src/hooks/useIntentWizard.ts: No such file or directory",
+  "timestamp": "2026-03-30T22:02:20.725Z",
+  "retry_count": 1
+}
