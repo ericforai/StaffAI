@@ -10,6 +10,7 @@ import type {
   WorkflowPlan,
 } from '../shared/task-types';
 import type { ApprovalChain } from '../shared/approval-chain-types';
+import type { RequirementDraft } from '../shared/intent-types';
 
 function readJsonFile<T>(filePath: string, fallback: T): T {
   if (!fs.existsSync(filePath)) {
@@ -93,6 +94,14 @@ export interface CostLogRepository {
   listByTaskId(taskId: string): Promise<CostLogEntry[]>;
   listByExecutionId(executionId: string): Promise<CostLogEntry[]>;
   save(entry: CostLogEntry): Promise<void>;
+}
+
+export interface RequirementDraftRepository {
+  list(): Promise<RequirementDraft[]>;
+  getById(id: string): Promise<RequirementDraft | null>;
+  save(draft: RequirementDraft): Promise<void>;
+  update(id: string, updater: (draft: RequirementDraft) => RequirementDraft): Promise<RequirementDraft | null>;
+  delete(id: string): Promise<boolean>;
 }
 
 export function createFileTaskRepository(filePath: string): TaskRepository {
@@ -554,6 +563,75 @@ export function createInMemoryToolCallLogRepository(seed: ToolCallLog[] = []): T
       }
       toolCallLogs[index] = updater(toolCallLogs[index]);
       return toolCallLogs[index];
+    },
+  };
+}
+
+export function createFileRequirementDraftRepository(filePath: string): RequirementDraftRepository {
+  return {
+    async list() {
+      return readJsonFile<RequirementDraft[]>(filePath, []);
+    },
+    async getById(id) {
+      return (await this.list()).find((draft) => draft.id === id) || null;
+    },
+    async save(draft) {
+      const drafts = await this.list();
+      drafts.push(draft);
+      writeJsonFile(filePath, drafts);
+    },
+    async update(id, updater) {
+      const drafts = await this.list();
+      const index = drafts.findIndex((draft) => draft.id === id);
+      if (index < 0) {
+        return null;
+      }
+
+      const updated = updater(drafts[index]);
+      drafts[index] = updated;
+      writeJsonFile(filePath, drafts);
+      return updated;
+    },
+    async delete(id) {
+      const drafts = await this.list();
+      const index = drafts.findIndex((draft) => draft.id === id);
+      if (index < 0) {
+        return false;
+      }
+      drafts.splice(index, 1);
+      writeJsonFile(filePath, drafts);
+      return true;
+    },
+  };
+}
+
+export function createInMemoryRequirementDraftRepository(seed: RequirementDraft[] = []): RequirementDraftRepository {
+  const drafts = [...seed];
+  return {
+    async list() {
+      return [...drafts];
+    },
+    async getById(id) {
+      return drafts.find((draft) => draft.id === id) || null;
+    },
+    async save(draft) {
+      drafts.push(draft);
+    },
+    async update(id, updater) {
+      const index = drafts.findIndex((draft) => draft.id === id);
+      if (index < 0) {
+        return null;
+      }
+      drafts[index] = updater(drafts[index]);
+      return drafts[index];
+    },
+    async delete(id) {
+      const index = drafts.findIndex((draft) => draft.id === id);
+      if (index < 0) {
+        return false;
+      }
+      drafts.splice(index, 1);
+      return true;
     },
   };
 }

@@ -17,6 +17,7 @@ import { registerToolRoutes } from '../api/tools';
 import { registerTemplateRoutes } from '../api/templates';
 import { registerAuditRoutes } from '../api/audit';
 import { registerPresetRoutes } from '../api/presets';
+import { registerIntentRoutes } from '../api/intents';
 import { retrieveMemoryContext } from '../memory/memory-retriever';
 import { createWriteBackService } from '../memory/write-back-service';
 import { BudgetService } from '../governance/budget-service';
@@ -222,6 +223,9 @@ export function registerBackendRoutes({
 
   // Register template routes
   registerTemplateRoutes(app, { store });
+
+  // Register intent routes
+  registerIntentRoutes(app, store);
 
   registerDiscussionRoutes(app, {
     discussionService,

@@ -12,6 +12,7 @@ import {
   ToolCallLog,
   WorkflowPlan,
 } from './shared/task-types';
+import type { RequirementDraft } from './shared/intent-types';
 import {
   ApprovalChainRepository,
   ApprovalRepository,
@@ -36,6 +37,9 @@ import {
   createInMemoryWorkflowPlanRepository,
   ExecutionTraceRepository,
   ExecutionRepository,
+  RequirementDraftRepository,
+  createFileRequirementDraftRepository,
+  createInMemoryRequirementDraftRepository,
   TaskAssignmentRepository,
   TaskRepository,
   ToolCallLogRepository,
@@ -126,6 +130,10 @@ function getCostLogsFilePath() {
   return process.env.AGENCY_COST_LOGS_FILE || COST_LOGS_FILE;
 }
 
+function getRequirementDraftsFilePath(dataDir: string) {
+  return process.env.AGENCY_REQUIREMENT_DRAFTS_FILE || path.join(dataDir, 'requirement_drafts.json');
+}
+
 export interface Template {
   name: string;
   activeAgentIds: string[];
@@ -148,6 +156,7 @@ interface StorePersistenceDependencies {
   toolCallLogRepository?: ToolCallLogRepository;
   executionTraceRepository?: ExecutionTraceRepository;
   costLogRepository?: CostLogRepository;
+  requirementDraftRepository?: RequirementDraftRepository;
   knowledgeAdapter?: KnowledgeRepository;
   auditLogRepository?: AuditLogRepository;
 }
@@ -181,6 +190,7 @@ export class Store extends EventEmitter {
   private toolCallLogRepository: ToolCallLogRepository;
   private executionTraceRepository: ExecutionTraceRepository;
   private costLogRepository: CostLogRepository;
+  private requirementDraftRepository: RequirementDraftRepository;
   private knowledgeAdapter: KnowledgeRepository | null;
   private auditLogger: AuditLogger | null;
 
@@ -259,6 +269,12 @@ export class Store extends EventEmitter {
     this.costLogRepository =
       dependencies.costLogRepository ??
       (mode === 'memory' ? createInMemoryCostLogRepository() : createFileCostLogRepository(getCostLogsFilePath()));
+
+    this.requirementDraftRepository =
+      dependencies.requirementDraftRepository ??
+      (mode === 'memory'
+        ? createInMemoryRequirementDraftRepository()
+        : createFileRequirementDraftRepository(getRequirementDraftsFilePath(process.env.AGENCY_MEMORY_ROOT_DIR || path.join(__dirname, '../../.ai'))));
 
     // Initialize knowledge adapter (optional - backward compatible)
     this.knowledgeAdapter =
@@ -769,5 +785,36 @@ export class Store extends EventEmitter {
 
   public async getCostLogsByTaskId(taskId: string): Promise<CostLogEntry[]> {
     return await this.costLogRepository.listByTaskId(taskId);
+  }
+
+  // --- Requirement Draft Logic ---
+
+  public async getRequirementDrafts(): Promise<RequirementDraft[]> {
+    try {
+      return await this.requirementDraftRepository.list();
+    } catch (err) {
+      console.error('Failed to load requirement drafts:', err);
+    }
+
+    return [];
+  }
+
+  public async saveRequirementDraft(draft: RequirementDraft): Promise<void> {
+    await this.requirementDraftRepository.save(draft);
+  }
+
+  public async getRequirementDraftById(id: string): Promise<RequirementDraft | null> {
+    return await this.requirementDraftRepository.getById(id);
+  }
+
+  public async updateRequirementDraft(
+    id: string,
+    updater: (draft: RequirementDraft) => RequirementDraft
+  ): Promise<RequirementDraft | null> {
+    return await this.requirementDraftRepository.update(id, updater);
+  }
+
+  public async deleteRequirementDraft(id: string): Promise<boolean> {
+    return await this.requirementDraftRepository.delete(id);
   }
 }
