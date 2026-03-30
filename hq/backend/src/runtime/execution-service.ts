@@ -733,9 +733,10 @@ export async function runTaskExecution(
 
     // Record usage to budget service if budget tracking is enabled
     if (input.budgetConfig && tokensUsed > 0) {
-      // Estimate cost: rough approximation of $0.003 per 1K tokens for Claude
+      // Estimate cost: rough approximation per 1K tokens for Claude
       // This can be refined based on actual model pricing
-      const estimatedCostUsd = (tokensUsed / 1000) * 0.003;
+      const ESTIMATED_COST_PER_1K_TOKENS = 0.003;
+      const estimatedCostUsd = (tokensUsed / 1000) * ESTIMATED_COST_PER_1K_TOKENS;
       await budgetService.recordUsage(input.taskId, tokensUsed, estimatedCostUsd);
     }
   }
