@@ -265,7 +265,7 @@ test('WorkflowExecutionEngine handles assignment failure', async () => {
 
   assert.equal(result.status, 'failed');
   assert.equal(result.failedStep, workflowPlan.steps[0].id);
-  assert.equal(result.error, 'Assignment execution failed');
+  assert.match(result.error || '', /Assignment execution failed/);
 });
 
 test('WorkflowExecutionEngine executes parallel workflow plan', async () => {

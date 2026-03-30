@@ -32,6 +32,8 @@ import { SkillScanner } from '../skill-scanner';
 import { Store } from '../store';
 import type { DiscussionServiceContract } from '../shared/discussion-service-contract';
 import type { RuntimePaths } from '../runtime/runtime-state';
+import type { ExecutionLifecycleRecord } from '../runtime/execution-service';
+import type { TaskRecord } from '../shared/task-types';
 import { createUserRepository } from '../identity/user-repository';
 import { createPermissionChecker } from '../identity/permission-checker';
 import { createUserContextService } from '../identity/user-context';
@@ -69,9 +71,9 @@ export function registerBackendRoutes({
 
   // Initialize assignment executor
   const assignmentExecutor = createAssignmentExecutor({
-    scanner,
     store,
-    discussionService,
+    auditLogger: null,
+    executor: 'claude',
   });
 
   // Initialize workflow execution engine
@@ -148,12 +150,6 @@ export function registerBackendRoutes({
     runtimePaths,
   });
 
-  registerTaskRoutes(app, store, {
-    getAgentProfiles: () =>
-      scanner
-        .getAllAgents()
-        .map((agent) => agent.profile)
-        .filter((profile): profile is NonNullable<typeof profile> => Boolean(profile)),
   // Shared execution base properties to avoid duplication
   const executionBase = {
     onExecutionStarted: (input: any) => {
@@ -181,9 +177,13 @@ export function registerBackendRoutes({
   };
 
   // Register task routes
-  registerTaskRoutes(app, {
-    store,
+  registerTaskRoutes(app, store, {
     ...executionBase,
+    getAgentProfiles: () =>
+      scanner
+        .getAllAgents()
+        .map((agent) => agent.profile)
+        .filter((profile): profile is NonNullable<typeof profile> => Boolean(profile)),
     onTaskCreated: (task) => {
       taskEvents.taskCreated(task);
     },
