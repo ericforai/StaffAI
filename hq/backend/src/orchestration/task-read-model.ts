@@ -39,6 +39,11 @@ export interface ExecutionListSummary {
 }
 
 function toExecutionListSummary(exec: ExecutionRecord): ExecutionListSummary {
+  const MAX_SUMMARY_LENGTH = 200;
+  const rawSummary = exec.outputSummary ?? '';
+  const truncatedSummary = rawSummary.length > MAX_SUMMARY_LENGTH
+    ? rawSummary.slice(0, MAX_SUMMARY_LENGTH) + '...'
+    : rawSummary;
   return {
     id: exec.id,
     displayExecutionId: exec.displayExecutionId,
@@ -48,7 +53,7 @@ function toExecutionListSummary(exec: ExecutionRecord): ExecutionListSummary {
     runtimeName: exec.runtimeName,
     startedAt: exec.startedAt,
     completedAt: exec.completedAt,
-    outputSummary: exec.outputSummary,
+    outputSummary: truncatedSummary || undefined,
     errorMessage: exec.errorMessage,
     degraded: exec.degraded,
     retryCount: exec.retryCount,
