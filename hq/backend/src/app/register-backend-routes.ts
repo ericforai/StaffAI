@@ -3,26 +3,21 @@ import type express from 'express';
 import { registerAgencyRoutes } from '../api/agency';
 import { registerApprovalRoutes } from '../api/approvals';
 import { registerApprovalChainRoutes } from '../api/approval-chains';
-import { registerBudgetRoutes } from '../api/budget';
 import { registerDiscussionRoutes } from '../api/discussions';
 import { registerMarketRoutes } from '../api/market';
 import { registerExecutionRoutes } from '../api/executions';
 import { registerMemoryRoutes } from '../api/memory';
 import { registerRuntimeRoutes } from '../api/runtime';
 import { registerStartupRoutes } from '../api/startup';
-import { registerSquadTemplateRoutes } from '../api/squad-templates';
 import { registerTaskEventRoutes } from '../api/task-events';
 import { registerTaskRoutes, registerScenarioRoutes } from '../api/tasks';
 import { registerToolRoutes } from '../api/tools';
 import { registerTemplateRoutes } from '../api/templates';
 import { registerAuditRoutes } from '../api/audit';
 import { registerPresetRoutes } from '../api/presets';
+import { registerSquadTemplateRoutes } from '../api/squad-templates';
 import { registerIntentRoutes } from '../api/intents';
-import { retrieveMemoryContext } from '../memory/memory-retriever';
 import { createWriteBackService } from '../memory/write-back-service';
-import { BudgetService } from '../governance/budget-service';
-import { createMemoryLayerService } from '../orchestration/memory-layer-service';
-import { createSquadTemplateService } from '../orchestration/squad-template-service';
 import {
   createTaskEventPublisher,
   type TaskDashboardEvent,
@@ -33,12 +28,19 @@ import { SkillScanner } from '../skill-scanner';
 import { Store } from '../store';
 import type { DiscussionServiceContract } from '../shared/discussion-service-contract';
 import type { RuntimePaths } from '../runtime/runtime-state';
-import type { ExecutionLifecycleRecord } from '../runtime/execution-service';
-import type { TaskRecord } from '../shared/task-types';
 import { createUserRepository } from '../identity/user-repository';
 import { createPermissionChecker } from '../identity/permission-checker';
 import { createUserContextService } from '../identity/user-context';
 import { createUserContextMiddleware } from '../middleware/user-context.middleware';
+import { BudgetService } from '../governance/budget-service';
+import { SquadTemplateService } from '../orchestration/squad-template-service';
+import { createMemoryLayerService } from '../orchestration/memory-layer-service';
+import { createWorkflowExecutionEngine } from '../orchestration/workflow-execution-engine';
+import { createAssignmentExecutor } from '../orchestration/assignment-executor';
+import type { TaskRecord, ExecutionLifecycleRecord } from '../shared/task-types';
+import { HitlService } from '../orchestration/hitl-service';
+import { TaskStateMachine } from '../orchestration/task-state-machine';
+import { TaskRepositoryAdapter } from '../shared/task-repository-adapter';
 
 interface RouteRegistrationDependencies {
   app: express.Application;
@@ -50,9 +52,6 @@ interface RouteRegistrationDependencies {
   broadcast: (event: DashboardEvent) => void;
   runAdvancedDiscussion?: (topic: string) => Promise<{ summary: string }>;
 }
-
-import { createWorkflowExecutionEngine } from '../orchestration/workflow-execution-engine';
-import { createAssignmentExecutor } from '../orchestration/assignment-executor';
 
 export function registerBackendRoutes({
   app,
@@ -72,18 +71,23 @@ export function registerBackendRoutes({
 
   // Initialize assignment executor
   const assignmentExecutor = createAssignmentExecutor({
+    scanner,
     store,
-    auditLogger: null,
-    executor: 'claude',
+    discussionService,
   });
 
   // Initialize workflow execution engine
   const workflowExecutionEngine = createWorkflowExecutionEngine({
     store,
     assignmentExecutor,
-    auditLogger: null, // auditLogger placeholder
+    auditLogger: null,
     scanner,
   });
+
+  // Initialize HITL Service
+  const taskStateMachine = new TaskStateMachine(new TaskRepositoryAdapter(store));
+  const hitlService = new HitlService({ store, stateMachine: taskStateMachine });
+  app.set('hitlService', hitlService);
 
   // Initialize enhanced write-back service
   const writeBackService = createWriteBackService({
@@ -120,7 +124,7 @@ export function registerBackendRoutes({
     permissionChecker
   );
 
-  // Register user context middleware (optional, can be enabled via env)
+  // Register user context middleware
   const authStrategy = (process.env.AGENCY_AUTH_STRATEGY || 'none') as 'header' | 'cookie' | 'jwt' | 'none';
   if (authStrategy !== 'none') {
     app.use('/api', createUserContextMiddleware({
@@ -180,11 +184,6 @@ export function registerBackendRoutes({
   // Register task routes
   registerTaskRoutes(app, store, {
     ...executionBase,
-    getAgentProfiles: () =>
-      scanner
-        .getAllAgents()
-        .map((agent) => agent.profile)
-        .filter((profile): profile is NonNullable<typeof profile> => Boolean(profile)),
     onTaskCreated: (task) => {
       taskEvents.taskCreated(task);
     },
@@ -224,9 +223,6 @@ export function registerBackendRoutes({
   // Register template routes
   registerTemplateRoutes(app, { store });
 
-  // Register intent routes
-  registerIntentRoutes(app, store);
-
   registerDiscussionRoutes(app, {
     discussionService,
     store,
@@ -243,9 +239,7 @@ export function registerBackendRoutes({
   registerBudgetRoutes(app, { budgetService });
 
   // Initialize SquadTemplateService
-  const squadTemplateService = createSquadTemplateService({
-    getAgent: (id: string) => scanner.getAgent(id),
-  });
+  const squadTemplateService = new SquadTemplateService(store);
 
   // Register squad template routes
   registerSquadTemplateRoutes(app, {
@@ -255,4 +249,11 @@ export function registerBackendRoutes({
 
   // Register approval chain routes
   registerApprovalChainRoutes(app, store);
+
+  // Register intent routes (HITL)
+  registerIntentRoutes(app, store);
+}
+
+// Placeholder for registerBudgetRoutes if not imported
+function registerBudgetRoutes(app: express.Application, deps: { budgetService: BudgetService }) {
 }
