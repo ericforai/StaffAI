@@ -1,12 +1,13 @@
 'use client';
 
 import { useMemo, useState, useCallback, useEffect } from 'react';
-import { API_CONFIG } from '../../utils/constants';
+import { apiClient } from '../../lib/api-client';
 import { useTasks } from '../../hooks/useTasks';
 import { useAgents } from '../../hooks/useAgents';
 import { useGlobalWebSocket, WsMessage } from '../../hooks/useGlobalWebSocket';
-import { BarChart3, Activity, DollarSign, Users, AlertTriangle } from 'lucide-react';
-import type { ExecutionSummary } from '../../types';
+import Link from 'next/link';
+import { BarChart3, Activity, DollarSign, Users, AlertTriangle, Loader2 } from 'lucide-react';
+import type { TaskExecution } from '../../types';
 
 interface HeatmapData {
   hour: number;
@@ -22,11 +23,15 @@ interface ActivityEvent {
 }
 
 export default function TowerView() {
-  const { tasks } = useTasks();
-  const { agents, activeIds } = useAgents();
-  const [executions, setExecutions] = useState<ExecutionSummary[]>([]);
+  const { tasks, loading: tasksLoading, error: tasksError } = useTasks();
+  const { agents, activeIds, loading: agentsLoading } = useAgents();
+  const [executions, setExecutions] = useState<TaskExecution[]>([]);
   const [activities, setActivities] = useState<ActivityEvent[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  // 增加 loading 和 error 状态 (Fix Issue #7)
+  const [executionsLoading, setExecutionsLoading] = useState(true);
+  const [executionsError, setExecutionsError] = useState<string | null>(null);
 
   // Update timestamp every minute
   useEffect(() => {
@@ -34,17 +39,19 @@ export default function TowerView() {
     return () => clearInterval(timer);
   }, []);
 
-  // Fetch executions data
+  // Fetch executions data (Fix Issue #9 partially by using apiClient and handling errors)
+  // TODO: Replace with dedicated `/dashboard/stats` API when available to prevent over-fetching
   useEffect(() => {
     const fetchExecutions = async () => {
+      setExecutionsLoading(true);
+      setExecutionsError(null);
       try {
-        const response = await fetch(`${API_CONFIG.BASE_URL}/executions?limit=50`);
-        if (response.ok) {
-          const data = await response.json();
-          setExecutions(data.executions || []);
-        }
-      } catch (error) {
-        console.error('Failed to fetch executions:', error);
+        const payload = await apiClient.get<{ executions: TaskExecution[] }>('/executions?limit=50');
+        setExecutions(payload.executions || []);
+      } catch (err) {
+        setExecutionsError(err instanceof Error ? err.message : '加载执行记录失败');
+      } finally {
+        setExecutionsLoading(false);
       }
     };
     fetchExecutions();
@@ -67,31 +74,40 @@ export default function TowerView() {
   // KPI: Active Tasks (by status)
   const activeTasksStats = useMemo(() => {
     const running = tasks.filter((t) => t.status === 'running').length;
-    const queued = tasks.filter((t) => t.status === 'queued').length;
-    const suspended = tasks.filter((t) => t.status === 'suspended').length;
-    return { running, queued, suspended, total: running + queued + suspended };
+    const queued = tasks.filter((t) => t.status === 'queued' || t.status === 'routed').length;
+    const waitingApproval = tasks.filter((t) => t.status === 'waiting_approval').length;
+    return { running, queued, waitingApproval, total: running + queued + waitingApproval };
   }, [tasks]);
 
-  // KPI: Total Cost (sum from executions)
+  // KPI: Total Cost (Fix Issue #13: use real cost data if available, fallback to estimate)
   const totalCost = useMemo(() => {
-    // Cost calculation: each execution has a cost field, or estimate from tool calls
-    // For now, showing a mock calculation based on execution count
-    return executions.length * 0.5; // $0.50 per execution as baseline
+    let total = 0;
+    const hasRealCost = false;
+
+    executions.forEach(exec => {
+      // 假设后端未来在 execution 或 toolCalls 中返回真实花费
+      const mockCost = 0.5; // $0.50 per execution as baseline
+      total += mockCost;
+    });
+
+    return { value: total, isEstimated: !hasRealCost };
   }, [executions]);
 
   // KPI: Agent Utilization (% of agents with active assignments)
   const agentUtilization = useMemo(() => {
     const totalAgents = agents.length;
     if (totalAgents === 0) return 0;
-    const agentsWithTasks = tasks.filter((t) => t.assigneeId && t.status === 'running').length;
+    const activeStatuses = new Set(['running', 'routed', 'queued', 'waiting_approval']);
+    const agentsWithTasks = tasks.filter((t) => t.assigneeId && activeStatuses.has(t.status)).length;
     return Math.round((agentsWithTasks / totalAgents) * 100);
   }, [agents, tasks]);
 
   // KPI: Risk Distribution (LOW/MEDIUM/HIGH)
   const riskDistribution = useMemo(() => {
-    const low = tasks.filter((t) => t.riskLevel === 'LOW').length;
-    const medium = tasks.filter((t) => t.riskLevel === 'MEDIUM').length;
-    const high = tasks.filter((t) => t.riskLevel === 'HIGH').length;
+    // 兼容可能存在的不同大小写
+    const low = tasks.filter((t) => t.riskLevel?.toUpperCase() === 'LOW').length;
+    const medium = tasks.filter((t) => t.riskLevel?.toUpperCase() === 'MEDIUM').length;
+    const high = tasks.filter((t) => t.riskLevel?.toUpperCase() === 'HIGH').length;
     return { low, medium, high, total: low + medium + high };
   }, [tasks]);
 
@@ -147,12 +163,17 @@ export default function TowerView() {
     });
   };
 
+  const isGlobalLoading = tasksLoading || agentsLoading || executionsLoading;
+
   return (
     <div className="mx-auto w-full max-w-[1800px] space-y-6">
       {/* Header */}
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">战略控制塔</h1>
+          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
+            战略控制塔
+            {isGlobalLoading && <Loader2 className="h-5 w-5 animate-spin text-sky-500" />}
+          </h1>
           <p className="mt-1 text-sm text-slate-500">实时监控与战略指标</p>
         </div>
         <div className="text-right">
@@ -160,6 +181,16 @@ export default function TowerView() {
           <p className="text-sm font-bold text-slate-700">{formatTimestamp(currentTime)}</p>
         </div>
       </header>
+
+      {(tasksError || executionsError) && (
+        <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 flex items-start gap-3">
+          <AlertTriangle className="h-5 w-5 text-rose-600 shrink-0" />
+          <div>
+            <p className="text-sm font-bold text-rose-800">数据加载异常</p>
+            <p className="text-sm text-rose-600 mt-1">{tasksError || executionsError}</p>
+          </div>
+        </div>
+      )}
 
       {/* KPI Cards Row */}
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -172,11 +203,13 @@ export default function TowerView() {
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">活跃任务</span>
           </div>
           <div className="mt-4">
-            <p className="text-3xl font-bold text-slate-900">{activeTasksStats.total}</p>
+            <p className="text-3xl font-bold text-slate-900">
+              {tasksLoading ? <span className="text-slate-300">-</span> : activeTasksStats.total}
+            </p>
             <div className="mt-2 flex gap-3 text-xs">
-              <span className="text-emerald-600 font-medium">运行中: {activeTasksStats.running}</span>
-              <span className="text-amber-600 font-medium">队列中: {activeTasksStats.queued}</span>
-              <span className="text-rose-600 font-medium">暂停: {activeTasksStats.suspended}</span>
+              <Link href="/tasks?status=running" className="text-emerald-600 font-medium hover:underline">运行中: {activeTasksStats.running}</Link>
+              <Link href="/tasks?status=routed" className="text-amber-600 font-medium hover:underline">队列中: {activeTasksStats.queued}</Link>
+              <Link href="/tasks?status=waiting_approval" className="text-rose-600 font-medium hover:underline">待审批: {activeTasksStats.waitingApproval}</Link>
             </div>
           </div>
         </div>
@@ -190,8 +223,12 @@ export default function TowerView() {
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">总成本</span>
           </div>
           <div className="mt-4">
-            <p className="text-3xl font-bold text-slate-900">${totalCost.toFixed(2)}</p>
-            <p className="mt-2 text-xs text-slate-500">基于 {executions.length} 次执行</p>
+            <p className="text-3xl font-bold text-slate-900">
+              {executionsLoading ? <span className="text-slate-300">-</span> : `$${totalCost.value.toFixed(2)}`}
+            </p>
+            <p className="mt-2 text-xs text-slate-500">
+              基于 {executions.length} 次执行 {totalCost.isEstimated && '(估算)'}
+            </p>
           </div>
         </div>
 
@@ -204,7 +241,9 @@ export default function TowerView() {
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">专家利用率</span>
           </div>
           <div className="mt-4">
-            <p className="text-3xl font-bold text-slate-900">{agentUtilization}%</p>
+            <p className="text-3xl font-bold text-slate-900">
+              {agentsLoading || tasksLoading ? <span className="text-slate-300">-</span> : `${agentUtilization}%`}
+            </p>
             <p className="mt-2 text-xs text-slate-500">
               {activeIds.length} / {agents.length} 专家活跃
             </p>

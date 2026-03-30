@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { API_CONFIG } from '../utils/constants';
+import { apiFetch } from '../utils/apiFetch';
 import type { TaskEvent } from '../types';
 import { normalizeTaskEventFeed } from '../lib/taskEventProjection';
 
@@ -14,11 +14,7 @@ export function useTaskEvents(taskId: string) {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`${API_CONFIG.BASE_URL}/task-events`);
-      const payload = (await response.json()) as { events?: unknown; error?: string };
-      if (!response.ok) {
-        throw new Error(payload.error || '任务事件加载失败。');
-      }
+      const payload = await apiFetch<{ events?: unknown }>('/task-events');
 
       const filtered = normalizeTaskEventFeed(payload.events).filter((event) => event.taskId === taskId);
       setEvents(filtered);

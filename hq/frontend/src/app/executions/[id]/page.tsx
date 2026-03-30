@@ -75,11 +75,8 @@ function normalizeToolCalls(execution: ReturnType<typeof useExecutionDetail>['ex
     return [];
   }
 
-  const candidates = [execution.toolCalls, execution.toolCallLogs, execution.toolCallLog];
-  for (const candidate of candidates) {
-    if (Array.isArray(candidate)) {
-      return candidate;
-    }
+  if (Array.isArray(execution.toolCalls)) {
+    return execution.toolCalls;
   }
 
   return [];

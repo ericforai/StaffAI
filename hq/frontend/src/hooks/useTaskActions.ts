@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { API_CONFIG } from '../utils/constants';
+import { apiClient } from '../lib/api-client';
 import type { TaskDetailPayload } from '../types';
 
 export type TaskExecutor = 'openai' | 'codex' | 'claude' | 'deerflow';
@@ -11,34 +11,47 @@ export function useTaskActions(taskId: string, onTaskUpdated?: (payload: TaskDet
   const [error, setError] = useState<string | null>(null);
 
   async function refreshTask() {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/tasks/${taskId}`);
-    const payload = (await response.json()) as TaskDetailPayload & { error?: string };
-    if (!response.ok) {
-      throw new Error(payload.error || '任务详情刷新失败。');
+    try {
+      const payload = await apiClient.get<TaskDetailPayload>(`/tasks/${taskId}`);
+      onTaskUpdated?.(payload);
+    } catch (err) {
+      throw new Error(err instanceof Error ? err.message : '任务详情刷新失败。');
     }
-    onTaskUpdated?.(payload);
   }
 
   async function executeTask(executor: TaskExecutor = 'claude') {
     try {
       setSubmitting(true);
       setError(null);
-      const response = await fetch(`${API_CONFIG.BASE_URL}/tasks/${taskId}/execute`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          executor,
-          summary: 'Execution finished from the task workspace',
-        }),
+      await apiClient.post(`/tasks/${taskId}/execute`, {
+        executor,
+        summary: 'Execution finished from the task workspace',
       });
-      const payload = (await response.json()) as { error?: string };
-      if (!response.ok) {
-        throw new Error(payload.error || '任务执行失败。');
-      }
       await refreshTask();
       return true;
-    } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : '任务执行失败。');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '任务执行失败。');
+      return false;
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  /**
+   * 统一的任务控制操作（暂停、恢复、取消）
+   */
+  async function controlTask(executionId: string, action: 'pause' | 'resume' | 'cancel') {
+    try {
+      setSubmitting(true);
+      setError(null);
+      await apiClient.post(`/executions/${executionId}/${action}`, undefined, {
+        headers: { 'X-Agency-Control': '1' }
+      });
+      
+      await refreshTask();
+      return true;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : `操作 ${action} 失败。`);
       return false;
     } finally {
       setSubmitting(false);
@@ -47,6 +60,9 @@ export function useTaskActions(taskId: string, onTaskUpdated?: (payload: TaskDet
 
   return {
     executeTask,
+    pauseTask: (executionId: string) => controlTask(executionId, 'pause'),
+    resumeTask: (executionId: string) => controlTask(executionId, 'resume'),
+    cancelTask: (executionId: string) => controlTask(executionId, 'cancel'),
     submitting,
     error,
   };

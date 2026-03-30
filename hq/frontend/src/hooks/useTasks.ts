@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { API_CONFIG } from '../utils/constants';
+import { apiClient } from '../lib/api-client';
 import type { TaskSummary } from '../types';
 
 export function useTasks() {
@@ -18,11 +18,7 @@ export function useTasks() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}/tasks`);
-      const payload = (await response.json()) as { tasks?: TaskSummary[]; error?: string };
-      if (!response.ok) {
-        throw new Error(payload.error || '任务列表加载失败。');
-      }
+      const payload = await apiClient.get<{ tasks: TaskSummary[] }>('/tasks');
       if (!cancelledRef.current) {
         setTasks(payload.tasks || []);
       }
