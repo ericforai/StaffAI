@@ -57,6 +57,11 @@ export interface WorkflowExecutionEngine {
   resume(workflowPlanId: string): Promise<void>;
 
   /**
+   * Resume a workflow from a specific checkpoint (HITL)
+   */
+  resumeFromCheckpoint(workflowPlanId: string, checkpointData: any): Promise<WorkflowExecutionResult>;
+
+  /**
    * Cancel a running workflow
    */
   cancel(workflowPlanId: string): Promise<void>;
@@ -232,7 +237,8 @@ export class DefaultWorkflowExecutionEngine implements WorkflowExecutionEngine {
           assignments,
           task,
           this.assignmentExecutor,
-          this.runningWorkflows
+          this.runningWorkflows,
+          this.selfHealingService
         );
       } else {
         result = await executeSerialWorkflow(
@@ -335,6 +341,71 @@ export class DefaultWorkflowExecutionEngine implements WorkflowExecutionEngine {
       previousState: { status: 'paused' },
       newState: { status: 'running' },
     });
+  }
+
+  async resumeFromCheckpoint(workflowPlanId: string, checkpointData: any): Promise<WorkflowExecutionResult> {
+    const workflowPlan = await this.store.getWorkflowPlanByTaskId(checkpointData.taskId);
+    const task = await this.store.getTaskById(checkpointData.taskId);
+    const assignments = await this.store.getTaskAssignmentsByTaskId(checkpointData.taskId);
+
+    if (!workflowPlan || !task || !assignments.length) {
+      throw new Error(`Cannot resume workflow ${workflowPlanId}: missing core data`);
+    }
+
+    // Set as running in engine
+    this.runningWorkflows.set(workflowPlanId, {
+      workflowPlanId,
+      status: 'running',
+      startedAt: new Date().toISOString(),
+      completedSteps: new Set(checkpointData.completedSteps || []),
+      currentStep: checkpointData.currentStep,
+    });
+
+    await this.updateWorkflowStatus(task.id, 'running');
+
+    await this.logAuditEvent({
+      entityType: 'execution',
+      entityId: workflowPlanId,
+      action: 'resumed_from_checkpoint',
+      actor: 'system',
+      newState: { status: 'running', checkpointData },
+    });
+
+    let result: WorkflowExecutionResult;
+
+    try {
+      if (workflowPlan.mode === 'parallel') {
+        result = await executeParallelWorkflow(
+          workflowPlan,
+          assignments,
+          task,
+          this.assignmentExecutor,
+          this.runningWorkflows,
+          this.selfHealingService
+        );
+      } else {
+        result = await executeSerialWorkflow(
+          workflowPlan,
+          assignments,
+          task,
+          this.assignmentExecutor,
+          this.runningWorkflows,
+          this.selfHealingService
+        );
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      result = {
+        workflowPlanId,
+        status: 'failed',
+        completedSteps: Array.from(this.runningWorkflows.get(workflowPlanId)?.completedSteps || []),
+        assignments,
+        error: errorMessage,
+      };
+    }
+
+    await this.finalizeExecution(workflowPlan, result);
+    return result;
   }
 
   async cancel(workflowPlanId: string): Promise<void> {

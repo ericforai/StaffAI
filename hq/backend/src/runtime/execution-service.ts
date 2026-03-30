@@ -11,6 +11,7 @@ import type { BudgetConfig } from '../shared/budget-types';
 import {
   resolveRuntimeAdapter,
   resolveRuntimeName,
+  isRetriableError,
   type RuntimeExecutionContext,
   type RuntimeExecutionError,
 } from './runtime-adapter';
@@ -273,8 +274,8 @@ export async function runTaskExecution(
   const runtimeAdapter = resolveRuntimeAdapter(input.executor);
   const displayExecutionId = await generateExecutionDisplayId(store);
 
-  // Initialize budget service with warning callback
-  const budgetService = new BudgetService({
+  // Initialize budget service (Singleton) with warning callback
+  const budgetService = BudgetService.getInstance({
     onBudgetWarning: async (event) => {
       if (typeof storeWithObservability.appendExecutionTraceEvent === 'function') {
         await storeWithObservability.appendExecutionTraceEvent({
@@ -899,7 +900,9 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
 
 function toRuntimeError(error: unknown, timeoutMs: number): RuntimeExecutionError {
   const message = error instanceof Error ? error.message : 'Unknown runtime failure';
-  if (message.includes('timed out')) {
+  const retriable = isRetriableError(error);
+
+  if (message.includes('timed out') || message.includes('timeout')) {
     return {
       code: 'timeout',
       message,
@@ -911,6 +914,6 @@ function toRuntimeError(error: unknown, timeoutMs: number): RuntimeExecutionErro
   return {
     code: 'execution_failed',
     message,
-    retriable: false,
+    retriable,
   };
 }

@@ -9,6 +9,7 @@ import type {
   ToolCallLog,
   WorkflowPlan,
 } from '../shared/task-types';
+import type { ApprovalChain } from '../shared/approval-chain-types';
 
 function readJsonFile<T>(filePath: string, fallback: T): T {
   if (!fs.existsSync(filePath)) {
@@ -33,6 +34,13 @@ export interface ApprovalRepository {
   listByTaskId(taskId: string): Promise<ApprovalRecord[]>;
   save(approval: ApprovalRecord): Promise<void>;
   updateStatus(approvalId: string, status: ApprovalRecord['status']): Promise<ApprovalRecord | null>;
+}
+
+export interface ApprovalChainRepository {
+  list(): Promise<ApprovalChain[]>;
+  getByTaskId(taskId: string): Promise<ApprovalChain | null>;
+  save(chain: ApprovalChain): Promise<void>;
+  delete(taskId: string): Promise<boolean>;
 }
 
 export interface ExecutionRepository {
@@ -143,6 +151,36 @@ export function createFileApprovalRepository(filePath: string): ApprovalReposito
   };
 }
 
+export function createFileApprovalChainRepository(filePath: string): ApprovalChainRepository {
+  return {
+    async list() {
+      return readJsonFile<ApprovalChain[]>(filePath, []);
+    },
+    async getByTaskId(taskId) {
+      return (await this.list()).find((chain) => chain.taskId === taskId) || null;
+    },
+    async save(chain) {
+      const chains = await this.list();
+      const index = chains.findIndex((c) => c.taskId === chain.taskId);
+      if (index >= 0) {
+        chains[index] = chain;
+      } else {
+        chains.push(chain);
+      }
+      writeJsonFile(filePath, chains);
+    },
+    async delete(taskId) {
+      const chains = await this.list();
+      const filtered = chains.filter((c) => c.taskId !== taskId);
+      if (filtered.length === chains.length) {
+        return false;
+      }
+      writeJsonFile(filePath, filtered);
+      return true;
+    },
+  };
+}
+
 export function createFileExecutionRepository(filePath: string): ExecutionRepository {
   return {
     async list() {
@@ -217,6 +255,34 @@ export function createInMemoryApprovalRepository(seed: ApprovalRecord[] = []): A
       target.status = status;
       target.resolvedAt = new Date().toISOString();
       return target;
+    },
+  };
+}
+
+export function createInMemoryApprovalChainRepository(seed: ApprovalChain[] = []): ApprovalChainRepository {
+  const chains = [...seed];
+  return {
+    async list() {
+      return [...chains];
+    },
+    async getByTaskId(taskId) {
+      return chains.find((chain) => chain.taskId === taskId) || null;
+    },
+    async save(chain) {
+      const index = chains.findIndex((c) => c.taskId === chain.taskId);
+      if (index >= 0) {
+        chains[index] = chain;
+      } else {
+        chains.push(chain);
+      }
+    },
+    async delete(taskId) {
+      const index = chains.findIndex((c) => c.taskId === taskId);
+      if (index < 0) {
+        return false;
+      }
+      chains.splice(index, 1);
+      return true;
     },
   };
 }

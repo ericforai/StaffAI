@@ -120,6 +120,7 @@ async function executeStepWithHealing(
       description: step.description ?? step.title,
       executor: 'claude',
       timeoutMs,
+      maxRetries: 0, // Disable internal retries as we handle them here with self-healing
     });
 
     if (result.status === 'completed') {
@@ -206,7 +207,8 @@ export async function executeParallelWorkflow(
   assignments: TaskAssignment[],
   task: TaskRecord,
   assignmentExecutor: AssignmentExecutor,
-  runningWorkflows: Map<string, RunningWorkflow>
+  runningWorkflows: Map<string, RunningWorkflow>,
+  selfHealingService?: SelfHealingService
 ): Promise<WorkflowExecutionResult> {
   const timeoutMs = getDefaultTaskTimeoutMs();
   const completedSteps: string[] = [];
@@ -241,19 +243,22 @@ export async function executeParallelWorkflow(
              running.currentStep = step.id;
           }
 
-          const result = await assignmentExecutor.execute(assignment, {
-            taskId: task.id,
-            title: task.title,
-            description: step.description ?? step.title,
-            executor: 'claude',
+          const result = await executeStepWithHealing(
+            assignment,
+            step,
+            task,
+            assignmentExecutor,
             timeoutMs,
-          });
+            workflowPlan.id,
+            selfHealingService
+          );
 
           if (result.status === 'completed') {
             completedSteps.push(step.id);
             await updateStepState(workflowPlan.id, step.id, 'completed', assignment);
-            if (running) {
-              running.completedSteps.add(step.id);
+            const runningPost = runningWorkflows.get(workflowPlan.id);
+            if (runningPost) {
+              runningPost.completedSteps.add(step.id);
             }
           } else {
             await updateStepState(workflowPlan.id, step.id, 'failed', assignment);

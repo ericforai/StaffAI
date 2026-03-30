@@ -29,11 +29,39 @@ export interface BudgetServiceOptions {
  * Uses in-memory storage for v1 (no persistence).
  */
 export class BudgetService {
-  private readonly usageByTask = new Map<string, BudgetUsage>();
-  private readonly options: BudgetServiceOptions;
+  private static instance: BudgetService | null = null;
+  private usageByTask = new Map<string, BudgetUsage>();
+  private options: BudgetServiceOptions = {};
+
+  /**
+   * Get the singleton instance of BudgetService.
+   */
+  public static getInstance(options?: BudgetServiceOptions): BudgetService {
+    if (!BudgetService.instance) {
+      BudgetService.instance = new BudgetService(options);
+    } else if (options) {
+      // Allow updating options if they are provided later
+      BudgetService.instance.updateOptions(options);
+    }
+    return BudgetService.instance;
+  }
+
+  /**
+   * Reset the singleton instance (primarily for testing).
+   */
+  public static resetInstance(): void {
+    BudgetService.instance = null;
+  }
 
   constructor(options: BudgetServiceOptions = {}) {
     this.options = options;
+  }
+
+  /**
+   * Update service options (used by singleton).
+   */
+  public updateOptions(options: BudgetServiceOptions): void {
+    this.options = { ...this.options, ...options };
   }
 
   /**
@@ -70,17 +98,26 @@ export class BudgetService {
       // Check warning threshold
       const thresholdPct = config.warningThresholdPct ?? 0.8;
       if (!usage.warningEmitted && usage.estimatedCostUsd >= config.maxCostUsd * thresholdPct) {
-        usage.warningEmitted = true;
-        this.usageByTask.set(taskId, usage);
+        // Fix: Use immutability instead of in-place modification
+        const updatedUsage: BudgetUsage = {
+          ...usage,
+          warningEmitted: true,
+        };
+        this.usageByTask.set(taskId, updatedUsage);
 
         // Emit warning event
-        const currentPct = usage.estimatedCostUsd / config.maxCostUsd;
+        const currentPct = updatedUsage.estimatedCostUsd / config.maxCostUsd;
         await this.options.onBudgetWarning?.({
           taskId,
-          usage,
+          usage: updatedUsage,
           thresholdPct,
           currentPct,
         });
+
+        return {
+          withinBudget: true,
+          usage: updatedUsage,
+        };
       }
     }
 

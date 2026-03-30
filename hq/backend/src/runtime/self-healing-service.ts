@@ -8,6 +8,8 @@
 import type { Agent } from '../types';
 import type { Scanner } from '../scanner';
 
+import { isRetriableError } from './runtime-adapter';
+
 /**
  * Strategy for healing a failed step
  */
@@ -202,22 +204,19 @@ export class SelfHealingService {
   }
 
   /**
-   * Check if a task should be retried based on attempt count
+   * Determine if a failed task should be retried based on error type and attempts
    */
   shouldRetry(taskId: string, error: Error): boolean {
     const attempts = this.getAttempts(taskId);
-    const retryableErrors = ['timed out', 'unavailable', 'network', 'timeout'];
+    const retryable = isRetriableError(error);
 
-    const isRetryable = retryableErrors.some((keyword) =>
-      error.message.toLowerCase().includes(keyword)
-    );
-
-    if (!isRetryable) {
+    if (!retryable) {
       return false;
     }
 
     return attempts.length < this.config.maxRetries;
   }
+
 
   /**
    * Check if agent replacement should be attempted

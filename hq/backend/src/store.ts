@@ -13,8 +13,10 @@ import {
   WorkflowPlan,
 } from './shared/task-types';
 import {
+  ApprovalChainRepository,
   ApprovalRepository,
   CostLogRepository,
+  createFileApprovalChainRepository,
   createFileApprovalRepository,
   createFileCostLogRepository,
   createFileExecutionRepository,
@@ -23,6 +25,7 @@ import {
   createFileTaskRepository,
   createFileToolCallLogRepository,
   createFileWorkflowPlanRepository,
+  createInMemoryApprovalChainRepository,
   createInMemoryApprovalRepository,
   createInMemoryCostLogRepository,
   createInMemoryExecutionRepository,
@@ -69,11 +72,13 @@ import {
   createPostgresAuditLogRepository,
   type AuditLogRepository,
 } from './persistence/audit-log-repositories';
+import { ApprovalChain } from './shared/approval-chain-types';
 
 const STORE_FILE = path.join(__dirname, '../../active_squad.json');
 const TEMPLATES_FILE = path.join(__dirname, '../../templates.json');
 const KNOWLEDGE_FILE = path.join(__dirname, '../../company_knowledge.json');
 const APPROVALS_FILE = process.env.AGENCY_APPROVALS_FILE || path.join(__dirname, '../../approvals.json');
+const APPROVAL_CHAINS_FILE = process.env.AGENCY_APPROVAL_CHAINS_FILE || path.join(__dirname, '../../approval_chains.json');
 const EXECUTIONS_FILE = process.env.AGENCY_EXECUTIONS_FILE || path.join(__dirname, '../../executions.json');
 const ASSIGNMENTS_FILE = process.env.AGENCY_TASK_ASSIGNMENTS_FILE || path.join(__dirname, '../../task_assignments.json');
 const WORKFLOW_PLANS_FILE = process.env.AGENCY_WORKFLOW_PLANS_FILE || path.join(__dirname, '../../workflow_plans.json');
@@ -91,6 +96,10 @@ function getTasksFilePath() {
 
 function getApprovalsFilePath() {
   return process.env.AGENCY_APPROVALS_FILE || APPROVALS_FILE;
+}
+
+function getApprovalChainsFilePath() {
+  return process.env.AGENCY_APPROVAL_CHAINS_FILE || APPROVAL_CHAINS_FILE;
 }
 
 function getExecutionsFilePath() {
@@ -132,6 +141,7 @@ export interface KnowledgeEntry {
 interface StorePersistenceDependencies {
   taskRepository?: TaskRepository;
   approvalRepository?: ApprovalRepository;
+  approvalChainRepository?: ApprovalChainRepository;
   executionRepository?: ExecutionRepository;
   taskAssignmentRepository?: TaskAssignmentRepository;
   workflowPlanRepository?: WorkflowPlanRepository;
@@ -164,6 +174,7 @@ export class Store extends EventEmitter {
   private state: SquadState = { activeAgentIds: [] };
   private taskRepository: TaskRepository;
   private approvalRepository: ApprovalRepository;
+  private approvalChainRepository: ApprovalChainRepository;
   private executionRepository: ExecutionRepository;
   private taskAssignmentRepository: TaskAssignmentRepository;
   private workflowPlanRepository: WorkflowPlanRepository;
@@ -203,6 +214,13 @@ export class Store extends EventEmitter {
         : mode === 'postgres'
           ? createPostgresApprovalRepository(postgresOptions!)
           : createFileApprovalRepository(getApprovalsFilePath()));
+    this.approvalChainRepository =
+      dependencies.approvalChainRepository ??
+      (mode === 'memory'
+        ? createInMemoryApprovalChainRepository()
+        : mode === 'postgres'
+          ? (() => { throw new Error('Postgres not implemented for ApprovalChainRepository yet'); })()
+          : createFileApprovalChainRepository(getApprovalChainsFilePath()));
     this.executionRepository =
       dependencies.executionRepository ??
       (mode === 'memory'
@@ -594,6 +612,24 @@ export class Store extends EventEmitter {
 
   public async getApprovalsByTaskId(taskId: string): Promise<ApprovalRecord[]> {
     return await this.approvalRepository.listByTaskId(taskId);
+  }
+
+  // --- Approval Chain Logic ---
+
+  public async getApprovalChains(): Promise<ApprovalChain[]> {
+    return await this.approvalChainRepository.list();
+  }
+
+  public async getApprovalChainByTaskId(taskId: string): Promise<ApprovalChain | null> {
+    return await this.approvalChainRepository.getByTaskId(taskId);
+  }
+
+  public async saveApprovalChain(chain: ApprovalChain): Promise<void> {
+    await this.approvalChainRepository.save(chain);
+  }
+
+  public async deleteApprovalChain(taskId: string): Promise<boolean> {
+    return await this.approvalChainRepository.delete(taskId);
   }
 
   // --- Execution Logic ---

@@ -18,8 +18,41 @@ export interface TaskListReadStore {
 
 export interface TaskListItem extends TaskRecord {
   latestApproval: ApprovalRecord | null;
-  latestExecution: ExecutionRecord | null;
+  latestExecution: ExecutionListSummary | null;
   canExecute: boolean;
+}
+
+/** Lightweight execution summary for list views — strips heavy fields */
+export interface ExecutionListSummary {
+  id: string;
+  displayExecutionId?: string;
+  taskId: string;
+  status: ExecutionRecord['status'];
+  executor?: ExecutionRecord['executor'];
+  runtimeName?: string;
+  startedAt?: string;
+  completedAt?: string;
+  outputSummary?: string;
+  errorMessage?: string;
+  degraded?: boolean;
+  retryCount?: number;
+}
+
+function toExecutionListSummary(exec: ExecutionRecord): ExecutionListSummary {
+  return {
+    id: exec.id,
+    displayExecutionId: exec.displayExecutionId,
+    taskId: exec.taskId,
+    status: exec.status,
+    executor: exec.executor,
+    runtimeName: exec.runtimeName,
+    startedAt: exec.startedAt,
+    completedAt: exec.completedAt,
+    outputSummary: exec.outputSummary,
+    errorMessage: exec.errorMessage,
+    degraded: exec.degraded,
+    retryCount: exec.retryCount,
+  };
 }
 
 export interface TaskDetailReadStore {
@@ -94,7 +127,10 @@ export async function buildTaskListReadModel(store: TaskListReadStore): Promise<
       return {
         ...task,
         latestApproval: sortByNewestTimestamp(approvals)[0] ?? null,
-        latestExecution: sortByNewestTimestamp(executions)[0] ?? null,
+        latestExecution: ((): ExecutionListSummary | null => {
+          const latest = sortByNewestTimestamp(executions)[0];
+          return latest ? toExecutionListSummary(latest) : null;
+        })(),
         canExecute: isTaskExecutable(task),
       };
     }),

@@ -22,7 +22,6 @@ import {
 } from '../memory/memory-retriever';
 import {
   createWriteBackService,
-  classifyExecutionOutcome,
 } from '../memory/write-back-service';
 import type {
   MemoryEntry,
@@ -32,6 +31,7 @@ import type {
   MemoryWritebackPolicy,
   MemoryWritebackResult,
 } from '../shared/memory-layer-types';
+import { MemoryDocumentType } from '../memory/memory-layout';
 
 /**
  * Configuration for creating a MemoryLayerService
@@ -73,10 +73,10 @@ export class MemoryLayerService {
    * @param policy - Override policy for this load operation
    * @returns Combined context from all requested layers
    */
-  public async loadMemory(
+  public loadMemory(
     task: TaskRecord,
     policy?: Partial<MemoryLoadPolicy>
-  ): Promise<MemoryLoadResult> {
+  ): MemoryLoadResult {
     const effectivePolicy: MemoryLoadPolicy = {
       ...this.defaultLoadPolicy,
       ...policy,
@@ -93,9 +93,13 @@ export class MemoryLayerService {
       allEntries.push(...layerResult.entries);
 
       // Append to context if we have room
-      const projectedLength = totalContext.length + layerResult.context.length + 2; // +2 for "\n\n"
-      if (totalContext.length === 0 || projectedLength <= effectivePolicy.maxContextChars) {
-        totalContext = totalContext ? `${totalContext}\n\n${layerResult.context}` : layerResult.context;
+      if (layerResult.context) {
+        const separator = totalContext.length > 0 ? '\n\n' : '';
+        const projectedLength = totalContext.length + separator.length + layerResult.context.length;
+        
+        if (totalContext.length === 0 || projectedLength <= effectivePolicy.maxContextChars) {
+          totalContext = totalContext ? `${totalContext}${separator}${layerResult.context}` : layerResult.context;
+        }
       }
     }
 
@@ -130,11 +134,11 @@ export class MemoryLayerService {
    * @param policy - Override policy for this writeback
    * @returns Writeback result with file paths
    */
-  public async writeback(
+  public writeback(
     task: TaskRecord,
     execution: ExecutionLifecycleRecord,
     policy?: Partial<MemoryWritebackPolicy>
-  ): Promise<MemoryWritebackResult> {
+  ): MemoryWritebackResult {
     const effectivePolicy: MemoryWritebackPolicy = {
       ...this.defaultWritebackPolicy,
       ...policy,
@@ -178,18 +182,28 @@ export class MemoryLayerService {
   }
 
   /**
-   * Loads memory from a specific layer
+   * Loads memory from a specific layer with true directory segregation
    */
   private loadFromLayer(
     layer: MemoryLayer,
     query: string,
     policy: MemoryLoadPolicy
   ): { entries: MemoryEntry[]; context: string } {
+    // Map L1/L2/L3 to specific document types for segregation
+    const layerTypeMapping: Record<MemoryLayer, MemoryDocumentType[]> = {
+      L1: ['KNOWLEDGE', 'DECISION'],
+      L2: ['PROJECT', 'TASK', 'SHARED'],
+      L3: ['AGENT'],
+    };
+
+    const documentTypes = layerTypeMapping[layer];
+
     const result = retrieveMemoryContext(query, {
       memoryRootDir: this.memoryRootDir,
       limit: policy.maxEntriesPerLayer,
       contextMaxChars: Math.floor(policy.maxContextChars / policy.layers.length),
       excerptMaxChars: 300,
+      documentTypes, // Segregate by type (which maps to directories)
     });
 
     const entries: MemoryEntry[] = result.entries.map((entry) => ({

@@ -10,12 +10,7 @@ import type {
   ApprovalChainStep,
 } from '../shared/approval-chain-types.js';
 import { DEFAULT_CHAINS } from '../shared/approval-chain-types.js';
-
-/**
- * In-memory storage for active approval chains
- * Key: taskId, Value: ApprovalChain
- */
-const chainStore = new Map<string, ApprovalChain>();
+import type { ApprovalChainRepository } from '../persistence/file-repositories.js';
 
 /**
  * Risk level mapping to chain templates
@@ -29,14 +24,16 @@ const CHAIN_SELECTOR: Record<string, keyof typeof DEFAULT_CHAINS> = {
 /**
  * Create a new approval chain for a task based on risk level
  *
+ * @param repository - Approval chain repository
  * @param taskId - Task identifier
  * @param riskLevel - Risk level (LOW | MEDIUM | HIGH)
  * @returns New approval chain
  */
-export function createChain(
+export async function createChain(
+  repository: ApprovalChainRepository,
   taskId: string,
   riskLevel: 'LOW' | 'MEDIUM' | 'HIGH'
-): ApprovalChain {
+): Promise<ApprovalChain> {
   const chainType = CHAIN_SELECTOR[riskLevel];
   const stepTemplates = DEFAULT_CHAINS[chainType];
 
@@ -53,13 +50,14 @@ export function createChain(
     status: 'in_progress',
   };
 
-  chainStore.set(taskId, chain);
+  await repository.save(chain);
   return chain;
 }
 
 /**
  * Advance an approval chain by processing the current step
  *
+ * @param repository - Approval chain repository
  * @param taskId - Task identifier
  * @param approverRole - Role of the approver (must match current step role)
  * @param decision - Approval decision ('approve' | 'reject')
@@ -67,13 +65,14 @@ export function createChain(
  * @returns Updated approval chain
  * @throws Error if chain not found, role mismatch, or invalid state
  */
-export function advanceChain(
+export async function advanceChain(
+  repository: ApprovalChainRepository,
   taskId: string,
   approverRole: string,
   decision: 'approve' | 'reject',
   comment?: string
-): ApprovalChain {
-  const chain = chainStore.get(taskId);
+): Promise<ApprovalChain> {
+  const chain = await repository.getByTaskId(taskId);
   if (!chain) {
     throw new Error(`Approval chain not found for task: ${taskId}`);
   }
@@ -132,53 +131,61 @@ export function advanceChain(
     status: newStatus,
   };
 
-  chainStore.set(taskId, updatedChain);
+  await repository.save(updatedChain);
   return updatedChain;
 }
 
 /**
  * Get approval chain for a task
  *
+ * @param repository - Approval chain repository
  * @param taskId - Task identifier
- * @returns Approval chain or undefined if not found
+ * @returns Approval chain or null if not found
  */
-export function getChain(taskId: string): ApprovalChain | undefined {
-  return chainStore.get(taskId);
+export async function getChain(
+  repository: ApprovalChainRepository,
+  taskId: string
+): Promise<ApprovalChain | null> {
+  return await repository.getByTaskId(taskId);
 }
 
 /**
  * Check if an approval chain is complete
  *
+ * @param repository - Approval chain repository
  * @param taskId - Task identifier
  * @returns true if chain exists and status is 'completed'
  */
-export function isChainComplete(taskId: string): boolean {
-  const chain = chainStore.get(taskId);
+export async function isChainComplete(
+  repository: ApprovalChainRepository,
+  taskId: string
+): Promise<boolean> {
+  const chain = await repository.getByTaskId(taskId);
   return chain?.status === 'completed';
 }
 
 /**
  * Delete an approval chain (cleanup utility)
  *
+ * @param repository - Approval chain repository
  * @param taskId - Task identifier
  * @returns true if chain was deleted, false if not found
  */
-export function deleteChain(taskId: string): boolean {
-  return chainStore.delete(taskId);
+export async function deleteChain(
+  repository: ApprovalChainRepository,
+  taskId: string
+): Promise<boolean> {
+  return await repository.delete(taskId);
 }
 
 /**
  * Get all active chains (utility for debugging/monitoring)
  *
+ * @param repository - Approval chain repository
  * @returns Array of all approval chains
  */
-export function getAllChains(): ApprovalChain[] {
-  return Array.from(chainStore.values());
-}
-
-/**
- * Clear all chains (utility for testing)
- */
-export function clearAllChains(): void {
-  chainStore.clear();
+export async function getAllChains(
+  repository: ApprovalChainRepository
+): Promise<ApprovalChain[]> {
+  return await repository.list();
 }

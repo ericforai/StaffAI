@@ -48,6 +48,9 @@ interface RouteRegistrationDependencies {
   runAdvancedDiscussion?: (topic: string) => Promise<{ summary: string }>;
 }
 
+import { createWorkflowExecutionEngine } from '../orchestration/workflow-execution-engine';
+import { createAssignmentExecutor } from '../orchestration/assignment-executor';
+
 export function registerBackendRoutes({
   app,
   scanner,
@@ -63,6 +66,21 @@ export function registerBackendRoutes({
     process.env.AGENCY_RUNTIME_SAMPLING === 'true';
   const memoryRootDir =
     process.env.AGENCY_MEMORY_DIR || path.resolve(process.cwd(), '.ai');
+
+  // Initialize assignment executor
+  const assignmentExecutor = createAssignmentExecutor({
+    scanner,
+    store,
+    discussionService,
+  });
+
+  // Initialize workflow execution engine
+  const workflowExecutionEngine = createWorkflowExecutionEngine({
+    store,
+    assignmentExecutor,
+    auditLogger: null, // auditLogger placeholder
+    scanner,
+  });
 
   // Initialize enhanced write-back service
   const writeBackService = createWriteBackService({
@@ -136,9 +154,36 @@ export function registerBackendRoutes({
         .getAllAgents()
         .map((agent) => agent.profile)
         .filter((profile): profile is NonNullable<typeof profile> => Boolean(profile)),
+  // Shared execution base properties to avoid duplication
+  const executionBase = {
+    onExecutionStarted: (input: any) => {
+      taskEvents.executionStarted(input);
+    },
+    onExecutionFinished: (execution: any) => {
+      taskEvents.executionFinished(execution);
+    },
+    onExecutionEvent: (input: any) => {
+      taskEvents.executionEvent(input);
+    },
+    loadMemoryContext: (task: TaskRecord) => {
+      const result = memoryLayerService.loadMemory(task);
+      return result.context || undefined;
+    },
+    writeExecutionSummary: (task: TaskRecord, execution: ExecutionLifecycleRecord) => {
+      memoryLayerService.writeback(task, execution);
+    },
+    sessionCapabilities: {
+      sampling: samplingEnabled,
+    },
     runAdvancedDiscussion: runAdvancedDiscussion
       ? runAdvancedDiscussion
-      : async (topic) => discussionService.runDiscussionSummary(topic),
+      : async (topic: any) => discussionService.runDiscussionSummary(topic),
+  };
+
+  // Register task routes
+  registerTaskRoutes(app, {
+    store,
+    ...executionBase,
     onTaskCreated: (task) => {
       taskEvents.taskCreated(task);
     },
@@ -149,57 +194,17 @@ export function registerBackendRoutes({
         taskEvents.approvalRequested(latestApproval);
       }
     },
-    onExecutionStarted: (input) => {
-      taskEvents.executionStarted(input);
-    },
-    onExecutionFinished: (execution) => {
-      taskEvents.executionFinished(execution);
-    },
-    onExecutionEvent: (input) => {
-      taskEvents.executionEvent(input);
-    },
-    loadMemoryContext: async (task) => {
-      const result = await memoryLayerService.loadMemory(task);
-      return result.context || undefined;
-    },
-    writeExecutionSummary: async (task, execution) => {
-      await memoryLayerService.writeback(task, execution);
-    },
-    sessionCapabilities: {
-      sampling: samplingEnabled,
-    },
   });
 
   registerApprovalRoutes(app, store, {
+    ...executionBase,
     onApprovalResolved: (approval) => {
       taskEvents.approvalResolved(approval);
     },
-    onExecutionStarted: (input) => {
-      taskEvents.executionStarted(input);
-    },
-    onExecutionFinished: (execution) => {
-      taskEvents.executionFinished(execution);
-    },
-    onExecutionEvent: (input) => {
-      taskEvents.executionEvent(input);
-    },
-    loadMemoryContext: async (task) => {
-      const result = await memoryLayerService.loadMemory(task);
-      return result.context || undefined;
-    },
-    writeExecutionSummary: async (task, execution) => {
-      await memoryLayerService.writeback(task, execution);
-    },
-    sessionCapabilities: {
-      sampling: samplingEnabled,
-    },
-    runAdvancedDiscussion: runAdvancedDiscussion
-      ? runAdvancedDiscussion
-      : async (topic) => discussionService.runDiscussionSummary(topic),
     autoExecuteAfterApproval: true,
   });
 
-  registerExecutionRoutes(app, store);
+  registerExecutionRoutes(app, store, { workflowExecutionEngine });
   registerToolRoutes(app, store);
   registerMemoryRoutes(app, { memoryRootDir });
 
@@ -227,8 +232,8 @@ export function registerBackendRoutes({
   // Register talent market routes
   registerMarketRoutes(app, { store });
 
-  // Initialize BudgetService
-  const budgetService = new BudgetService();
+  // Initialize BudgetService (Singleton)
+  const budgetService = BudgetService.getInstance();
 
   // Register budget routes
   registerBudgetRoutes(app, { budgetService });
@@ -245,5 +250,5 @@ export function registerBackendRoutes({
   });
 
   // Register approval chain routes
-  registerApprovalChainRoutes(app);
+  registerApprovalChainRoutes(app, store);
 }

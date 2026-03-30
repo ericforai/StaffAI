@@ -13,11 +13,14 @@ import {
   isChainComplete,
 } from '../governance/approval-chain-service';
 import type { ApprovalChain } from '../shared/approval-chain-types';
+import type { Store } from '../store';
 
 /**
  * Register approval chain routes
  */
-export function registerApprovalChainRoutes(app: express.Application) {
+export function registerApprovalChainRoutes(app: express.Application, store: Store) {
+  const repository = (store as any).approvalChainRepository;
+
   /**
    * GET /api/approval-chains/:taskId
    *
@@ -30,11 +33,11 @@ export function registerApprovalChainRoutes(app: express.Application) {
    * - chain: ApprovalChain - The approval chain or null if not found
    * - exists: boolean - Whether a chain exists for this task
    */
-  app.get('/api/approval-chains/:taskId', (req, res) => {
+  app.get('/api/approval-chains/:taskId', async (req, res) => {
     const taskId = req.params.taskId;
 
     try {
-      const chain = getChain(taskId);
+      const chain = await getChain(repository, taskId);
 
       if (!chain) {
         return res.json({
@@ -74,7 +77,7 @@ export function registerApprovalChainRoutes(app: express.Application) {
    * - chain: ApprovalChain - Updated approval chain
    * - isComplete: boolean - Whether the chain is complete
    */
-  app.post('/api/approval-chains/:taskId/advance', (req, res) => {
+  app.post('/api/approval-chains/:taskId/advance', async (req, res) => {
     const taskId = req.params.taskId;
     const { approverRole, decision, comment } = req.body;
 
@@ -100,7 +103,8 @@ export function registerApprovalChainRoutes(app: express.Application) {
     }
 
     try {
-      const updatedChain = advanceChain(
+      const updatedChain = await advanceChain(
+        repository,
         taskId,
         approverRole,
         decision,
