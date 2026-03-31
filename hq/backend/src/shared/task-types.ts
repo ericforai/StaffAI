@@ -34,6 +34,7 @@ export const TASK_TYPES = [
   'workflow_dispatch',
   'frontend_implementation',
   'quality_assurance',
+  'feature_delivery',
   'general',
 ] as const;
 export type TaskType = (typeof TASK_TYPES)[number];

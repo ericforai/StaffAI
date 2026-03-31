@@ -71,6 +71,21 @@ const ROUTE_RULES: RouteRule[] = [
     reason: 'Coordination and decomposition work should route to dispatcher ownership.',
     executionMode: 'parallel',
   },
+  {
+    taskType: 'feature_delivery',
+    keywords: ['delivery', 'feature', 'end-to-end', '全流程', '交付', 'requirement delivery', 'sprint'],
+    recommendedAgentRole: 'sprint-prioritizer',
+    candidateAgentRoles: [
+      'sprint-prioritizer',
+      'software-architect',
+      'frontend-developer',
+      'backend-architect',
+      'security-engineer',
+      'code-reviewer',
+    ],
+    reason: 'End-to-end feature delivery requires multi-role coordination starting from requirements.',
+    executionMode: 'serial',
+  },
 ];
 
 function inferDefaultTaskType(input: TaskRouteInput): TaskType | undefined {
