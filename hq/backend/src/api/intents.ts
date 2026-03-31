@@ -182,6 +182,7 @@ export function registerIntentRoutes(app: Application, store: Store) {
         candidateAgentRoles: draft.implementationPlan.steps.map((s: any) => s.role),
         routeReason: 'Generated from requirement delivery wizard',
         routingStatus: 'matched',
+        intentId: draft.id,
         createdAt: now,
         updatedAt: now,
       };

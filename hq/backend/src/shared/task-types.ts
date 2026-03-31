@@ -41,7 +41,7 @@ export type TaskType = (typeof TASK_TYPES)[number];
 export const TASK_RISK_LEVELS = ['low', 'medium', 'high'] as const;
 export type TaskRiskLevel = (typeof TASK_RISK_LEVELS)[number];
 
-export const TASK_ASSIGNMENT_STATUSES = ['pending', 'running', 'completed', 'failed', 'skipped'] as const;
+export const TASK_ASSIGNMENT_STATUSES = ['pending', 'running', 'waiting_input', 'completed', 'failed', 'skipped'] as const;
 export type TaskAssignmentStatus = (typeof TASK_ASSIGNMENT_STATUSES)[number];
 
 export const WORKFLOW_PLAN_MODES = ['single', 'serial', 'parallel'] as const;
@@ -80,6 +80,8 @@ export interface TaskRecord {
   candidateAgentRoles: string[];
   routeReason: string;
   routingStatus: 'matched' | 'manual_review';
+  // 关联的需求意图 ID
+  intentId?: string;
   // 任务负责人（从组织架构选择的员工）
   assigneeId?: string;
   assigneeName?: string;
@@ -210,6 +212,7 @@ export interface ExecutionRecord {
   };
   outputSummary?: string;
   errorMessage?: string;
+  artifacts?: Artifact[];
   memoryContextExcerpt?: string;
   startedAt?: string;
   endedAt?: string;
