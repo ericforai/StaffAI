@@ -19,7 +19,7 @@ To provide a comprehensive platform for deploying and managing specialized AI ag
 - **Precision Budgeting**: Real-time cost tracking and automatic shutoff.
 - **Tiered Memory Hierarchy**: L1 (Org), L2 (Project), and L3 (Agent) memory for deep context retention.
 - **Self-Healing Workflows**: Intelligent retry logic and checkpoint-based recovery.
-- **Human-in-the-Loop (HITL)**: Advanced recovery APIs and manual intervention points.
+- **Advanced HITL (Human-in-the-Loop)**: Automated interception of high-risk tool actions with granular approval gates and seamless breakpoint resumption.
 - **Agency Roster**: 144+ specialized agent personalities across various corporate functions.
 
 ## Success Metrics

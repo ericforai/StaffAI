@@ -16,6 +16,7 @@
 - **Reliability**: Self-healing workflows and checkpoint-based recovery for robust task execution.
 - **Governance First**: Mandatory approval chains for HIGH/MEDIUM risk tasks.
 - **Human-in-the-Loop**: Seamless transition between automated and manual intervention.
+- **Risk-Aware Intervention**: High-risk system changes are automatically paused, providing users with clear context (reason, action, impact) before authorizing resumption.
 
 ## Design Patterns
 - **Dual-Core Separation**: Explicitly distinguish between Management (TS) and Execution (Python).
