@@ -12,6 +12,7 @@ To provide a comprehensive platform for deploying and managing specialized AI ag
 - **Project Managers**: Seeking to manage multi-agent squads with clear task routing and approval chains.
 
 ## Core Features
+- **Unified Task Center**: A single, cohesive interface for creating and managing tasks, integrating AI-guided wizards with quick-creation tools.
 - **Dual-Core Architecture**: Separation of concerns between the TS Office (Management) and Python Workshop (Execution).
 - **Enterprise Governance**: Multi-step approval chains and risk-based routing.
 - **Precision Budgeting**: Real-time cost tracking and automatic shutoff.
