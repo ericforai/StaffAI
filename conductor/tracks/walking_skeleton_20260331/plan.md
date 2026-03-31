@@ -30,7 +30,7 @@ Finalize physical connectivity between TS Office and Python Workshop
 
 ---
 
-## Phase 3: Task Orchestration Logic
+## Phase 3: Task Orchestration Logic [checkpoint: 464d1d5]
 
 - [x] Task: Create integration tests for task dispatch and completion 44604cb
     - [x] Mock task payload and verify end-to-end flow: HQ -> Workshop -> Result -> HQ
@@ -38,13 +38,13 @@ Finalize physical connectivity between TS Office and Python Workshop
     - [x] Update `hq/backend` task service to use the Workshop executor for specific agent roles
 - [x] Task: Implement state persistence for results 5774ff3
     - [x] Ensure `hq/backend` persists the results received from Workshop to the local JSON/Postgres database
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Task Orchestration Logic' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Task Orchestration Logic' (Protocol in workflow.md) 464d1d5
 
 ---
 
 ## Phase 4: Verification & Cleanup
 
-- [ ] Task: Final end-to-end manual verification
-    - [ ] Run the full system and execute a dummy task via Command Deck
-- [ ] Task: Document final architecture in `docs/`
+- [x] Task: Final end-to-end manual verification a52c6bb
+    - [x] Run the full system and execute a dummy task via Command Deck
+- [x] Task: Document final architecture in `docs/` a52c6bb
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Verification & Cleanup' (Protocol in workflow.md)
