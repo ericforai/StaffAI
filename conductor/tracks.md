@@ -7,4 +7,9 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Finalize physical connectivity between TS Office and Python Workshop**
   *Link: [./tracks/walking_skeleton_20260331/](./tracks/walking_skeleton_20260331/)*
 
+---
+
+- [x] **Track: V0.3: Deep Approval Gates**
+  *Link: [./tracks/deep_approval_gates_v03_20260331/](./tracks/deep_approval_gates_v03_20260331/)*
+
 
