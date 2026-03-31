@@ -92,7 +92,8 @@ const TASK_STATE_TRANSITIONS: Record<TaskStatus, TaskStatus[]> = {
 
 const ASSIGNMENT_STATE_TRANSITIONS: Record<TaskAssignmentStatus, TaskAssignmentStatus[]> = {
   pending: ['running', 'skipped', 'failed', 'completed'],
-  running: ['completed', 'failed', 'skipped'],
+  running: ['completed', 'failed', 'skipped', 'waiting_input'],
+  waiting_input: ['running', 'completed', 'failed', 'skipped'],
   completed: [],
   failed: ['pending', 'running'],
   skipped: ['pending'],

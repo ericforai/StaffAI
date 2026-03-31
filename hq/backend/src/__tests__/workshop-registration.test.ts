@@ -43,3 +43,10 @@ test('POST /api/workshop/register registers a workshop instance', async () => {
   assert.equal(data.status, 'success');
   assert.equal(data.workshop?.url, 'http://localhost:8000');
 });
+
+test('GET /api/workshop/list returns registered workshops', async () => {
+  const response = await fetch(`${baseUrl}/api/workshop/list`);
+  assert.equal(response.status, 200);
+  const data = (await response.json()) as any;
+  assert.equal(Array.isArray(data.workshops), true);
+});

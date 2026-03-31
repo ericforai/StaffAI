@@ -1,3 +1,4 @@
+from __future__ import annotations
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -8,6 +9,7 @@ import asyncio
 import json
 import logging
 import uuid
+from typing import Optional, Union
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 
@@ -66,7 +68,7 @@ app.add_middleware(
 _threads_store: dict[str, dict] = {}
 
 
-def _make_thread(thread_id: str | None = None, metadata: dict | None = None) -> dict:
+def _make_thread(thread_id: Optional[str] = None, metadata: Optional[dict] = None) -> dict:
     """Create a new thread record (immutable snapshot)."""
     tid = thread_id or str(uuid.uuid4())
     now = datetime.now(timezone.utc).isoformat()
@@ -85,7 +87,7 @@ def _make_thread(thread_id: str | None = None, metadata: dict | None = None) -> 
     }
 
 
-def _get_or_create_thread(thread_id: str, metadata: dict | None = None) -> dict:
+def _get_or_create_thread(thread_id: str, metadata: Optional[dict] = None) -> dict:
     """Return existing thread or create one with the given ID."""
     if thread_id not in _threads_store:
         if len(_threads_store) >= MAX_THREADS:
@@ -131,15 +133,15 @@ def _update_thread_values(thread_id: str, values_overrides: dict) -> dict:
 class TaskEnvelope(BaseModel):
     task_id: str
     action: str
-    agent_role: str | None = None
-    identity_context: str | None = None
-    description: str | None = None
-    memory_context: str | None = None
+    agent_role: Optional[str] = None
+    identity_context: Optional[str] = None
+    description: Optional[str] = None
+    memory_context: Optional[str] = None
     payload: dict = {}
 
 
 class CreateThreadRequest(BaseModel):
-    metadata: dict | None = None
+    metadata: Optional[dict] = None
 
 
 class SearchThreadsRequest(BaseModel):
@@ -152,14 +154,14 @@ class UpdateStateRequest(BaseModel):
 
 
 class PatchThreadRequest(BaseModel):
-    metadata: dict | None = None
+    metadata: Optional[dict] = None
 
 
 class RunRequest(BaseModel):
-    assistant_id: str | None = None
+    assistant_id: Optional[str] = None
     input: dict = {}
     context: dict = {}
-    stream_mode: list[str] | None = None
+    stream_mode: Optional[list[str]] = None
 
 
 # ---------------------------------------------------------------------------
@@ -193,9 +195,31 @@ async def setup_mcp_bridge():
         logger.error(f"Failed to initialize MCP tools: {e}")
 
 
+async def register_with_hq():
+    hq_url = os.getenv("HQ_API_URL", "http://localhost:3333/api")
+    workshop_url = os.getenv("WORKSHOP_URL", "http://localhost:8000")
+
+    payload = {
+        "url": workshop_url,
+        "capabilities": ["deer-flow", "langgraph", "fastapi"]
+    }
+
+    try:
+        import requests
+        response = requests.post(f"{hq_url}/workshop/register", json=payload, timeout=5)
+        if response.status_code == 200:
+            logger.info(f"Successfully registered with HQ at {hq_url}")
+        else:
+            logger.warning(f"Failed to register with HQ: {response.status_code} {response.text}")
+    except Exception as e:
+        logger.error(f"Error registering with HQ: {e}")
+
+
 @app.on_event("startup")
 async def startup_event():
     await setup_mcp_bridge()
+    # 异步执行注册，以免阻塞启动
+    asyncio.create_task(register_with_hq())
 
 
 # ---------------------------------------------------------------------------
@@ -579,4 +603,5 @@ async def lg_create_run(thread_id: str, request: Request):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
