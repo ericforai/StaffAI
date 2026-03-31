@@ -9,6 +9,9 @@ test('tool gateway filters visible tools by role', () => {
     async saveToolCallLog(log: ToolCallLog) {
       savedLogs.push(log);
     },
+    async saveApproval(approval: any) {
+      // no-op
+    }
   });
 
   const reviewerTools = gateway.listTools('reviewer');
@@ -27,6 +30,9 @@ test('tool gateway blocks high-risk tools without approval', async () => {
     async saveToolCallLog(log: ToolCallLog) {
       savedLogs.push(log);
     },
+    async saveApproval(approval: any) {
+      // no-op
+    }
   });
 
   const result = await gateway.executeTool(
@@ -47,6 +53,9 @@ test('tool gateway executes low-risk tool when allowed', async () => {
     async saveToolCallLog(log: ToolCallLog) {
       savedLogs.push(log);
     },
+    async saveApproval(approval: any) {
+      // no-op
+    }
   });
 
   const result = await gateway.executeTool(
@@ -63,4 +72,27 @@ test('tool gateway executes low-risk tool when allowed', async () => {
   assert.equal(result.log.riskLevel, 'low');
   assert.match(result.output?.summary ?? '', /read/i);
   assert.equal(savedLogs.length, 1);
+});
+
+test('tool gateway creates ApprovalRecord for high-risk tools when blocked', async () => {
+  const savedApprovals: any[] = [];
+  const gateway = new ToolGateway({
+    async saveToolCallLog(log: ToolCallLog) { /* no-op */ },
+    async saveApproval(approval: any) {
+      savedApprovals.push(approval);
+    }
+  });
+
+  const result = await gateway.executeTool(
+    'runtime_executor',
+    { task: 'risky delete command' },
+    { actorRole: 'backend-developer', taskId: 'task-99', executionId: 'exec-99' }
+  );
+
+  assert.equal(result.ok, false);
+  assert.equal(result.log.status, 'blocked');
+  assert.equal(savedApprovals.length, 1);
+  assert.equal(savedApprovals[0].approvalType, 'tool_call');
+  assert.equal(savedApprovals[0].taskId, 'task-99');
+  assert.equal(savedApprovals[0].blockedAction, 'Execute tool: runtime_executor');
 });

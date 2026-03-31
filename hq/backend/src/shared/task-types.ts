@@ -107,7 +107,7 @@ export interface TaskRouteDecision {
   executionMode: TaskExecutionMode;
 }
 
-export type ApprovalType = 'plan' | 'high_risk_action' | 'final_delivery' | 'generic';
+export type ApprovalType = 'plan_approval' | 'tool_call' | 'delivery_check' | 'generic';
 
 export interface ApprovalRecord {
   id: string;
@@ -115,6 +115,8 @@ export interface ApprovalRecord {
   taskTitle?: string;
   status: ApprovalStatus;
   approvalType?: ApprovalType;
+  // 被拦截的具体动作描述
+  blockedAction?: string;
   requestedBy: string;
   requestedAt: string;
   riskLevel?: ApprovalRiskLevel;

@@ -22,7 +22,10 @@ export interface ToolExecutionResult {
 export class ToolGateway {
   private readonly tools = new Map<string, BaseTool>();
 
-  constructor(private readonly store: Pick<Store, 'saveToolCallLog'> & Partial<Pick<Store, 'appendExecutionTraceEvent'>>) {
+  constructor(
+    private readonly store: Pick<Store, 'saveToolCallLog' | 'saveApproval'> &
+      Partial<Pick<Store, 'appendExecutionTraceEvent'>>
+  ) {
     this.registerDefaultTools();
   }
 
@@ -99,6 +102,27 @@ export class ToolGateway {
       const log = this.createBaseLog(permission.tool.name, context, createdAt, 'blocked', permission.tool.riskLevel, input);
       log.errorMessage = permission.reason;
       await this.store.saveToolCallLog(log);
+
+      // Create ApprovalRecord for high-risk tools
+      if (permission.tool.riskLevel === 'high') {
+        await this.store.saveApproval({
+          id: `appr_tool_${log.id}`,
+          taskId: context.taskId ?? 'unknown',
+          status: 'pending',
+          approvalType: 'tool_call',
+          blockedAction: `Execute tool: ${toolName}`,
+          requestedBy: context.actorRole,
+          requestedAt: createdAt,
+          riskLevel: 'HIGH',
+          riskReason: permission.reason || 'High-risk tool execution requires explicit user approval',
+          decisionContext: {
+            toolName,
+            inputSummary: log.inputSummary,
+            executionId: context.executionId,
+          },
+        });
+      }
+
       return { ok: false, tool: permission.tool.definition, log, error: permission.reason };
     }
 
@@ -185,4 +209,3 @@ export class ToolGateway {
     return serialized.length > 200 ? serialized.slice(0, 197) + '...' : serialized;
   }
 }
-
