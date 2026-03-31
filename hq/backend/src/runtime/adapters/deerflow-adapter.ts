@@ -1,12 +1,18 @@
 import { RuntimeAdapter, RuntimeExecutionContext, RuntimeExecutionResult } from '../runtime-adapter';
+import { WorkshopRegistry } from '../../orchestration/workshop-registry';
 
 export class DeerFlowRuntimeAdapter implements RuntimeAdapter {
   name = 'python_deerflow_workshop';
   supports: Array<'single' | 'serial' | 'parallel' | 'advanced_discussion'> = ['single', 'serial', 'parallel'];
 
-  private readonly WORKSHOP_URL = process.env.WORKSHOP_URL || 'http://127.0.0.1:8000';
-
   async run(context: RuntimeExecutionContext): Promise<RuntimeExecutionResult> {
+    const registry = WorkshopRegistry.getInstance();
+    const workshops = registry.list();
+    // 优先从注册中心寻找具备 deer-flow 能力的 Workshop
+    const capableWorkshop = workshops.find((w) => w.capabilities.includes('deer-flow'));
+
+    const workshopUrl = capableWorkshop?.url || process.env.WORKSHOP_URL || 'http://127.0.0.1:8000';
+
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 300000); // 增加到 5min，因为多步搜索较慢
@@ -25,7 +31,7 @@ ${context.task.description}
 ---
 `.trim();
 
-      const response = await fetch(`${this.WORKSHOP_URL}/api/v1/tasks/stream`, {
+      const response = await fetch(`${workshopUrl}/api/v1/tasks/stream`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
