@@ -167,7 +167,7 @@ interface StorePersistenceDependencies {
   auditLogRepository?: AuditLogRepository;
 }
 
-function getPersistenceMode(): 'file' | 'memory' | 'postgres' {
+export function getPersistenceMode(): 'file' | 'memory' | 'postgres' {
   const raw = (process.env.AGENCY_PERSISTENCE_MODE || 'file').toLowerCase();
   if (raw === 'postgres') {
     return 'postgres';

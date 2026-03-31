@@ -35,12 +35,12 @@ export const CreateContactSchema = z.object({
   email: z.string().email('邮箱格式不正确').optional(),
   phone: z.string().max(50).optional(),
   companyId: z.string().optional(),
-  tags: z.array(z.string()).default([]),
+  tags: z.array(z.string()).optional().default([]),
   notes: z.string().optional(),
 });
 
 export type Contact = z.infer<typeof ContactSchema>;
-export type CreateContactInput = z.infer<typeof CreateContactSchema>;
+export type CreateContactInput = z.input<typeof CreateContactSchema>;
 
 export const CompanySchema = z.object({
   id: z.string(),
@@ -61,18 +61,18 @@ export const CreateCompanySchema = z.object({
   website: z.string().url('网站URL格式不正确').optional().or(z.literal('').transform(() => undefined)),
   size: z.enum(['startup', 'small', 'medium', 'large', 'enterprise']).optional(),
   address: z.string().max(300).optional(),
-  tags: z.array(z.string()).default([]),
+  tags: z.array(z.string()).optional().default([]),
   notes: z.string().optional(),
 });
 
 export type Company = z.infer<typeof CompanySchema>;
-export type CreateCompanyInput = z.infer<typeof CreateCompanySchema>;
+export type CreateCompanyInput = z.input<typeof CreateCompanySchema>;
 
 export const DealSchema = z.object({
   id: z.string(),
   title: z.string().min(1).max(300),
-  value: z.number().min(0).default(0),
-  stage: z.enum(DEAL_STAGES),
+  value: z.number().min(0).default(0).optional(),
+  stage: z.enum(DEAL_STAGES).default('prospecting').optional(),
   contactId: z.string().optional(),
   companyId: z.string().optional(),
   expectedClose: z.string().optional(),
@@ -83,8 +83,8 @@ export const DealSchema = z.object({
 
 export const CreateDealSchema = z.object({
   title: z.string().min(1, '商机名称不能为空').max(300),
-  value: z.number().min(0).default(0),
-  stage: z.enum(DEAL_STAGES).default('prospecting'),
+  value: z.number().min(0).default(0).optional(),
+  stage: z.enum(DEAL_STAGES).default('prospecting').optional(),
   contactId: z.string().optional(),
   companyId: z.string().optional(),
   expectedClose: z.string().optional(),
@@ -96,8 +96,8 @@ export const UpdateDealStageSchema = z.object({
 });
 
 export type Deal = z.infer<typeof DealSchema>;
-export type CreateDealInput = z.infer<typeof CreateDealSchema>;
-export type UpdateDealStageInput = z.infer<typeof UpdateDealStageSchema>;
+export type CreateDealInput = z.input<typeof CreateDealSchema>;
+export type UpdateDealStageInput = z.input<typeof UpdateDealStageSchema>;
 
 export const ActivitySchema = z.object({
   id: z.string(),

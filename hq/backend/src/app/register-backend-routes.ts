@@ -17,6 +17,8 @@ import { registerAuditRoutes } from '../api/audit';
 import { registerPresetRoutes } from '../api/presets';
 import { registerSquadTemplateRoutes } from '../api/squad-templates';
 import { registerIntentRoutes } from '../api/intents';
+import { registerCrmRoutes } from '../api/crm';
+import { registerWorkshopRoutes } from '../api/workshop';
 import { createWriteBackService } from '../memory/write-back-service';
 import {
   createTaskEventPublisher,
@@ -41,6 +43,24 @@ import type { TaskRecord, ExecutionRecord } from '../shared/task-types';
 import { HitlService } from '../orchestration/hitl-service';
 import { TaskStateMachine } from '../orchestration/task-state-machine';
 import { TaskRepositoryAdapter } from '../shared/task-repository-adapter';
+import { getPersistenceMode } from '../store';
+import {
+  createFileContactRepository,
+  createFileCompanyRepository,
+  createFileDealRepository,
+  createFileActivityRepository,
+  createInMemoryContactRepository,
+  createInMemoryCompanyRepository,
+  createInMemoryDealRepository,
+  createInMemoryActivityRepository,
+} from '../persistence/crm-repositories';
+import {
+  createContactService,
+  createCompanyService,
+  createDealService,
+  createActivityService,
+  createDashboardService,
+} from '../crm/crm-service';
 
 interface RouteRegistrationDependencies {
   app: express.Application;
@@ -137,6 +157,7 @@ export function registerBackendRoutes({
   registerStartupRoutes(app, {
     discussionService,
   });
+  registerWorkshopRoutes(app);
   registerTaskEventRoutes(app, { taskEventFeed });
 
   registerAgencyRoutes(app, {
@@ -254,8 +275,49 @@ export function registerBackendRoutes({
 
   // Register intent routes (HITL)
   registerIntentRoutes(app, store);
+
+  // ─── CRM Routes ─────────────────────────────────────────────────────────────
+  const persistenceMode = getPersistenceMode();
+
+  // Contact repository
+  const crmContactsFile = process.env.AGENCY_CRM_CONTACTS_FILE || path.join(memoryRootDir, 'crm_contacts.json');
+  const contactRepo =
+    persistenceMode === 'memory'
+      ? createInMemoryContactRepository()
+      : createFileContactRepository(crmContactsFile);
+
+  // Company repository
+  const crmCompaniesFile = process.env.AGENCY_CRM_COMPANIES_FILE || path.join(memoryRootDir, 'crm_companies.json');
+  const companyRepo =
+    persistenceMode === 'memory'
+      ? createInMemoryCompanyRepository()
+      : createFileCompanyRepository(crmCompaniesFile);
+
+  // Deal repository
+  const crmDealsFile = process.env.AGENCY_CRM_DEALS_FILE || path.join(memoryRootDir, 'crm_deals.json');
+  const dealRepo =
+    persistenceMode === 'memory'
+      ? createInMemoryDealRepository()
+      : createFileDealRepository(crmDealsFile);
+
+  // Activity repository
+  const crmActivitiesFile = process.env.AGENCY_CRM_ACTIVITIES_FILE || path.join(memoryRootDir, 'crm_activities.json');
+  const activityRepo =
+    persistenceMode === 'memory'
+      ? createInMemoryActivityRepository()
+      : createFileActivityRepository(crmActivitiesFile);
+
+  // CRM services
+  const contactService = createContactService(contactRepo, companyRepo);
+  const companyService = createCompanyService(companyRepo);
+  const dealService = createDealService(dealRepo, contactRepo, companyRepo);
+  const activityService = createActivityService(activityRepo);
+  const dashboardService = createDashboardService(contactRepo, companyRepo, dealRepo, activityRepo);
+
+  registerCrmRoutes(app, { contactService, companyService, dealService, activityService, dashboardService });
 }
 
-// Placeholder for registerBudgetRoutes if not imported
 function registerBudgetRoutes(app: express.Application, deps: { budgetService: BudgetService }) {
 }
+
+export { getPersistenceMode };
