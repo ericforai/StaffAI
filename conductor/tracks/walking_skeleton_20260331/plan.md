@@ -24,8 +24,8 @@ Finalize physical connectivity between TS Office and Python Workshop
     - [x] Write a test script to verify message ordering and delivery over SSE
 - [x] Task: Enhance SSE support in TS Backend 944386c
     - [x] Implement SSE endpoint in `hq/backend` to forward logs from `workshop/`
-- [ ] Task: Integrate `deer-flow` streaming into Workshop
-    - [ ] Connect `DeerFlowClient.stream()` output to Workshop SSE endpoint
+- [x] Task: Integrate `deer-flow` streaming into Workshop 31a7bb7
+    - [x] Connect `DeerFlowClient.stream()` output to Workshop SSE endpoint
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: SSE Bridge & Streaming' (Protocol in workflow.md)
 
 ---
