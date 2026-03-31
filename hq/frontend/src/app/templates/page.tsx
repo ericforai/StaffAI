@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { FileText, Trash2, Play, Users, Layout } from 'lucide-react';
+import { Trash2, Play, Users, Layout } from 'lucide-react';
 
 interface Template {
   name: string;

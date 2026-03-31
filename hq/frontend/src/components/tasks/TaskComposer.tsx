@@ -86,7 +86,7 @@ export function TaskComposer({ agents, activeIds, onTaskCreated, onSwitchToAdvan
         </label>
         <select
           value={priority}
-          onChange={(event) => setPriority(event.target.value as any)}
+          onChange={(event) => setPriority(event.target.value as 'low' | 'medium' | 'high' | 'urgent')}
           className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-base text-slate-800 outline-none"
         >
           <option value="low">低优先级</option>
