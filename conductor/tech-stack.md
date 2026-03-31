@@ -4,7 +4,7 @@
 - **Language**: TypeScript (v5.9+)
 - **Runtime**: Node.js (Latest stable)
 - **Framework**: Express (v5.2.1+)
-- **Orchestration**: MCP (Model Context Protocol), WebSockets (ws)
+- **Orchestration**: MCP (Model Context Protocol), WebSockets (ws), Intent Services (Brainstorming & Planning)
 - **Storage**: PostgreSQL (Production), JSON File (Development), Redis (Cache)
 
 ## Execution Core (Python Workshop)
