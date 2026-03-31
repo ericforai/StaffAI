@@ -361,7 +361,7 @@ export async function createTask(
     id: taskId,
     title: input.title.trim(),
     description: input.description.trim(),
-    taskType: routeDecision.taskType,
+    taskType: normalizeTaskType(input.taskType) || routeDecision.taskType,
     priority: normalizePriority(input.priority),
     status: approvalDecision.approvalRequired ? 'waiting_approval' : 'routed',
     executionMode: normalizeExecutionMode(input.executionMode, routeDecision.executionMode),

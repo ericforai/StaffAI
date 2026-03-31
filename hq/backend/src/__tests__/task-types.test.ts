@@ -24,9 +24,10 @@ test('advanced discussion mode is preserved as an execution mode', () => {
 });
 
 test('task assignments and workflow plans expose their own vocabulary', () => {
-  assert.deepEqual(TASK_ASSIGNMENT_STATUSES, ['pending', 'running', 'completed', 'failed', 'skipped']);
-  assert.deepEqual(WORKFLOW_PLAN_MODES, ['single', 'serial', 'parallel']);
+  assert.deepStrictEqual([...TASK_ASSIGNMENT_STATUSES], ['pending', 'running', 'waiting_input', 'completed', 'failed', 'skipped']);
+  assert.deepStrictEqual([...WORKFLOW_PLAN_MODES], ['single', 'serial', 'parallel']);
 });
+
 
 test('tool definitions and tool calls expose their own vocabulary', () => {
   assert.deepEqual(TOOL_DEFINITION_CATEGORIES, ['knowledge', 'runtime', 'filesystem', 'repository', 'quality']);

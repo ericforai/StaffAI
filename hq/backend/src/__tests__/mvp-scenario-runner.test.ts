@@ -65,6 +65,7 @@ function makeMockStore() {
     saveApproval: async (a: any) => { approvals.push(a); },
     logAudit: async (event: any) => { auditEvents.push(event); },
     getTasks: async () => [...tasks],
+    getTaskById: async (id: string) => tasks.find((t) => t.id === id) || null,
     _getTasks: () => tasks,
     _getAssignments: () => assignments,
     _getWorkflowPlans: () => workflowPlans,
@@ -206,4 +207,32 @@ test('runMvpScenario with serial mode produces serial workflow plan', async () =
   assert.equal(result.task.executionMode, 'serial');
   // The workflow plan mode depends on task-orchestrator's inferPlanMode
   assert.ok(result.workflowPlan.steps.length > 0);
+});
+
+test('runMvpScenario with feature-delivery preset activates all roles', async () => {
+  const agents = [
+    makeMockAgent('sprint-prioritizer'),
+    makeMockAgent('software-architect'),
+    makeMockAgent('frontend-developer'),
+    makeMockAgent('backend-architect'),
+    makeMockAgent('security-engineer'),
+    makeMockAgent('code-reviewer'),
+  ];
+  const store = makeMockStore();
+  const scanner = makeMockScanner(agents);
+
+  const result = await runMvpScenario(
+    {
+      title: 'End-to-end Feature',
+      description: 'Need a full feature delivered',
+      presetName: 'feature-delivery',
+    },
+    store,
+    scanner,
+  );
+
+  assert.equal(result.presetUsed.name, 'feature-delivery');
+  assert.equal(result.workflowPlan.steps.length, 6);
+  assert.equal(result.workflowPlan.steps[0].agentId, 'sprint-prioritizer');
+  assert.equal(result.workflowPlan.steps[5].agentId, 'code-reviewer');
 });

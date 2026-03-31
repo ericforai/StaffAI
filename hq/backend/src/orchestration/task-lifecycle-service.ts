@@ -436,6 +436,7 @@ export class TaskLifecycleService {
       workflow_dispatch: 'dispatcher',
       frontend_implementation: 'frontend-developer',
       quality_assurance: 'qa-engineer',
+      feature_delivery: 'sprint-prioritizer',
       general: 'dispatcher',
     };
 
