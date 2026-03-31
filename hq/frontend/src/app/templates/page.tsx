@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Trash2, Play, Users, Layout } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { FileText, Trash2, Play, Users, Layout } from 'lucide-react';
 
 interface Template {
   name: string;
@@ -17,25 +18,77 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333/api';
 export default function TemplatesPage() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
+    setLoading(true);
     fetch(`${API_BASE}/templates`)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+      })
       .then(data => {
         setTemplates(data);
+        setError(null);
+      })
+      .catch(err => {
+        console.error('Failed to fetch templates:', err);
+        setError(err.message || '无法加载模板库，请检查后端服务是否启动。');
+      })
+      .finally(() => {
         setLoading(false);
       });
   }, []);
 
-  const handleDelete = async (name: string) => {
-    if (!confirm(`确定要删除模板 "${name}" 吗？`)) return;
-    const res = await fetch(`${API_BASE}/templates/${name}`, { method: 'DELETE' });
-    if (res.ok) {
-      setTemplates(templates.filter(t => t.name !== name));
+  const handleUseTemplate = async (name: string) => {
+    try {
+      const res = await fetch(`${API_BASE}/templates/${encodeURIComponent(name)}/create-task`, {
+        method: 'POST'
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert('任务创建成功！正在为您跳转...');
+        router.push('/tasks');
+      } else {
+        alert('创建失败: ' + (data.error || '未知错误'));
+      }
+    } catch (err) {
+      alert('调用出错: ' + String(err));
     }
   };
 
-  if (loading) return <div className="p-8 text-center font-black text-slate-400">正在加载模板库...</div>;
+  const handleDelete = async (name: string) => {
+    if (!confirm(`确定要删除模板 "${name}" 吗？`)) return;
+    try {
+      const res = await fetch(`${API_BASE}/templates/${name}`, { method: 'DELETE' });
+      if (res.ok) {
+        setTemplates(templates.filter(t => t.name !== name));
+      }
+    } catch (err) {
+      alert('删除失败: ' + String(err));
+    }
+  };
+
+  if (loading) return (
+    <div className="flex min-h-screen items-center justify-center bg-[#f6f1e7]">
+      <div className="text-center font-black text-slate-400 animate-pulse">正在加载模板库...</div>
+    </div>
+  );
+
+  if (error) return (
+    <div className="flex min-h-screen items-center justify-center bg-[#f6f1e7]">
+      <div className="rounded-3xl bg-white p-12 text-center shadow-xl ring-1 ring-slate-200">
+        <p className="text-lg font-bold text-rose-500">{error}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="mt-6 rounded-2xl bg-slate-900 px-8 py-3 text-sm font-black text-white transition-transform active:scale-95"
+        >
+          重试
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <main className="min-h-screen bg-[#f6f1e7] p-8">
@@ -57,7 +110,14 @@ export default function TemplatesPage() {
                 <Layout size={24} />
               </div>
               <h3 className="text-xl font-black text-slate-900">{template.name}</h3>
-              <p className="mt-2 line-clamp-2 text-sm text-slate-500 leading-relaxed">
+              {template.scenario && (
+                <div className="mt-1 flex">
+                  <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-blue-600 ring-1 ring-blue-200/50">
+                    {template.scenario}
+                  </span>
+                </div>
+              )}
+              <p className="mt-3 line-clamp-2 text-sm text-slate-500 leading-relaxed">
                 {template.description || '暂无描述。'}
               </p>
               
@@ -82,7 +142,10 @@ export default function TemplatesPage() {
                 </button>
               </div>
 
-              <button className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-50 py-3 text-sm font-black text-slate-900 transition-colors hover:bg-slate-100">
+              <button 
+                onClick={() => handleUseTemplate(template.name)}
+                className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-50 py-3 text-sm font-black text-slate-900 transition-colors hover:bg-slate-100"
+              >
                 <Play size={16} />
                 使用此模板
               </button>

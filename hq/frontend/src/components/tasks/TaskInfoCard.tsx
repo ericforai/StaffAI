@@ -178,9 +178,17 @@ export function TaskInfoCard({
         <button
           type="button"
           onClick={handleSaveTemplate}
-          className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 transition-all hover:border-slate-300 hover:text-slate-950 flex items-center gap-2"
+          disabled={isSaving}
+          className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 transition-all hover:border-slate-300 hover:text-slate-950 flex items-center gap-2 disabled:opacity-50"
         >
           <Save size={16} />
+          {isSaving ? '正在沉淀...' : '保存为模板'}
+        </button>
+      </div>
+    </section>
+  );
+}
+16} />
           保存为模板
         </button>
       </div>
