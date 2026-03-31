@@ -109,6 +109,13 @@ export function registerBackendRoutes({
   const hitlService = new HitlService({ store, stateMachine: taskStateMachine });
   app.set('hitlService', hitlService);
 
+  // Initialize Lifecycle Service
+  const lifecycleService = createTaskLifecycleService({
+    store,
+    auditLogger: store.getAuditLogger() || undefined,
+  });
+  app.locals.lifecycleService = lifecycleService;
+
   // Initialize enhanced write-back service
   const writeBackService = createWriteBackService({
     memoryRootDir,

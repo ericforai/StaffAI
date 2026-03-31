@@ -37,20 +37,22 @@ export function registerTemplateRoutes(app: express.Application, dependencies: T
   app.post('/api/templates/:name/create-task', async (req, res) => {
     const templateName = req.params.name;
     const templates = dependencies.store.getTemplates();
-    const template = templates.find(t => t.name === templateName);
+    const template = templates.find(t => t.name === templateName || (t as any).id === templateName);
 
     if (!template) {
       return res.status(404).json({ error: 'Template not found' });
     }
 
-    // 模拟从模板创建 TaskIntent 并直接转为 Task
+    // 1. Create a RequirementDraft based on Template
     const now = new Date().toISOString();
-    const intentId = `intent_tpl_${Date.now()}`;
+    const intentId = `intent_tpl_${randomUUID()}`;
     const draft: any = {
       id: intentId,
-      rawInput: `基于模板创建: ${template.name}`,
-      status: 'completed',
-      clarificationMessages: [],
+      rawInput: `Instantiated from template: ${template.name}`,
+      status: 'plan_ready', // Skip directly to plan ready
+      clarificationMessages: [
+        { id: randomUUID(), role: 'assistant', content: `Using template: ${template.name}`, timestamp: now }
+      ],
       designSummary: template.designSummary,
       implementationPlan: template.implementationPlan,
       suggestedAutonomyLevel: template.implementationPlan?.recommendedAutonomyLevel || 'L2',
@@ -59,15 +61,16 @@ export function registerTemplateRoutes(app: express.Application, dependencies: T
       updatedAt: now,
     };
 
-    // 保存意图
     await dependencies.store.saveRequirementDraft(draft);
 
-    // 调用已有的 create-task 逻辑 (这里直接通过 fetch 触发或手动模拟)
-    // 为了简单演示，我们直接在 store 中标记该任务已由模板创建
+    // 2. We can return the intentId and let frontend handle the final confirmation,
+    // OR we can trigger the conversion here if lifecycleService is available.
+    // Given the V0.4 goal, we return success and the intentId for UX continuity.
     return res.json({ 
       success: true, 
-      message: '任务已基于模板初始化，请前往任务列表查看。',
-      intentId 
+      message: '任务已基于模板初始化，请确认计划后即可开始执行。',
+      intentId,
+      draft
     });
   });
 

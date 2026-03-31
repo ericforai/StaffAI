@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useIntentWizard } from '../../hooks/useIntentWizard';
 import { ClarificationPanel } from '../intent/ClarificationPanel';
 import { DesignConfirmPanel } from '../intent/DesignConfirmPanel';
@@ -12,7 +13,15 @@ interface AdvancedTaskWizardProps {
 }
 
 export function AdvancedTaskWizard({ onTaskCreated, onCancel }: AdvancedTaskWizardProps) {
-  const { state, createIntent, sendMessage, confirmDesign, createTask } = useIntentWizard();
+  const { state, createIntent, sendMessage, confirmDesign, createTask, loadIntent } = useIntentWizard();
+  const searchParams = useSearchParams();
+  const intentId = searchParams.get('intentId');
+
+  useEffect(() => {
+    if (intentId && !state.draft && !state.loading) {
+      loadIntent(intentId);
+    }
+  }, [intentId, loadIntent, state.draft, state.loading]);
 
   // Step 1: Input + Clarification
   if (state.step === 1 && !state.draft) {

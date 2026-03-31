@@ -47,9 +47,9 @@ export default function TemplatesPage() {
         method: 'POST'
       });
       const data = await res.json();
-      if (res.ok) {
-        alert('任务创建成功！正在为您跳转...');
-        router.push('/tasks');
+      if (res.ok && data.intentId) {
+        // Redirect to task list with the intent context to trigger the wizard final step
+        router.push(`/tasks?mode=advanced&intentId=${data.intentId}`);
       } else {
         alert('创建失败: ' + (data.error || '未知错误'));
       }

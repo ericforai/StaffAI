@@ -104,5 +104,25 @@ export function useIntentWizard() {
     }
   }, [state.draft]);
 
-  return { state, createIntent, sendMessage, confirmDesign, createTask };
+  const loadIntent = useCallback(async (intentId: string) => {
+    setState(s => ({ ...s, loading: true, error: null }));
+    try {
+      const res = await fetch(`${API_BASE}/intents/${intentId}`);
+      if (!res.ok) throw new Error(`Failed to load intent: ${res.status}`);
+      const draft: RequirementDraft = await res.json();
+      
+      // Determine correct step based on status
+      let step: 1 | 2 | 3 = 1;
+      if (draft.status === 'plan_ready') step = 3;
+      else if (draft.status === 'design_ready' || draft.status === 'design_approved') step = 2;
+
+      setState({ draft, loading: false, error: null, step });
+      return draft;
+    } catch (err) {
+      setState(s => ({ ...s, loading: false, error: String(err) }));
+      return null;
+    }
+  }, []);
+
+  return { state, createIntent, sendMessage, confirmDesign, createTask, loadIntent };
 }
