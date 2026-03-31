@@ -19,17 +19,23 @@ V0.2: Feature Delivery & Teaming
 
 ## Phase 2: Frontend Integration [checkpoint: ]
 
-- [ ] Task: Update Task Details View
-    - [ ] Add "Plan" tab to show the implementation plan from the draft
-    - [ ] Add "Artifacts" tab to show structured outputs per role
-- [ ] Task: Update Intent Wizard completion flow
-    - [ ] On plan confirmation, call the create-task API and redirect to the new task
+- [x] Task: Update Task Details View e6eddf8
+    - [x] Add "Plan" tab to show the implementation plan from the draft
+    - [x] Add "Artifacts" tab to show structured outputs per role
+- [x] Task: Update Intent Wizard completion flow e6eddf8
+    - [x] On plan confirmation, call the create-task API and redirect to the new task
 
 ---
 
 ## Phase 3: Workflow Orchestration [checkpoint: ]
 
-- [ ] Task: Enhance `mvp-scenario-runner` for Feature Delivery
-    - [ ] Ensure correct role sequence: PM -> Architect -> FE -> BE -> Security -> Reviewer
-- [ ] Task: End-to-end verification of the full flow
-    - [ ] Dummy demand -> Clarification -> Plan -> Task -> Teaming
+- [x] Task: Enhance `mvp-scenario-runner` for Feature Delivery 4181761
+    - [x] Ensure correct role sequence: PM -> Architect -> FE -> BE -> Security -> Reviewer
+- [x] Task: End-to-end verification of the full flow 4181761
+    - [x] Dummy demand -> Clarification -> Plan -> Task -> Teaming
+
+---
+
+## Phase: Review Fixes
+
+- [x] Task: Apply review suggestions 3b532c0
