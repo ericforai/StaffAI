@@ -7,9 +7,9 @@ Finalize physical connectivity between TS Office and Python Workshop
 
 ## Phase 1: Preparation & Handshake
 
-- [ ] Task: Write connection health-check tests for both cores
-    - [ ] Define TS-side unit tests for Workshop registration endpoint
-    - [ ] Define Python-side tests for FastAPI health-check endpoint
+- [x] Task: Write connection health-check tests for both cores 3c46d10
+    - [x] Define TS-side unit tests for Workshop registration endpoint
+    - [x] Define Python-side tests for FastAPI health-check endpoint
 - [ ] Task: Implement Workshop registration mechanism
     - [ ] Update `hq/backend` to accept registration from `workshop/`
     - [ ] Update `workshop/main.py` to ping `hq/backend` on startup
