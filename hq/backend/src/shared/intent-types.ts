@@ -64,6 +64,21 @@ export interface RequirementDraft {
   updatedAt: string;
 }
 
+export interface TemplateRecord {
+  id: string;
+  title: string;
+  description: string;
+  scenario: string;
+  designSummary: DesignSummary;
+  implementationPlan: ImplementationPlan;
+  // 沉淀该模板的原始任务 ID（可选）
+  sourceTaskId?: string;
+  // 模板标签，便于分类
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const INTENT_STATUSES: IntentStatus[] = [
   'intake',
   'clarifying',
