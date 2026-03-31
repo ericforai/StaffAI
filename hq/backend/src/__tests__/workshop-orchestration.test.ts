@@ -95,5 +95,11 @@ test('POST /api/tasks/:id/execute with deerflow executor should route to worksho
   assert.equal(body.execution.status, 'completed');
   assert.equal(body.execution.outputSummary, 'Mock workshop result');
 
+  // 5. Verify persistence
+  const getTaskRes = await fetch(`${baseUrl}/api/tasks/${task.id}`);
+  const getTaskPayload = (await getTaskRes.json()) as any;
+  assert.equal(getTaskPayload.task.status, 'completed');
+  // Note: outputSummary is usually on the execution object, but some task types might bubble it up
+  
   mockWorkshop.close();
 });
