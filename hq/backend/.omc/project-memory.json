@@ -1,0 +1,285 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1774925864561,
+  "projectRoot": "/Users/user/agency-agents/hq/backend",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "express",
+        "version": "5.2.1",
+        "category": "backend"
+      }
+    ],
+    "packageManager": "npm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "npm run build",
+    "testCommand": "npm test",
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {
+      "build": "node -e \"const fs=require('fs');try{fs.rmSync('dist',{recursive:true});}catch(e){if(e&&e.code!=='ENOENT')throw e;}\" && tsc",
+      "test": "npm run build && AGENCY_UNDER_NODE_TEST=1 node --test --test-concurrency=1 $(pwd)/dist/**/*.test.js",
+      "start:web": "node dist/web-server.js",
+      "start:mcp": "node dist/mcp-server.js",
+      "dev:web": "ts-node src/web-server.ts",
+      "dev:mcp": "ts-node src/mcp-server.ts",
+      "generate:executions": "ts-node src/scripts/generate-execution-records.ts",
+      "auto-fix": "node ../../.claude/scripts/fix.js run",
+      "auto-fix:status": "node ../../.claude/scripts/fix.js status",
+      "auto-fix:reset": "node ../../.claude/scripts/fix.js reset",
+      "auto-fix:history": "node ../../.claude/scripts/fix.js history",
+      "watch:fix": "node ../../.claude/scripts/watch-and-fix.js",
+      "test:watch": "node ../../.claude/scripts/watch-and-fix.js"
+    }
+  },
+  "conventions": {
+    "namingStyle": "camelCase/PascalCase",
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "scripts",
+      "src"
+    ],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "coverage": {
+      "path": "coverage",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1774925864526,
+      "keyFiles": []
+    },
+    "dist": {
+      "path": "dist",
+      "purpose": "Distribution/build output",
+      "fileCount": 10,
+      "lastAccessed": 1774925864526,
+      "keyFiles": [
+        "execution-strategy.js",
+        "mcp-server.js",
+        "mcp.js",
+        "scanner.js",
+        "server.js"
+      ]
+    },
+    "dist-test": {
+      "path": "dist-test",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1774925864529,
+      "keyFiles": [
+        "store.js",
+        "types.js"
+      ]
+    },
+    "generated-test-data": {
+      "path": "generated-test-data",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1774925864529,
+      "keyFiles": [
+        "executions.json",
+        "tasks.json",
+        "tool-calls.json"
+      ]
+    },
+    "scripts": {
+      "path": "scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 6,
+      "lastAccessed": 1774925864529,
+      "keyFiles": [
+        "LIGHTWEIGHT_EXECUTION_GUIDE.md",
+        "demo-lightweight-scenarios.ts",
+        "generate-execution-records.ts",
+        "run-lightweight-task.ts",
+        "verify-deerflow-connectivity.ts"
+      ]
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 11,
+      "lastAccessed": 1774925864530,
+      "keyFiles": [
+        "bullmq.d.ts",
+        "execution-strategy.ts",
+        "mcp-server.ts",
+        "mcp.ts",
+        "scanner.ts"
+      ]
+    },
+    "test-data": {
+      "path": "test-data",
+      "purpose": null,
+      "fileCount": 21,
+      "lastAccessed": 1774925864530,
+      "keyFiles": [
+        "executions-batch-2.json",
+        "executions-history-batch1.json",
+        "executions-history-batch10.json",
+        "executions-history-batch11.json",
+        "executions-history-batch12.json"
+      ]
+    },
+    "dist/__tests__": {
+      "path": "dist/__tests__",
+      "purpose": "Test files",
+      "fileCount": 86,
+      "lastAccessed": 1774925864530,
+      "keyFiles": [
+        "advanced-discussion-runner.test.js",
+        "agency-consult.test.js",
+        "approval-chain-service.test.js"
+      ]
+    },
+    "dist/api": {
+      "path": "dist/api",
+      "purpose": "API routes",
+      "fileCount": 21,
+      "lastAccessed": 1774925864531,
+      "keyFiles": [
+        "agency.js",
+        "agents.js",
+        "approval-chains.js"
+      ]
+    },
+    "dist/app": {
+      "path": "dist/app",
+      "purpose": "Application code",
+      "fileCount": 4,
+      "lastAccessed": 1774925864531,
+      "keyFiles": [
+        "create-discussion-service.js",
+        "create-web-server-runtime.js",
+        "discussion-service.js"
+      ]
+    },
+    "dist-test/__tests__": {
+      "path": "dist-test/__tests__",
+      "purpose": "Test files",
+      "fileCount": 1,
+      "lastAccessed": 1774925864531,
+      "keyFiles": [
+        "file-memory-retriever.test.js"
+      ]
+    },
+    "dist-test/api": {
+      "path": "dist-test/api",
+      "purpose": "API routes",
+      "fileCount": 1,
+      "lastAccessed": 1774925864531,
+      "keyFiles": [
+        "memory.js"
+      ]
+    },
+    "src/__tests__": {
+      "path": "src/__tests__",
+      "purpose": "Test files",
+      "fileCount": 89,
+      "lastAccessed": 1774925864531,
+      "keyFiles": [
+        "advanced-discussion-runner.test.ts",
+        "agency-consult.test.ts",
+        "approval-chain-service.test.ts"
+      ]
+    },
+    "src/api": {
+      "path": "src/api",
+      "purpose": "API routes",
+      "fileCount": 21,
+      "lastAccessed": 1774925864531,
+      "keyFiles": [
+        "agency.ts",
+        "agents.ts",
+        "approval-chains.ts"
+      ]
+    },
+    "src/app": {
+      "path": "src/app",
+      "purpose": "Application code",
+      "fileCount": 4,
+      "lastAccessed": 1774925864531,
+      "keyFiles": [
+        "create-discussion-service.ts",
+        "create-web-server-runtime.ts",
+        "discussion-service.ts"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "src/types.ts",
+      "accessCount": 3,
+      "lastAccessed": 1774926948866,
+      "type": "file"
+    },
+    {
+      "path": "src/persistence/file-repositories.ts",
+      "accessCount": 2,
+      "lastAccessed": 1774926879209,
+      "type": "file"
+    },
+    {
+      "path": "src/api/tasks.ts",
+      "accessCount": 2,
+      "lastAccessed": 1774926894323,
+      "type": "file"
+    },
+    {
+      "path": "src/types/crm-types.ts",
+      "accessCount": 1,
+      "lastAccessed": 1774926757935,
+      "type": "file"
+    },
+    {
+      "path": "src/server.ts",
+      "accessCount": 1,
+      "lastAccessed": 1774926879158,
+      "type": "file"
+    },
+    {
+      "path": "src/app/register-backend-routes.ts",
+      "accessCount": 1,
+      "lastAccessed": 1774926902422,
+      "type": "file"
+    },
+    {
+      "path": "src/store.ts",
+      "accessCount": 1,
+      "lastAccessed": 1774926916182,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

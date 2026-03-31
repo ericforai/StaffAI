@@ -234,6 +234,30 @@ export function registerTaskRoutes(
       task,
     });
   });
+
+  app.post('/api/assignments/:id/artifacts', async (req, res) => {
+    const { type, title, content, structuredData, createdBy } = req.body;
+    if (!type || !title || !content) {
+      return res.status(400).json({ error: 'type, title and content are required' });
+    }
+
+    const artifact = {
+      id: `art_${Date.now()}`,
+      type,
+      title,
+      content,
+      structuredData,
+      createdBy,
+      createdAt: new Date().toISOString(),
+    };
+
+    const updated = await store.addArtifactToAssignment(req.params.id, artifact);
+    if (!updated) {
+      return res.status(404).json({ error: 'Assignment not found' });
+    }
+
+    return res.status(201).json(artifact);
+  });
 }
 
 /**

@@ -16,6 +16,7 @@ import { WorkflowPlanPanel } from '../../../components/tasks/WorkflowPlanPanel';
 import { AssignmentPanel } from '../../../components/tasks/AssignmentPanel';
 import { ExecutionList } from '../../../components/tasks/ExecutionList';
 import { EventTimeline } from '../../../components/tasks/EventTimeline';
+import { ArtifactsPanel } from '../../../components/tasks/ArtifactsPanel';
 
 /**
  * Task Detail Page (StaffAI 1.0 Atomic Version)
@@ -26,7 +27,7 @@ import { EventTimeline } from '../../../components/tasks/EventTimeline';
 export default function TaskDetailPage() {
   const params = useParams<{ id: string }>();
   const taskId = Array.isArray(params.id) ? params.id[0] : params.id;
-  
+
   // Data Fetching
   const { data, loading, error, setData, reload } = useTaskDetail(taskId);
   const { executeTask, suspendTask, submitting, error: actionError } = useTaskActions(taskId, setData);
@@ -34,8 +35,9 @@ export default function TaskDetailPage() {
   const { agents } = useAgents();
 
   // State
-  const [selectedExecutor, setSelectedExecutor] = useState<'openai' | 'claude' | 'codex' | 'deerflow'>('openai');
+  const [selectedExecutor, setSelectedExecutor] = useState<'openai' | 'claude' | 'codex' | 'deerflow'>('claude');
   const [expandedExecutionId, setExpandedExecutionId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'overview' | 'plan' | 'artifacts'>('overview');
 
   // Derived Data
   const workflowPlan = data?.workflowPlan ?? data?.task.workflowPlan ?? null;
@@ -76,7 +78,7 @@ export default function TaskDetailPage() {
 
     if (missingAgents.length > 0) {
       const missingRoles = missingAgents.map(a => a.agentId).join(', ');
-      alert(`组织中缺少以下类型的专家：${missingRoles}\n\n请先前往人才市场聘用对应的专家。`);
+      alert(`组织中缺少以下类型的专家：${missingRoles}\n\n请 先前往人才市场聘用对应的专家。`);
       return;
     }
 
@@ -100,7 +102,7 @@ export default function TaskDetailPage() {
   if (error || !data) return (
     <div className="flex min-h-screen items-center justify-center bg-[#f6f1e7] p-8">
       <div className="max-w-md rounded-[2rem] border border-rose-200 bg-white p-8 text-center shadow-xl">
-        <h2 className="text-2xl font-black text-rose-600">加载失败</h2>
+        <h2 className="text-2xl font-black text-rose-600">加载 失败</h2>
         <p className="mt-4 text-slate-600">{error || '任务不存在'}</p>
         <div className="mt-8 flex justify-center gap-4">
           <button onClick={() => reload()} className="rounded-full bg-slate-900 px-6 py-2 text-white font-bold">重试</button>
@@ -125,12 +127,12 @@ export default function TaskDetailPage() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          {/* Left Column: Task Info & Plan */}
+          {/* Left Column: Task Info & Plan & Artifacts */}
           <div className="space-y-6">
-            <TaskInfoCard 
+            <TaskInfoCard
               task={data.task}
               executor={selectedExecutor}
-              onExecutorChange={setSelectedExecutor}
+              setSelectedExecutor={setSelectedExecutor}
               onExecute={handleExecuteTask}
               onPause={handlePauseTask}
               submitting={submitting}
@@ -144,18 +146,55 @@ export default function TaskDetailPage() {
               />
             )}
 
-            <div className="grid gap-6 sm:grid-cols-2">
-              <WorkflowPlanPanel workflowPlan={workflowPlan} />
-              <AssignmentPanel assignments={assignments} agents={agents} />
+            {/* Sub-Tabs */}
+            <div className="flex gap-4 border-b border-slate-200 px-4">
+              <button 
+                onClick={() => setActiveTab('overview')}
+                className={`pb-4 text-sm font-black uppercase tracking-widest transition-all ${activeTab === 'overview' ? 'border-b-2 border-slate-950 text-slate-950' : 'text-slate-400 hover:text-slate-600'}`}
+              >
+                概览
+              </button>
+              <button 
+                onClick={() => setActiveTab('plan')}
+                className={`pb-4 text-sm font-black uppercase tracking-widest transition-all ${activeTab === 'plan' ? 'border-b-2 border-slate-950 text-slate-950' : 'text-slate-400 hover:text-slate-600'}`}
+              >
+                执行计划
+              </button>
+              <button 
+                onClick={() => setActiveTab('artifacts')}
+                className={`pb-4 text-sm font-black uppercase tracking-widest transition-all ${activeTab === 'artifacts' ? 'border-b-2 border-slate-950 text-slate-950' : 'text-slate-400 hover:text-slate-600'}`}
+              >
+                中间产物
+              </button>
             </div>
+
+            {activeTab === 'overview' && (
+              <div className="grid gap-6 sm:grid-cols-2">
+                <AssignmentPanel assignments={assignments} agents={agents} />
+                <div className="rounded-[2rem] border border-slate-200 bg-white/50 p-8 backdrop-blur-xl">
+                  <h3 className="text-lg font-black text-slate-900">执行上下文</h3>
+                  <p className="mt-4 text-sm text-slate-600 leading-relaxed">
+                    当前任务正处于 {data.task.status} 阶段。{assignments.length} 位专家已就位。
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'plan' && (
+              <WorkflowPlanPanel workflowPlan={workflowPlan} />
+            )}
+
+            {activeTab === 'artifacts' && (
+              <ArtifactsPanel assignments={assignments} />
+            )}
           </div>
 
           {/* Right Column: Execution History & Events */}
           <div className="space-y-6">
-            <ExecutionList 
+            <ExecutionList
               executions={data.executions}
-              expandedId={expandedExecutionId}
-              onToggleExpand={setExpandedExecutionId}
+              expandedExecutionId={expandedExecutionId}
+              setExpandedExecutionId={setExpandedExecutionId}
               onReload={reload}
             />
 

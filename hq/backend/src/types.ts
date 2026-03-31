@@ -98,3 +98,91 @@ export interface Skill {
   allowedTools: string[];
   installations: SkillInstallation[];
 }
+
+// ─────────────────────────────────────────────
+// CRM Domain Types
+// ─────────────────────────────────────────────
+
+export type ContactStage =
+  | 'new'
+  | 'contacted'
+  | 'qualified'
+  | 'proposal'
+  | 'negotiation'
+  | 'closed_won'
+  | 'closed_lost';
+
+export type DealStage =
+  | 'qualification'
+  | 'proposal'
+  | 'negotiation'
+  | 'closed_won'
+  | 'closed_lost';
+
+export interface CrmContact {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  companyId?: string;
+  companyName?: string;
+  title?: string;
+  stage: ContactStage;
+  tags: string[];
+  notes?: string;
+  ownerId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CrmCompany {
+  id: string;
+  name: string;
+  industry?: string;
+  website?: string;
+  phone?: string;
+  address?: string;
+  employeeCount?: number;
+  annualRevenue?: number;
+  tags: string[];
+  notes?: string;
+  ownerId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CrmDeal {
+  id: string;
+  title: string;
+  value: number;
+  currency: string;
+  stage: DealStage;
+  contactId?: string;
+  contactName?: string;
+  companyId?: string;
+  companyName?: string;
+  expectedCloseDate?: string;
+  probability?: number;
+  tags: string[];
+  notes?: string;
+  ownerId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CrmActivity {
+  id: string;
+  type: 'call' | 'email' | 'meeting' | 'note' | 'task';
+  subject: string;
+  description?: string;
+  contactId?: string;
+  contactName?: string;
+  companyId?: string;
+  companyName?: string;
+  dealId?: string;
+  dealTitle?: string;
+  date: string;
+  duration?: number; // minutes, for calls/meetings
+  ownerId?: string;
+  createdAt: string;
+}

@@ -41000,5 +41000,65 @@
       "executor": "deerflow",
       "runtimeName": "python_deerflow_workshop"
     }
+  },
+  {
+    "id": "trace_exec_ba109760-6253-4219-ac60-be648d8b10d5_1774923165282",
+    "type": "execution_started",
+    "taskId": "task_1774923132862",
+    "executionId": "ba109760-6253-4219-ac60-be648d8b10d5",
+    "occurredAt": "2026-03-31T02:12:45.282Z",
+    "actor": "openai",
+    "summary": "开始执行任务：task_1774923132862",
+    "data": {
+      "executor": "openai",
+      "runtimeName": "openai_api",
+      "executionMode": "serial"
+    }
+  },
+  {
+    "id": "trace_exec_ba109760-6253-4219-ac60-be648d8b10d5_1774923166248",
+    "type": "execution_completed",
+    "taskId": "task_1774923132862",
+    "executionId": "ba109760-6253-4219-ac60-be648d8b10d5",
+    "occurredAt": "2026-03-31T02:12:46.248Z",
+    "actor": "openai",
+    "summary": "完成任务：task_1774923132862",
+    "data": {
+      "status": "completed",
+      "degraded": false,
+      "retryCount": 0,
+      "executor": "openai",
+      "runtimeName": "openai_api"
+    }
+  },
+  {
+    "id": "trace_exec_8e692b2e-6a91-4b26-b350-40511e5e8d87_1774926523569",
+    "type": "execution_started",
+    "taskId": "task_1774926500844",
+    "executionId": "8e692b2e-6a91-4b26-b350-40511e5e8d87",
+    "occurredAt": "2026-03-31T03:08:43.569Z",
+    "actor": "claude",
+    "summary": "开始执行任务：task_1774926500844",
+    "data": {
+      "executor": "claude",
+      "runtimeName": "local_claude_cli",
+      "executionMode": "serial"
+    }
+  },
+  {
+    "id": "trace_exec_8e692b2e-6a91-4b26-b350-40511e5e8d87_1774926883648",
+    "type": "execution_failed",
+    "taskId": "task_1774926500844",
+    "executionId": "8e692b2e-6a91-4b26-b350-40511e5e8d87",
+    "occurredAt": "2026-03-31T03:14:43.648Z",
+    "actor": "claude",
+    "summary": "失败任务：task_1774926500844",
+    "data": {
+      "status": "failed",
+      "degraded": false,
+      "retryCount": 1,
+      "executor": "claude",
+      "runtimeName": "local_claude_cli"
+    }
   }
 ]

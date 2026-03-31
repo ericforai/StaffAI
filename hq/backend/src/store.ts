@@ -136,7 +136,13 @@ function getRequirementDraftsFilePath(dataDir: string) {
 
 export interface Template {
   name: string;
+  type: 'requirement_clarification' | 'design_summary' | 'delivery_plan' | 'role_collaboration' | 'approval' | 'full_scenario';
   activeAgentIds: string[];
+  designSummary?: any;
+  implementationPlan?: any;
+  roles?: string[];
+  description?: string;
+  createdAt?: string;
 }
 
 export interface KnowledgeEntry {
@@ -356,9 +362,46 @@ export class Store extends EventEmitter {
     if (index >= 0) {
       templates[index].activeAgentIds = activeAgentIds;
     } else {
-      templates.push({ name, activeAgentIds });
+      templates.push({ name, activeAgentIds, type: 'full_scenario' });
     }
     fs.writeFileSync(TEMPLATES_FILE, JSON.stringify(templates, null, 2), 'utf-8');
+  }
+
+  public async saveTemplateFromTask(taskId: string, templateName: string, description?: string): Promise<Template | null> {
+    const task = await this.getTaskById(taskId);
+    if (!task) return null;
+
+    const intentId = (task as any).intentId;
+    let designSummary: any = null;
+    let implementationPlan: any = null;
+
+    if (intentId) {
+      const intent = await this.getRequirementDraftById(intentId);
+      if (intent) {
+        designSummary = intent.designSummary;
+        implementationPlan = intent.implementationPlan;
+      }
+    }
+
+    const assignments = await this.getTaskAssignmentsByTaskId(taskId);
+    const roles = Array.from(new Set(assignments.map(a => a.agentId)));
+
+    const template: Template = {
+      name: templateName,
+      type: 'full_scenario',
+      activeAgentIds: roles,
+      roles: roles,
+      designSummary,
+      implementationPlan,
+      description: description || task.description.substring(0, 100),
+      createdAt: new Date().toISOString(),
+    };
+
+    const templates = this.getTemplates();
+    templates.push(template);
+    fs.writeFileSync(TEMPLATES_FILE, JSON.stringify(templates, null, 2), 'utf-8');
+    
+    return template;
   }
 
   public deleteTemplate(name: string) {
@@ -702,6 +745,16 @@ export class Store extends EventEmitter {
     updater: (assignment: TaskAssignment) => TaskAssignment
   ): Promise<TaskAssignment | null> {
     return await this.taskAssignmentRepository.update(assignmentId, updater);
+  }
+
+  public async addArtifactToAssignment(assignmentId: string, artifact: any): Promise<TaskAssignment | null> {
+    return await this.taskAssignmentRepository.update(assignmentId, (asgn) => {
+      const artifacts = asgn.artifacts || [];
+      return {
+        ...asgn,
+        artifacts: [...artifacts, { ...artifact, createdAt: artifact.createdAt || new Date().toISOString() }],
+      };
+    });
   }
 
   // --- Workflow Plan Logic ---

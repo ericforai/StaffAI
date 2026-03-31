@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cat /Users/user/CRM-auto/package.json && echo \\\"===\\\" && find /Users/user/CRM-auto/src -type f | sort\",\"description\":\"Read package.json and list all src files\"}",
+  "error": "Exit code 1\ncat: /Users/user/CRM-auto/package.json: No such file or directory",
+  "timestamp": "2026-03-31T03:15:51.369Z",
+  "retry_count": 1
+}

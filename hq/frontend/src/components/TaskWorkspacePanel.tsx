@@ -133,7 +133,7 @@ export function TaskWorkspacePanel({
     createTask,
   } = useTaskComposer();
   const [selectedTaskId, setSelectedTaskId] = useState('');
-  const [selectedExecutor, setSelectedExecutor] = useState<TaskExecutor>('openai');
+  const [selectedExecutor, setSelectedExecutor] = useState<TaskExecutor>('claude');
   const effectiveSelectedTaskId = useMemo(() => {
     if (!tasks.length) {
       return '';

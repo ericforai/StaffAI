@@ -157,5 +157,1029 @@
     "createdTaskId": null,
     "createdAt": "2026-03-30T22:11:36.076Z",
     "updatedAt": "2026-03-30T22:11:47.648Z"
+  },
+  {
+    "id": "intent_1774909244120_bl5hd1u",
+    "rawInput": "做一个CRM",
+    "status": "design_ready",
+    "clarificationMessages": [
+      {
+        "id": "0e009104-1d09-49d7-8a3d-ac13b502de0b",
+        "role": "assistant",
+        "content": "Who are the primary users?",
+        "timestamp": "2026-03-30T22:20:44.120Z"
+      },
+      {
+        "id": "e3491627-befa-491c-8330-3ddd1bce1737",
+        "role": "user",
+        "content": "我自己",
+        "timestamp": "2026-03-30T22:20:47.612Z"
+      },
+      {
+        "id": "be6e7e7e-8cab-4485-beb1-30d4a36bdecc",
+        "role": "assistant",
+        "content": "Who are the primary users?",
+        "timestamp": "2026-03-30T22:20:47.612Z"
+      },
+      {
+        "id": "1e8d9432-fc40-483a-9064-013be4654ef5",
+        "role": "user",
+        "content": "我自己",
+        "timestamp": "2026-03-30T22:20:51.136Z"
+      }
+    ],
+    "designSummary": {
+      "goal": "CRM",
+      "targetUser": "",
+      "coreFlow": "",
+      "scope": "",
+      "outOfScope": "",
+      "deliverables": "",
+      "constraints": "",
+      "risks": ""
+    },
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0.4,
+    "createdTaskId": null,
+    "createdAt": "2026-03-30T22:20:44.120Z",
+    "updatedAt": "2026-03-30T22:20:51.136Z"
+  },
+  {
+    "id": "intent_1774911922322_q78xms1",
+    "rawInput": "做一个CRM",
+    "status": "design_ready",
+    "clarificationMessages": [
+      {
+        "id": "5635e93a-bab5-4eb9-8576-18bd45f93f06",
+        "role": "assistant",
+        "content": "Who are the primary users?",
+        "timestamp": "2026-03-30T23:05:22.322Z"
+      },
+      {
+        "id": "d2ca6a9c-2826-4cfd-9be7-07295c22a80e",
+        "role": "user",
+        "content": "我自己也给你",
+        "timestamp": "2026-03-30T23:05:32.985Z"
+      },
+      {
+        "id": "a44312be-12fa-4624-80ab-32af041fb98e",
+        "role": "assistant",
+        "content": "Who are the primary users?",
+        "timestamp": "2026-03-30T23:05:32.985Z"
+      },
+      {
+        "id": "bac5de77-0aaf-46a6-bc1a-a926a0562329",
+        "role": "user",
+        "content": "我自己",
+        "timestamp": "2026-03-30T23:05:38.256Z"
+      }
+    ],
+    "designSummary": {
+      "goal": "CRM",
+      "targetUser": "",
+      "coreFlow": "",
+      "scope": "",
+      "outOfScope": "",
+      "deliverables": "",
+      "constraints": "",
+      "risks": ""
+    },
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0.4,
+    "createdTaskId": null,
+    "createdAt": "2026-03-30T23:05:22.322Z",
+    "updatedAt": "2026-03-30T23:05:38.256Z"
+  },
+  {
+    "id": "intent_1774912033677_lx3ulk9",
+    "rawInput": "我要做一个CRM",
+    "status": "intake",
+    "clarificationMessages": [
+      {
+        "id": "msg_1774912033677_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-03-30T23:07:13.677Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-03-30T23:07:13.677Z",
+    "updatedAt": "2026-03-30T23:07:13.677Z"
+  },
+  {
+    "id": "intent_1774912033677_lx3ulk9",
+    "rawInput": "我要做一个CRM",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1774912033677_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-03-30T23:07:13.677Z"
+      },
+      {
+        "id": "msg_1774912056112_u",
+        "role": "user",
+        "content": "把我现有的客户数据管理起来 目前都是Excel的",
+        "timestamp": "2026-03-30T23:07:36.112Z"
+      },
+      {
+        "id": "msg_1774912056112_a",
+        "role": "assistant",
+        "content": "Who are the target users (e.g., developers, end-users, admins)?",
+        "timestamp": "2026-03-30T23:07:36.112Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-03-30T23:07:13.677Z",
+    "updatedAt": "2026-03-30T23:07:36.112Z"
+  },
+  {
+    "id": "intent_1774912033677_lx3ulk9",
+    "rawInput": "我要做一个CRM",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1774912033677_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-03-30T23:07:13.677Z"
+      },
+      {
+        "id": "msg_1774912066245_u",
+        "role": "user",
+        "content": "我自己",
+        "timestamp": "2026-03-30T23:07:46.245Z"
+      },
+      {
+        "id": "msg_1774912066245_a",
+        "role": "assistant",
+        "content": "Who are the target users (e.g., developers, end-users, admins)?",
+        "timestamp": "2026-03-30T23:07:46.245Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-03-30T23:07:13.677Z",
+    "updatedAt": "2026-03-30T23:07:46.245Z"
+  },
+  {
+    "id": "intent_1774912033677_lx3ulk9",
+    "rawInput": "我要做一个CRM",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1774912033677_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-03-30T23:07:13.677Z"
+      },
+      {
+        "id": "msg_1774912077128_u",
+        "role": "user",
+        "content": "我自己",
+        "timestamp": "2026-03-30T23:07:57.128Z"
+      },
+      {
+        "id": "msg_1774912077128_a",
+        "role": "assistant",
+        "content": "Who are the target users (e.g., developers, end-users, admins)?",
+        "timestamp": "2026-03-30T23:07:57.128Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-03-30T23:07:13.677Z",
+    "updatedAt": "2026-03-30T23:07:57.128Z"
+  },
+  {
+    "id": "intent_1774912148793_sur3xa7",
+    "rawInput": "我要做一个CRM系统",
+    "status": "intake",
+    "clarificationMessages": [
+      {
+        "id": "msg_1774912148793_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-03-30T23:09:08.793Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-03-30T23:09:08.793Z",
+    "updatedAt": "2026-03-30T23:09:08.793Z"
+  },
+  {
+    "id": "intent_1774912156100_bdbww1d",
+    "rawInput": "我要做一个CRM系统",
+    "status": "intake",
+    "clarificationMessages": [
+      {
+        "id": "msg_1774912156100_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-03-30T23:09:16.100Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-03-30T23:09:16.100Z",
+    "updatedAt": "2026-03-30T23:09:16.100Z"
+  },
+  {
+    "id": "intent_1774912156100_bdbww1d",
+    "rawInput": "我要做一个CRM系统",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1774912156100_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-03-30T23:09:16.100Z"
+      },
+      {
+        "id": "msg_1774912156114_u",
+        "role": "user",
+        "content": "给中小企业用的",
+        "timestamp": "2026-03-30T23:09:16.114Z"
+      },
+      {
+        "id": "msg_1774912156114_a",
+        "role": "assistant",
+        "content": "Who are the target users (e.g., developers, end-users, admins)?",
+        "timestamp": "2026-03-30T23:09:16.114Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-03-30T23:09:16.100Z",
+    "updatedAt": "2026-03-30T23:09:16.114Z"
+  },
+  {
+    "id": "intent_1774912156100_bdbww1d",
+    "rawInput": "我要做一个CRM系统",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1774912156100_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-03-30T23:09:16.100Z"
+      },
+      {
+        "id": "msg_1774912156123_u",
+        "role": "user",
+        "content": "支持客户管理和销售机会跟踪",
+        "timestamp": "2026-03-30T23:09:16.123Z"
+      },
+      {
+        "id": "msg_1774912156123_a",
+        "role": "assistant",
+        "content": "Who are the target users (e.g., developers, end-users, admins)?",
+        "timestamp": "2026-03-30T23:09:16.123Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-03-30T23:09:16.100Z",
+    "updatedAt": "2026-03-30T23:09:16.123Z"
+  },
+  {
+    "id": "intent_1774912182524_cpja9k1",
+    "rawInput": "我要做一个CRM系统",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1774912182524_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-03-30T23:09:42.523Z"
+      },
+      {
+        "id": "msg_1774912182540_u",
+        "role": "user",
+        "content": "第一轮",
+        "timestamp": "2026-03-30T23:09:42.540Z"
+      },
+      {
+        "id": "msg_1774912182540_a",
+        "role": "assistant",
+        "content": "Who are the target users (e.g., developers, end-users, admins)?",
+        "timestamp": "2026-03-30T23:09:42.540Z"
+      },
+      {
+        "id": "msg_1774912182550_u",
+        "role": "user",
+        "content": "第二轮",
+        "timestamp": "2026-03-30T23:09:42.550Z"
+      },
+      {
+        "id": "msg_1774912182550_a",
+        "role": "assistant",
+        "content": "What are the core technical constraints or stack preferences?",
+        "timestamp": "2026-03-30T23:09:42.550Z"
+      },
+      {
+        "id": "msg_1774912182559_u",
+        "role": "user",
+        "content": "第三轮",
+        "timestamp": "2026-03-30T23:09:42.559Z"
+      },
+      {
+        "id": "msg_1774912182559_a",
+        "role": "assistant",
+        "content": "What should be the final deliverable (e.g., API, UI components, documentation)?",
+        "timestamp": "2026-03-30T23:09:42.559Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-03-30T23:09:42.523Z",
+    "updatedAt": "2026-03-30T23:09:42.559Z"
+  },
+  {
+    "id": "intent_1774912187273_uuy9uzj",
+    "rawInput": "我要做一个CRM系统",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1774912187274_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-03-30T23:09:47.273Z"
+      },
+      {
+        "id": "msg_1774912187287_u",
+        "role": "user",
+        "content": "第一轮",
+        "timestamp": "2026-03-30T23:09:47.287Z"
+      },
+      {
+        "id": "msg_1774912187287_a",
+        "role": "assistant",
+        "content": "Who are the target users (e.g., developers, end-users, admins)?",
+        "timestamp": "2026-03-30T23:09:47.287Z"
+      },
+      {
+        "id": "msg_1774912187295_u",
+        "role": "user",
+        "content": "第二轮",
+        "timestamp": "2026-03-30T23:09:47.295Z"
+      },
+      {
+        "id": "msg_1774912187296_a",
+        "role": "assistant",
+        "content": "What are the core technical constraints or stack preferences?",
+        "timestamp": "2026-03-30T23:09:47.295Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-03-30T23:09:47.273Z",
+    "updatedAt": "2026-03-30T23:09:47.295Z"
+  },
+  {
+    "id": "intent_1774912241742_wkdssar",
+    "rawInput": "做一个我自己用的CRM",
+    "status": "plan_ready",
+    "clarificationMessages": [
+      {
+        "id": "msg_1774912241742_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-03-30T23:10:41.742Z"
+      },
+      {
+        "id": "msg_1774912253600_u",
+        "role": "user",
+        "content": "整理我现在的客户数据 目前都是excle",
+        "timestamp": "2026-03-30T23:10:53.600Z"
+      },
+      {
+        "id": "msg_1774912253600_a",
+        "role": "assistant",
+        "content": "Who are the target users (e.g., developers, end-users, admins)?",
+        "timestamp": "2026-03-30T23:10:53.600Z"
+      },
+      {
+        "id": "msg_1774912262886_u",
+        "role": "user",
+        "content": "我自己用",
+        "timestamp": "2026-03-30T23:11:02.886Z"
+      },
+      {
+        "id": "msg_1774912262886_a",
+        "role": "assistant",
+        "content": "What are the core technical constraints or stack preferences?",
+        "timestamp": "2026-03-30T23:11:02.886Z"
+      },
+      {
+        "id": "msg_1774912271188_u",
+        "role": "user",
+        "content": "JAVA",
+        "timestamp": "2026-03-30T23:11:11.188Z"
+      },
+      {
+        "id": "msg_1774912271189_a",
+        "role": "assistant",
+        "content": "What should be the final deliverable (e.g., API, UI components, documentation)?",
+        "timestamp": "2026-03-30T23:11:11.188Z"
+      },
+      {
+        "id": "msg_1774912294544_u",
+        "role": "user",
+        "content": "UI components 前后端完整的项目",
+        "timestamp": "2026-03-30T23:11:34.544Z"
+      }
+    ],
+    "designSummary": {
+      "goal": "做一个我自己用的CRM",
+      "targetUser": "UI components 前后端完整的项目",
+      "coreFlow": "User input -> Processing -> Output",
+      "scope": "Core functionality as described",
+      "outOfScope": "Advanced optimizations and complex integrations",
+      "deliverables": "Functional implementation with tests",
+      "constraints": "Adhere to project coding standards",
+      "risks": "Low to Medium (standard development)"
+    },
+    "implementationPlan": {
+      "roles": [
+        "product-manager",
+        "software-architect",
+        "frontend-developer"
+      ],
+      "steps": [
+        {
+          "id": "step_1",
+          "title": "Requirement analysis",
+          "role": "product-manager"
+        },
+        {
+          "id": "step_2",
+          "title": "Architecture design",
+          "role": "software-architect"
+        },
+        {
+          "id": "step_3",
+          "title": "Frontend scaffold",
+          "role": "frontend-developer"
+        }
+      ],
+      "recommendedAutonomyLevel": "L2",
+      "estimatedComplexity": "Medium"
+    },
+    "suggestedAutonomyLevel": "L2",
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-03-30T23:10:41.742Z",
+    "updatedAt": "2026-03-30T23:11:39.356Z"
+  },
+  {
+    "id": "intent_1774912677131_lbnkih7",
+    "rawInput": "做一个CRM",
+    "status": "completed",
+    "clarificationMessages": [
+      {
+        "id": "msg_1774912677131_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-03-30T23:17:57.131Z"
+      },
+      {
+        "id": "msg_1774912700493_u",
+        "role": "user",
+        "content": "整理我在Excel里的客户信息",
+        "timestamp": "2026-03-30T23:18:20.493Z"
+      },
+      {
+        "id": "msg_1774912700493_a",
+        "role": "assistant",
+        "content": "Who are the target users (e.g., developers, end-users, admins)?",
+        "timestamp": "2026-03-30T23:18:20.493Z"
+      },
+      {
+        "id": "msg_1774912706298_u",
+        "role": "user",
+        "content": "我自己",
+        "timestamp": "2026-03-30T23:18:26.298Z"
+      },
+      {
+        "id": "msg_1774912706299_a",
+        "role": "assistant",
+        "content": "What are the core technical constraints or stack preferences?",
+        "timestamp": "2026-03-30T23:18:26.298Z"
+      },
+      {
+        "id": "msg_1774912714915_u",
+        "role": "user",
+        "content": "JAVA",
+        "timestamp": "2026-03-30T23:18:34.915Z"
+      },
+      {
+        "id": "msg_1774912714915_a",
+        "role": "assistant",
+        "content": "What should be the final deliverable (e.g., API, UI components, documentation)?",
+        "timestamp": "2026-03-30T23:18:34.915Z"
+      },
+      {
+        "id": "msg_1774912720153_u",
+        "role": "user",
+        "content": "UI",
+        "timestamp": "2026-03-30T23:18:40.153Z"
+      }
+    ],
+    "designSummary": {
+      "goal": "做一个CRM",
+      "targetUser": "UI",
+      "coreFlow": "User input -> Processing -> Output",
+      "scope": "Core functionality as described",
+      "outOfScope": "Advanced optimizations and complex integrations",
+      "deliverables": "Functional implementation with tests",
+      "constraints": "Adhere to project coding standards",
+      "risks": "Low to Medium (standard development)"
+    },
+    "implementationPlan": {
+      "scenario": "full-stack-dev",
+      "steps": [
+        {
+          "id": "step_1",
+          "order": 1,
+          "role": "product-manager",
+          "goal": "Define detailed user stories and acceptance criteria.",
+          "input": "Requirement Draft & Design Summary",
+          "verification": "Finalized PRD document",
+          "approvalRequired": true
+        },
+        {
+          "id": "step_2",
+          "order": 2,
+          "role": "software-architect",
+          "goal": "Design system architecture and API contracts.",
+          "input": "PRD document",
+          "verification": "Architecture diagram and API spec",
+          "approvalRequired": true
+        },
+        {
+          "id": "step_3",
+          "order": 3,
+          "role": "backend-architect",
+          "goal": "Implement backend services and database models.",
+          "input": "Architecture design",
+          "verification": "Working API endpoints and unit tests",
+          "approvalRequired": false
+        },
+        {
+          "id": "step_4",
+          "order": 4,
+          "role": "frontend-developer",
+          "goal": "Build UI components and integrate with backend.",
+          "input": "API endpoints and UI design",
+          "verification": "Functional UI and E2E tests",
+          "approvalRequired": false
+        },
+        {
+          "id": "step_5",
+          "order": 5,
+          "role": "code-reviewer",
+          "goal": "Review all code and perform security audit.",
+          "input": "Source code and test results",
+          "verification": "Signed-off pull request",
+          "approvalRequired": true
+        }
+      ],
+      "recommendedAutonomyLevel": "L2",
+      "estimatedComplexity": "Medium"
+    },
+    "suggestedAutonomyLevel": "L2",
+    "suggestedScenario": "full-stack-dev",
+    "confidenceScore": 0,
+    "createdTaskId": "task_1774912726857",
+    "createdAt": "2026-03-30T23:17:57.131Z",
+    "updatedAt": "2026-03-30T23:18:46.857Z"
+  },
+  {
+    "id": "intent_1774923074126_d3206je",
+    "rawInput": "做一个CRM系统",
+    "status": "completed",
+    "clarificationMessages": [
+      {
+        "id": "msg_1774923074126_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-03-31T02:11:14.126Z"
+      },
+      {
+        "id": "msg_1774923091366_u",
+        "role": "user",
+        "content": "整理我在本地Excel中存在的客户信息",
+        "timestamp": "2026-03-31T02:11:31.366Z"
+      },
+      {
+        "id": "msg_1774923091366_a",
+        "role": "assistant",
+        "content": "Who are the target users (e.g., developers, end-users, admins)?",
+        "timestamp": "2026-03-31T02:11:31.366Z"
+      },
+      {
+        "id": "msg_1774923097125_u",
+        "role": "user",
+        "content": "我自己",
+        "timestamp": "2026-03-31T02:11:37.125Z"
+      },
+      {
+        "id": "msg_1774923097125_a",
+        "role": "assistant",
+        "content": "What are the core technical constraints or stack preferences?",
+        "timestamp": "2026-03-31T02:11:37.125Z"
+      },
+      {
+        "id": "msg_1774923104374_u",
+        "role": "user",
+        "content": "Java",
+        "timestamp": "2026-03-31T02:11:44.374Z"
+      },
+      {
+        "id": "msg_1774923104375_a",
+        "role": "assistant",
+        "content": "What should be the final deliverable (e.g., API, UI components, documentation)?",
+        "timestamp": "2026-03-31T02:11:44.374Z"
+      },
+      {
+        "id": "msg_1774923110427_u",
+        "role": "user",
+        "content": "全栈",
+        "timestamp": "2026-03-31T02:11:50.427Z"
+      }
+    ],
+    "designSummary": {
+      "goal": "做一个CRM系统",
+      "targetUser": "全栈",
+      "coreFlow": "User input -> Processing -> Output",
+      "scope": "Core functionality as described",
+      "outOfScope": "Advanced optimizations and complex integrations",
+      "deliverables": "Functional implementation with tests",
+      "constraints": "Adhere to project coding standards",
+      "risks": "Low to Medium (standard development)"
+    },
+    "implementationPlan": {
+      "scenario": "full-stack-dev",
+      "steps": [
+        {
+          "id": "step_1",
+          "order": 1,
+          "role": "software-architect",
+          "goal": "规划 (Plan): 分析需求，重述目标，识别风险，并拆解具体的实施步骤。等待用户确认。",
+          "input": "需求摘要 (Requirement Draft)",
+          "verification": "输出 .md 计划文档并获得批准",
+          "approvalRequired": true
+        },
+        {
+          "id": "step_2",
+          "order": 2,
+          "role": "senior-developer",
+          "goal": "开发 (TDD): 采用测试驱动开发模式，先写失败的测试 (RED)，再最小实现 (GREEN)，最后重构 (REFACTOR)。",
+          "input": "已批准的规划文档",
+          "verification": "测试覆盖率达到 80%+，所有测试用例通过",
+          "approvalRequired": false
+        },
+        {
+          "id": "step_3",
+          "order": 3,
+          "role": "code-reviewer",
+          "goal": "质检 (Code Review): 执行安全与质量审查，检查硬编码、潜在漏洞以及代码最佳实践。",
+          "input": "完成开发的代码",
+          "verification": "生成审查报告并阻断严重问题，所有 Issue 被修复",
+          "approvalRequired": true
+        },
+        {
+          "id": "step_4",
+          "order": 4,
+          "role": "workflow-optimizer",
+          "goal": "维护 (Refactor/Clean): 运行死代码分析，清理未使用的依赖和代码，优化整体结构。",
+          "input": "质检通过的代码",
+          "verification": "死代码清理报告，清理后测试依然通过",
+          "approvalRequired": false
+        }
+      ],
+      "recommendedAutonomyLevel": "L2",
+      "estimatedComplexity": "Medium"
+    },
+    "suggestedAutonomyLevel": "L2",
+    "suggestedScenario": "full-stack-dev",
+    "confidenceScore": 0,
+    "createdTaskId": "task_1774923132862",
+    "createdAt": "2026-03-31T02:11:14.126Z",
+    "updatedAt": "2026-03-31T02:12:12.862Z"
+  },
+  {
+    "id": "intent_1774926444807_ps96ugc",
+    "rawInput": "做一个CRM",
+    "status": "completed",
+    "clarificationMessages": [
+      {
+        "id": "msg_1774926444807_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-03-31T03:07:24.807Z"
+      },
+      {
+        "id": "msg_1774926469798_u",
+        "role": "user",
+        "content": "帮我在本地excle中的客户数据统一管理起来",
+        "timestamp": "2026-03-31T03:07:49.798Z"
+      },
+      {
+        "id": "msg_1774926469799_a",
+        "role": "assistant",
+        "content": "Who are the target users (e.g., developers, end-users, admins)?",
+        "timestamp": "2026-03-31T03:07:49.798Z"
+      },
+      {
+        "id": "msg_1774926473659_u",
+        "role": "user",
+        "content": "我自己",
+        "timestamp": "2026-03-31T03:07:53.659Z"
+      },
+      {
+        "id": "msg_1774926473659_a",
+        "role": "assistant",
+        "content": "What are the core technical constraints or stack preferences?",
+        "timestamp": "2026-03-31T03:07:53.659Z"
+      },
+      {
+        "id": "msg_1774926479325_u",
+        "role": "user",
+        "content": "Java",
+        "timestamp": "2026-03-31T03:07:59.325Z"
+      },
+      {
+        "id": "msg_1774926479325_a",
+        "role": "assistant",
+        "content": "What should be the final deliverable (e.g., API, UI components, documentation)?",
+        "timestamp": "2026-03-31T03:07:59.325Z"
+      },
+      {
+        "id": "msg_1774926489973_u",
+        "role": "user",
+        "content": "ALL",
+        "timestamp": "2026-03-31T03:08:09.973Z"
+      }
+    ],
+    "designSummary": {
+      "goal": "做一个CRM",
+      "targetUser": "ALL",
+      "coreFlow": "User input -> Processing -> Output",
+      "scope": "Core functionality as described",
+      "outOfScope": "Advanced optimizations and complex integrations",
+      "deliverables": "Functional implementation with tests",
+      "constraints": "Adhere to project coding standards",
+      "risks": "Low to Medium (standard development)"
+    },
+    "implementationPlan": {
+      "scenario": "feature-delivery",
+      "steps": [
+        {
+          "id": "step_1",
+          "order": 1,
+          "role": "sprint-prioritizer",
+          "goal": "产品澄清 (Product): 完善 PRD 摘要，明确目标用户和验收标准。",
+          "input": "设计摘要 (Design Summary)",
+          "verification": "输出 PRD 摘要文档",
+          "approvalRequired": true
+        },
+        {
+          "id": "step_2",
+          "order": 2,
+          "role": "software-architect",
+          "goal": "架构设计 (Architect): 拆分前后端边界，定义核心接口和模块关系。",
+          "input": "PRD 摘要",
+          "verification": "输出架构说明书与接口定义",
+          "approvalRequired": true
+        },
+        {
+          "id": "step_3",
+          "order": 3,
+          "role": "frontend-developer",
+          "goal": "前端开发 (Frontend): 实现交互流程、页面结构及状态流。",
+          "input": "架构说明书",
+          "verification": "前端组件与交互逻辑通过验证",
+          "approvalRequired": false
+        },
+        {
+          "id": "step_4",
+          "order": 4,
+          "role": "backend-architect",
+          "goal": "后端开发 (Backend): 实现数据模型、业务逻辑及 API 接口。",
+          "input": "架构说明书",
+          "verification": "API 接口测试通过，数据持久化正常",
+          "approvalRequired": false
+        },
+        {
+          "id": "step_5",
+          "order": 5,
+          "role": "security-engineer",
+          "goal": "安全审计 (Security): 审查权限边界、风险动作并拦截敏感操作。",
+          "input": "前后端代码及配置",
+          "verification": "生成安全审查报告，确认无高危风险",
+          "approvalRequired": true
+        },
+        {
+          "id": "step_6",
+          "order": 6,
+          "role": "code-reviewer",
+          "goal": "最终评审 (Review): 汇总所有产物，给出合并与发布建议。",
+          "input": "全套开发产出",
+          "verification": "最终验收测试通过，输出总评报告",
+          "approvalRequired": true
+        }
+      ],
+      "recommendedAutonomyLevel": "L2",
+      "estimatedComplexity": "Medium"
+    },
+    "suggestedAutonomyLevel": "L2",
+    "suggestedScenario": "full-stack-dev",
+    "confidenceScore": 0,
+    "createdTaskId": "task_1774926500844",
+    "createdAt": "2026-03-31T03:07:24.807Z",
+    "updatedAt": "2026-03-31T03:08:20.844Z"
+  },
+  {
+    "id": "intent_1774926709390_0wu217m",
+    "rawInput": "我想要一个简洁的个人设置页面，支持修改头像、昵称和修改密码功能。",
+    "status": "completed",
+    "clarificationMessages": [
+      {
+        "id": "msg_1774926709390_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-03-31T03:11:49.390Z"
+      },
+      {
+        "id": "msg_1774926737435_u",
+        "role": "user",
+        "content": "目标是提升用户体验，让设置更直观。",
+        "timestamp": "2026-03-31T03:12:17.435Z"
+      },
+      {
+        "id": "msg_1774926737435_a",
+        "role": "assistant",
+        "content": "Who are the target users (e.g., developers, end-users, admins)?",
+        "timestamp": "2026-03-31T03:12:17.435Z"
+      },
+      {
+        "id": "msg_1774926737444_u",
+        "role": "user",
+        "content": "目标用户是普通 C 端用户。",
+        "timestamp": "2026-03-31T03:12:17.444Z"
+      },
+      {
+        "id": "msg_1774926737444_a",
+        "role": "assistant",
+        "content": "What are the core technical constraints or stack preferences?",
+        "timestamp": "2026-03-31T03:12:17.444Z"
+      },
+      {
+        "id": "msg_1774926737452_u",
+        "role": "user",
+        "content": "技术栈使用 React + Tailwind。",
+        "timestamp": "2026-03-31T03:12:17.452Z"
+      },
+      {
+        "id": "msg_1774926737452_a",
+        "role": "assistant",
+        "content": "What should be the final deliverable (e.g., API, UI components, documentation)?",
+        "timestamp": "2026-03-31T03:12:17.452Z"
+      },
+      {
+        "id": "msg_1774926737460_u",
+        "role": "user",
+        "content": "最终交付一个可交互的页面组件。",
+        "timestamp": "2026-03-31T03:12:17.460Z"
+      }
+    ],
+    "designSummary": {
+      "goal": "我想要一个简洁的个人设置页面，支持修改头像、昵称和修改密码功能。",
+      "targetUser": "普通 C 端用户",
+      "coreFlow": "User input -> Processing -> Output",
+      "scope": "Core functionality as described",
+      "outOfScope": "Advanced optimizations and complex integrations",
+      "deliverables": "Functional implementation with tests",
+      "constraints": "Adhere to project coding standards",
+      "risks": "Low to Medium (standard development)"
+    },
+    "implementationPlan": {
+      "scenario": "feature-delivery",
+      "steps": [
+        {
+          "id": "step_1",
+          "order": 1,
+          "role": "sprint-prioritizer",
+          "goal": "产品澄清 (Product): 完善 PRD 摘要，明确目标用户和验收标准。",
+          "input": "设计摘要 (Design Summary)",
+          "verification": "输出 PRD 摘要文档",
+          "approvalRequired": true
+        },
+        {
+          "id": "step_2",
+          "order": 2,
+          "role": "software-architect",
+          "goal": "架构设计 (Architect): 拆分前后端边界，定义核心接口和模块关系。",
+          "input": "PRD 摘要",
+          "verification": "输出架构说明书与接口定义",
+          "approvalRequired": true
+        },
+        {
+          "id": "step_3",
+          "order": 3,
+          "role": "frontend-developer",
+          "goal": "前端开发 (Frontend): 实现交互流程、页面结构及状态流。",
+          "input": "架构说明书",
+          "verification": "前端组件与交互逻辑通过验证",
+          "approvalRequired": false
+        },
+        {
+          "id": "step_4",
+          "order": 4,
+          "role": "backend-architect",
+          "goal": "后端开发 (Backend): 实现数据模型、业务逻辑及 API 接口。",
+          "input": "架构说明书",
+          "verification": "API 接口测试通过，数据持久化正常",
+          "approvalRequired": false
+        },
+        {
+          "id": "step_5",
+          "order": 5,
+          "role": "security-engineer",
+          "goal": "安全审计 (Security): 审查权限边界、风险动作并拦截敏感操作。",
+          "input": "前后端代码及配置",
+          "verification": "生成安全审查报告，确认无高危风险",
+          "approvalRequired": true
+        },
+        {
+          "id": "step_6",
+          "order": 6,
+          "role": "code-reviewer",
+          "goal": "最终评审 (Review): 汇总所有产物，给出合并与发布建议。",
+          "input": "全套开发产出",
+          "verification": "最终验收测试通过，输出总评报告",
+          "approvalRequired": true
+        }
+      ],
+      "recommendedAutonomyLevel": "L2",
+      "estimatedComplexity": "Medium"
+    },
+    "suggestedAutonomyLevel": "L2",
+    "suggestedScenario": "full-stack-dev",
+    "confidenceScore": 0,
+    "createdTaskId": "task_1774926783268",
+    "createdAt": "2026-03-31T03:11:49.390Z",
+    "updatedAt": "2026-03-31T03:13:03.268Z"
   }
 ]

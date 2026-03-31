@@ -1,0 +1,399 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1774909209402,
+  "projectRoot": "/Users/user/agency-agents",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "docs",
+      "examples",
+      "scripts"
+    ],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "design": {
+      "path": "design",
+      "purpose": null,
+      "fileCount": 8,
+      "lastAccessed": 1774909209380,
+      "keyFiles": [
+        "design-brand-guardian.md",
+        "design-image-prompt-engineer.md",
+        "design-inclusive-visuals-specialist.md",
+        "design-ui-designer.md",
+        "design-ux-architect.md"
+      ]
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 5,
+      "lastAccessed": 1774909209380,
+      "keyFiles": [
+        "ClaudeCode使用说明书.md",
+        "Codex使用说明书.md",
+        "GeminiCLI使用说明书.md",
+        "如何激活Agent.md"
+      ]
+    },
+    "engineering": {
+      "path": "engineering",
+      "purpose": null,
+      "fileCount": 23,
+      "lastAccessed": 1774909209381,
+      "keyFiles": [
+        "engineering-ai-data-remediation-engineer.md",
+        "engineering-ai-engineer.md",
+        "engineering-autonomous-optimization-architect.md",
+        "engineering-backend-architect.md",
+        "engineering-code-reviewer.md"
+      ]
+    },
+    "examples": {
+      "path": "examples",
+      "purpose": "Example code",
+      "fileCount": 6,
+      "lastAccessed": 1774909209381,
+      "keyFiles": [
+        "README.md",
+        "nexus-spatial-discovery.md",
+        "workflow-book-chapter.md",
+        "workflow-landing-page.md",
+        "workflow-startup-mvp.md"
+      ]
+    },
+    "game-development": {
+      "path": "game-development",
+      "purpose": null,
+      "fileCount": 6,
+      "lastAccessed": 1774909209381,
+      "keyFiles": [
+        "game-audio-engineer.md",
+        "game-designer.md",
+        "level-designer.md",
+        "narrative-designer.md",
+        "technical-artist.md"
+      ]
+    },
+    "hq": {
+      "path": "hq",
+      "purpose": null,
+      "fileCount": 17,
+      "lastAccessed": 1774909209382,
+      "keyFiles": [
+        "CHANGELOG.md",
+        "PLAN-sampling-fallback.md",
+        "README.md",
+        "active_squad.json",
+        "approvals.json"
+      ]
+    },
+    "integrations": {
+      "path": "integrations",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1774909209382,
+      "keyFiles": [
+        "README.md"
+      ]
+    },
+    "marketing": {
+      "path": "marketing",
+      "purpose": null,
+      "fileCount": 26,
+      "lastAccessed": 1774909209382,
+      "keyFiles": [
+        "marketing-app-store-optimizer.md",
+        "marketing-baidu-seo-specialist.md",
+        "marketing-bilibili-content-strategist.md",
+        "marketing-book-co-author.md",
+        "marketing-carousel-growth-engine.md"
+      ]
+    },
+    "paid-media": {
+      "path": "paid-media",
+      "purpose": null,
+      "fileCount": 7,
+      "lastAccessed": 1774909209382,
+      "keyFiles": [
+        "paid-media-auditor.md",
+        "paid-media-creative-strategist.md",
+        "paid-media-paid-social-strategist.md",
+        "paid-media-ppc-strategist.md",
+        "paid-media-programmatic-buyer.md"
+      ]
+    },
+    "product": {
+      "path": "product",
+      "purpose": null,
+      "fileCount": 4,
+      "lastAccessed": 1774909209382,
+      "keyFiles": [
+        "product-behavioral-nudge-engine.md",
+        "product-feedback-synthesizer.md",
+        "product-sprint-prioritizer.md",
+        "product-trend-researcher.md"
+      ]
+    },
+    "project-management": {
+      "path": "project-management",
+      "purpose": null,
+      "fileCount": 6,
+      "lastAccessed": 1774909209383,
+      "keyFiles": [
+        "project-management-experiment-tracker.md",
+        "project-management-jira-workflow-steward.md",
+        "project-management-project-shepherd.md",
+        "project-management-studio-operations.md",
+        "project-management-studio-producer.md"
+      ]
+    },
+    "sales": {
+      "path": "sales",
+      "purpose": null,
+      "fileCount": 8,
+      "lastAccessed": 1774909209383,
+      "keyFiles": [
+        "sales-account-strategist.md",
+        "sales-coach.md",
+        "sales-deal-strategist.md",
+        "sales-discovery-coach.md",
+        "sales-engineer.md"
+      ]
+    },
+    "scripts": {
+      "path": "scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 3,
+      "lastAccessed": 1774909209383,
+      "keyFiles": [
+        "convert.sh",
+        "install.sh",
+        "lint-agents.sh"
+      ]
+    },
+    "spatial-computing": {
+      "path": "spatial-computing",
+      "purpose": null,
+      "fileCount": 6,
+      "lastAccessed": 1774909209383,
+      "keyFiles": [
+        "macos-spatial-metal-engineer.md",
+        "terminal-integration-specialist.md",
+        "visionos-spatial-engineer.md",
+        "xr-cockpit-interaction-specialist.md",
+        "xr-immersive-developer.md"
+      ]
+    },
+    "specialized": {
+      "path": "specialized",
+      "purpose": null,
+      "fileCount": 23,
+      "lastAccessed": 1774909209383,
+      "keyFiles": [
+        "accounts-payable-agent.md",
+        "agentic-identity-trust.md",
+        "agents-orchestrator.md",
+        "automation-governance-architect.md",
+        "blockchain-security-auditor.md"
+      ]
+    },
+    "strategy": {
+      "path": "strategy",
+      "purpose": null,
+      "fileCount": 4,
+      "lastAccessed": 1774909209383,
+      "keyFiles": [
+        "EXECUTIVE-BRIEF.md",
+        "QUICKSTART.md",
+        "nexus-strategy.md"
+      ]
+    },
+    "support": {
+      "path": "support",
+      "purpose": null,
+      "fileCount": 6,
+      "lastAccessed": 1774909209383,
+      "keyFiles": [
+        "support-analytics-reporter.md",
+        "support-executive-summary-generator.md",
+        "support-finance-tracker.md",
+        "support-infrastructure-maintainer.md",
+        "support-legal-compliance-checker.md"
+      ]
+    },
+    "testing": {
+      "path": "testing",
+      "purpose": null,
+      "fileCount": 8,
+      "lastAccessed": 1774909209383,
+      "keyFiles": [
+        "testing-accessibility-auditor.md",
+        "testing-api-tester.md",
+        "testing-evidence-collector.md",
+        "testing-performance-benchmarker.md",
+        "testing-reality-checker.md"
+      ]
+    },
+    "workshop": {
+      "path": "workshop",
+      "purpose": null,
+      "fileCount": 6,
+      "lastAccessed": 1774909209383,
+      "keyFiles": [
+        "main.py",
+        "requirements.txt",
+        "task_envelope_v2.py",
+        "workshop.log"
+      ]
+    },
+    "hq/config": {
+      "path": "hq/config",
+      "purpose": "Configuration files",
+      "fileCount": 3,
+      "lastAccessed": 1774909209384,
+      "keyFiles": [
+        "capability-bindings.json",
+        "host-manifest.json",
+        "host-policy.json"
+      ]
+    },
+    "workshop/tests": {
+      "path": "workshop/tests",
+      "purpose": "Test files",
+      "fileCount": 0,
+      "lastAccessed": 1774909209385,
+      "keyFiles": []
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "hq/backend/src/api/intents.ts",
+      "accessCount": 3,
+      "lastAccessed": 1774925547410,
+      "type": "file"
+    },
+    {
+      "path": "hq/backend/src/orchestration/mvp-preset.ts",
+      "accessCount": 2,
+      "lastAccessed": 1774910151980,
+      "type": "file"
+    },
+    {
+      "path": "hq/backend/src/orchestration/hitl-service.ts",
+      "accessCount": 2,
+      "lastAccessed": 1774925053579,
+      "type": "file"
+    },
+    {
+      "path": "hq/frontend/src/app/tasks/[id]/page.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1774925377120,
+      "type": "file"
+    },
+    {
+      "path": "hq/frontend/src/components/TaskWorkspacePanel.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1774925377487,
+      "type": "file"
+    },
+    {
+      "path": "TODOS.md",
+      "accessCount": 1,
+      "lastAccessed": 1774910055799,
+      "type": "file"
+    },
+    {
+      "path": "docs/plans/staffai_superpowers_latest_dev_plan.md",
+      "accessCount": 1,
+      "lastAccessed": 1774910074360,
+      "type": "file"
+    },
+    {
+      "path": "hq/backend/src/shared/dual-core-protocol.ts",
+      "accessCount": 1,
+      "lastAccessed": 1774910102926,
+      "type": "file"
+    },
+    {
+      "path": "hq/backend/src/shared/hitl-types.ts",
+      "accessCount": 1,
+      "lastAccessed": 1774910102940,
+      "type": "file"
+    },
+    {
+      "path": "hq/backend/src/shared/task-envelope-v2.ts",
+      "accessCount": 1,
+      "lastAccessed": 1774910102982,
+      "type": "file"
+    },
+    {
+      "path": "hq/backend/src/orchestration/task-main-chain-service.ts",
+      "accessCount": 1,
+      "lastAccessed": 1774910103035,
+      "type": "file"
+    },
+    {
+      "path": "hq/backend/src/app/register-backend-routes.ts",
+      "accessCount": 1,
+      "lastAccessed": 1774910151926,
+      "type": "directory"
+    },
+    {
+      "path": "hq/backend",
+      "accessCount": 1,
+      "lastAccessed": 1774910151968,
+      "type": "directory"
+    },
+    {
+      "path": "hq/backend/src/runtime/runtime-adapter.ts",
+      "accessCount": 1,
+      "lastAccessed": 1774925039091,
+      "type": "file"
+    },
+    {
+      "path": "hq/backend/src/orchestration/plan-generation-service.ts",
+      "accessCount": 1,
+      "lastAccessed": 1774925059810,
+      "type": "file"
+    },
+    {
+      "path": "hq/backend/src/orchestration/task-execution-orchestrator.ts",
+      "accessCount": 1,
+      "lastAccessed": 1774925453404,
+      "type": "file"
+    },
+    {
+      "path": "hq/backend/src/orchestration/task-orchestrator.ts",
+      "accessCount": 1,
+      "lastAccessed": 1774925477299,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

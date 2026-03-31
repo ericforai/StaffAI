@@ -1,10 +1,14 @@
 'use client';
 
 import Link from 'next/link';
+import ReactMarkdown from 'react-markdown';
 import { SuspendedTaskPanel } from '../SuspendedTaskPanel';
 import { formatTaskStatus, formatExecutionMode } from '../../utils/formatters';
 import type { TaskExecutor } from '../../hooks/useTaskActions';
 import type { TaskSummary, TaskExecution } from '../../types';
+import { Save } from 'lucide-react';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333/api';
 
 interface TaskInfoCardProps {
   task: TaskSummary;
@@ -57,10 +61,32 @@ export function TaskInfoCard({
 }: TaskInfoCardProps) {
   const statusMessage = getTaskStatusMessage(task.status, task.executionMode);
 
+  const handleSaveTemplate = async () => {
+    const name = prompt('请输入模板名称:', `${task.title} 模板`);
+    if (!name) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/tasks/${task.id}/save-template`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      });
+      if (res.ok) {
+        alert('模板保存成功！您可以在模板中心查看。');
+      } else {
+        alert('保存失败，请重试。');
+      }
+    } catch (err) {
+      alert('保存出错：' + String(err));
+    }
+  };
+
   return (
     <section className="rounded-[1.8rem] border border-slate-200 bg-white/88 p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)]">
       <h2 className="text-2xl font-black text-slate-950">{task.title}</h2>
-      <p className="mt-3 text-base leading-7 text-slate-600">{task.description}</p>
+      <div className="mt-3 text-sm leading-7 text-slate-600 prose prose-sm prose-slate max-w-none">
+        <ReactMarkdown>{task.description}</ReactMarkdown>
+      </div>
       
       <div className="mt-6 grid gap-3 sm:grid-cols-3">
         <div className="rounded-[1.2rem] border border-slate-200 bg-[#fcfaf5] p-4">
@@ -149,6 +175,14 @@ export function TaskInfoCard({
         >
           查看审批队列
         </Link>
+        <button
+          type="button"
+          onClick={handleSaveTemplate}
+          className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 transition-all hover:border-slate-300 hover:text-slate-950 flex items-center gap-2"
+        >
+          <Save size={16} />
+          保存为模板
+        </button>
       </div>
     </section>
   );

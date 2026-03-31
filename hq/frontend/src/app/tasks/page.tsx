@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTasks } from '../../hooks/useTasks';
@@ -8,6 +8,7 @@ import { useTaskEventFeed } from '../../hooks/useTaskEventFeed';
 import { useAgents } from '../../hooks/useAgents';
 import { API_CONFIG } from '../../utils/constants';
 import { TaskComposer } from '../../components/tasks/TaskComposer';
+import { AdvancedTaskWizard } from '../../components/tasks/AdvancedTaskWizard';
 import { TaskFilter } from '../../components/tasks/TaskFilter';
 import { TaskCard } from '../../components/tasks/TaskCard';
 import { ExecutionConfirmModal } from '../../components/tasks/ExecutionConfirmModal';
@@ -27,13 +28,22 @@ export default function TasksPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const statusFilter = searchParams.get('status');
+  const initialMode = searchParams.get('mode') === 'advanced' ? 'advanced' : 'simple';
+  
   const { tasks, loading, error, setTasks, reload } = useTasks();
   const { latestSummaryByTaskId } = useTaskEventFeed();
   const { agents, activeIds } = useAgents();
 
   const [viewMode, setViewMode] = useState<'all' | 'active'>(statusFilter ? 'active' : 'all');
+  const [creationMode, setCreationMode] = useState<'simple' | 'advanced'>(initialMode);
   const [newTaskId, setNewTaskId] = useState<string | null>(null);
   const [executing, setExecuting] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get('mode') === 'advanced') {
+      setCreationMode('advanced');
+    }
+  }, [searchParams]);
 
   async function executeTask(taskId: string) {
     setExecuting(true);
@@ -71,14 +81,24 @@ export default function TasksPage() {
 
   return (
     <div className="mx-auto w-full max-w-[1800px]">
-      <TaskComposer
-        agents={agents}
-        activeIds={activeIds}
-        onTaskCreated={(task) => {
-          setTasks((current) => [task, ...current]);
-          setNewTaskId(task.id);
-        }}
-      />
+      {creationMode === 'simple' ? (
+        <TaskComposer
+          agents={agents}
+          activeIds={activeIds}
+          onTaskCreated={(task) => {
+            setTasks((current) => [task, ...current]);
+            setNewTaskId(task.id);
+          }}
+          onSwitchToAdvanced={() => setCreationMode('advanced')}
+        />
+      ) : (
+        <AdvancedTaskWizard
+          onTaskCreated={(taskId) => {
+            router.push(`/tasks/${taskId}`);
+          }}
+          onCancel={() => setCreationMode('simple')}
+        />
+      )}
 
       <div className="mt-5 rounded-[1.8rem] border border-slate-200 bg-white p-6 shadow-sm">
         <TaskFilter

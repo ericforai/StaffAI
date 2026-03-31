@@ -18,10 +18,26 @@ function formatApprovalStatus(status: string) {
       return '已批准';
     case 'rejected':
       return '已拒绝';
+    case 'cancelled':
+      return '已取消';
     default:
       return status;
   }
 }
+
+const APPROVAL_TYPE_LABELS: Record<string, string> = {
+  plan: '计划审批',
+  high_risk_action: '高风险动作',
+  final_delivery: '最终交付',
+  generic: '常规审批',
+};
+
+const APPROVAL_TYPE_STYLES: Record<string, string> = {
+  plan: 'bg-blue-100 text-blue-700 border-blue-200',
+  high_risk_action: 'bg-amber-100 text-amber-700 border-amber-200',
+  final_delivery: 'bg-purple-100 text-purple-700 border-purple-200',
+  generic: 'bg-slate-100 text-slate-700 border-slate-200',
+};
 
 const formatApprovalDate = (value?: string) => {
   if (!value) {
@@ -220,25 +236,45 @@ export default function ApprovalsPage() {
       )}
 
       <div className="grid gap-4">
-        {visibleApprovals.map((approval) => (
+        {visibleApprovals.map((approval: any) => (
           <div key={approval.id} className="rounded-lg border border-slate-200 bg-white px-5 py-4">
             <div className="flex items-center justify-between gap-4">
-              <div>
+              <div className="flex items-center gap-3">
+                <span className={`rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${APPROVAL_TYPE_STYLES[approval.approvalType] || APPROVAL_TYPE_STYLES.generic}`}>
+                  {APPROVAL_TYPE_LABELS[approval.approvalType] || APPROVAL_TYPE_LABELS.generic}
+                </span>
                 <Link href={`/tasks/${approval.taskId}`} className="text-sm font-bold text-slate-900 hover:text-slate-700">
                   {approval.taskId}
                 </Link>
-                <p className="mt-2 text-xs tracking-[0.14em] text-slate-500">{approval.requestedBy}</p>
-                {latestSummaryByTaskId.get(approval.taskId) && (
-                  <p className="mt-2 text-xs text-slate-500">
-                    最新事件：{latestSummaryByTaskId.get(approval.taskId)?.detail}
-                  </p>
-                )}
               </div>
               <div className="text-right">
                 <p className="text-sm font-bold text-slate-900">{formatApprovalStatus(approval.status)}</p>
                 <p className="mt-1 text-xs text-slate-500">{formatTimestamp(approval.requestedAt)}</p>
               </div>
             </div>
+
+            <div className="mt-3">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">风险评估</p>
+              <div className="mt-2 flex items-center gap-2">
+                <span className={`text-xs font-black ${approval.riskLevel === 'HIGH' ? 'text-rose-600' : approval.riskLevel === 'MEDIUM' ? 'text-amber-600' : 'text-emerald-600'}`}>
+                  {approval.riskLevel || 'LOW'} RISK
+                </span>
+                <p className="text-sm text-slate-600">{approval.riskReason || '常规操作，风险受控。'}</p>
+              </div>
+            </div>
+
+            {approval.blockingArtifacts && approval.blockingArtifacts.length > 0 && (
+              <div className="mt-4">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">待评审产物</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {approval.blockingArtifacts.map((artId: string) => (
+                    <span key={artId} className="rounded-md bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-600 ring-1 ring-slate-200">
+                      {artId}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="mt-4">
               <SuspendedTaskPanel taskId={approval.taskId} />

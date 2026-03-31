@@ -104,6 +104,23 @@ const MVP_PRESETS: ReadonlyMap<string, MvpPreset> = new Map([
       defaultContextPaths: ['context/project.md', 'context/architecture.md'],
     },
   ],
+  [
+    'feature-delivery',
+    {
+      name: 'feature-delivery',
+      description: '产品研发交付小组 — 从需求澄清到最终交付的全流程团队',
+      roles: [
+        'sprint-prioritizer',
+        'software-architect',
+        'frontend-developer',
+        'backend-architect',
+        'security-engineer',
+        'code-reviewer',
+      ],
+      defaultExecutionMode: 'serial' as const,
+      defaultContextPaths: ['docs/plans', 'docs/system-design'],
+    },
+  ],
 ]);
 
 const MVP_PRESET_ALIASES: ReadonlyMap<string, string> = new Map([

@@ -1,6 +1,6 @@
-# 🎭 StaffAI Agent OS (NexusArchive)
+# 🎭 StaffAI Agent OS
 
-> **The Enterprise-Grade AI Agent Operating System** - A dual-core architecture designed for reliable, scalable, and governed multi-agent orchestration. Powering the next generation of digital workforces with the "NexusArchive" (数凭电子会计档案) internal foundation.
+> **The Enterprise-Grade AI Agent Operating System** - A dual-core architecture designed for reliable, scalable, and governed multi-agent orchestration.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![StaffAI 1.0](https://img.shields.io/badge/Version-1.0--Stable-blue.svg)](#-key-features-staffai-10)
@@ -44,11 +44,11 @@ Our 1.0 release closes the critical engineering gaps for production readiness:
 cd hq && ./setup.sh
 ./start.sh
 
-# The Python Workshop ( deer-flow) will be automatically connected
+# The Python Workshop (deer-flow) will be automatically connected
 ```
 
 Then open:
-- `http://localhost:3008` for the **NexusArchive Command Deck**
+- `http://localhost:3008` for the **Command Deck**
 - `http://localhost:3333/startup-check` for runtime status
 
 ---

@@ -577,7 +577,12 @@ export function createFileRequirementDraftRepository(filePath: string): Requirem
     },
     async save(draft) {
       const drafts = await this.list();
-      drafts.push(draft);
+      const index = drafts.findIndex((d) => d.id === draft.id);
+      if (index >= 0) {
+        drafts[index] = draft;
+      } else {
+        drafts.push(draft);
+      }
       writeJsonFile(filePath, drafts);
     },
     async update(id, updater) {

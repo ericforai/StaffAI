@@ -104,18 +104,24 @@ export interface TaskRouteDecision {
   executionMode: TaskExecutionMode;
 }
 
+export type ApprovalType = 'plan' | 'high_risk_action' | 'final_delivery' | 'generic';
+
 export interface ApprovalRecord {
   id: string;
   taskId: string;
-  taskTitle?: string;           // NEW: Task title for display
+  taskTitle?: string;
   status: ApprovalStatus;
+  approvalType?: ApprovalType;
   requestedBy: string;
   requestedAt: string;
-  riskLevel?: ApprovalRiskLevel;  // NEW: Risk level assessment
-  approver?: string;           // NEW: Approver name/ID
-  approvedAt?: string;         // NEW: When approval was granted/denied
-  reason?: string;             // NEW: Reason for decision
-  decisionContext?: Record<string, unknown>;  // NEW: Additional context
+  riskLevel?: ApprovalRiskLevel;
+  riskReason?: string;
+  resumeTarget?: string; // e.g., stepId or execution state
+  blockingArtifacts?: string[]; // IDs of artifacts that must be reviewed
+  approver?: string;
+  approvedAt?: string;
+  reason?: string; // Reason for approval/rejection decision
+  decisionContext?: Record<string, unknown>;
   resolvedAt?: string;
 }
 
@@ -127,6 +133,16 @@ export type TaskAssignmentRole =
   | 'commander'
   | 'executor'
   | 'critic';
+
+export interface Artifact {
+  id: string;
+  type: 'prd' | 'architecture' | 'frontend_spec' | 'backend_spec' | 'security_report' | 'review_report' | 'generic';
+  title: string;
+  content: string; // Markdown or JSON string
+  structuredData?: Record<string, any>;
+  createdAt: string;
+  createdBy: string; // agentId
+}
 
 export interface TaskAssignment {
   id: string;
@@ -144,6 +160,7 @@ export interface TaskAssignment {
   completedAt?: string;
   resultSummary?: string;
   errorMessage?: string;
+  artifacts?: Artifact[];
 }
 
 export interface WorkflowPlanStep {

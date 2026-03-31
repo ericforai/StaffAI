@@ -1,64 +1,78 @@
-# GEMINI.md
+# 🎭 StaffAI Agent OS - Workspace Guide
 
-## Project Overview
+Welcome to the **StaffAI Agent OS** project. This document serves as the primary technical reference for this workspace, replacing global memories with project-specific context.
 
-**The Agency** is a comprehensive collection of 144+ specialized AI agent personalities designed to transform workflows across multiple domains. Unlike generic AI prompts, these agents are meticulously crafted with unique identities, core missions, critical rules, technical deliverables, and success metrics.
+## 🚀 Project Overview
+StaffAI is an enterprise-grade AI Agent Operating System designed for reliable, scalable, and governed multi-agent orchestration. It connects a vast library of **144+ specialized agents** with a robust execution environment.
 
-The project is organized into 12 divisions, including Engineering, Design, Marketing, Sales, Product, Project Management, Testing, Support, and more. It features a robust integration system that converts these agent definitions into formats compatible with leading AI tools like Claude Code, Cursor, Aider, Windsurf, and **Gemini CLI**.
+### 🏗️ Dual-Core Architecture
+The system follows a "Management-Execution" separation model:
+1.  **TS Office (The Orchestrator)**: TypeScript/Express-based backend (`hq/`) managing workflow planning, task routing, approvals, and state.
+2.  **Python Workshop (The Executor)**: Python-based environment (`workshop/`) using `deer-flow` and LangGraph for high-performance tool execution and agentic reasoning in sandboxed environments.
 
-## Directory Overview
+---
 
-The repository is structured to manage agent definitions and their deployment to various tools:
+## 🛠️ Tech Stack
+- **Management Core (TS Office)**:
+  - **Backend**: Node.js, TypeScript, Express, MCP (Model Context Protocol), WebSockets.
+  - **Frontend**: React 19, Next.js, TailwindCSS.
+  - **Storage**: PostgreSQL (Production), JSON File (Development), Redis (Cache), ChromaDB (Vector).
+- **Execution Core (Python Workshop)**:
+  - **Engine**: Python 3.10+, FastAPI, LangGraph, `deer-flow`.
+  - **Isolation**: Docker-based physical sandboxing.
+- **Integration**: SSE (Server-Sent Events) for real-time thought-stream "broadcasting".
 
-- **Agent Divisions (`engineering/`, `design/`, `marketing/`, etc.)**: Contain the core `.md` files for each specialized agent.
-- **`scripts/`**: Automation tools for maintaining and deploying the agency.
-  - `lint-agents.sh`: Validates agent file structure and content.
-  - `convert.sh`: Generates tool-specific integration files from the raw agent Markdown.
-  - `install.sh`: Deploys the converted agents to local tool configuration directories.
-- **`integrations/`**: Target directory for converted files (e.g., Gemini CLI extensions, Cursor rules).
-- **`strategy/` & `examples/`**: High-level documentation and real-world multi-agent workflow scenarios.
+---
 
-## Key Commands
+## ⚡ Quick Start & Startup Commands
 
-### For Maintenance & Development
-- **Lint all agents**: Ensure all agent files meet formatting standards.
+### 1. Full System Bootstrap
+The easiest way to start the entire HQ (Backend + Frontend):
+```bash
+cd hq
+./setup.sh  # One-time setup
+./start.sh  # Starts Backend (3333) and Frontend (3008)
+```
+
+### 2. Manual Component Startup
+- **TS Backend (Port 3333)**:
   ```bash
-  ./scripts/lint-agents.sh
+  cd hq/backend
+  npm run dev:web  # Development mode
+  # or
+  npm run build && npm run start:web  # Production mode
   ```
-- **Convert agents**: Regenerate integration files for all tools (or a specific one).
+- **TS Frontend (Port 3008)**:
   ```bash
-  ./scripts/convert.sh --tool gemini-cli
+  cd hq/frontend
+  PORT=3008 npm run dev
   ```
-
-### For Gemini CLI Integration
-- **Install the Agency Extension**: Deploys all agents as skills in your Gemini CLI environment.
+- **Python Workshop (Port 8000 default)**:
   ```bash
-  ./scripts/convert.sh --tool gemini-cli
-  ./scripts/install.sh --tool gemini-cli
-  ```
-- **Activate a Skill**: Once installed, you can invoke any agent by its slug.
-  ```text
-  "Use the frontend-developer skill to review this React component."
+  cd workshop
+  python main.py
   ```
 
-## Development Conventions
+---
 
-When contributing new agents or modifying existing ones, adhere to the following standards enforced by `scripts/lint-agents.sh`:
+## 🧠 Core Concepts & Memory
+- **L1/L2/L3 Memory Hierarchy**:
+  - **L1 (Org)**: Global shared knowledge (RAG).
+  - **L2 (Project)**: Shared context for a specific task/squad.
+  - **L3 (Agent)**: Personal experience and "style" for each specialist.
+- **HITL (Human-in-the-Loop)**: Mandatory approval chains for HIGH/MEDIUM risk tasks.
+- **Squad Mode**: Collaborative agent groups (Coordinator, Executor, Critic).
 
-### Required YAML Frontmatter
-Every agent file must begin with a YAML block containing:
-- `name`: The human-readable name of the agent.
-- `description`: A concise summary of the agent's specialty.
-- `color`: A primary color associated with the agent (e.g., cyan, green, red).
+---
 
-### Recommended Sections
-To ensure agent quality and personality depth, include these sections:
-- `## 🧠 Your Identity & Memory`: Define the persona and background.
-- `## 🎯 Your Core Mission`: List primary responsibilities and goals.
-- `## 🚨 Critical Rules You Must Follow`: Mandatory boundaries and technical constraints.
-- `## 📋 Your Technical Deliverables`: Examples of expected outputs (code, reports).
+## 📅 Iteration Direction (v1.0 Roadmap)
+- **Phase 1: The Walking Skeleton**: Finalizing physical connectivity between TS Office and Python Workshop via `deer-flow`.
+- **Governance & Budgeting**: Implementing real-time cost tracking and multi-level approval gates.
+- **Atlas Visualization**: Real-time growth of the company knowledge graph and agent relationship map.
 
-### Content Quality
-- **Word Count**: Agent bodies should generally exceed 50 words to provide sufficient context.
-- **Tone**: Maintain the specific "voice" defined in the agent's `communication style` section.
-- **Surgical Updates**: When editing, preserve the established frontmatter structure to ensure `convert.sh` continues to function correctly.
+---
+
+## 📋 Development Conventions
+- **Agent Definitions**: Managed in `engineering/`, `design/`, etc. Use `./scripts/convert.sh` to update tool-specific integrations.
+- **Repository Pattern**: All persistence goes through `hq/backend/src/persistence/` interfaces to allow swapping between File and DB storage.
+- **Type Safety**: Strict TypeScript in backend; React 19 in frontend.

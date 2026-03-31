@@ -33,11 +33,11 @@ import { createPermissionChecker } from '../identity/permission-checker';
 import { createUserContextService } from '../identity/user-context';
 import { createUserContextMiddleware } from '../middleware/user-context.middleware';
 import { BudgetService } from '../governance/budget-service';
-import { SquadTemplateService } from '../orchestration/squad-template-service';
+import { createSquadTemplateService } from '../orchestration/squad-template-service';
 import { createMemoryLayerService } from '../orchestration/memory-layer-service';
 import { createWorkflowExecutionEngine } from '../orchestration/workflow-execution-engine';
 import { createAssignmentExecutor } from '../orchestration/assignment-executor';
-import type { TaskRecord, ExecutionLifecycleRecord } from '../shared/task-types';
+import type { TaskRecord, ExecutionRecord } from '../shared/task-types';
 import { HitlService } from '../orchestration/hitl-service';
 import { TaskStateMachine } from '../orchestration/task-state-machine';
 import { TaskRepositoryAdapter } from '../shared/task-repository-adapter';
@@ -71,9 +71,9 @@ export function registerBackendRoutes({
 
   // Initialize assignment executor
   const assignmentExecutor = createAssignmentExecutor({
-    scanner,
     store,
-    discussionService,
+    auditLogger: null,
+    executor: (process.env.AGENCY_RUNTIME_DEFAULT_EXECUTOR as any) || 'claude',
   });
 
   // Initialize workflow execution engine
@@ -170,7 +170,7 @@ export function registerBackendRoutes({
       const result = memoryLayerService.loadMemory(task);
       return result.context || undefined;
     },
-    writeExecutionSummary: (task: TaskRecord, execution: ExecutionLifecycleRecord) => {
+    writeExecutionSummary: (task: TaskRecord, execution: ExecutionRecord) => {
       memoryLayerService.writeback(task, execution);
     },
     sessionCapabilities: {
@@ -239,7 +239,9 @@ export function registerBackendRoutes({
   registerBudgetRoutes(app, { budgetService });
 
   // Initialize SquadTemplateService
-  const squadTemplateService = new SquadTemplateService(store);
+  const squadTemplateService = createSquadTemplateService({
+    getAgent: (id: string) => scanner.getAgent(id),
+  });
 
   // Register squad template routes
   registerSquadTemplateRoutes(app, {

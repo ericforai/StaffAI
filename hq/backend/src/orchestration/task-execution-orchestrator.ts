@@ -170,6 +170,7 @@ async function runWorkflowPlanWithAssignments(input: {
       workflowPlanId: workflowPlan.id,
       mode: workflowPlan.mode,
       failed,
+      degraded: failed,
     },
   };
 }

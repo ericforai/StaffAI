@@ -85,5 +85,24 @@ export function useIntentWizard() {
     }
   }, [state.draft]);
 
-  return { state, createIntent, sendMessage, confirmDesign };
+  const createTask = useCallback(async () => {
+    if (!state.draft) return null;
+    setState(s => ({ ...s, loading: true, error: null }));
+    try {
+      const res = await fetch(`${API_BASE}/intents/${state.draft!.id}/create-task`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!res.ok) throw new Error(`Task creation failed: ${res.status}`);
+      const data = await res.json();
+      return data.taskId;
+    } catch (err) {
+      setState(s => ({ ...s, loading: false, error: String(err) }));
+      return null;
+    } finally {
+      setState(s => ({ ...s, loading: false }));
+    }
+  }, [state.draft]);
+
+  return { state, createIntent, sendMessage, confirmDesign, createTask };
 }
