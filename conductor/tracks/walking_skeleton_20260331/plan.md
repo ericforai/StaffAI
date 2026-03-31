@@ -18,7 +18,7 @@ Finalize physical connectivity between TS Office and Python Workshop
 
 ---
 
-## Phase 2: SSE Bridge & Streaming
+## Phase 2: SSE Bridge & Streaming [checkpoint: d532a38]
 
 - [x] Task: Implement streaming tests for SSE thought-broadcasting 944386c
     - [x] Write a test script to verify message ordering and delivery over SSE
@@ -26,16 +26,16 @@ Finalize physical connectivity between TS Office and Python Workshop
     - [x] Implement SSE endpoint in `hq/backend` to forward logs from `workshop/`
 - [x] Task: Integrate `deer-flow` streaming into Workshop 31a7bb7
     - [x] Connect `DeerFlowClient.stream()` output to Workshop SSE endpoint
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: SSE Bridge & Streaming' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: SSE Bridge & Streaming' (Protocol in workflow.md) d532a38
 
 ---
 
 ## Phase 3: Task Orchestration Logic
 
-- [ ] Task: Create integration tests for task dispatch and completion
-    - [ ] Mock task payload and verify end-to-end flow: HQ -> Workshop -> Result -> HQ
-- [ ] Task: Finalize task routing in TS Office
-    - [ ] Update `hq/backend` task service to use the Workshop executor for specific agent roles
+- [x] Task: Create integration tests for task dispatch and completion 44604cb
+    - [x] Mock task payload and verify end-to-end flow: HQ -> Workshop -> Result -> HQ
+- [x] Task: Finalize task routing in TS Office 44604cb
+    - [x] Update `hq/backend` task service to use the Workshop executor for specific agent roles
 - [ ] Task: Implement state persistence for results
     - [ ] Ensure `hq/backend` persists the results received from Workshop to the local JSON/Postgres database
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Task Orchestration Logic' (Protocol in workflow.md)
