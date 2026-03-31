@@ -34,4 +34,8 @@ Unify /tasks and /tasks/new pages into a single view
     - [x] Remove the old `/tasks/new` page if it's no longer needed
 - [x] Task: Final UI polish
     - [x] Ensure consistent styling and responsive behavior for the consolidated view
-- [x] Task: Conductor - User Manual Verification 'Phase 3: Cleanup & Refinement' (Protocol in workflow.md)
+---
+
+## Phase: Review Fixes
+
+- [x] Task: Apply review suggestions 4d7db9e
