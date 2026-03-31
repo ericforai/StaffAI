@@ -5,7 +5,7 @@ Finalize physical connectivity between TS Office and Python Workshop
 
 ---
 
-## Phase 1: Preparation & Handshake
+## Phase 1: Preparation & Handshake [checkpoint: 5bb8127]
 
 - [x] Task: Write connection health-check tests for both cores 3c46d10
     - [x] Define TS-side unit tests for Workshop registration endpoint
@@ -13,16 +13,17 @@ Finalize physical connectivity between TS Office and Python Workshop
 - [x] Task: Implement Workshop registration mechanism 42a43ad
     - [x] Update `hq/backend` to accept registration from `workshop/`
     - [x] Update `workshop/main.py` to ping `hq/backend` on startup
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Preparation & Handshake' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Preparation & Handshake' (Protocol in workflow.md) 5bb8127
+
 
 ---
 
 ## Phase 2: SSE Bridge & Streaming
 
-- [ ] Task: Implement streaming tests for SSE thought-broadcasting
-    - [ ] Write a test script to verify message ordering and delivery over SSE
-- [ ] Task: Enhance SSE support in TS Backend
-    - [ ] Implement SSE endpoint in `hq/backend` to forward logs from `workshop/`
+- [x] Task: Implement streaming tests for SSE thought-broadcasting 944386c
+    - [x] Write a test script to verify message ordering and delivery over SSE
+- [x] Task: Enhance SSE support in TS Backend 944386c
+    - [x] Implement SSE endpoint in `hq/backend` to forward logs from `workshop/`
 - [ ] Task: Integrate `deer-flow` streaming into Workshop
     - [ ] Connect `DeerFlowClient.stream()` output to Workshop SSE endpoint
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: SSE Bridge & Streaming' (Protocol in workflow.md)
