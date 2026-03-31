@@ -36,8 +36,8 @@ Finalize physical connectivity between TS Office and Python Workshop
     - [x] Mock task payload and verify end-to-end flow: HQ -> Workshop -> Result -> HQ
 - [x] Task: Finalize task routing in TS Office 44604cb
     - [x] Update `hq/backend` task service to use the Workshop executor for specific agent roles
-- [ ] Task: Implement state persistence for results
-    - [ ] Ensure `hq/backend` persists the results received from Workshop to the local JSON/Postgres database
+- [x] Task: Implement state persistence for results 5774ff3
+    - [x] Ensure `hq/backend` persists the results received from Workshop to the local JSON/Postgres database
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Task Orchestration Logic' (Protocol in workflow.md)
 
 ---
