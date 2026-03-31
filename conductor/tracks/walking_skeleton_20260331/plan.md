@@ -42,9 +42,9 @@ Finalize physical connectivity between TS Office and Python Workshop
 
 ---
 
-## Phase 4: Verification & Cleanup
+## Phase 4: Verification & Cleanup [checkpoint: a991504]
 
 - [x] Task: Final end-to-end manual verification a52c6bb
     - [x] Run the full system and execute a dummy task via Command Deck
 - [x] Task: Document final architecture in `docs/` a52c6bb
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Verification & Cleanup' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Verification & Cleanup' (Protocol in workflow.md) a991504
