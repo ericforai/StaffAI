@@ -173,34 +173,54 @@ export function registerApprovalRoutes(
     const maxRetries = typeof req.body?.maxRetries === 'number' ? req.body.maxRetries : undefined;
 
     let approval: ApprovalRecord | null = null;
+    let task: TaskRecord | null = null;
 
-    // Use ApprovalServiceV2 if available
-    if (approvalService) {
-      const result = await approvalService.approve({
+    // Use LifecycleService if available (preferred)
+    const lifecycleService = (app as any).locals.lifecycleService;
+
+    if (lifecycleService) {
+      const result = await lifecycleService.handleApprovalDecision(
+        req.params.id,
+        'approved',
+        approver,
+        reason
+      );
+      approval = result.approval;
+      task = result.task;
+    } else if (approvalService) {
+      approval = await approvalService.approve({
         approvalId: req.params.id,
         approver,
         decision: 'approved',
         reason,
       });
-      approval = result;
+      if (approval) {
+        task = await store.updateTask(approval.taskId, (currentTask) => ({
+          ...currentTask,
+          status: 'routed',
+          approvalRequired: false,
+          updatedAt: new Date().toISOString(),
+        }));
+      }
     } else {
-      // Fallback to legacy function
       approval = await approveApproval(req.params.id, store, approver);
+      if (approval) {
+        task = await store.updateTask(approval.taskId, (currentTask) => ({
+          ...currentTask,
+          status: 'routed',
+          approvalRequired: false,
+          updatedAt: new Date().toISOString(),
+        }));
+      }
     }
 
     if (!approval) {
       return res.status(404).json({
-        error: 'approval not found',
+        error: 'approval not found or could not be processed',
         approvalId: req.params.id,
       });
     }
 
-    const task = await store.updateTask(approval.taskId, (currentTask) => ({
-      ...currentTask,
-      status: 'routed',
-      approvalRequired: false,
-      updatedAt: new Date().toISOString(),
-    }));
     dependencies.onApprovalResolved?.(approval);
 
     let execution: ExecutionLifecycleRecord | undefined;
@@ -251,19 +271,45 @@ export function registerApprovalRoutes(
     const reason = req.body?.reason as string | undefined;
 
     let approval: ApprovalRecord | null = null;
+    let task: TaskRecord | null = null;
 
-    // Use ApprovalServiceV2 if available
-    if (approvalService) {
-      const result = await approvalService.reject({
+    // Use LifecycleService if available
+    const lifecycleService = (app as any).locals.lifecycleService;
+
+    if (lifecycleService) {
+      const result = await lifecycleService.handleApprovalDecision(
+        req.params.id,
+        'rejected',
+        approver,
+        reason
+      );
+      approval = result.approval;
+      task = result.task;
+    } else if (approvalService) {
+      approval = await approvalService.reject({
         approvalId: req.params.id,
         approver,
         decision: 'rejected',
         reason,
       });
-      approval = result;
+      if (approval) {
+        task = await store.updateTask(approval.taskId, (currentTask) => ({
+          ...currentTask,
+          status: 'cancelled',
+          approvalRequired: true,
+          updatedAt: new Date().toISOString(),
+        }));
+      }
     } else {
-      // Fallback to legacy function
       approval = await rejectApproval(req.params.id, store, approver);
+      if (approval) {
+        task = await store.updateTask(approval.taskId, (currentTask) => ({
+          ...currentTask,
+          status: 'cancelled',
+          approvalRequired: true,
+          updatedAt: new Date().toISOString(),
+        }));
+      }
     }
 
     if (!approval) {
@@ -273,12 +319,6 @@ export function registerApprovalRoutes(
       });
     }
 
-    const task = await store.updateTask(approval.taskId, (currentTask) => ({
-      ...currentTask,
-      status: 'cancelled',
-      approvalRequired: true,
-      updatedAt: new Date().toISOString(),
-    }));
     dependencies.onApprovalResolved?.(approval);
 
     return res.json({

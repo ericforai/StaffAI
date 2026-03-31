@@ -16,6 +16,7 @@ export interface RuntimeExecutionContext {
   timeoutMs: number;
   maxRetries: number;
   inputSnapshot?: Record<string, unknown>;
+  approvalGranted?: boolean;
   onEvent?: (event: { type: string; data: any }) => void;
 }
 
@@ -44,6 +45,10 @@ export interface RuntimeOutputSnapshot extends Record<string, unknown> {
 export interface RuntimeExecutionResult {
   outputSummary: string;
   outputSnapshot?: RuntimeOutputSnapshot;
+  /** When true, the agent needs human input before continuing */
+  needsHumanInput?: boolean;
+  /** Human input that was provided to continue */
+  humanInput?: string;
 }
 
 export interface RuntimeExecutionError {

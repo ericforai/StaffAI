@@ -1,10 +1,11 @@
 import { randomUUID } from 'node:crypto';
 import type { TaskAssignment, TaskRecord, TaskAssignmentStatus } from '../shared/task-types';
+import type { PendingHumanInput } from '../shared/hitl-types';
 import type { RuntimeExecutionContext, RuntimeExecutionResult } from '../runtime/runtime-adapter';
 import { resolveRuntimeAdapter, resolveRuntimeName } from '../runtime/runtime-adapter';
 import type { AuditLogger, AuditEvent } from '../governance/audit-logger';
 import type { Store } from '../store';
-import { executeAssignmentWithRetry, trackRunningAssignment } from './assignment-execution-runner';
+import { executeAssignmentWithRetry, trackRunningAssignment, type AssignmentExecutionWithRetryResult } from './assignment-execution-runner';
 import { updateAssignmentExecutionStatus, markAssignmentCompleted, markAssignmentFailed } from './assignment-status-updater';
 import { logAssignmentAuditEvent } from './assignment-audit-logger';
 import { resolveTaskTimeoutMs } from '../runtime/task-execution-config';
@@ -19,7 +20,7 @@ export type AssignmentExecutionStatus = 'idle' | 'running' | 'completed' | 'fail
  */
 export interface AssignmentResult {
   assignmentId: string;
-  status: 'completed' | 'failed';
+  status: 'completed' | 'failed' | 'waiting_input';
   outputSummary?: string;
   outputSnapshot?: Record<string, unknown>;
   error?: string;
@@ -37,6 +38,7 @@ export interface AssignmentExecutionInput {
   timeoutMs?: number;
   maxRetries?: number;
   memoryContextExcerpt?: string;
+  approvalGranted?: boolean;
 }
 
 /**
@@ -80,7 +82,7 @@ interface RunningAssignment {
  * Configuration for AssignmentExecutor
  */
 export interface AssignmentExecutorConfig {
-  store: Pick<Store, 'getTaskById' | 'updateTaskAssignment' | 'saveExecution' | 'logAudit'> & Partial<Pick<Store, 'getTaskAssignments'>>;
+  store: Pick<Store, 'getTaskById' | 'updateTaskAssignment' | 'saveExecution' | 'logAudit' | 'savePendingHumanInput'> & Partial<Pick<Store, 'getTaskAssignments'>>;
   auditLogger: AuditLogger | null;
   executor: 'claude' | 'codex' | 'openai' | 'deerflow';
   timeoutMs?: number;
@@ -107,6 +109,15 @@ export class DefaultAssignmentExecutor implements AssignmentExecutor {
     const timeoutMs = resolveTaskTimeoutMs(input.timeoutMs ?? this.defaultTimeoutMs);
     const executor = input.executor ?? this.defaultExecutor;
     const maxRetries = input.maxRetries ?? 1;
+
+    // Check if already completed
+    if (assignment.status === 'completed') {
+      return {
+        assignmentId: assignment.id,
+        status: 'completed',
+        outputSummary: assignment.resultSummary,
+      };
+    }
 
     trackRunningAssignment(this.runningAssignments, assignment.id, 'running');
 
@@ -141,6 +152,18 @@ export class DefaultAssignmentExecutor implements AssignmentExecutor {
     );
 
     if (result.success) {
+      // Check if runtime signaled need for human input
+      if (result.needsHumanInput) {
+        await this.handleHumanInputNeeded(assignment, input, result);
+        return {
+          assignmentId: assignment.id,
+          status: 'completed',
+          outputSummary: result.outputSummary,
+          outputSnapshot: result.outputSnapshot,
+          retryCount: result.attempts,
+        };
+      }
+
       await markAssignmentCompleted(this.store, this.defaultExecutor, assignment.id, result.outputSummary, result.outputSnapshot, resolveRuntimeName);
       this.runningAssignments.set(assignment.id, { assignmentId: assignment.id, status: 'completed' });
 
@@ -225,12 +248,46 @@ export class DefaultAssignmentExecutor implements AssignmentExecutor {
       memoryContextExcerpt: input.memoryContextExcerpt,
       timeoutMs,
       maxRetries: input.maxRetries ?? 1,
+      approvalGranted: input.approvalGranted,
       inputSnapshot: {
         assignmentId: assignment.id,
         agentId: assignment.agentId,
         assignmentRole: assignment.assignmentRole,
       },
     };
+  }
+
+  private async handleHumanInputNeeded(
+    assignment: TaskAssignment,
+    input: AssignmentExecutionInput,
+    result: AssignmentExecutionWithRetryResult
+  ): Promise<void> {
+    // Extract questions from output summary - runtime sends {{HITL_NEED_INPUT}} marker
+    const questions = result.outputSummary?.replace(/{{HITL_NEED_INPUT}}/g, '').trim() || 'Human input needed';
+
+    const pendingInput: PendingHumanInput = {
+      id: randomUUID(),
+      assignmentId: assignment.id,
+      taskId: input.taskId,
+      questions,
+      outputSnapshot: result.outputSnapshot,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+    };
+
+    await this.store.savePendingHumanInput(pendingInput);
+    await updateAssignmentExecutionStatus(this.store, assignment.id, 'waiting_input');
+
+    this.runningAssignments.set(assignment.id, { assignmentId: assignment.id, status: 'idle' });
+
+    await logAssignmentAuditEvent(this.store, this.auditLogger, {
+      entityType: 'execution',
+      entityId: assignment.id,
+      action: 'waiting_input',
+      actor: 'system',
+      previousState: { status: 'running' },
+      newState: { status: 'waiting_input', pendingInputId: pendingInput.id },
+    });
   }
 
   private isRetriableError(error: string): boolean {

@@ -79,10 +79,16 @@ export interface Task {
 export interface Approval {
   id: string;
   taskId: string;
+  taskTitle?: string;
   status: string;
+  approvalType?: 'plan_approval' | 'tool_call' | 'delivery_check' | 'generic';
+  blockedAction?: string;
   requestedBy: string;
   requestedAt: string;
   resolvedAt?: string;
+  riskLevel?: string;
+  riskReason?: string;
+  decisionContext?: Record<string, any>;
 }
 
 export interface TaskExecution {
@@ -140,4 +146,68 @@ export interface TraceEvent {
   summary: string;
   occurredAt: string;
   payload?: any;
+}
+
+// Intent / Requirement Draft types (align with backend shared/intent-types.ts)
+
+export type IntentStatus =
+  | 'intake'
+  | 'clarifying'
+  | 'design_ready'
+  | 'design_approved'
+  | 'planning'
+  | 'plan_ready'
+  | 'completed'
+  | 'cancelled';
+
+export type AutonomyLevel = 'L0' | 'L1' | 'L2' | 'L3';
+
+export interface DesignSummary {
+  goal: string;
+  targetUser: string;
+  coreFlow: string;
+  scope: string;
+  outOfScope: string;
+  deliverables: string;
+  constraints: string;
+  risks: string;
+}
+
+export interface ClarificationMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+}
+
+export interface PlanStep {
+  id: string;
+  order: number;
+  role: string;
+  goal: string;
+  input: string;
+  verification: string;
+  approvalRequired: boolean;
+}
+
+export interface ImplementationPlan {
+  scenario: string;
+  steps: PlanStep[];
+  recommendedAutonomyLevel: AutonomyLevel;
+  estimatedComplexity: 'Low' | 'Medium' | 'High';
+}
+
+export interface RequirementDraft {
+  id: string;
+  rawInput: string;
+  status: IntentStatus;
+  clarificationMessages: ClarificationMessage[];
+  designSummary: DesignSummary | null;
+  implementationPlan: ImplementationPlan | null;
+  suggestedAutonomyLevel: AutonomyLevel | null;
+  suggestedScenario: string | null;
+  confidenceScore: number;
+  createdTaskId: string | null;
+  createdAt: string;
+  updatedAt: string;
 }

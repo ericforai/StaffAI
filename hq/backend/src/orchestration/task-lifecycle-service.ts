@@ -323,9 +323,19 @@ export class TaskLifecycleService {
       return { approval: null, task: null };
     }
 
-    // Update task status based on decision
+    // Update task status based on decision and approval type
     const task = await this.store.updateTask(approval.taskId, (current) => {
-      const newStatus = decision === 'approved' ? 'routed' : 'cancelled';
+      let newStatus: TaskStatus = 'cancelled';
+      
+      if (decision === 'approved') {
+        // If it was a tool call interruption, go back to running
+        if (approval.approvalType === 'tool_call') {
+          newStatus = 'running';
+        } else {
+          newStatus = 'routed';
+        }
+      }
+
       return {
         ...current,
         status: newStatus,
