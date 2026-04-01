@@ -2,9 +2,13 @@ import { randomUUID } from 'node:crypto';
 import type { Store } from '../store';
 import type { RequirementDraft } from '../shared/intent-types';
 import type { OKRGap } from './inspector-service';
+import type { DashboardEvent } from '../observability/dashboard-events';
 
 export class ProactiveProposalService {
-  constructor(private readonly store: Store) {}
+  constructor(
+    private readonly store: Store,
+    private readonly publish?: (event: DashboardEvent) => void
+  ) {}
 
   /**
    * Generates a proactive RequirementDraft from an identified OKR gap.
@@ -35,6 +39,19 @@ export class ProactiveProposalService {
     };
 
     await this.store.saveRequirementDraft(draft);
+
+    // Emit SSE event
+    if (this.publish) {
+      this.publish({
+        type: 'PROACTIVE_PROPOSAL',
+        agentId,
+        message: `Agent ${agentId} proposed a new task based on OKR gap.`,
+        intentId: draft.id,
+        objective: gap.objective,
+        metricGap: `${gap.description}: ${gap.currentValueValue}${gap.unit} < ${gap.targetValue}${gap.unit}`,
+      });
+    }
+
     return draft;
   }
 }
