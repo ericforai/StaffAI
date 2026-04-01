@@ -56,4 +56,21 @@ export function registerAgentRoutes(app: express.Application, dependencies: Agen
       systemPrompt: agent.systemPrompt,
     });
   });
+
+  app.get('/api/agents/:id/memory', async (req, res) => {
+    const agentId = req.params.id;
+    const memory = await dependencies.store.getAgentMemoryByAgentId(agentId);
+
+    if (!memory) {
+      return res.json({
+        agentId,
+        experienceLog: [],
+        behavioralHeuristics: [],
+        organizationalAwareness: { teamEvaluations: {} },
+        updatedAt: new Date().toISOString(),
+      });
+    }
+
+    return res.json(memory);
+  });
 }

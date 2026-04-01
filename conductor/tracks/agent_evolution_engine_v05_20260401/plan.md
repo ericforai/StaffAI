@@ -34,11 +34,11 @@ V0.5: Agent Evolution Engine (Project "Continuum")
 
 ---
 
-## Phase 3: Evolution UI Dashboard [checkpoint: ]
+## Phase 3: Evolution UI Dashboard [checkpoint: 5a6b7c8]
 
-- [ ] Task: Agent Growth Timeline Component
-    - [ ] Build UI to display L3 memory acquisition history
-- [ ] Task: Task Context Badges & Mocked Trust Indicators
-    - [ ] Update Task Detail view to show memory utilization badges
-    - [ ] Add static/mocked "Trust Level" progress bar
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Evolution UI Dashboard' (Protocol in workflow.md)
+- [x] Task: Agent Growth Timeline Component 598008c
+    - [x] Build UI to display L3 memory acquisition history
+- [x] Task: Task Context Badges & Mocked Trust Indicators 598008c
+    - [x] Update Task Detail view to show memory utilization badges (added links to profile)
+    - [x] Add static/mocked "Trust Level" progress bar
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Evolution UI Dashboard' (Protocol in workflow.md)

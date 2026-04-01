@@ -211,3 +211,29 @@ export interface RequirementDraft {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface ExperienceEntry {
+  id: string;
+  taskId: string;
+  title: string;
+  insight: string;
+  timestamp: string;
+}
+
+export interface BehavioralHeuristic {
+  id: string;
+  pattern: string;
+  correction: string;
+  sourceTaskId: string;
+  timestamp: string;
+}
+
+export interface AgentMemory {
+  agentId: string;
+  experienceLog: ExperienceEntry[];
+  behavioralHeuristics: BehavioralHeuristic[];
+  organizationalAwareness: {
+    teamEvaluations: Record<string, string>;
+  };
+  updatedAt: string;
+}

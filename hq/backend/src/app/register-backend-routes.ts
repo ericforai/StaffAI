@@ -44,6 +44,7 @@ import { HitlService } from '../orchestration/hitl-service';
 import { TaskStateMachine } from '../orchestration/task-state-machine';
 import { TaskRepositoryAdapter } from '../shared/task-repository-adapter';
 import { getPersistenceMode } from '../store';
+import { createTaskLifecycleService } from '../orchestration/task-lifecycle-service';
 import {
   createFileContactRepository,
   createFileCompanyRepository,
@@ -110,9 +111,10 @@ export function registerBackendRoutes({
   app.set('hitlService', hitlService);
 
   // Initialize Lifecycle Service
+  const rawAuditLogger = store.getAuditLogger();
   const lifecycleService = createTaskLifecycleService({
     store,
-    auditLogger: store.getAuditLogger() || undefined,
+    auditLogger: rawAuditLogger ? { log: async (e) => { await rawAuditLogger.log(e); } } : undefined,
   });
   app.locals.lifecycleService = lifecycleService;
 
