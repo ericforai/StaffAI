@@ -89,6 +89,26 @@ export function OKRManager() {
           ))
         )}
       </div>
+
+      <OKRCreateModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSuccess={fetchOkrs} 
+      />
+    </div>
+  );
+}
+e={{ width: `${progress}%` }} 
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }
