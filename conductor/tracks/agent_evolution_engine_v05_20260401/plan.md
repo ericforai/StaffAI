@@ -22,8 +22,8 @@ V0.5: Agent Evolution Engine (Project "Continuum")
 
 ## Phase 2: Autonomous Intents & Notifications [checkpoint: ]
 
-- [ ] Task: Create "Inspector" Agent capabilities
-    - [ ] Define mechanism for agents to evaluate OKR metrics
+- [x] Task: Create "Inspector" Agent capabilities 90cce1c
+    - [x] Define mechanism for agents to evaluate OKR metrics (implemented via `InspectorService`)
 - [ ] Task: Proactive Proposal Generation
     - [ ] Create service to convert an agent's finding into a `RequirementDraft`
     - [ ] Ensure the generated draft is linked to the originating agent
