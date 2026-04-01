@@ -20,17 +20,17 @@ V0.5: Agent Evolution Engine (Project "Continuum")
 
 ---
 
-## Phase 2: Autonomous Intents & Notifications [checkpoint: ]
+## Phase 2: Autonomous Intents & Notifications [checkpoint: 6248e07]
 
 - [x] Task: Create "Inspector" Agent capabilities 90cce1c
     - [x] Define mechanism for agents to evaluate OKR metrics (implemented via `InspectorService`)
 - [x] Task: Proactive Proposal Generation 5313e5b
     - [x] Create service to convert an agent's finding into a `RequirementDraft` (implemented via `ProactiveProposalService`)
     - [x] Ensure the generated draft is linked to the originating agent (added `originatingAgentId`)
-- [ ] Task: SSE Broadcast for Proactive Proposals
-    - [ ] Update `DashboardEvent` types to include `PROACTIVE_PROPOSAL`
-    - [ ] Implement SSE emission when a new autonomous intent is created
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Autonomous Intents & Notifications' (Protocol in workflow.md)
+- [x] Task: SSE Broadcast for Proactive Proposals 6248e07
+    - [x] Update `DashboardEvent` types to include `PROACTIVE_PROPOSAL`
+    - [x] Implement SSE emission when a new autonomous intent is created
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Autonomous Intents & Notifications' (Protocol in workflow.md)
 
 ---
 
