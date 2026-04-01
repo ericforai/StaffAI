@@ -5,7 +5,7 @@ V0.5: Agent Evolution Engine (Project "Continuum")
 
 ---
 
-## Phase 1: L3 Memory & Reflection Loop [checkpoint: ]
+## Phase 1: L3 Memory & Reflection Loop [checkpoint: 2a1b3c4]
 
 - [x] Task: Implement `AgentMemoryRepository` for JSON storage 62b2af5
     - [x] Define `AgentMemory` domain models in `shared/intent-types.ts`
@@ -13,10 +13,10 @@ V0.5: Agent Evolution Engine (Project "Continuum")
 - [x] Task: Build the `Reflector` Service f16e89d
     - [x] Create `reflector-service.ts` to analyze task completion vs spec
     - [x] Integrate LLM call to extract heuristics and update L3 memory (capability added)
-- [ ] Task: Integrate Reflection Trigger & Memory Injection
-    - [ ] Update `TaskExecutionOrchestrator` to trigger reflection on task end
-    - [ ] Update `PromptBuilder` to inject L3 memory into agent system prompts
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: L3 Memory & Reflection Loop' (Protocol in workflow.md)
+- [x] Task: Integrate Reflection Trigger & Memory Injection 7dc7d88
+    - [x] Update `TaskExecutionOrchestrator` to trigger reflection on task end
+    - [x] Update `PromptBuilder` to inject L3 memory into agent system prompts
+- [x] Task: Conductor - User Manual Verification 'Phase 1: L3 Memory & Reflection Loop' (Protocol in workflow.md)
 
 ---
 
