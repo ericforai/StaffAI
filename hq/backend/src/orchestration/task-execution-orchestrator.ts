@@ -396,8 +396,12 @@ export async function executeTaskRecord(
     await dependencies.writeExecutionSummary?.(task, result.execution);
 
     // Trigger reflection for agent evolution
-    if (result.execution.status === 'completed' || result.execution.status === 'failed') {
-      const reflector = new ReflectorService(store);
+    if (
+      (result.execution.status === 'completed' || result.execution.status === 'failed') &&
+      store.getAgentMemoryByAgentId &&
+      store.saveAgentMemory
+    ) {
+      const reflector = new ReflectorService(store as any);
       await reflector.reflect(task, result.execution);
     }
 
@@ -456,8 +460,12 @@ export async function executeTaskRecord(
   await dependencies.writeExecutionSummary?.(task, result.execution);
 
   // Trigger reflection for agent evolution
-  if (result.execution.status === 'completed' || result.execution.status === 'failed') {
-    const reflector = new ReflectorService(store);
+  if (
+    (result.execution.status === 'completed' || result.execution.status === 'failed') &&
+    store.getAgentMemoryByAgentId &&
+    store.saveAgentMemory
+  ) {
+    const reflector = new ReflectorService(store as any);
     await reflector.reflect(task, result.execution);
   }
 

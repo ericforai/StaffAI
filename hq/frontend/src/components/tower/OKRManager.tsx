@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react';
 import { Target, Plus, ChevronRight, BarChart2, CheckCircle2, AlertCircle } from 'lucide-react';
 import type { OKRRecord, KeyResult } from '../../types/domain';
+import { OKRCreateModal } from './OKRCreateModal';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333/api';
 
 export function OKRManager() {
   const [okrs, setOkrs] = useState<OKRRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchOkrs = async () => {
     setLoading(true);
@@ -38,6 +40,17 @@ export function OKRManager() {
 
   return (
     <div className="space-y-8">
+      {/* Header Actions */}
+      <div className="flex justify-end">
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="px-6 py-3 rounded-2xl bg-slate-900 text-white font-black shadow-lg shadow-slate-200 hover:bg-black transition-all flex items-center gap-2"
+        >
+          <Plus size={18} />
+          发布战略 OKR
+        </button>
+      </div>
+
       {/* OKR List */}
       <div className="grid gap-6">
         {okrs.length === 0 ? (
@@ -95,20 +108,6 @@ export function OKRManager() {
         onClose={() => setIsModalOpen(false)} 
         onSuccess={fetchOkrs} 
       />
-    </div>
-  );
-}
-e={{ width: `${progress}%` }} 
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))
-        )}
-      </div>
     </div>
   );
 }

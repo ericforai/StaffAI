@@ -220,6 +220,25 @@ export interface ExperienceEntry {
   timestamp: string;
 }
 
+export interface KeyResult {
+  id: string;
+  description: string;
+  targetValue: number;
+  currentValueValue: number;
+  metricKey: string;
+  unit: string;
+  status: string;
+}
+
+export interface OKRRecord {
+  id: string;
+  objective: string;
+  keyResults: KeyResult[];
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface BehavioralHeuristic {
   id: string;
   pattern: string;
