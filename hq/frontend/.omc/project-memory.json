@@ -1,0 +1,206 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1774935896338,
+  "projectRoot": "/Users/user/agency-agents/hq/frontend",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "next",
+        "version": "16.1.7",
+        "category": "fullstack"
+      },
+      {
+        "name": "react",
+        "version": "19.2.3",
+        "category": "frontend"
+      },
+      {
+        "name": "react-dom",
+        "version": "19.2.3",
+        "category": "frontend"
+      },
+      {
+        "name": "@playwright/test",
+        "version": "1.56.1",
+        "category": "testing"
+      }
+    ],
+    "packageManager": "npm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "npm run build",
+    "testCommand": null,
+    "lintCommand": "npm run lint",
+    "devCommand": "npm run dev",
+    "scripts": {
+      "dev": "next dev --webpack -p 3008",
+      "build": "next build",
+      "start": "next start",
+      "lint": "eslint",
+      "test:e2e": "playwright test"
+    }
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": "type-based"
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "public",
+      "src",
+      "tests"
+    ],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "public": {
+      "path": "public",
+      "purpose": "Public files",
+      "fileCount": 6,
+      "lastAccessed": 1774935896318,
+      "keyFiles": [
+        "file.svg",
+        "globe.svg",
+        "grid.svg",
+        "next.svg",
+        "vercel.svg"
+      ]
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 0,
+      "lastAccessed": 1774935896321,
+      "keyFiles": []
+    },
+    "test-results": {
+      "path": "test-results",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1774935896321,
+      "keyFiles": []
+    },
+    "tests": {
+      "path": "tests",
+      "purpose": "Test files",
+      "fileCount": 0,
+      "lastAccessed": 1774935896322,
+      "keyFiles": []
+    },
+    "src/app": {
+      "path": "src/app",
+      "purpose": "Application code",
+      "fileCount": 6,
+      "lastAccessed": 1774935896322,
+      "keyFiles": [
+        "AppWebSocketProvider.tsx",
+        "ClientShell.tsx",
+        "favicon.ico"
+      ]
+    },
+    "src/components": {
+      "path": "src/components",
+      "purpose": "UI components",
+      "fileCount": 8,
+      "lastAccessed": 1774935896323,
+      "keyFiles": [
+        "ActivityLog.tsx",
+        "AgentCard.tsx",
+        "ChatPanel.tsx"
+      ]
+    },
+    "src/lib": {
+      "path": "src/lib",
+      "purpose": "Library code",
+      "fileCount": 4,
+      "lastAccessed": 1774935896323,
+      "keyFiles": [
+        "api-client.ts",
+        "execution-parser.ts",
+        "messageParser.ts"
+      ]
+    },
+    "src/types": {
+      "path": "src/types",
+      "purpose": "Type definitions",
+      "fileCount": 4,
+      "lastAccessed": 1774935896323,
+      "keyFiles": [
+        "api.ts",
+        "domain.ts",
+        "hitl-types.ts"
+      ]
+    },
+    "src/utils": {
+      "path": "src/utils",
+      "purpose": "Utility functions",
+      "fileCount": 5,
+      "lastAccessed": 1774935896323,
+      "keyFiles": [
+        "apiFetch.ts",
+        "constants.ts",
+        "dateFormatter.ts"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "src/app/tasks/page.tsx",
+      "accessCount": 12,
+      "lastAccessed": 1774936099622,
+      "type": "file"
+    },
+    {
+      "path": "src/app/tasks/[id]/page.tsx",
+      "accessCount": 11,
+      "lastAccessed": 1774936240030,
+      "type": "file"
+    },
+    {
+      "path": "src/types/domain.ts",
+      "accessCount": 4,
+      "lastAccessed": 1774935980106,
+      "type": "file"
+    },
+    {
+      "path": "src/components/intent/ClarificationPanel.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1774935922276,
+      "type": "file"
+    },
+    {
+      "path": "src/hooks/usePendingHumanInputs.ts",
+      "accessCount": 1,
+      "lastAccessed": 1774936121541,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

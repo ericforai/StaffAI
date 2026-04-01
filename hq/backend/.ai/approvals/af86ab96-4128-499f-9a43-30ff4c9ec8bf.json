@@ -1,0 +1,8 @@
+{
+  "taskTitle": "Delete data",
+  "riskLevel": "MEDIUM",
+  "approvalType": "generic",
+  "riskReason": "Contains destructive operation keywords, General routine task",
+  "id": "af86ab96-4128-499f-9a43-30ff4c9ec8bf",
+  "reason": "No longer needed"
+}

@@ -1051,62 +1051,62 @@
     "updatedAt": "2026-03-31T03:08:20.844Z"
   },
   {
-    "id": "intent_1774926709390_0wu217m",
-    "rawInput": "我想要一个简洁的个人设置页面，支持修改头像、昵称和修改密码功能。",
+    "id": "intent_1774927199586_impi8h1",
+    "rawInput": "我想做一个CRM",
     "status": "completed",
     "clarificationMessages": [
       {
-        "id": "msg_1774926709390_a",
+        "id": "msg_1774927199586_a",
         "role": "assistant",
         "content": "Understood. What is the primary goal of this feature?",
-        "timestamp": "2026-03-31T03:11:49.390Z"
+        "timestamp": "2026-03-31T03:19:59.586Z"
       },
       {
-        "id": "msg_1774926737435_u",
+        "id": "msg_1774927225388_u",
         "role": "user",
-        "content": "目标是提升用户体验，让设置更直观。",
-        "timestamp": "2026-03-31T03:12:17.435Z"
+        "content": "管理我本地的客户数据 目前都是excle",
+        "timestamp": "2026-03-31T03:20:25.388Z"
       },
       {
-        "id": "msg_1774926737435_a",
+        "id": "msg_1774927225389_a",
         "role": "assistant",
         "content": "Who are the target users (e.g., developers, end-users, admins)?",
-        "timestamp": "2026-03-31T03:12:17.435Z"
+        "timestamp": "2026-03-31T03:20:25.388Z"
       },
       {
-        "id": "msg_1774926737444_u",
+        "id": "msg_1774927235943_u",
         "role": "user",
-        "content": "目标用户是普通 C 端用户。",
-        "timestamp": "2026-03-31T03:12:17.444Z"
+        "content": "我自己",
+        "timestamp": "2026-03-31T03:20:35.943Z"
       },
       {
-        "id": "msg_1774926737444_a",
+        "id": "msg_1774927235943_a",
         "role": "assistant",
         "content": "What are the core technical constraints or stack preferences?",
-        "timestamp": "2026-03-31T03:12:17.444Z"
+        "timestamp": "2026-03-31T03:20:35.943Z"
       },
       {
-        "id": "msg_1774926737452_u",
+        "id": "msg_1774927246101_u",
         "role": "user",
-        "content": "技术栈使用 React + Tailwind。",
-        "timestamp": "2026-03-31T03:12:17.452Z"
+        "content": "Java",
+        "timestamp": "2026-03-31T03:20:46.101Z"
       },
       {
-        "id": "msg_1774926737452_a",
+        "id": "msg_1774927246101_a",
         "role": "assistant",
         "content": "What should be the final deliverable (e.g., API, UI components, documentation)?",
-        "timestamp": "2026-03-31T03:12:17.452Z"
+        "timestamp": "2026-03-31T03:20:46.101Z"
       },
       {
-        "id": "msg_1774926737460_u",
+        "id": "msg_1774927254435_u",
         "role": "user",
-        "content": "最终交付一个可交互的页面组件。",
-        "timestamp": "2026-03-31T03:12:17.460Z"
+        "content": "全栈交付",
+        "timestamp": "2026-03-31T03:20:54.435Z"
       }
     ],
     "designSummary": {
-      "goal": "我想要一个简洁的个人设置页面，支持修改头像、昵称和修改密码功能。",
-      "targetUser": "普通 C 端用户",
+      "goal": "我想做一个CRM",
+      "targetUser": "全栈交付",
       "coreFlow": "User input -> Processing -> Output",
       "scope": "Core functionality as described",
       "outOfScope": "Advanced optimizations and complex integrations",
@@ -1178,8 +1178,281 @@
     "suggestedAutonomyLevel": "L2",
     "suggestedScenario": "full-stack-dev",
     "confidenceScore": 0,
-    "createdTaskId": "task_1774926783268",
-    "createdAt": "2026-03-31T03:11:49.390Z",
-    "updatedAt": "2026-03-31T03:13:03.268Z"
+    "createdTaskId": "task_1774927260465",
+    "createdAt": "2026-03-31T03:19:59.586Z",
+    "updatedAt": "2026-03-31T03:21:00.465Z"
+  },
+  {
+    "id": "intent_demo_1774927214938",
+    "rawInput": "基于模板创建: 标准 Web 功能开发模板",
+    "status": "completed",
+    "clarificationMessages": [],
+    "designSummary": {
+      "goal": "开发一个标准功能",
+      "targetUser": "通用用户",
+      "coreFlow": "输入 -> 处理 -> 展示",
+      "deliverables": "代码 + 文档 + 测试"
+    },
+    "implementationPlan": {
+      "scenario": "feature-delivery",
+      "steps": [
+        {
+          "id": "step_1",
+          "order": 1,
+          "role": "sprint-prioritizer",
+          "goal": "产品定义",
+          "input": "模板",
+          "verification": "PRD",
+          "approvalRequired": true
+        },
+        {
+          "id": "step_2",
+          "order": 2,
+          "role": "software-architect",
+          "goal": "技术方案",
+          "input": "PRD",
+          "verification": "架构文档",
+          "approvalRequired": true
+        },
+        {
+          "id": "step_3",
+          "order": 3,
+          "role": "frontend-developer",
+          "goal": "UI 实现",
+          "input": "方案",
+          "verification": "组件",
+          "approvalRequired": false
+        }
+      ],
+      "recommendedAutonomyLevel": "L2"
+    },
+    "suggestedAutonomyLevel": "L2",
+    "createdAt": "2026-03-31T03:20:14.937Z",
+    "updatedAt": "2026-03-31T03:20:14.937Z"
+  },
+  {
+    "id": "intent_1774927574278_fnyujxd",
+    "rawInput": "我想要网站支持深色模式，要那种高级的质感。",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1774927574278_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-03-31T03:26:14.278Z"
+      },
+      {
+        "id": "msg_1774927574321_u",
+        "role": "user",
+        "content": "目标是提升夜间阅读舒适度。",
+        "timestamp": "2026-03-31T03:26:14.321Z"
+      },
+      {
+        "id": "msg_1774927574322_a",
+        "role": "assistant",
+        "content": "Who are the target users (e.g., developers, end-users, admins)?",
+        "timestamp": "2026-03-31T03:26:14.321Z"
+      },
+      {
+        "id": "msg_1774927574330_u",
+        "role": "user",
+        "content": "技术栈是 Next.js + TailwindCSS。",
+        "timestamp": "2026-03-31T03:26:14.330Z"
+      },
+      {
+        "id": "msg_1774927574330_a",
+        "role": "assistant",
+        "content": "What are the core technical constraints or stack preferences?",
+        "timestamp": "2026-03-31T03:26:14.330Z"
+      },
+      {
+        "id": "msg_1774927574339_u",
+        "role": "user",
+        "content": "交付一个开关组件和全局样式配置文件。",
+        "timestamp": "2026-03-31T03:26:14.339Z"
+      },
+      {
+        "id": "msg_1774927574339_a",
+        "role": "assistant",
+        "content": "What should be the final deliverable (e.g., API, UI components, documentation)?",
+        "timestamp": "2026-03-31T03:26:14.339Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-03-31T03:26:14.278Z",
+    "updatedAt": "2026-03-31T03:26:14.339Z"
+  },
+  {
+    "id": "intent_tpl_1774938204187",
+    "rawInput": "基于模板创建: 标准 Web 功能开发模板",
+    "status": "completed",
+    "clarificationMessages": [],
+    "designSummary": {
+      "goal": "开发一个标准功能",
+      "targetUser": "通用用户",
+      "coreFlow": "输入 -> 处理 -> 展示",
+      "deliverables": "代码 + 文档 + 测试"
+    },
+    "implementationPlan": {
+      "scenario": "feature-delivery",
+      "steps": [
+        {
+          "id": "step_1",
+          "order": 1,
+          "role": "sprint-prioritizer",
+          "goal": "产品定义",
+          "input": "模板",
+          "verification": "PRD",
+          "approvalRequired": true
+        },
+        {
+          "id": "step_2",
+          "order": 2,
+          "role": "software-architect",
+          "goal": "技术方案",
+          "input": "PRD",
+          "verification": "架构文档",
+          "approvalRequired": true
+        },
+        {
+          "id": "step_3",
+          "order": 3,
+          "role": "frontend-developer",
+          "goal": "UI 实现",
+          "input": "方案",
+          "verification": "组件",
+          "approvalRequired": false
+        }
+      ],
+      "recommendedAutonomyLevel": "L2"
+    },
+    "suggestedAutonomyLevel": "L2",
+    "suggestedScenario": "feature-delivery",
+    "createdAt": "2026-03-31T06:23:24.187Z",
+    "updatedAt": "2026-03-31T06:23:24.187Z"
+  },
+  {
+    "id": "intent_tpl_1774938295561",
+    "rawInput": "基于模板创建: 标准 Web 功能开发模板",
+    "status": "completed",
+    "clarificationMessages": [],
+    "designSummary": {
+      "goal": "开发一个标准功能",
+      "targetUser": "通用用户",
+      "coreFlow": "输入 -> 处理 -> 展示",
+      "deliverables": "代码 + 文档 + 测试"
+    },
+    "implementationPlan": {
+      "scenario": "feature-delivery",
+      "steps": [
+        {
+          "id": "step_1",
+          "order": 1,
+          "role": "sprint-prioritizer",
+          "goal": "产品定义",
+          "input": "模板",
+          "verification": "PRD",
+          "approvalRequired": true
+        },
+        {
+          "id": "step_2",
+          "order": 2,
+          "role": "software-architect",
+          "goal": "技术方案",
+          "input": "PRD",
+          "verification": "架构文档",
+          "approvalRequired": true
+        },
+        {
+          "id": "step_3",
+          "order": 3,
+          "role": "frontend-developer",
+          "goal": "UI 实现",
+          "input": "方案",
+          "verification": "组件",
+          "approvalRequired": false
+        }
+      ],
+      "recommendedAutonomyLevel": "L2"
+    },
+    "suggestedAutonomyLevel": "L2",
+    "suggestedScenario": "feature-delivery",
+    "createdAt": "2026-03-31T06:24:55.561Z",
+    "updatedAt": "2026-03-31T06:24:55.561Z"
+  },
+  {
+    "id": "intent_1774953657918_bf9dl5t",
+    "rawInput": "我想做一个客户系统",
+    "status": "intake",
+    "clarificationMessages": [
+      {
+        "id": "msg_1774953657918_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-03-31T10:40:57.918Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-03-31T10:40:57.918Z",
+    "updatedAt": "2026-03-31T10:40:57.918Z"
+  },
+  {
+    "id": "intent_tpl_1774953677484",
+    "rawInput": "基于模板创建: 标准 Web 功能开发模板",
+    "status": "completed",
+    "clarificationMessages": [],
+    "designSummary": {
+      "goal": "开发一个标准功能",
+      "targetUser": "通用用户",
+      "coreFlow": "输入 -> 处理 -> 展示",
+      "deliverables": "代码 + 文档 + 测试"
+    },
+    "implementationPlan": {
+      "scenario": "feature-delivery",
+      "steps": [
+        {
+          "id": "step_1",
+          "order": 1,
+          "role": "sprint-prioritizer",
+          "goal": "产品定义",
+          "input": "模板",
+          "verification": "PRD",
+          "approvalRequired": true
+        },
+        {
+          "id": "step_2",
+          "order": 2,
+          "role": "software-architect",
+          "goal": "技术方案",
+          "input": "PRD",
+          "verification": "架构文档",
+          "approvalRequired": true
+        },
+        {
+          "id": "step_3",
+          "order": 3,
+          "role": "frontend-developer",
+          "goal": "UI 实现",
+          "input": "方案",
+          "verification": "组件",
+          "approvalRequired": false
+        }
+      ],
+      "recommendedAutonomyLevel": "L2"
+    },
+    "suggestedAutonomyLevel": "L2",
+    "suggestedScenario": "feature-delivery",
+    "createdAt": "2026-03-31T10:41:17.484Z",
+    "updatedAt": "2026-03-31T10:41:17.484Z"
   }
 ]

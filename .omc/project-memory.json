@@ -393,6 +393,36 @@
       "accessCount": 1,
       "lastAccessed": 1774925477299,
       "type": "file"
+    },
+    {
+      "path": "hq/tasks.json",
+      "accessCount": 1,
+      "lastAccessed": 1774957872139,
+      "type": "file"
+    },
+    {
+      "path": "hq/executions.json",
+      "accessCount": 1,
+      "lastAccessed": 1774957872201,
+      "type": "file"
+    },
+    {
+      "path": "conductor/tracks.md",
+      "accessCount": 1,
+      "lastAccessed": 1774957883978,
+      "type": "file"
+    },
+    {
+      "path": "hq/workflow_plans.json",
+      "accessCount": 1,
+      "lastAccessed": 1774957884042,
+      "type": "file"
+    },
+    {
+      "path": "conductor/tracks/feature_delivery_v02_20260331/plan.md",
+      "accessCount": 1,
+      "lastAccessed": 1774957898450,
+      "type": "file"
     }
   ],
   "userDirectives": []

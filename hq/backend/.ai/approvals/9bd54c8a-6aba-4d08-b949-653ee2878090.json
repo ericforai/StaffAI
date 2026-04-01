@@ -1,0 +1,6 @@
+{
+  "riskLevel": "HIGH",
+  "approvalType": "generic",
+  "riskReason": "Contains destructive operation keywords, Involves production environment",
+  "id": "9bd54c8a-6aba-4d08-b949-653ee2878090"
+}

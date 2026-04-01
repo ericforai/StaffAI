@@ -6,18 +6,21 @@ import Link from 'next/link';
 import { ArrowLeft, ShieldCheck, Target, TrendingUp, Award, BrainCircuit } from 'lucide-react';
 import { useAgentMemory } from '../../../hooks/useAgentMemory';
 import { AgentGrowthTimeline } from '../../../components/AgentGrowthTimeline';
+import type { Agent } from '../../../types/domain';
 
 export default function AgentProfilePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const agentId = params.id;
   const { memory, loading, error } = useAgentMemory(agentId);
-  const [agent, setAgent] = useState<any>(null);
+  const [agent, setAgent] = useState<Agent | null>(null);
+
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333/api';
 
   useEffect(() => {
     async function loadAgent() {
       try {
-        const res = await fetch(`http://localhost:3333/api/agents/${agentId}`);
+        const res = await fetch(`${API_BASE}/agents/${agentId}`);
         if (res.ok) {
           const data = await res.json();
           setAgent(data);
@@ -27,7 +30,7 @@ export default function AgentProfilePage() {
       }
     }
     void loadAgent();
-  }, [agentId]);
+  }, [agentId, API_BASE]);
 
   if (!agent) return <div className="p-20 text-center">Loading Profile...</div>;
 

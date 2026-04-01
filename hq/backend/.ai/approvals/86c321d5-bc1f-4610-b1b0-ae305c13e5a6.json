@@ -1,0 +1,9 @@
+{
+  "riskLevel": "LOW",
+  "approvalType": "generic",
+  "riskReason": "",
+  "id": "86c321d5-bc1f-4610-b1b0-ae305c13e5a6",
+  "approver": "admin",
+  "approvedAt": "2026-04-01T04:02:22.769Z",
+  "reason": "Too risky"
+}

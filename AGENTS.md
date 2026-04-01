@@ -4,168 +4,99 @@ This file provides guidance to Codex when working in `/Users/user/agency-agents`
 
 ## Project Overview
 
-**The Agency** is a collection of AI agent specialists organized by domain.
-Each agent is a Markdown file with frontmatter metadata and structured content for personality, workflow, and deliverables.
+**StaffAI** is an enterprise-grade AI Agent Operating System. It connects a library of **144+ specialized agents** with a robust, governed execution environment.
 
-**The Agency HQ** (`hq/`) is the web dashboard for managing these agents via MCP and the web discussion APIs.
+**The Agency HQ** (`hq/`) is the dual-core management orchestrator:
+- **TS Office (Management)**: Handles intent clarification, task routing, approval gates, and state persistence.
+- **Python Workshop (Execution)**: Handles high-performance tool execution via `deer-flow`.
 
 ## Current HQ Shape
 
-HQ now has two equally important entry points:
+HQ is a multi-agent Command Deck with a unified delivery flow:
 
-1. The Web UI, which is the primary multi-agent command deck.
-2. MCP tools, which let Codex / Cursor clients call the same agency capabilities.
-
-The Web UI is no longer a lightweight chat pane. It is a three-column command deck:
-
-- left: squad storage, active roster, activity log
-- center: talent pool and discovery
-- right: discussion control console
+1. **Intake & Clarification**: Advanced Wizard for turning vague ideas into detailed Specs.
+2. **Implementation Planning**: Automated plan generation and multi-agent squad recommendation.
+3. **Execution & HITL**: Real-time streaming of agent thoughts with automated high-risk action interception.
+4. **Institutional Knowledge**: One-click "Save as Template" to build a Reuse Flywheel.
 
 ## Quick Start
 
 ```bash
-# Start both backend (3333) and frontend (3008)
+# Full System Bootstrap
 cd hq && ./start.sh
 
-# Or start individually
-cd hq/backend && npm run build && npm run start:web
-cd hq/frontend && npm run dev
+# Or Manual Start (Ports: Backend 3333, Frontend 3008)
+cd hq/backend && npm run dev:web
+cd hq/frontend && PORT=3008 npm run dev
 ```
 
-## Development Commands
-
-### Backend (`hq/backend/`)
-
-```bash
-npm run build       # Compile TypeScript
-npm run start:web   # Start Express server (port 3333)
-npm run dev:web     # Dev mode with ts-node
-npm run start:mcp   # Start MCP server for Codex integration
-```
-
-### Frontend (`hq/frontend/`)
-
-```bash
-npm run dev         # Start Next.js dev server (port 3008)
-npm run build       # Production build
-npm run start       # Production server
-npm run lint        # Run ESLint
-```
-
-## HQ Architecture
+## HQ Architecture & Services
 
 ```text
 hq/
-├── backend/
-│   └── src/
-│       ├── mcp.ts              # MCP protocol and orchestration tools
-│       ├── server.ts           # Express API, WebSocket broadcast, discussion routes
-│       ├── discussion-service.ts
-│       ├── store.ts            # squad, templates, knowledge
-│       ├── scanner.ts          # Agent registry
-│       └── types.ts
-└── frontend/
-    └── src/
-        ├── app/page.tsx               # Main dashboard
-        ├── components/                # AgentCard, DiscussionControlPanel, ActivityLog
-        ├── hooks/                     # useAgents, useWebSocket, useDiscussionControl
-        └── utils/constants.ts         # WS_CONFIG, API_CONFIG, DEPT_MAP
+├── backend/src/
+│   ├── orchestration/      # CORE: TaskLifecycleService, TaskOrchestrator, Intent Services
+│   ├── governance/         # HITL: ApprovalServiceV2, RiskAssessment, AuditLogger
+│   ├── runtime/            # EXECUTORS: RuntimeAdapters (Claude, Codex, OpenAI, DeerFlow)
+│   ├── tools/              # CAPABILITIES: ToolGateway (High-risk interception logic)
+│   ├── persistence/        # STORAGE: Repository Pattern (File & Postgres support)
+│   ├── shared/             # DOMAIN: Task, Intent, and Template type definitions
+│   └── api/                # ROUTES: Intents, Templates, Approvals, Tasks, Runtime
+└── frontend/src/
+    ├── app/tasks/[id]/     # Atomic Task Detail view (Overview, Plan, Artifacts tabs)
+    ├── app/templates/      # Template Center UI
+    ├── components/intent/  # Clarification, Design, and Plan Preview panels
+    └── components/approvals/ # HITL: ApprovalDetailPanel
 ```
 
-## What HQ Does Now
+## Core Capabilities
 
-- `consult_the_agency` still handles smart routing and knowledge injection.
-- The web discussion console can search experts, hire them, assign work, and run a real discussion.
-- Templates can be saved and reused as discussion squads.
-- Discussion execution can be routed through local CLI executors to save token cost.
+- **End-to-End Requirement Delivery**: AI-guided flow from raw input to implementation plan.
+- **Advanced HITL**: Automated interception of high-risk tool actions (e.g., `rm`, `write`) with breakpoint resumption.
+- **Reuse Flywheel**: Save successful task patterns as templates for one-click instantiation.
+- **Dual-Core SSE Bridge**: Real-time thought broadcasting from Python executors to TS dashboard.
 
-## MCP Tools
+## Unified Domain APIs
 
-Available tools include:
+### 1. Intent (Requirement Drafts)
+- `POST /api/intents`: Create raw draft
+- `POST /api/intents/:id/clarify`: Iterative clarification
+- `POST /api/intents/:id/confirm-design`: Lock in design summary
+- `POST /api/intents/:id/create-task`: Instantiate formal TaskRecord
 
-- `consult_the_agency`
-- `manage_staff`
-- `report_task_result`
-- `find_experts`
-- `hire_experts`
-- `assign_expert_tasks`
-- `expert_discussion`
+### 2. Governance & Approvals
+- `POST /api/approvals/:id/approve`: Authorize and resume execution
+- `POST /api/approvals/:id/reject`: Cancel blocked action
 
-## Web Discussion API
-
-The dashboard uses the backend discussion service directly through:
-
-- `POST /api/discussions/search`
-- `POST /api/discussions/hire`
-- `POST /api/discussions/run`
-- `GET /api/startup-check`
-- `GET /startup-check`
-
-## Discussion Execution
-
-The discussion service is designed around an executor layer rather than a fixed cloud API.
-
-- Preferred path: local Claude Code / Codex CLI
-- Optional fallback: OpenAI API
-- Environment-driven selection is preferred over hardcoding a provider
-- Main environment knobs:
-  `AGENCY_DISCUSSION_EXECUTOR`, `AGENCY_DISCUSSION_CLAUDE_PATH`, `AGENCY_DISCUSSION_CODEX_PATH`, `AGENCY_DISCUSSION_TIMEOUT_MS`
-
-## Agent File Structure
-
-Each agent, such as `engineering/frontend-developer.md`, follows this pattern:
-
-```markdown
----
-name: Agent Name
-description: One-line specialty
-color: blue
-emoji: 🎯
-vibe: Personality hook
----
-
-## 🧠 Your Identity & Memory
-## 🎯 Your Core Mission
-## 🚨 Critical Rules You Must Follow
-## 📋 Your Technical Deliverables
-## 🔄 Your Workflow Process
-```
-
-Sections are grouped into Persona versus Operations. The conversion scripts depend on that structure.
+### 3. Knowledge & Templates
+- `GET /api/templates`: Browse organization patterns
+- `POST /api/tasks/:id/save-template`: Capture task as reusable asset
+- `POST /api/templates/:id/create-task`: Quick-start from template
 
 ## Type Safety Notes
 
-- Backend uses strict TypeScript.
-- Frontend uses React 19 with strict null checks.
-- Prefer `for...of` over `forEach` or `reduce` when dealing with nullable unions.
+- **Strict Mode**: Backend and Frontend both enforce strict TypeScript.
+- **Exhaustive Mapping**: `TaskType` additions must be mapped in `TaskLifecycleService` and `TaskOrchestrator`.
+- **Domain Alignment**: Frontend types in `domain.ts` must exactly match backend `shared/` types.
 
-## Guides Index
+## 🛠️ 核心执行协议：Conductor
 
-- `AI 元编码法则（Thread 规范）`  
-  Path: `docs/guides/ai-meta-coding-laws.md`  
-  适用：定义本 thread 的规范沉淀边界、法则模板、索引机制与演进策略。
+所有涉及系统功能变更、代码编写或架构调整的任务，必须严格遵守 **Conductor 规格驱动协议**：
 
-- `法则生命周期管理（Rule Lifecycle Laws）`  
-  Path: `docs/guides/rule-lifecycle-laws.md`  
-  适用：规范法则从 Draft 到 Active、Superseded、Deprecated 的变更与追溯流程。
+1. **规格先行 (Spec First)**：创建 `spec.md` 定义目标与成功标准。
+2. **计划驱动 (Plan Driven)**：在 `plan.md` 中使用 `[ ]`, `[~]`, `[x]` 追踪原子任务。
+3. **工程闭环 (Engineering Loop)**：执行 TDD，commit 后附加 `git notes` 审计摘要。
+4. **验证与检查点 (Verification & Checkpoint)**：每个阶段结束需提出手动验证计划并获取用户确认。
+5. **文档同步 (Doc Sync)**：轨道完成后同步更新 `product.md` 和 `tech-stack.md`。
 
-## Deferred TODO / Roadmap
+---
+Protocol details: `conductor/workflow.md`
 
-These items are intentionally left for later:
+## Updated Roadmap
 
-- discussion history persistence and replay
-- template rename/delete/tagging
-- retry or replacement when an expert fails
-- richer discussion progress visualization
-- export discussion output to documents or tasks
-- auth, rate limiting, and input validation
-
-## MCP Setup Example
-
-```json
-{
-  "command": "node",
-  "args": ["/path/to/agency-agents/hq/backend/dist/mcp-server.js"]
-}
-```
+- [x] Intent-based Task Creation Flow
+- [x] Automated High-Risk Tool Interception
+- [x] Template Reuse Flywheel
+- [ ] Multi-turn Parallel Autonomy (L3)
+- [ ] Real-time Cost/Token Analytics Dash
+- [ ] Cross-Agent Shared Memory (L2) Graph

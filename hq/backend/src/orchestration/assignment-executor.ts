@@ -82,7 +82,7 @@ interface RunningAssignment {
  * Configuration for AssignmentExecutor
  */
 export interface AssignmentExecutorConfig {
-  store: Pick<Store, 'getTaskById' | 'updateTaskAssignment' | 'saveExecution' | 'logAudit' | 'savePendingHumanInput'> & Partial<Pick<Store, 'getTaskAssignments'>>;
+  store: Pick<Store, 'getTaskById' | 'updateTaskAssignment' | 'saveExecution' | 'logAudit' | 'savePendingHumanInput' | 'getAgentMemoryByAgentId'> & Partial<Pick<Store, 'getTaskAssignments'>>;
   auditLogger: AuditLogger | null;
   executor: 'claude' | 'codex' | 'openai' | 'deerflow';
   timeoutMs?: number;
@@ -142,7 +142,7 @@ export class DefaultAssignmentExecutor implements AssignmentExecutor {
     });
 
     const runtimeAdapter = resolveRuntimeAdapter(executor);
-    const runtimeContext = this.buildRuntimeContext(assignment, task, input, executor, timeoutMs);
+    const runtimeContext = await this.buildRuntimeContext(assignment, task, input, executor, timeoutMs);
 
     const result = await executeAssignmentWithRetry(
       runtimeAdapter.run(runtimeContext),
@@ -230,13 +230,14 @@ export class DefaultAssignmentExecutor implements AssignmentExecutor {
     return this.runningAssignments.get(assignmentId)?.status ?? 'idle';
   }
 
-  private buildRuntimeContext(
+  private async buildRuntimeContext(
     assignment: TaskAssignment,
     task: TaskRecord,
     input: AssignmentExecutionInput,
     executor: 'claude' | 'codex' | 'openai' | 'deerflow',
     timeoutMs: number
-  ): RuntimeExecutionContext {
+  ): Promise<RuntimeExecutionContext> {
+    const memory = await this.store.getAgentMemoryByAgentId(assignment.agentId);
     return {
       task,
       executor,
@@ -246,6 +247,7 @@ export class DefaultAssignmentExecutor implements AssignmentExecutor {
       executionMode: task.executionMode,
       summary: input.description,
       memoryContextExcerpt: input.memoryContextExcerpt,
+      l3Memory: memory || undefined,
       timeoutMs,
       maxRetries: input.maxRetries ?? 1,
       approvalGranted: input.approvalGranted,

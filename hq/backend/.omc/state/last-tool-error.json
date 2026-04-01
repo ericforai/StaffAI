@@ -1,7 +1,7 @@
 {
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"cat /Users/user/CRM-auto/package.json && echo \\\"===\\\" && find /Users/user/CRM-auto/src -type f | sort\",\"description\":\"Read package.json and list all src files\"}",
-  "error": "Exit code 1\ncat: /Users/user/CRM-auto/package.json: No such file or directory",
-  "timestamp": "2026-03-31T03:15:51.369Z",
+  "tool_name": "Glob",
+  "tool_input_preview": "{\"pattern\":\"**/*workflow*test*\"}",
+  "error": "spawn /Users/user/.nvm/versions/node/v22.16.0/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/arm64-darwin/rg EACCES",
+  "timestamp": "2026-04-01T04:06:44.925Z",
   "retry_count": 1
 }

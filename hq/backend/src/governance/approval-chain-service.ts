@@ -8,9 +8,9 @@
 import type {
   ApprovalChain,
   ApprovalChainStep,
-} from '../shared/approval-chain-types.js';
-import { DEFAULT_CHAINS } from '../shared/approval-chain-types.js';
-import type { ApprovalChainRepository } from '../persistence/file-repositories.js';
+} from '../shared/approval-chain-types';
+import { DEFAULT_CHAINS } from '../shared/approval-chain-types';
+import type { ApprovalChainRepository } from '../persistence/file-repositories';
 
 /**
  * Risk level mapping to chain templates

@@ -11,9 +11,14 @@ export interface ReflectorDependencies {
   }>;
 }
 
+export interface ReflectorStore {
+  getAgentMemoryByAgentId(agentId: string): Promise<AgentMemory | null>;
+  saveAgentMemory(memory: AgentMemory): Promise<void>;
+}
+
 export class ReflectorService {
   constructor(
-    private readonly store: Store,
+    private readonly store: ReflectorStore,
     private readonly deps: ReflectorDependencies = {}
   ) {}
 

@@ -42,3 +42,9 @@ V0.5: Agent Evolution Engine (Project "Continuum")
     - [x] Update Task Detail view to show memory utilization badges (added links to profile)
     - [x] Add static/mocked "Trust Level" progress bar
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Evolution UI Dashboard' (Protocol in workflow.md)
+
+---
+
+## Phase: Review Fixes
+
+- [~] Task: Apply review suggestions

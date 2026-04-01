@@ -1,8 +1,11 @@
 import type express from 'express';
 import type { Store } from '../store';
+import type { TaskLifecycleService } from '../orchestration/task-lifecycle-service';
+import { randomUUID } from 'node:crypto';
 
 export interface TemplateRouteDependencies {
   store: Store;
+  lifecycleService?: TaskLifecycleService;
 }
 
 export function registerTemplateRoutes(app: express.Application, dependencies: TemplateRouteDependencies) {
@@ -63,9 +66,6 @@ export function registerTemplateRoutes(app: express.Application, dependencies: T
 
     await dependencies.store.saveRequirementDraft(draft);
 
-    // 2. We can return the intentId and let frontend handle the final confirmation,
-    // OR we can trigger the conversion here if lifecycleService is available.
-    // Given the V0.4 goal, we return success and the intentId for UX continuity.
     return res.json({ 
       success: true, 
       message: '任务已基于模板初始化，请确认计划后即可开始执行。',

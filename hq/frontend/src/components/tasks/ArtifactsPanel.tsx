@@ -14,7 +14,7 @@ interface Artifact {
 interface Assignment {
   id: string;
   agentId: string;
-  assignmentRole: string;
+  assignmentRole?: string;
   artifacts?: Artifact[];
 }
 

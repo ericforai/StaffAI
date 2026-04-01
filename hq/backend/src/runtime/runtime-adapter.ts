@@ -1,4 +1,5 @@
 import type { TaskExecutionMode, TaskRecord } from '../shared/task-types';
+import type { AgentMemory } from '../shared/intent-types';
 import { ClaudeRuntimeAdapter } from './adapters/claude-adapter';
 import { CodexRuntimeAdapter } from './adapters/codex-adapter';
 import { OpenAIRuntimeAdapter } from './adapters/openai-adapter';
@@ -13,6 +14,7 @@ export interface RuntimeExecutionContext {
   executionMode: TaskExecutionMode;
   summary: string;
   memoryContextExcerpt?: string;
+  l3Memory?: AgentMemory;
   timeoutMs: number;
   maxRetries: number;
   inputSnapshot?: Record<string, unknown>;

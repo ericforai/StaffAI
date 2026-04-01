@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1774925864561,
+  "lastScanned": 1775012320617,
   "projectRoot": "/Users/user/agency-agents/hq/backend",
   "techStack": {
     "languages": [
@@ -53,7 +53,7 @@
     }
   },
   "conventions": {
-    "namingStyle": "camelCase/PascalCase",
+    "namingStyle": null,
     "importStyle": null,
     "testPattern": null,
     "fileOrganization": null
@@ -76,14 +76,14 @@
       "path": "coverage",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1774925864526,
+      "lastAccessed": 1775012320589,
       "keyFiles": []
     },
     "dist": {
       "path": "dist",
       "purpose": "Distribution/build output",
       "fileCount": 10,
-      "lastAccessed": 1774925864526,
+      "lastAccessed": 1775012320596,
       "keyFiles": [
         "execution-strategy.js",
         "mcp-server.js",
@@ -96,7 +96,7 @@
       "path": "dist-test",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1774925864529,
+      "lastAccessed": 1775012320597,
       "keyFiles": [
         "store.js",
         "types.js"
@@ -106,7 +106,7 @@
       "path": "generated-test-data",
       "purpose": null,
       "fileCount": 3,
-      "lastAccessed": 1774925864529,
+      "lastAccessed": 1775012320598,
       "keyFiles": [
         "executions.json",
         "tasks.json",
@@ -117,7 +117,7 @@
       "path": "scripts",
       "purpose": "Build/utility scripts",
       "fileCount": 6,
-      "lastAccessed": 1774925864529,
+      "lastAccessed": 1775012320599,
       "keyFiles": [
         "LIGHTWEIGHT_EXECUTION_GUIDE.md",
         "demo-lightweight-scenarios.ts",
@@ -130,7 +130,7 @@
       "path": "src",
       "purpose": "Source code",
       "fileCount": 11,
-      "lastAccessed": 1774925864530,
+      "lastAccessed": 1775012320602,
       "keyFiles": [
         "bullmq.d.ts",
         "execution-strategy.ts",
@@ -143,7 +143,7 @@
       "path": "test-data",
       "purpose": null,
       "fileCount": 21,
-      "lastAccessed": 1774925864530,
+      "lastAccessed": 1775012320602,
       "keyFiles": [
         "executions-batch-2.json",
         "executions-history-batch1.json",
@@ -155,19 +155,19 @@
     "dist/__tests__": {
       "path": "dist/__tests__",
       "purpose": "Test files",
-      "fileCount": 86,
-      "lastAccessed": 1774925864530,
+      "fileCount": 95,
+      "lastAccessed": 1775012320603,
       "keyFiles": [
         "advanced-discussion-runner.test.js",
         "agency-consult.test.js",
-        "approval-chain-service.test.js"
+        "agent-memory-repo.test.js"
       ]
     },
     "dist/api": {
       "path": "dist/api",
       "purpose": "API routes",
-      "fileCount": 21,
-      "lastAccessed": 1774925864531,
+      "fileCount": 23,
+      "lastAccessed": 1775012320604,
       "keyFiles": [
         "agency.js",
         "agents.js",
@@ -178,7 +178,7 @@
       "path": "dist/app",
       "purpose": "Application code",
       "fileCount": 4,
-      "lastAccessed": 1774925864531,
+      "lastAccessed": 1775012320604,
       "keyFiles": [
         "create-discussion-service.js",
         "create-web-server-runtime.js",
@@ -189,7 +189,7 @@
       "path": "dist-test/__tests__",
       "purpose": "Test files",
       "fileCount": 1,
-      "lastAccessed": 1774925864531,
+      "lastAccessed": 1775012320605,
       "keyFiles": [
         "file-memory-retriever.test.js"
       ]
@@ -198,7 +198,7 @@
       "path": "dist-test/api",
       "purpose": "API routes",
       "fileCount": 1,
-      "lastAccessed": 1774925864531,
+      "lastAccessed": 1775012320605,
       "keyFiles": [
         "memory.js"
       ]
@@ -206,19 +206,19 @@
     "src/__tests__": {
       "path": "src/__tests__",
       "purpose": "Test files",
-      "fileCount": 89,
-      "lastAccessed": 1774925864531,
+      "fileCount": 98,
+      "lastAccessed": 1775012320606,
       "keyFiles": [
         "advanced-discussion-runner.test.ts",
         "agency-consult.test.ts",
-        "approval-chain-service.test.ts"
+        "agent-memory-repo.test.ts"
       ]
     },
     "src/api": {
       "path": "src/api",
       "purpose": "API routes",
-      "fileCount": 21,
-      "lastAccessed": 1774925864531,
+      "fileCount": 23,
+      "lastAccessed": 1775012320606,
       "keyFiles": [
         "agency.ts",
         "agents.ts",
@@ -229,7 +229,7 @@
       "path": "src/app",
       "purpose": "Application code",
       "fileCount": 4,
-      "lastAccessed": 1774925864531,
+      "lastAccessed": 1775012320607,
       "keyFiles": [
         "create-discussion-service.ts",
         "create-web-server-runtime.ts",
@@ -239,45 +239,261 @@
   },
   "hotPaths": [
     {
-      "path": "src/types.ts",
-      "accessCount": 3,
-      "lastAccessed": 1774926948866,
+      "path": "src/store.ts",
+      "accessCount": 34,
+      "lastAccessed": 1775012377160,
       "type": "file"
     },
     {
-      "path": "src/persistence/file-repositories.ts",
-      "accessCount": 2,
-      "lastAccessed": 1774926879209,
-      "type": "file"
-    },
-    {
-      "path": "src/api/tasks.ts",
-      "accessCount": 2,
-      "lastAccessed": 1774926894323,
+      "path": "src/__tests__/workflow-execution-engine.test.ts",
+      "accessCount": 25,
+      "lastAccessed": 1774929979386,
       "type": "file"
     },
     {
       "path": "src/types/crm-types.ts",
-      "accessCount": 1,
-      "lastAccessed": 1774926757935,
+      "accessCount": 24,
+      "lastAccessed": 1775012184681,
       "type": "file"
     },
     {
-      "path": "src/server.ts",
-      "accessCount": 1,
-      "lastAccessed": 1774926879158,
+      "path": "src/orchestration/assignment-executor.ts",
+      "accessCount": 13,
+      "lastAccessed": 1774929564643,
+      "type": "file"
+    },
+    {
+      "path": "src/api/tasks.ts",
+      "accessCount": 13,
+      "lastAccessed": 1774934772937,
+      "type": "file"
+    },
+    {
+      "path": "src/types.ts",
+      "accessCount": 13,
+      "lastAccessed": 1775012359091,
+      "type": "file"
+    },
+    {
+      "path": "src/shared/task-types.ts",
+      "accessCount": 11,
+      "lastAccessed": 1775012367187,
+      "type": "file"
+    },
+    {
+      "path": "src/persistence/file-repositories.ts",
+      "accessCount": 10,
+      "lastAccessed": 1774929345719,
+      "type": "file"
+    },
+    {
+      "path": "src/api/executions.ts",
+      "accessCount": 10,
+      "lastAccessed": 1775012367341,
+      "type": "file"
+    },
+    {
+      "path": "src/scripts/generate-execution-records.ts",
+      "accessCount": 10,
+      "lastAccessed": 1775016297031,
+      "type": "file"
+    },
+    {
+      "path": "src/shared/hitl-types.ts",
+      "accessCount": 8,
+      "lastAccessed": 1774934659441,
+      "type": "file"
+    },
+    {
+      "path": "src/crm/crm-service.ts",
+      "accessCount": 6,
+      "lastAccessed": 1774928644211,
+      "type": "file"
+    },
+    {
+      "path": "src/orchestration/assignment-execution-runner.ts",
+      "accessCount": 6,
+      "lastAccessed": 1774929490921,
+      "type": "file"
+    },
+    {
+      "path": "src/orchestration/task-execution-orchestrator.ts",
+      "accessCount": 5,
+      "lastAccessed": 1774929862029,
+      "type": "file"
+    },
+    {
+      "path": "src/orchestration/assignment-status-updater.ts",
+      "accessCount": 5,
+      "lastAccessed": 1774930575295,
+      "type": "file"
+    },
+    {
+      "path": "scripts/generate-execution-records.ts",
+      "accessCount": 5,
+      "lastAccessed": 1775012312700,
       "type": "file"
     },
     {
       "path": "src/app/register-backend-routes.ts",
-      "accessCount": 1,
-      "lastAccessed": 1774926902422,
+      "accessCount": 4,
+      "lastAccessed": 1774928072278,
       "type": "file"
     },
     {
-      "path": "src/store.ts",
+      "path": "src/runtime/runtime-adapter.ts",
+      "accessCount": 4,
+      "lastAccessed": 1774929201010,
+      "type": "file"
+    },
+    {
+      "path": "src/orchestration/hitl-service.ts",
+      "accessCount": 3,
+      "lastAccessed": 1774929062649,
+      "type": "file"
+    },
+    {
+      "path": "src/persistence/crm-repositories.ts",
+      "accessCount": 2,
+      "lastAccessed": 1774927540877,
+      "type": "file"
+    },
+    {
+      "path": "src/api/approvals.ts",
+      "accessCount": 2,
+      "lastAccessed": 1774927723276,
+      "type": "file"
+    },
+    {
+      "path": "src/server.ts",
+      "accessCount": 2,
+      "lastAccessed": 1774927811418,
+      "type": "file"
+    },
+    {
+      "path": "src/runtime/adapters/claude-adapter.ts",
+      "accessCount": 2,
+      "lastAccessed": 1774929062591,
+      "type": "file"
+    },
+    {
+      "path": "src/__tests__/generate-exec-test.ts",
+      "accessCount": 2,
+      "lastAccessed": 1774930264397,
+      "type": "file"
+    },
+    {
+      "path": "src/__tests__/generate-execution-records.test.ts",
+      "accessCount": 2,
+      "lastAccessed": 1774959031140,
+      "type": "file"
+    },
+    {
+      "path": "src/__tests__/generate-execution-records-integration.test.ts",
+      "accessCount": 2,
+      "lastAccessed": 1774959043031,
+      "type": "file"
+    },
+    {
+      "path": "src/scripts/README.md",
+      "accessCount": 2,
+      "lastAccessed": 1775016296922,
+      "type": "file"
+    },
+    {
+      "path": "package.json",
       "accessCount": 1,
-      "lastAccessed": 1774926916182,
+      "lastAccessed": 1774927000869,
+      "type": "file"
+    },
+    {
+      "path": "src/governance/risk-assessment.ts",
+      "accessCount": 1,
+      "lastAccessed": 1774927264973,
+      "type": "file"
+    },
+    {
+      "path": "src/scanner.ts",
+      "accessCount": 1,
+      "lastAccessed": 1774927954121,
+      "type": "file"
+    },
+    {
+      "path": "src/__tests__/memory-layer-service.test.ts",
+      "accessCount": 1,
+      "lastAccessed": 1774928206059,
+      "type": "file"
+    },
+    {
+      "path": "src/__tests__/crm-service.test.ts",
+      "accessCount": 1,
+      "lastAccessed": 1774928333886,
+      "type": "file"
+    },
+    {
+      "path": "ztest.ts",
+      "accessCount": 1,
+      "lastAccessed": 1774928789263,
+      "type": "file"
+    },
+    {
+      "path": "src/orchestration/task-state-machine.ts",
+      "accessCount": 1,
+      "lastAccessed": 1774929096441,
+      "type": "file"
+    },
+    {
+      "path": "src/__tests__/generate-execution-records-batch-test.test.ts",
+      "accessCount": 1,
+      "lastAccessed": 1774929115215,
+      "type": "file"
+    },
+    {
+      "path": "src/orchestration/workflow-execution-serial.ts",
+      "accessCount": 1,
+      "lastAccessed": 1774929120902,
+      "type": "file"
+    },
+    {
+      "path": "generated-test-data/executions.json",
+      "accessCount": 1,
+      "lastAccessed": 1774930170529,
+      "type": "file"
+    },
+    {
+      "path": "src/runtime/execution-store.ts",
+      "accessCount": 1,
+      "lastAccessed": 1774959016439,
+      "type": "file"
+    },
+    {
+      "path": "test-executions-2.json",
+      "accessCount": 1,
+      "lastAccessed": 1774959177451,
+      "type": "file"
+    },
+    {
+      "path": "test-executions-batch-2.json",
+      "accessCount": 1,
+      "lastAccessed": 1774959203174,
+      "type": "file"
+    },
+    {
+      "path": "test-data/executions-history-batch1.json",
+      "accessCount": 1,
+      "lastAccessed": 1774997338683,
+      "type": "file"
+    },
+    {
+      "path": "test-data/executions-history-combined.json",
+      "accessCount": 1,
+      "lastAccessed": 1774997366022,
+      "type": "file"
+    },
+    {
+      "path": "src/__tests__/server.api.test.ts",
+      "accessCount": 1,
+      "lastAccessed": 1774997524188,
       "type": "file"
     }
   ],

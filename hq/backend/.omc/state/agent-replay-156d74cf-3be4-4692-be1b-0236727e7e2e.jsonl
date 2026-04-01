@@ -1,1 +1,10 @@
 {"t":0,"agent":"a5f98f4","agent_type":"unknown","event":"agent_stop","success":true}
+{"t":0,"agent":"a00b1af","agent_type":"unknown","event":"agent_stop","success":true}
+{"t":0,"agent":"ae190a3","agent_type":"unknown","event":"agent_stop","success":true}
+{"t":0,"agent":"a00cd23","agent_type":"unknown","event":"agent_stop","success":true}
+{"t":0,"agent":"system","event":"keyword_detected","keyword":"tdd"}
+{"t":0,"agent":"a080039","agent_type":"Explore","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"ac9da67","agent_type":"test-engineer","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"a751fed","agent_type":"explore","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"aca101b","agent_type":"planner","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"ad073ff","agent_type":"unknown","event":"agent_stop","success":true}

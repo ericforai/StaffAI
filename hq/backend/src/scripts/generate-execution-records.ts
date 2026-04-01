@@ -1,10 +1,3 @@
-/**
- * Generate Execution Records for History Endpoint
- *
- * Utility script to populate test execution records with various statuses,
- * scenarios, and timestamps for testing the /api/executions history endpoint.
- */
-
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -15,6 +8,8 @@ interface GenerateOptions {
   taskId?: string;
   outputFile?: string;
   daysBack?: number;
+  /** Write directly into the Store (executions.json) — skips existing records */
+  persist?: boolean;
 }
 
 /**

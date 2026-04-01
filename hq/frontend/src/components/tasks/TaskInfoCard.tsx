@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import { SuspendedTaskPanel } from '../SuspendedTaskPanel';
@@ -16,6 +17,7 @@ interface TaskInfoCardProps {
   selectedExecutor: TaskExecutor;
   setSelectedExecutor: (executor: TaskExecutor) => void;
   onExecute: () => void;
+  onPause?: () => void | Promise<void>;
   submitting: boolean;
 }
 
@@ -57,8 +59,10 @@ export function TaskInfoCard({
   selectedExecutor,
   setSelectedExecutor,
   onExecute,
+  onPause,
   submitting
 }: TaskInfoCardProps) {
+  const [isSaving, setIsSaving] = useState(false);
   const statusMessage = getTaskStatusMessage(task.status, task.executionMode);
 
   const handleSaveTemplate = async () => {
@@ -66,6 +70,7 @@ export function TaskInfoCard({
     if (!name) return;
 
     try {
+      setIsSaving(true);
       const res = await fetch(`${API_BASE}/tasks/${task.id}/save-template`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -78,6 +83,8 @@ export function TaskInfoCard({
       }
     } catch (err) {
       alert('保存出错：' + String(err));
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -161,6 +168,16 @@ export function TaskInfoCard({
             ? '运行高级讨论'
             : '执行任务'}
         </button>
+        {onPause && latestExecution?.status === 'running' && (
+          <button
+            type="button"
+            onClick={() => void onPause()}
+            disabled={submitting}
+            className="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-black text-rose-800 transition-all hover:border-rose-300 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            暂停执行
+          </button>
+        )}
         {task.status === 'waiting_approval' && (
           <Link
             href="/approvals"
@@ -183,13 +200,6 @@ export function TaskInfoCard({
         >
           <Save size={16} />
           {isSaving ? '正在沉淀...' : '保存为模板'}
-        </button>
-      </div>
-    </section>
-  );
-}
-16} />
-          保存为模板
         </button>
       </div>
     </section>

@@ -29,3 +29,22 @@ export interface ResumePayload {
   feedback: HumanFeedbackPayload;
   resumedBy: string;
 }
+
+/**
+ * Stores pending human input needed for an assignment to continue.
+ * The runtime detects {{HITL_NEED_INPUT}} marker → stores here → assignment pauses.
+ */
+export interface PendingHumanInput {
+  id: string;
+  assignmentId: string;
+  taskId: string;
+  /** The questions or context the agent needs human input for */
+  questions: string;
+  /** Full output snapshot that triggered the need for input */
+  outputSnapshot?: Record<string, unknown>;
+  status: 'pending' | 'answered' | 'cancelled';
+  createdAt: string;
+  answeredAt?: string;
+  answer?: string;
+  answeredBy?: string;
+}

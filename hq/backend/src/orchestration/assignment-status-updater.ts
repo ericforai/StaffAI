@@ -126,5 +126,9 @@ function buildAssignmentTimestamps(status: TaskAssignmentStatus): {
     };
   }
 
+  if (status === 'waiting_input') {
+    return { updatedAt: now };
+  }
+
   return { updatedAt: now };
 }

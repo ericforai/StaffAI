@@ -1,9 +1,11 @@
 import type express from 'express';
 import type { Scanner } from '../scanner';
 import type { UserContextService } from '../identity/user-context.js';
+import type { Store } from '../store';
 
 export interface AgentRouteDependencies {
   scanner: Scanner;
+  store: Store;
   userContextService?: UserContextService;
 }
 

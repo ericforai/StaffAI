@@ -1,5 +1,6 @@
 import type { Agent } from '../types';
 import type { DiscussionParticipant } from '../orchestration/discussion-roster';
+import type { AgentMemory } from '../shared/intent-types';
 
 // ============================================================================
 // Types and Interfaces
@@ -14,6 +15,7 @@ export interface KnowledgeEntryLike {
 export interface PromptContext {
   assignment: string;
   knowledgeContext: string;
+  l3MemoryContext?: string;
 }
 
 export type ParticipantFormatter = (
@@ -30,6 +32,7 @@ export interface PromptBuilder {
   buildExpertPrompt(context: PromptContext): string;
   buildSynthesisPrompt(topic: string, participants: readonly DiscussionParticipant[], options?: SynthesisOptions): string;
   buildKnowledgeContext(task: string, history: KnowledgeEntryLike[], getAgent: (agentId: string) => Agent | undefined): string;
+  buildAgentL3MemoryContext(memory: AgentMemory | null): string;
   formatParticipantResponses(
     participants: readonly Pick<DiscussionParticipant, 'name' | 'response'>[],
     formatter?: ParticipantFormatter
@@ -80,10 +83,40 @@ export function buildKnowledgeContext(
 }
 
 /**
- * Combines an assignment string with knowledge context.
+ * Builds an L3 memory context string for a specific agent.
  */
-export function buildExpertPrompt(assignment: string, knowledgeContext: string): string {
-  return `${assignment}${knowledgeContext}`;
+export function buildAgentL3MemoryContext(memory: AgentMemory | null): string {
+  if (!memory) return '';
+
+  let context = '\n\n---\n### 员工专属记忆 (L3 Memory)：\n';
+
+  if (memory.experienceLog.length > 0) {
+    context += '\n#### 历史经验日志：\n';
+    context += memory.experienceLog
+      .slice(-5) // Only last 5 entries
+      .map((e) => `- 【${e.title}】: ${e.insight}`)
+      .join('\n');
+  }
+
+  if (memory.behavioralHeuristics.length > 0) {
+    context += '\n\n#### 行为准则 (用户纠正总结)：\n';
+    context += memory.behavioralHeuristics
+      .map((h) => `- 发现模式: ${h.pattern}\n  改进动作: ${h.correction}`)
+      .join('\n');
+  }
+
+  return context;
+}
+
+/**
+ * Combines an assignment string with knowledge and L3 memory context.
+ */
+export function buildExpertPrompt(
+  assignment: string,
+  knowledgeContext: string,
+  l3MemoryContext: string = '',
+): string {
+  return `${assignment}${l3MemoryContext}${knowledgeContext}`;
 }
 
 /**
@@ -133,7 +166,7 @@ export function buildSynthesisPrompt(
 export function createPromptBuilder(): PromptBuilder {
   return {
     buildExpertPrompt(context: PromptContext): string {
-      return buildExpertPrompt(context.assignment, context.knowledgeContext);
+      return buildExpertPrompt(context.assignment, context.knowledgeContext, context.l3MemoryContext);
     },
 
     buildSynthesisPrompt(topic: string, participants: readonly DiscussionParticipant[], options?: SynthesisOptions): string {
@@ -146,6 +179,10 @@ export function createPromptBuilder(): PromptBuilder {
       getAgent: (agentId: string) => Agent | undefined,
     ): string {
       return buildKnowledgeContext(task, history, getAgent);
+    },
+
+    buildAgentL3MemoryContext(memory: AgentMemory | null): string {
+      return buildAgentL3MemoryContext(memory);
     },
 
     formatParticipantResponses(

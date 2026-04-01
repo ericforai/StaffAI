@@ -1,5 +1,6 @@
 import { RuntimeAdapter, RuntimeExecutionContext, RuntimeExecutionResult } from '../runtime-adapter';
 import { WorkshopRegistry } from '../../orchestration/workshop-registry';
+import { buildAgentL3MemoryContext } from '../prompt-builder';
 
 export class DeerFlowRuntimeAdapter implements RuntimeAdapter {
   name = 'python_deerflow_workshop';
@@ -31,6 +32,8 @@ ${context.task.description}
 ---
 `.trim();
 
+      const l3MemoryContext = buildAgentL3MemoryContext(context.l3Memory ?? null);
+
       const response = await fetch(`${workshopUrl}/api/v1/tasks/stream`, {
         method: 'POST',
         headers: {
@@ -42,8 +45,8 @@ ${context.task.description}
           agent_role: context.task.recommendedAgentRole,
           // 注入负责人的身份角色（从任务路由信息提取）
           identity_context: context.task.recommendedAgentRole
-            ? `You are acting as: ${context.task.recommendedAgentRole}. ${context.task.description}`
-            : context.task.description,
+            ? `You are acting as: ${context.task.recommendedAgentRole}. ${context.task.description}${l3MemoryContext}`
+            : `${context.task.description}${l3MemoryContext}`,
           description: enhancedDescription,
           memory_context: context.memoryContextExcerpt,
           payload: context.inputSnapshot || {}

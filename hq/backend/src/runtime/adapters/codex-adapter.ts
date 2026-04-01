@@ -1,5 +1,6 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
+import { buildAgentL3MemoryContext } from '../prompt-builder';
 import type { RuntimeAdapter, RuntimeExecutionContext, RuntimeExecutionResult, RuntimeOutputSnapshot } from '../runtime-adapter';
 
 const execFileAsync = promisify(execFile);
@@ -28,7 +29,8 @@ export class CodexRuntimeAdapter implements RuntimeAdapter {
     try {
       // Build the prompt for the local CLI
       const taskDescription = context.task.description || context.task.title;
-      const fullPrompt = `${taskDescription}\n\nContext:\n${context.summary}`;
+      const l3MemoryContext = buildAgentL3MemoryContext(context.l3Memory ?? null);
+      const fullPrompt = `${taskDescription}\n\n${l3MemoryContext}\n\nContext:\n${context.summary}`;
 
       // Use 'codex exec' subcommand for non-interactive execution
       // Codex automatically uses configured MCP servers

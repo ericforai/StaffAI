@@ -8,6 +8,7 @@ import type { TaskAssignment, TaskExecutionMode, TaskRecord, WorkflowPlan } from
 import { resolveExecutionDecision, type SessionCapabilities } from '../execution-strategy';
 import { createAssignmentExecutor } from './assignment-executor';
 import { rebuildWorkflowBundleForSerialExecution } from './task-orchestrator';
+import { ReflectorService } from './reflector-service';
 
 interface ExecuteTaskInput {
   executor: 'claude' | 'codex' | 'openai' | 'deerflow';
@@ -40,10 +41,15 @@ type TaskExecutionStore = Pick<Store, 'saveExecution' | 'updateExecution' | 'upd
       | 'logAudit'
       | 'getTaskAssignmentById'
       | 'savePendingHumanInput'
+      | 'getAgentMemoryByAgentId'
+      | 'saveAgentMemory'
     >
   >;
 
-type AssignmentExecutorStore = Pick<Store, 'getTaskById' | 'updateTaskAssignment' | 'saveExecution' | 'logAudit' | 'savePendingHumanInput'>;
+type AssignmentExecutorStore = Pick<
+  Store,
+  'getTaskById' | 'updateTaskAssignment' | 'saveExecution' | 'logAudit' | 'savePendingHumanInput' | 'getAgentMemoryByAgentId'
+>;
 
 function hasAssignmentExecutorStore(store: TaskExecutionStore): store is TaskExecutionStore & AssignmentExecutorStore {
   return (
@@ -51,7 +57,8 @@ function hasAssignmentExecutorStore(store: TaskExecutionStore): store is TaskExe
     typeof store.updateTaskAssignment === 'function' &&
     typeof store.saveExecution === 'function' &&
     typeof store.logAudit === 'function' &&
-    typeof store.savePendingHumanInput === 'function'
+    typeof store.savePendingHumanInput === 'function' &&
+    typeof store.getAgentMemoryByAgentId === 'function'
   );
 }
 
@@ -388,6 +395,12 @@ export async function executeTaskRecord(
 
     await dependencies.writeExecutionSummary?.(task, result.execution);
 
+    // Trigger reflection for agent evolution
+    if (result.execution.status === 'completed' || result.execution.status === 'failed') {
+      const reflector = new ReflectorService(store);
+      await reflector.reflect(task, result.execution);
+    }
+
     return {
       mode: requestedMode,
       ...result,
@@ -441,6 +454,12 @@ export async function executeTaskRecord(
   );
 
   await dependencies.writeExecutionSummary?.(task, result.execution);
+
+  // Trigger reflection for agent evolution
+  if (result.execution.status === 'completed' || result.execution.status === 'failed') {
+    const reflector = new ReflectorService(store);
+    await reflector.reflect(task, result.execution);
+  }
 
   return {
     mode: requestedMode,

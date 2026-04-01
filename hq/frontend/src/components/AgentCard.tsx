@@ -2,7 +2,8 @@
  * 专家卡片组件（侧边栏和主区域通用）
  */
 import { motion } from 'framer-motion';
-import { UserMinus, Loader2, Zap, BriefcaseBusiness, UserPlus, Check } from 'lucide-react';
+import Link from 'next/link';
+import { UserMinus, Loader2, Zap, BriefcaseBusiness, UserPlus, Check, ExternalLink } from 'lucide-react';
 import { DEPT_MAP } from '../utils/constants';
 import { Agent } from '../types';
 

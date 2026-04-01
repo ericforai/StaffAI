@@ -10,7 +10,8 @@ import { usePendingHumanInputs } from '../../../hooks/usePendingHumanInputs';
 import { useGlobalWebSocket, type WsMessage } from '../../../hooks/useGlobalWebSocket';
 import { useAgents } from '../../../hooks/useAgents';
 import { useApprovalActions } from '../../../hooks/useApprovalActions';
-import type { TaskEvent } from '../../../types';
+import { useExecutionTrace } from '../../../hooks/useExecutionTrace';
+import type { ExecutionTrace, TaskEvent } from '../../../types';
 import { API_CONFIG } from '../../../utils/constants';
 import { SuspendedTaskPanel } from '../../../components/SuspendedTaskPanel';
 import { HumanInputPanel } from '../../../components/tasks/HumanInputPanel';
@@ -34,7 +35,10 @@ export default function TaskDetailPage() {
 
   // Data Fetching
   const { data, loading, error, setData, reload } = useTaskDetail(taskId);
-  const { executeTask, pauseTask, submitting, error: actionError } = useTaskActions(taskId, setData);
+  const { executeTask, pauseTask, resumeTask, cancelTask, submitting, error: actionError } = useTaskActions(
+    taskId,
+    setData
+  );
   const { events, loading: eventsLoading, refresh: refreshEvents, pushEvent } = useTaskEvents(taskId);
   const { inputs: pendingInputs, submitting: inputSubmitting, submitError, respondToAssignment, reload: reloadInputs } = usePendingHumanInputs(taskId);
   const { agents } = useAgents();
@@ -43,7 +47,35 @@ export default function TaskDetailPage() {
   // State
   const [selectedExecutor, setSelectedExecutor] = useState<'openai' | 'claude' | 'codex' | 'deerflow'>('claude');
   const [expandedExecutionId, setExpandedExecutionId] = useState<string | null>(null);
+  const [copiedExecutionId, setCopiedExecutionId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'plan' | 'artifacts'>('overview');
+
+  const { trace: rawTrace, loading: traceLoading, error: traceError, reload: reloadTrace } = useExecutionTrace(
+    expandedExecutionId || ''
+  );
+
+  const executionTraceForList: ExecutionTrace | null =
+    rawTrace?.traceEvents && expandedExecutionId
+      ? {
+          executionId: expandedExecutionId,
+          traceEvents: rawTrace.traceEvents.map((e) => ({
+            id: e.id,
+            type: e.type,
+            summary: e.summary ?? '',
+            occurredAt: e.occurredAt,
+          })),
+        }
+      : null;
+
+  const copyOutputSummary = useCallback(async (id: string, content: string) => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopiedExecutionId(id);
+      window.setTimeout(() => setCopiedExecutionId(null), 2000);
+    } catch {
+      alert('复制失败');
+    }
+  }, []);
 
   // Derived Data
   const workflowPlan = data?.workflowPlan ?? data?.task.workflowPlan ?? null;
@@ -172,7 +204,7 @@ export default function TaskDetailPage() {
               setSelectedExecutor={setSelectedExecutor}
               onExecute={handleExecuteTask}
               onPause={handlePauseTask}
-              loading={submitting}
+              submitting={submitting}
             />
 
             {/* Tabs for Plan / Artifacts */}
@@ -203,10 +235,20 @@ export default function TaskDetailPage() {
               <div className="space-y-6">
                 <ExecutionList
                   executions={data.executions}
-                  expandedId={expandedExecutionId}
-                  onExpand={setExpandedExecutionId}
+                  expandedExecutionId={expandedExecutionId}
+                  setExpandedExecutionId={setExpandedExecutionId}
+                  copiedExecutionId={copiedExecutionId}
+                  copyOutputSummary={copyOutputSummary}
+                  trace={executionTraceForList}
+                  traceLoading={traceLoading}
+                  traceError={traceError}
+                  reloadTrace={() => void reloadTrace()}
+                  onPause={(id) => void pauseTask(id)}
+                  onResume={(id) => void resumeTask(id)}
+                  onCancel={(id) => void cancelTask(id)}
+                  submitting={submitting}
                 />
-                <AssignmentPanel assignments={assignments} />
+                <AssignmentPanel assignments={assignments} agents={agents} />
               </div>
             )}
 
@@ -221,19 +263,17 @@ export default function TaskDetailPage() {
 
           {/* Right Column: Timeline & HITL */}
           <div className="space-y-6">
-            <SuspendedTaskPanel />
+            <SuspendedTaskPanel taskId={taskId} />
             
             {pendingInputs.length > 0 && (
               <div className="space-y-4">
                 <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest px-2">需要人类输入</h3>
-                {pendingInputs.map(input => (
-                  <HumanInputPanel
-                    key={input.id}
-                    input={input}
-                    onSubmit={(response) => respondToAssignment(input.assignmentId, response)}
-                    loading={inputSubmitting}
-                  />
-                ))}
+                <HumanInputPanel
+                  inputs={pendingInputs}
+                  onRespond={respondToAssignment}
+                  submitting={inputSubmitting}
+                  submitError={submitError}
+                />
               </div>
             )}
 

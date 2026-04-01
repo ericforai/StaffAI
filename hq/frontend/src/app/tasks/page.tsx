@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTasks } from '../../hooks/useTasks';
@@ -12,6 +12,7 @@ import { AdvancedTaskWizard } from '../../components/tasks/AdvancedTaskWizard';
 import { TaskFilter } from '../../components/tasks/TaskFilter';
 import { TaskCard } from '../../components/tasks/TaskCard';
 import { ExecutionConfirmModal } from '../../components/tasks/ExecutionConfirmModal';
+import { Library } from 'lucide-react';
 
 const STATUS_LABELS: Record<string, string> = {
   created: '已创建',
@@ -24,7 +25,7 @@ const STATUS_LABELS: Record<string, string> = {
   cancelled: '已取消',
 };
 
-export default function TasksPage() {
+function TasksPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const statusFilter = searchParams.get('status');
@@ -108,6 +109,21 @@ export default function TasksPage() {
           totalCount={tasks.length}
         />
 
+        <div className="mb-6 flex items-center justify-between rounded-2xl bg-slate-50 p-4 border border-slate-100">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm ring-1 ring-slate-200/50">
+              <Library size={20} />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-900">使用最佳实践</p>
+              <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">从模板库快速启动经过验证的交付路径</p>
+            </div>
+          </div>
+          <Link href="/templates" className="rounded-xl bg-white border border-slate-200 px-4 py-2 text-xs font-black text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:text-slate-950 active:scale-95">
+            进入模板中心
+          </Link>
+        </div>
+
         {statusFilter && (
           <div className="mb-4 flex items-center gap-2 text-sm">
             <span className="rounded-md bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
@@ -183,5 +199,13 @@ export default function TasksPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function TasksPage() {
+  return (
+    <Suspense fallback={<div className="mx-auto w-full max-w-[1800px] p-6"><p className="text-sm text-slate-500">加载中...</p></div>}>
+      <TasksPageContent />
+    </Suspense>
   );
 }

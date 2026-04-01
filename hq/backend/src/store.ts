@@ -12,7 +12,7 @@ import {
   ToolCallLog,
   WorkflowPlan,
 } from './shared/task-types';
-import type { RequirementDraft, AgentMemory, TemplateRecord } from './shared/intent-types';
+import type { RequirementDraft, AgentMemory, TemplateRecord, OKRRecord } from './shared/intent-types';
 import {
   ApprovalChainRepository,
   ApprovalRepository,
@@ -102,6 +102,7 @@ const EXECUTION_TRACES_FILE = process.env.AGENCY_EXECUTION_TRACES_FILE || path.j
 const COST_LOGS_FILE = process.env.AGENCY_COST_LOGS_FILE || path.join(__dirname, '../../cost_logs.json');
 const PENDING_HUMAN_INPUT_FILE = process.env.AGENCY_PENDING_HUMAN_INPUT_FILE || path.join(__dirname, '../../pending_human_input.json');
 const AGENT_MEMORY_FILE = process.env.AGENCY_AGENT_MEMORY_FILE || path.join(__dirname, '../../agent_memory.json');
+const OKRS_FILE = process.env.AGENCY_OKRS_FILE || path.join(__dirname, '../../okrs.json');
 
 function getAuditLogsDir() {
   return process.env.AGENCY_AUDIT_LOGS_DIR || path.join(__dirname, '../../.ai/audit');

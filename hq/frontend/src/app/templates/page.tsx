@@ -11,6 +11,7 @@ interface Template {
   activeAgentIds: string[];
   description?: string;
   createdAt?: string;
+  scenario?: string;
 }
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333/api';

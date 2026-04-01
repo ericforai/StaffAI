@@ -1,6 +1,7 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { buildExecutorEnv, extractStructuredResponse, formatExecutorError } from '../discussion-executor';
+import { buildAgentL3MemoryContext } from '../prompt-builder';
 import type { RuntimeAdapter, RuntimeExecutionContext, RuntimeExecutionResult, RuntimeOutputSnapshot } from '../runtime-adapter';
 
 const execFileAsync = promisify(execFile);
@@ -32,7 +33,7 @@ export class ClaudeRuntimeAdapter implements RuntimeAdapter {
     return process.env.AGENCY_TASK_CLAUDE_PATH || process.env.AGENCY_DISCUSSION_CLAUDE_PATH || 'claude';
   }
 
-  private buildArgs(prompt: string): string[] {
+  private buildArgs(prompt: string, systemPrompt: string): string[] {
     return [
       '-p',
       '--output-format',
@@ -43,7 +44,7 @@ export class ClaudeRuntimeAdapter implements RuntimeAdapter {
       '--allowed-tools',
       ALLOWED_TOOL_PATTERNS.join(','),
       '--system-prompt',
-      AGENT_SYSTEM_PROMPT,
+      systemPrompt,
       prompt,
     ];
   }
@@ -69,10 +70,13 @@ export class ClaudeRuntimeAdapter implements RuntimeAdapter {
     const taskDescription = context.task.description || context.task.title;
     const prompt = `${taskDescription}\n\nContext:\n${context.summary}`;
 
+    const l3MemoryContext = buildAgentL3MemoryContext(context.l3Memory ?? null);
+    const systemPrompt = `${AGENT_SYSTEM_PROMPT}${l3MemoryContext}`;
+
     try {
       const result = await execFileAsync(
         claudePath,
-        this.buildArgs(prompt),
+        this.buildArgs(prompt, systemPrompt),
         {
           env: buildExecutorEnv(process.env),
           timeout: context.timeoutMs || 120000,
