@@ -127,6 +127,12 @@ export interface OKRRecord {
   updatedAt: string;
 }
 
+export function calculateKeyResultProgress(kr: KeyResult): number {
+  if (kr.targetValue === 0) return kr.currentValueValue >= 0 ? 100 : 0;
+  const progress = (kr.currentValueValue / kr.targetValue) * 100;
+  return Math.min(Math.max(progress, 0), 100);
+}
+
 export const INTENT_STATUSES: IntentStatus[] = [
   'intake',
   'clarifying',

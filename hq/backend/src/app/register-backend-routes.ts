@@ -17,6 +17,7 @@ import { registerAuditRoutes } from '../api/audit';
 import { registerPresetRoutes } from '../api/presets';
 import { registerSquadTemplateRoutes } from '../api/squad-templates';
 import { registerIntentRoutes } from '../api/intents';
+import { registerOkrRoutes } from '../api/okrs';
 import { registerCrmRoutes } from '../api/crm';
 import { registerWorkshopRoutes } from '../api/workshop';
 import { createWriteBackService } from '../memory/write-back-service';
@@ -252,6 +253,9 @@ export function registerBackendRoutes({
 
   // Register template routes
   registerTemplateRoutes(app, { store });
+
+  // Register OKR routes
+  registerOkrRoutes(app, store);
 
   registerDiscussionRoutes(app, {
     discussionService,
