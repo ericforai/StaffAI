@@ -7,9 +7,9 @@ V0.5: Agent Evolution Engine (Project "Continuum")
 
 ## Phase 1: L3 Memory & Reflection Loop [checkpoint: ]
 
-- [ ] Task: Implement `AgentMemoryRepository` for JSON storage
-    - [ ] Define `AgentMemory` domain models in `shared/intent-types.ts`
-    - [ ] Create file-based repository in `persistence/file-repositories.ts`
+- [x] Task: Implement `AgentMemoryRepository` for JSON storage 62b2af5
+    - [x] Define `AgentMemory` domain models in `shared/intent-types.ts`
+    - [x] Create file-based repository in `persistence/file-repositories.ts`
 - [ ] Task: Build the `Reflector` Service
     - [ ] Create `reflector-service.ts` to analyze task completion vs spec
     - [ ] Integrate LLM call to extract heuristics and update L3 memory
