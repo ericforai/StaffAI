@@ -94,6 +94,7 @@ const TOOL_CALL_LOGS_FILE = process.env.AGENCY_TOOL_CALL_LOGS_FILE || path.join(
 const EXECUTION_TRACES_FILE = process.env.AGENCY_EXECUTION_TRACES_FILE || path.join(__dirname, '../../execution_traces.json');
 const COST_LOGS_FILE = process.env.AGENCY_COST_LOGS_FILE || path.join(__dirname, '../../cost_logs.json');
 const PENDING_HUMAN_INPUT_FILE = process.env.AGENCY_PENDING_HUMAN_INPUT_FILE || path.join(__dirname, '../../pending_human_input.json');
+const AGENT_MEMORY_FILE = process.env.AGENCY_AGENT_MEMORY_FILE || path.join(__dirname, '../../agent_memory.json');
 
 function getAuditLogsDir() {
   return process.env.AGENCY_AUDIT_LOGS_DIR || path.join(__dirname, '../../.ai/audit');
@@ -137,6 +138,10 @@ function getCostLogsFilePath() {
 
 function getPendingHumanInputFilePath() {
   return process.env.AGENCY_PENDING_HUMAN_INPUT_FILE || PENDING_HUMAN_INPUT_FILE;
+}
+
+function getAgentMemoryFilePath() {
+  return process.env.AGENCY_AGENT_MEMORY_FILE || AGENT_MEMORY_FILE;
 }
 
 function getRequirementDraftsFilePath(dataDir: string) {
@@ -210,6 +215,7 @@ export class Store extends EventEmitter {
   private knowledgeAdapter: KnowledgeRepository | null;
   private auditLogger: AuditLogger | null;
   private pendingHumanInputRepository: PendingHumanInputRepository;
+  private agentMemoryRepository: AgentMemoryRepository;
 
   constructor(dependencies: StorePersistenceDependencies = {}) {
     super();
@@ -298,6 +304,12 @@ export class Store extends EventEmitter {
       (mode === 'memory'
         ? createInMemoryPendingHumanInputRepository()
         : createFilePendingHumanInputRepository(getPendingHumanInputFilePath()));
+
+    this.agentMemoryRepository =
+      dependencies.agentMemoryRepository ??
+      (mode === 'memory'
+        ? createInMemoryAgentMemoryRepository()
+        : createFileAgentMemoryRepository(getAgentMemoryFilePath()));
 
     // Initialize knowledge adapter (optional - backward compatible)
     this.knowledgeAdapter =
@@ -926,5 +938,15 @@ export class Store extends EventEmitter {
     updater: (input: PendingHumanInput) => PendingHumanInput
   ): Promise<PendingHumanInput | null> {
     return await this.pendingHumanInputRepository.update(id, updater);
+  }
+
+  // --- Agent Memory Logic ---
+
+  public async getAgentMemoryByAgentId(agentId: string): Promise<AgentMemory | null> {
+    return await this.agentMemoryRepository.getAgentMemoryByAgentId(agentId);
+  }
+
+  public async saveAgentMemory(memory: AgentMemory): Promise<void> {
+    await this.agentMemoryRepository.saveAgentMemory(memory);
   }
 }
