@@ -17,9 +17,4 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: V0.4: Reuse Flywheel & Templates**
   *Link: [./tracks/reuse_flywheel_v04_20260331/](./tracks/reuse_flywheel_v04_20260331/)*
 
----
-
-- [x] **Track: V0.5: Agent Evolution Engine (Project Continuum)**
-  *Link: [./tracks/agent_evolution_engine_v05_20260401/](./tracks/agent_evolution_engine_v05_20260401/)*
-
 
