@@ -17,4 +17,9 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: V0.4: Reuse Flywheel & Templates**
   *Link: [./tracks/reuse_flywheel_v04_20260331/](./tracks/reuse_flywheel_v04_20260331/)*
 
+---
+
+- [x] **Track: V0.6: Strategic Mission Control (OKR & Goals)**
+  *Link: [./tracks/strategic_mission_control_v06_20260401/](./tracks/strategic_mission_control_v06_20260401/)*
+
 
