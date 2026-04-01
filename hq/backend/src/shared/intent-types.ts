@@ -58,6 +58,8 @@ export interface RequirementDraft {
   implementationPlan: ImplementationPlan | null;
   suggestedAutonomyLevel: AutonomyLevel | null;
   suggestedScenario: string | null;
+  // 生成该意图的代理 ID（可选，用于自主提案）
+  originatingAgentId?: string;
   confidenceScore: number;
   createdTaskId: string | null;
   createdAt: string;
