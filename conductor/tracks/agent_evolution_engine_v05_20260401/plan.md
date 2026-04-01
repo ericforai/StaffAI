@@ -24,9 +24,9 @@ V0.5: Agent Evolution Engine (Project "Continuum")
 
 - [x] Task: Create "Inspector" Agent capabilities 90cce1c
     - [x] Define mechanism for agents to evaluate OKR metrics (implemented via `InspectorService`)
-- [ ] Task: Proactive Proposal Generation
-    - [ ] Create service to convert an agent's finding into a `RequirementDraft`
-    - [ ] Ensure the generated draft is linked to the originating agent
+- [x] Task: Proactive Proposal Generation 5313e5b
+    - [x] Create service to convert an agent's finding into a `RequirementDraft` (implemented via `ProactiveProposalService`)
+    - [x] Ensure the generated draft is linked to the originating agent (added `originatingAgentId`)
 - [ ] Task: SSE Broadcast for Proactive Proposals
     - [ ] Update `DashboardEvent` types to include `PROACTIVE_PROPOSAL`
     - [ ] Implement SSE emission when a new autonomous intent is created
