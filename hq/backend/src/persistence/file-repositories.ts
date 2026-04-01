@@ -10,7 +10,8 @@ import type {
   WorkflowPlan,
 } from '../shared/task-types';
 import type { ApprovalChain } from '../shared/approval-chain-types';
-import type { RequirementDraft } from '../shared/intent-types';
+import type { PendingHumanInput } from '../shared/hitl-types';
+import type { RequirementDraft, AgentMemory } from '../shared/intent-types';
 
 function readJsonFile<T>(filePath: string, fallback: T): T {
   if (!fs.existsSync(filePath)) {
@@ -96,12 +97,25 @@ export interface CostLogRepository {
   save(entry: CostLogEntry): Promise<void>;
 }
 
+export interface PendingHumanInputRepository {
+  list(): Promise<import('../shared/hitl-types').PendingHumanInput[]>;
+  getById(id: string): Promise<import('../shared/hitl-types').PendingHumanInput | null>;
+  listByAssignmentId(assignmentId: string): Promise<import('../shared/hitl-types').PendingHumanInput[]>;
+  listByTaskId(taskId: string): Promise<import('../shared/hitl-types').PendingHumanInput[]>;
+  save(input: import('../shared/hitl-types').PendingHumanInput): Promise<void>;
+  update(id: string, updater: (input: import('../shared/hitl-types').PendingHumanInput) => import('../shared/hitl-types').PendingHumanInput): Promise<import('../shared/hitl-types').PendingHumanInput | null>;
+}
 export interface RequirementDraftRepository {
   list(): Promise<RequirementDraft[]>;
   getById(id: string): Promise<RequirementDraft | null>;
   save(draft: RequirementDraft): Promise<void>;
   update(id: string, updater: (draft: RequirementDraft) => RequirementDraft): Promise<RequirementDraft | null>;
   delete(id: string): Promise<boolean>;
+}
+
+export interface AgentMemoryRepository {
+  getAgentMemoryByAgentId(agentId: string): Promise<AgentMemory | null>;
+  saveAgentMemory(memory: AgentMemory): Promise<void>;
 }
 
 export function createFileTaskRepository(filePath: string): TaskRepository {
@@ -637,6 +651,104 @@ export function createInMemoryRequirementDraftRepository(seed: RequirementDraft[
       }
       drafts.splice(index, 1);
       return true;
+    },
+  };
+}
+
+export function createFilePendingHumanInputRepository(filePath: string): PendingHumanInputRepository {
+  return {
+    async list() {
+      return readJsonFile<PendingHumanInput[]>(filePath, []);
+    },
+    async getById(id) {
+      return (await this.list()).find((input) => input.id === id) || null;
+    },
+    async listByAssignmentId(assignmentId) {
+      return (await this.list()).filter((input) => input.assignmentId === assignmentId);
+    },
+    async listByTaskId(taskId) {
+      return (await this.list()).filter((input) => input.taskId === taskId);
+    },
+    async save(input) {
+      const inputs = await this.list();
+      inputs.push(input);
+      writeJsonFile(filePath, inputs);
+    },
+    async update(id, updater) {
+      const inputs = await this.list();
+      const index = inputs.findIndex((input) => input.id === id);
+      if (index < 0) {
+        return null;
+      }
+      const updated = updater(inputs[index]);
+      inputs[index] = updated;
+      writeJsonFile(filePath, inputs);
+      return updated;
+    },
+  };
+}
+
+export function createInMemoryPendingHumanInputRepository(seed: PendingHumanInput[] = []): PendingHumanInputRepository {
+  const inputs = [...seed];
+  return {
+    async list() {
+      return [...inputs];
+    },
+    async getById(id) {
+      return inputs.find((input) => input.id === id) || null;
+    },
+    async listByAssignmentId(assignmentId) {
+      return inputs.filter((input) => input.assignmentId === assignmentId);
+    },
+    async listByTaskId(taskId) {
+      return inputs.filter((input) => input.taskId === taskId);
+    },
+    async save(input) {
+      inputs.push(input);
+    },
+    async update(id, updater) {
+      const index = inputs.findIndex((input) => input.id === id);
+      if (index < 0) {
+        return null;
+      }
+      inputs[index] = updater(inputs[index]);
+      return inputs[index];
+    },
+  };
+}
+
+export function createFileAgentMemoryRepository(filePath: string): AgentMemoryRepository {
+  return {
+    async getAgentMemoryByAgentId(agentId: string) {
+      const memories = readJsonFile<AgentMemory[]>(filePath, []);
+      return memories.find((m) => m.agentId === agentId) || null;
+    },
+    async saveAgentMemory(memory: AgentMemory) {
+      const memories = readJsonFile<AgentMemory[]>(filePath, []);
+      const index = memories.findIndex((m) => m.agentId === memory.agentId);
+      if (index >= 0) {
+        memories[index] = memory;
+      } else {
+        memories.push(memory);
+      }
+      writeJsonFile(filePath, memories);
+    },
+  };
+}
+
+export function createInMemoryAgentMemoryRepository(seed: AgentMemory[] = []): AgentMemoryRepository {
+  const memories = [...seed];
+  return {
+    async getAgentMemoryByAgentId(agentId: string) {
+      return memories.find((m) => m.agentId === agentId) || null;
+    },
+    async saveAgentMemory(memory: AgentMemory) {
+      const index = memories.findIndex((m) => m.agentId === memory.agentId);
+      if (index >= 0) {
+        memories[index] = memory;
+      } else {
+        memories.push(memory);
+      }
     },
   };
 }
