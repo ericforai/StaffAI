@@ -105,6 +105,26 @@ export interface AgentMemory {
   updatedAt: string;
 }
 
+export interface KeyResult {
+  id: string;
+  description: string;
+  targetValue: number;
+  currentValueValue: number;
+  metricKey: string; // e.g., 'test_coverage', 'failed_tasks_ratio'
+  unit: string;
+  status: 'on_track' | 'behind' | 'at_risk' | 'completed';
+}
+
+export interface OKRRecord {
+  id: string;
+  objective: string;
+  keyResults: KeyResult[];
+  ownerSquadId?: string;
+  status: 'active' | 'completed' | 'cancelled';
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const INTENT_STATUSES: IntentStatus[] = [
   'intake',
   'clarifying',

@@ -12,7 +12,7 @@ import {
   ToolCallLog,
   WorkflowPlan,
 } from './shared/task-types';
-import type { RequirementDraft } from './shared/intent-types';
+import type { RequirementDraft, AgentMemory, TemplateRecord } from './shared/intent-types';
 import {
   ApprovalChainRepository,
   ApprovalRepository,
@@ -47,7 +47,14 @@ import {
   PendingHumanInputRepository,
   createFilePendingHumanInputRepository,
   createInMemoryPendingHumanInputRepository,
+  AgentMemoryRepository,
+  createFileAgentMemoryRepository,
+  createInMemoryAgentMemoryRepository,
+  OKRRepository,
+  createFileOKRRepository,
+  createInMemoryOKRRepository,
 } from './persistence/file-repositories';
+import { randomUUID } from 'node:crypto';
 import {
   createPostgresApprovalRepository,
   createPostgresExecutionRepository,
@@ -144,19 +151,29 @@ function getAgentMemoryFilePath() {
   return process.env.AGENCY_AGENT_MEMORY_FILE || AGENT_MEMORY_FILE;
 }
 
+function getOKRsFilePath() {
+  return process.env.AGENCY_OKRS_FILE || OKRS_FILE;
+}
+
 function getRequirementDraftsFilePath(dataDir: string) {
   return process.env.AGENCY_REQUIREMENT_DRAFTS_FILE || path.join(dataDir, 'requirement_drafts.json');
 }
 
 export interface Template {
+  id?: string;
   name: string;
+  title?: string;
+  scenario?: string;
   type: 'requirement_clarification' | 'design_summary' | 'delivery_plan' | 'role_collaboration' | 'approval' | 'full_scenario';
   activeAgentIds: string[];
   designSummary?: any;
   implementationPlan?: any;
   roles?: string[];
   description?: string;
+  sourceTaskId?: string;
+  tags?: string[];
   createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface KnowledgeEntry {
@@ -180,6 +197,8 @@ interface StorePersistenceDependencies {
   knowledgeAdapter?: KnowledgeRepository;
   auditLogRepository?: AuditLogRepository;
   pendingHumanInputRepository?: PendingHumanInputRepository;
+  agentMemoryRepository?: AgentMemoryRepository;
+  okrRepository?: OKRRepository;
 }
 
 export function getPersistenceMode(): 'file' | 'memory' | 'postgres' {
@@ -216,6 +235,7 @@ export class Store extends EventEmitter {
   private auditLogger: AuditLogger | null;
   private pendingHumanInputRepository: PendingHumanInputRepository;
   private agentMemoryRepository: AgentMemoryRepository;
+  private okrRepository: OKRRepository;
 
   constructor(dependencies: StorePersistenceDependencies = {}) {
     super();
@@ -310,6 +330,10 @@ export class Store extends EventEmitter {
       (mode === 'memory'
         ? createInMemoryAgentMemoryRepository()
         : createFileAgentMemoryRepository(getAgentMemoryFilePath()));
+
+    this.okrRepository =
+      dependencies.okrRepository ??
+      (mode === 'memory' ? createInMemoryOKRRepository() : createFileOKRRepository(getOKRsFilePath()));
 
     // Initialize knowledge adapter (optional - backward compatible)
     this.knowledgeAdapter =
@@ -948,5 +972,23 @@ export class Store extends EventEmitter {
 
   public async saveAgentMemory(memory: AgentMemory): Promise<void> {
     await this.agentMemoryRepository.saveAgentMemory(memory);
+  }
+
+  // --- OKR Logic ---
+
+  public async getOKRs(): Promise<OKRRecord[]> {
+    return await this.okrRepository.list();
+  }
+
+  public async getOKRById(id: string): Promise<OKRRecord | null> {
+    return await this.okrRepository.getById(id);
+  }
+
+  public async saveOKR(okr: OKRRecord): Promise<void> {
+    await this.okrRepository.save(okr);
+  }
+
+  public async updateOKR(id: string, updater: (okr: OKRRecord) => OKRRecord): Promise<OKRRecord | null> {
+    return await this.okrRepository.update(id, updater);
   }
 }

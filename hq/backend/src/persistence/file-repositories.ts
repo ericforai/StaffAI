@@ -11,7 +11,7 @@ import type {
 } from '../shared/task-types';
 import type { ApprovalChain } from '../shared/approval-chain-types';
 import type { PendingHumanInput } from '../shared/hitl-types';
-import type { RequirementDraft, AgentMemory } from '../shared/intent-types';
+import type { RequirementDraft, AgentMemory, OKRRecord } from '../shared/intent-types';
 
 function readJsonFile<T>(filePath: string, fallback: T): T {
   if (!fs.existsSync(filePath)) {
@@ -116,6 +116,13 @@ export interface RequirementDraftRepository {
 export interface AgentMemoryRepository {
   getAgentMemoryByAgentId(agentId: string): Promise<AgentMemory | null>;
   saveAgentMemory(memory: AgentMemory): Promise<void>;
+}
+
+export interface OKRRepository {
+  list(): Promise<OKRRecord[]>;
+  getById(id: string): Promise<OKRRecord | null>;
+  save(okr: OKRRecord): Promise<void>;
+  update(id: string, updater: (okr: OKRRecord) => OKRRecord): Promise<OKRRecord | null>;
 }
 
 export function createFileTaskRepository(filePath: string): TaskRepository {
@@ -749,6 +756,61 @@ export function createInMemoryAgentMemoryRepository(seed: AgentMemory[] = []): A
       } else {
         memories.push(memory);
       }
+    },
+  };
+}
+
+export function createFileOKRRepository(filePath: string): OKRRepository {
+  return {
+    async list() {
+      return readJsonFile<OKRRecord[]>(filePath, []);
+    },
+    async getById(id) {
+      return (await this.list()).find((o) => o.id === id) || null;
+    },
+    async save(okr) {
+      const okrs = await this.list();
+      const index = okrs.findIndex((o) => o.id === okr.id);
+      if (index >= 0) {
+        okrs[index] = okr;
+      } else {
+        okrs.push(okr);
+      }
+      writeJsonFile(filePath, okrs);
+    },
+    async update(id, updater) {
+      const okrs = await this.list();
+      const index = okrs.findIndex((o) => o.id === id);
+      if (index < 0) return null;
+      okrs[index] = updater(okrs[index]);
+      writeJsonFile(filePath, okrs);
+      return okrs[index];
+    },
+  };
+}
+
+export function createInMemoryOKRRepository(seed: OKRRecord[] = []): OKRRepository {
+  const okrs = [...seed];
+  return {
+    async list() {
+      return okrs;
+    },
+    async getById(id) {
+      return okrs.find((o) => o.id === id) || null;
+    },
+    async save(okr) {
+      const index = okrs.findIndex((o) => o.id === okr.id);
+      if (index >= 0) {
+        okrs[index] = okr;
+      } else {
+        okrs.push(okr);
+      }
+    },
+    async update(id, updater) {
+      const index = okrs.findIndex((o) => o.id === id);
+      if (index < 0) return null;
+      okrs[index] = updater(okrs[index]);
+      return okrs[index];
     },
   };
 }
