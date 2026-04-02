@@ -1454,5 +1454,821 @@
     "suggestedScenario": "feature-delivery",
     "createdAt": "2026-03-31T10:41:17.484Z",
     "updatedAt": "2026-03-31T10:41:17.484Z"
+  },
+  {
+    "id": "intent_1775078481408_zvv2iqx",
+    "rawInput": "I want to build a user dashboard",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775078481408_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-01T21:21:21.408Z"
+      },
+      {
+        "id": "msg_1775078488551_u",
+        "role": "user",
+        "content": "I want to track sales metrics",
+        "timestamp": "2026-04-01T21:21:28.551Z"
+      },
+      {
+        "id": "msg_1775078536975_u",
+        "role": "user",
+        "content": "For sales managers to track team performance",
+        "timestamp": "2026-04-01T21:22:16.975Z"
+      },
+      {
+        "id": "msg_1775078642725_u",
+        "role": "user",
+        "content": "I want a dashboard showing sales data",
+        "timestamp": "2026-04-01T21:24:02.725Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0.7,
+    "createdTaskId": null,
+    "createdAt": "2026-04-01T21:21:21.408Z",
+    "updatedAt": "2026-04-01T21:24:02.725Z"
+  },
+  {
+    "id": "intent_1775084415108_0bmhg7i",
+    "rawInput": "我想添加一个用户登录功能",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775084415111_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-01T23:00:15.108Z"
+      },
+      {
+        "id": "msg_1775084417196_u",
+        "role": "user",
+        "content": "添加登录功能",
+        "timestamp": "2026-04-01T23:00:17.196Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0.55,
+    "createdTaskId": null,
+    "createdAt": "2026-04-01T23:00:15.108Z",
+    "updatedAt": "2026-04-01T23:00:23.285Z"
+  },
+  {
+    "id": "intent_1775085230931_thrt21q",
+    "rawInput": "我想添加一个用户登录功能",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775085230931_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-01T23:13:50.930Z"
+      },
+      {
+        "id": "msg_1775085233013_u",
+        "role": "user",
+        "content": "我想添加一个用户登录功能",
+        "timestamp": "2026-04-01T23:13:53.013Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0.55,
+    "createdTaskId": null,
+    "createdAt": "2026-04-01T23:13:50.930Z",
+    "updatedAt": "2026-04-01T23:13:53.795Z"
+  },
+  {
+    "id": "intent_1775086984422_j6hh1o9",
+    "rawInput": "测试",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775086984422_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-01T23:43:04.422Z"
+      },
+      {
+        "id": "msg_1775086984565_u",
+        "role": "user",
+        "content": "测试",
+        "timestamp": "2026-04-01T23:43:04.565Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0.55,
+    "createdTaskId": null,
+    "createdAt": "2026-04-01T23:43:04.422Z",
+    "updatedAt": "2026-04-01T23:43:05.339Z"
+  },
+  {
+    "id": "intent_1775087152234_x7h14yo",
+    "rawInput": "测试",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775087152234_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-01T23:45:52.234Z"
+      },
+      {
+        "id": "msg_1775087152307_u",
+        "role": "user",
+        "content": "你好",
+        "timestamp": "2026-04-01T23:45:52.307Z"
+      },
+      {
+        "id": "msg_1775087152692_a",
+        "role": "assistant",
+        "content": "你好！我是产品经理，很高兴与您交流。请问您想要构建什么功能或产品？",
+        "timestamp": "2026-04-01T23:45:52.692Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0.55,
+    "createdTaskId": null,
+    "createdAt": "2026-04-01T23:45:52.234Z",
+    "updatedAt": "2026-04-01T23:45:52.953Z"
+  },
+  {
+    "id": "intent_1775087181121_alx30my",
+    "rawInput": "我想添加一个用户登录功能",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775087181121_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-01T23:46:21.121Z"
+      },
+      {
+        "id": "msg_1775087181179_u",
+        "role": "user",
+        "content": "添加登录功能",
+        "timestamp": "2026-04-01T23:46:21.179Z"
+      },
+      {
+        "id": "msg_1775087181574_a",
+        "role": "assistant",
+        "content": "I understand you want to add login functionality. Could you tell me more about who will be using this login feature?",
+        "timestamp": "2026-04-01T23:46:21.574Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0.55,
+    "createdTaskId": null,
+    "createdAt": "2026-04-01T23:46:21.121Z",
+    "updatedAt": "2026-04-01T23:46:21.858Z"
+  },
+  {
+    "id": "intent_1775097581605_l6mjlah",
+    "rawInput": "我想做一个根据标书自动生成投标文件的系统",
+    "status": "intake",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775097581605_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-02T02:39:41.605Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-04-02T02:39:41.605Z",
+    "updatedAt": "2026-04-02T02:39:41.605Z"
+  },
+  {
+    "id": "intent_1775097968417_mhyi81r",
+    "rawInput": "添加登录功能",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775097968417_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-02T02:46:08.417Z"
+      },
+      {
+        "id": "msg_1775097968539_u",
+        "role": "user",
+        "content": "添加登录功能",
+        "timestamp": "2026-04-02T02:46:08.539Z"
+      },
+      {
+        "id": "msg_1775097969204_a",
+        "role": "assistant",
+        "content": "我理解您想要添加登录功能。这个登录功能是用于您的哪个产品或平台呢？",
+        "timestamp": "2026-04-02T02:46:09.204Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0.55,
+    "createdTaskId": null,
+    "createdAt": "2026-04-02T02:46:08.417Z",
+    "updatedAt": "2026-04-02T02:46:09.991Z"
+  },
+  {
+    "id": "intent_1775097995594_xr0d7zj",
+    "rawInput": "添加登录功能",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775097995594_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-02T02:46:35.594Z"
+      },
+      {
+        "id": "msg_1775097995706_u",
+        "role": "user",
+        "content": "添加登录功能",
+        "timestamp": "2026-04-02T02:46:35.706Z"
+      },
+      {
+        "id": "msg_1775097996355_a",
+        "role": "assistant",
+        "content": "我理解您想要添加登录功能。这个登录功能是面向谁使用的呢？",
+        "timestamp": "2026-04-02T02:46:36.355Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0.55,
+    "createdTaskId": null,
+    "createdAt": "2026-04-02T02:46:35.594Z",
+    "updatedAt": "2026-04-02T02:46:36.558Z"
+  },
+  {
+    "id": "intent_1775098333365_2xv61jx",
+    "rawInput": "我做一个自动生成标书的系统",
+    "status": "intake",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775098333365_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-02T02:52:13.365Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-04-02T02:52:13.365Z",
+    "updatedAt": "2026-04-02T02:52:13.365Z"
+  },
+  {
+    "id": "intent_1775098420427_l3gnem0",
+    "rawInput": "用户登录",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775098420427_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-02T02:53:40.427Z"
+      },
+      {
+        "id": "msg_1775098420489_u",
+        "role": "user",
+        "content": "用户登录",
+        "timestamp": "2026-04-02T02:53:40.489Z"
+      },
+      {
+        "id": "msg_1775098422108_a",
+        "role": "assistant",
+        "content": "我理解您想要构建用户登录功能。请问这个登录功能是用于什么类型的系统或应用？",
+        "timestamp": "2026-04-02T02:53:42.108Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0.55,
+    "createdTaskId": null,
+    "createdAt": "2026-04-02T02:53:40.427Z",
+    "updatedAt": "2026-04-02T02:53:42.433Z"
+  },
+  {
+    "id": "intent_1775098439923_j2e8mfn",
+    "rawInput": "用户登录",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775098439923_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-02T02:53:59.922Z"
+      },
+      {
+        "id": "msg_1775098439984_u",
+        "role": "user",
+        "content": "用户登录",
+        "timestamp": "2026-04-02T02:53:59.984Z"
+      },
+      {
+        "id": "msg_1775098440285_a",
+        "role": "assistant",
+        "content": "我理解您想要构建用户登录功能。请问这个登录功能将用于什么类型的系统或应用？",
+        "timestamp": "2026-04-02T02:54:00.285Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0.55,
+    "createdTaskId": null,
+    "createdAt": "2026-04-02T02:53:59.922Z",
+    "updatedAt": "2026-04-02T02:54:00.655Z"
+  },
+  {
+    "id": "intent_1775098507273_vtergvq",
+    "rawInput": "标书自动生成系统",
+    "status": "intake",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775098507273_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-02T02:55:07.273Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-04-02T02:55:07.273Z",
+    "updatedAt": "2026-04-02T02:55:07.273Z"
+  },
+  {
+    "id": "intent_1775098679006_mdy1gwj",
+    "rawInput": "标书自动生成",
+    "status": "intake",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775098679006_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-02T02:57:59.006Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-04-02T02:57:59.006Z",
+    "updatedAt": "2026-04-02T02:57:59.006Z"
+  },
+  {
+    "id": "intent_1775098950750_prjqzcv",
+    "rawInput": "用户登录功能",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775098950750_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-02T03:02:30.750Z"
+      },
+      {
+        "id": "msg_1775098951829_u",
+        "role": "user",
+        "content": "用户登录",
+        "timestamp": "2026-04-02T03:02:31.829Z"
+      },
+      {
+        "id": "msg_1775098953667_a",
+        "role": "assistant",
+        "content": "好的，我理解您想要构建一个用户登录功能。请问这个登录功能是用于什么类型的平台或应用呢？",
+        "timestamp": "2026-04-02T03:02:33.667Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0.55,
+    "createdTaskId": null,
+    "createdAt": "2026-04-02T03:02:30.750Z",
+    "updatedAt": "2026-04-02T03:02:33.965Z"
+  },
+  {
+    "id": "intent_1775099003962_cecvxwh",
+    "rawInput": "测试",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775099003962_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-02T03:03:23.962Z"
+      },
+      {
+        "id": "msg_1775099004012_u",
+        "role": "user",
+        "content": "你好",
+        "timestamp": "2026-04-02T03:03:24.012Z"
+      },
+      {
+        "id": "msg_1775099004461_a",
+        "role": "assistant",
+        "content": "你好！很高兴与你交流。请问你想要构建什么内容呢？",
+        "timestamp": "2026-04-02T03:03:24.461Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0.55,
+    "createdTaskId": null,
+    "createdAt": "2026-04-02T03:03:23.962Z",
+    "updatedAt": "2026-04-02T03:03:24.677Z"
+  },
+  {
+    "id": "intent_1775099013314_0m5lywt",
+    "rawInput": "测试",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775099013314_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-02T03:03:33.314Z"
+      },
+      {
+        "id": "msg_1775099013350_u",
+        "role": "user",
+        "content": "你好",
+        "timestamp": "2026-04-02T03:03:33.350Z"
+      },
+      {
+        "id": "msg_1775099013862_a",
+        "role": "assistant",
+        "content": "你好！我是产品经理，很高兴与您交流。请告诉我您想要构建什么内容？",
+        "timestamp": "2026-04-02T03:03:33.862Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0.55,
+    "createdTaskId": null,
+    "createdAt": "2026-04-02T03:03:33.314Z",
+    "updatedAt": "2026-04-02T03:03:34.114Z"
+  },
+  {
+    "id": "intent_1775099063590_n5u3u4d",
+    "rawInput": "测试中文",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775099063590_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-02T03:04:23.590Z"
+      },
+      {
+        "id": "msg_1775099063765_u",
+        "role": "user",
+        "content": "你好",
+        "timestamp": "2026-04-02T03:04:23.765Z"
+      },
+      {
+        "id": "msg_1775099064579_a",
+        "role": "assistant",
+        "content": "你好！我理解您想要构建某个产品或功能。请问这个项目的主要目标是什么？",
+        "timestamp": "2026-04-02T03:04:24.580Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0.55,
+    "createdTaskId": null,
+    "createdAt": "2026-04-02T03:04:23.590Z",
+    "updatedAt": "2026-04-02T03:04:25.068Z"
+  },
+  {
+    "id": "intent_1775099168608_v19gqb8",
+    "rawInput": "测试",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775099168608_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-02T03:06:08.608Z"
+      },
+      {
+        "id": "msg_1775099168667_u",
+        "role": "user",
+        "content": "你好",
+        "timestamp": "2026-04-02T03:06:08.667Z"
+      },
+      {
+        "id": "msg_1775099169197_a",
+        "role": "assistant",
+        "content": "你好！我理解你想要构建一些东西。你能告诉我这个项目的主要目标是什么吗？",
+        "timestamp": "2026-04-02T03:06:09.197Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-04-02T03:06:08.608Z",
+    "updatedAt": "2026-04-02T03:06:09.676Z"
+  },
+  {
+    "id": "intent_1775099336774_94nwknp",
+    "rawInput": "标书自动生成系统",
+    "status": "intake",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775099336774_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-02T03:08:56.774Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-04-02T03:08:56.774Z",
+    "updatedAt": "2026-04-02T03:08:56.774Z"
+  },
+  {
+    "id": "intent_1775099360024_gqi9fiz",
+    "rawInput": "添加一个数据分析仪表盘",
+    "status": "intake",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775099360024_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-02T03:09:20.024Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-04-02T03:09:20.024Z",
+    "updatedAt": "2026-04-02T03:09:20.024Z"
+  },
+  {
+    "id": "intent_1775099360633_vmwscgp",
+    "rawInput": "测试需求",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775099360633_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-02T03:09:20.633Z"
+      },
+      {
+        "id": "msg_1775099365406_u",
+        "role": "user",
+        "content": "我想添加一个数据分析仪表盘",
+        "timestamp": "2026-04-02T03:09:25.406Z"
+      },
+      {
+        "id": "msg_1775099396363_a",
+        "role": "assistant",
+        "content": "您想添加一个数据分析仪表盘。这个仪表盘的主要目的是什么？",
+        "timestamp": "2026-04-02T03:09:56.363Z"
+      },
+      {
+        "id": "msg_1775099444033_u",
+        "role": "user",
+        "content": "我想要一个销售数据仪表盘",
+        "timestamp": "2026-04-02T03:10:44.033Z"
+      },
+      {
+        "id": "msg_1775099444724_a",
+        "role": "assistant",
+        "content": "您想要一个销售数据仪表盘。这个仪表盘将用于分析哪些具体的销售数据？",
+        "timestamp": "2026-04-02T03:10:44.724Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0.55,
+    "createdTaskId": null,
+    "createdAt": "2026-04-02T03:09:20.633Z",
+    "updatedAt": "2026-04-02T03:10:45.003Z"
+  },
+  {
+    "id": "intent_1775099866792_5dg941p",
+    "rawInput": "添加一个数据分析仪表盘",
+    "status": "intake",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775099866792_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-02T03:17:46.792Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-04-02T03:17:46.792Z",
+    "updatedAt": "2026-04-02T03:17:46.792Z"
+  },
+  {
+    "id": "intent_1775099896733_xevhwrq",
+    "rawInput": "测试流",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775099896733_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-02T03:18:16.733Z"
+      },
+      {
+        "id": "msg_1775099902769_u",
+        "role": "user",
+        "content": "添加一个用户登录功能",
+        "timestamp": "2026-04-02T03:18:22.769Z"
+      },
+      {
+        "id": "msg_1775099903809_a",
+        "role": "assistant",
+        "content": "我理解您想要添加一个用户登录功能。这个登录功能是针对什么类型的用户群体呢？",
+        "timestamp": "2026-04-02T03:18:23.809Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-04-02T03:18:16.733Z",
+    "updatedAt": "2026-04-02T03:18:24.098Z"
+  },
+  {
+    "id": "intent_1775099937939_qrd3gux",
+    "rawInput": "测试",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775099937939_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-02T03:18:57.939Z"
+      },
+      {
+        "id": "msg_1775099943385_u",
+        "role": "user",
+        "content": "添加登录功能",
+        "timestamp": "2026-04-02T03:19:03.385Z"
+      },
+      {
+        "id": "msg_1775099943756_a",
+        "role": "assistant",
+        "content": "我理解您想要添加登录功能。这个登录功能是面向网站用户还是移动应用用户？",
+        "timestamp": "2026-04-02T03:19:03.756Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-04-02T03:18:57.939Z",
+    "updatedAt": "2026-04-02T03:19:04.036Z"
+  },
+  {
+    "id": "intent_1775100251455_apik58v",
+    "rawInput": "添加一个数据分析仪表盘",
+    "status": "intake",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775100251455_a",
+        "role": "assistant",
+        "content": "Understood. What is the primary goal of this feature?",
+        "timestamp": "2026-04-02T03:24:11.455Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0,
+    "createdTaskId": null,
+    "createdAt": "2026-04-02T03:24:11.455Z",
+    "updatedAt": "2026-04-02T03:24:11.455Z"
+  },
+  {
+    "id": "intent_1775100542083_mjyun91",
+    "rawInput": "添加一个数据分析仪表盘",
+    "status": "clarifying",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775100542995_a",
+        "role": "assistant",
+        "content": "我理解您想要添加一个数据分析仪表盘。请问这个仪表盘是给谁使用的，他们的角色是什么？",
+        "timestamp": "2026-04-02T03:29:02.995Z"
+      },
+      {
+        "id": "msg_1775100550508_u",
+        "role": "user",
+        "content": "给运营团队使用，监控销售数据",
+        "timestamp": "2026-04-02T03:29:10.508Z"
+      },
+      {
+        "id": "msg_1775100550974_a",
+        "role": "assistant",
+        "content": "我理解您想要为运营团队创建一个销售数据监控仪表盘。请问您希望这个仪表盘主要监控哪些具体的销售指标？",
+        "timestamp": "2026-04-02T03:29:10.974Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0.4,
+    "createdTaskId": null,
+    "createdAt": "2026-04-02T03:29:02.083Z",
+    "updatedAt": "2026-04-02T03:29:11.309Z"
+  },
+  {
+    "id": "intent_1775101408131_5i24o7u",
+    "rawInput": "做一个仪表盘",
+    "status": "intake",
+    "clarificationMessages": [
+      {
+        "id": "msg_1775101409021_a",
+        "role": "assistant",
+        "content": "我理解您想要创建一个仪表盘。请问这个仪表盘是用于什么目的的？",
+        "timestamp": "2026-04-02T03:43:29.021Z"
+      }
+    ],
+    "designSummary": null,
+    "implementationPlan": null,
+    "suggestedAutonomyLevel": null,
+    "suggestedScenario": null,
+    "confidenceScore": 0.4,
+    "createdTaskId": null,
+    "createdAt": "2026-04-02T03:43:28.131Z",
+    "updatedAt": "2026-04-02T03:43:28.131Z"
   }
 ]

@@ -131,8 +131,8 @@ export class WorkshopLLMClient {
                 } else if (!inDesignSummary) {
                   yield { type: 'message', content };
                 }
-              } else if (event.type === 'done') {
-                // End of stream
+              } else if (event.type === 'done' || event.type === 'end') {
+                // End of stream (Workshop sends 'end' in data, SSE event is 'done')
                 if (!isComplete) {
                   isComplete = true;
                   yield {

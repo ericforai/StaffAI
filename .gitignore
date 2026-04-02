@@ -87,3 +87,6 @@ integrations/qwen/agents/
 workshop/venv/
 workshop/__pycache__/
 workshop/deer-flow/
+
+# OMC runtime files
+.omc/

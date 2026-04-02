@@ -49,5 +49,22 @@
     "metadata": {
       "taskId": "task-1"
     }
+  },
+  {
+    "id": "8fd4ddd7-2838-4108-956e-c32d3019ab75",
+    "timestamp": "2026-04-01T06:01:07.726Z",
+    "entityType": "approval",
+    "entityId": "approval-1",
+    "action": "approved",
+    "actor": "system",
+    "previousState": {
+      "status": "pending"
+    },
+    "newState": {
+      "status": "approved"
+    },
+    "metadata": {
+      "taskId": "task-1"
+    }
   }
 ]

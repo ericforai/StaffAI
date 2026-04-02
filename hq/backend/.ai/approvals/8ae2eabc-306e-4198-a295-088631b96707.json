@@ -1,0 +1,7 @@
+{
+  "taskTitle": "Delete production database",
+  "riskLevel": "HIGH",
+  "approvalType": "generic",
+  "riskReason": "Contains destructive operation keywords, Involves production environment, General routine task",
+  "id": "8ae2eabc-306e-4198-a295-088631b96707"
+}

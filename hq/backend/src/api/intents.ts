@@ -59,15 +59,41 @@ export function registerIntentRoutes(app: Application, store: Store) {
         updatedAt: now,
       };
 
-      // Initial AI question
-      draft.clarificationMessages.push({
-        id: `msg_${Date.now()}_a`,
-        role: 'assistant',
-        content: "Understood. What is the primary goal of this feature?",
-        timestamp: now,
-      });
-
+      // Save draft first, then get LLM to generate opening question
       await store.saveRequirementDraft(draft);
+
+      // Generate opening question from Workshop LLM
+      try {
+        const streamingClient = brainstormingService.getStreamingClient();
+        let firstQuestion = '';
+
+        for await (const event of streamingClient.streamClarification(draft, rawInput)) {
+          if (event.content) {
+            firstQuestion += event.content;
+          }
+          if (event.done) break;
+        }
+
+        // Update draft with LLM's first question
+        draft.clarificationMessages.push({
+          id: `msg_${Date.now()}_a`,
+          role: 'assistant',
+          content: firstQuestion.trim() || '你好！请详细描述你想要构建的功能。',
+          timestamp: new Date().toISOString(),
+        });
+        draft.confidenceScore = 0.4;
+        await store.saveRequirementDraft(draft);
+      } catch (err) {
+        // Fallback question if Workshop fails
+        draft.clarificationMessages.push({
+          id: `msg_${Date.now()}_a`,
+          role: 'assistant',
+          content: '你好！请详细描述你想要构建的功能。',
+          timestamp: new Date().toISOString(),
+        });
+        await store.saveRequirementDraft(draft);
+      }
+
       res.status(201).json(draft);
     } catch (err) {
       res.status(400).json({ error: String(err) });

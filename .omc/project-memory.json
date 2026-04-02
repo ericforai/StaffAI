@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1774909209402,
+  "lastScanned": 1775077436411,
   "projectRoot": "/Users/user/agency-agents",
   "techStack": {
     "languages": [],
@@ -36,11 +36,33 @@
   },
   "customNotes": [],
   "directoryMap": {
+    "conductor": {
+      "path": "conductor",
+      "purpose": null,
+      "fileCount": 6,
+      "lastAccessed": 1775077436367,
+      "keyFiles": [
+        "index.md",
+        "product-guidelines.md",
+        "product.md",
+        "tech-stack.md",
+        "tracks.md"
+      ]
+    },
+    "crm": {
+      "path": "crm",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1775077436370,
+      "keyFiles": [
+        "SPEC.md"
+      ]
+    },
     "design": {
       "path": "design",
       "purpose": null,
       "fileCount": 8,
-      "lastAccessed": 1774909209380,
+      "lastAccessed": 1775077436374,
       "keyFiles": [
         "design-brand-guardian.md",
         "design-image-prompt-engineer.md",
@@ -53,7 +75,7 @@
       "path": "docs",
       "purpose": "Documentation",
       "fileCount": 5,
-      "lastAccessed": 1774909209380,
+      "lastAccessed": 1775077436379,
       "keyFiles": [
         "ClaudeCode使用说明书.md",
         "Codex使用说明书.md",
@@ -65,7 +87,7 @@
       "path": "engineering",
       "purpose": null,
       "fileCount": 23,
-      "lastAccessed": 1774909209381,
+      "lastAccessed": 1775077436380,
       "keyFiles": [
         "engineering-ai-data-remediation-engineer.md",
         "engineering-ai-engineer.md",
@@ -78,7 +100,7 @@
       "path": "examples",
       "purpose": "Example code",
       "fileCount": 6,
-      "lastAccessed": 1774909209381,
+      "lastAccessed": 1775077436381,
       "keyFiles": [
         "README.md",
         "nexus-spatial-discovery.md",
@@ -91,7 +113,7 @@
       "path": "game-development",
       "purpose": null,
       "fileCount": 6,
-      "lastAccessed": 1774909209381,
+      "lastAccessed": 1775077436382,
       "keyFiles": [
         "game-audio-engineer.md",
         "game-designer.md",
@@ -103,21 +125,21 @@
     "hq": {
       "path": "hq",
       "purpose": null,
-      "fileCount": 17,
-      "lastAccessed": 1774909209382,
+      "fileCount": 19,
+      "lastAccessed": 1775077436385,
       "keyFiles": [
         "CHANGELOG.md",
         "PLAN-sampling-fallback.md",
         "README.md",
         "active_squad.json",
-        "approvals.json"
+        "agent_memory.json"
       ]
     },
     "integrations": {
       "path": "integrations",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1774909209382,
+      "lastAccessed": 1775077436389,
       "keyFiles": [
         "README.md"
       ]
@@ -126,7 +148,7 @@
       "path": "marketing",
       "purpose": null,
       "fileCount": 26,
-      "lastAccessed": 1774909209382,
+      "lastAccessed": 1775077436392,
       "keyFiles": [
         "marketing-app-store-optimizer.md",
         "marketing-baidu-seo-specialist.md",
@@ -139,7 +161,7 @@
       "path": "paid-media",
       "purpose": null,
       "fileCount": 7,
-      "lastAccessed": 1774909209382,
+      "lastAccessed": 1775077436393,
       "keyFiles": [
         "paid-media-auditor.md",
         "paid-media-creative-strategist.md",
@@ -152,7 +174,7 @@
       "path": "product",
       "purpose": null,
       "fileCount": 4,
-      "lastAccessed": 1774909209382,
+      "lastAccessed": 1775077436396,
       "keyFiles": [
         "product-behavioral-nudge-engine.md",
         "product-feedback-synthesizer.md",
@@ -164,7 +186,7 @@
       "path": "project-management",
       "purpose": null,
       "fileCount": 6,
-      "lastAccessed": 1774909209383,
+      "lastAccessed": 1775077436397,
       "keyFiles": [
         "project-management-experiment-tracker.md",
         "project-management-jira-workflow-steward.md",
@@ -177,7 +199,7 @@
       "path": "sales",
       "purpose": null,
       "fileCount": 8,
-      "lastAccessed": 1774909209383,
+      "lastAccessed": 1775077436399,
       "keyFiles": [
         "sales-account-strategist.md",
         "sales-coach.md",
@@ -189,19 +211,21 @@
     "scripts": {
       "path": "scripts",
       "purpose": "Build/utility scripts",
-      "fileCount": 3,
-      "lastAccessed": 1774909209383,
+      "fileCount": 5,
+      "lastAccessed": 1775077436399,
       "keyFiles": [
         "convert.sh",
+        "generate-execution-history.ts",
         "install.sh",
-        "lint-agents.sh"
+        "lint-agents.sh",
+        "verify-delivery-flow.ts"
       ]
     },
     "spatial-computing": {
       "path": "spatial-computing",
       "purpose": null,
       "fileCount": 6,
-      "lastAccessed": 1774909209383,
+      "lastAccessed": 1775077436400,
       "keyFiles": [
         "macos-spatial-metal-engineer.md",
         "terminal-integration-specialist.md",
@@ -214,7 +238,7 @@
       "path": "specialized",
       "purpose": null,
       "fileCount": 23,
-      "lastAccessed": 1774909209383,
+      "lastAccessed": 1775077436408,
       "keyFiles": [
         "accounts-payable-agent.md",
         "agentic-identity-trust.md",
@@ -227,7 +251,7 @@
       "path": "strategy",
       "purpose": null,
       "fileCount": 4,
-      "lastAccessed": 1774909209383,
+      "lastAccessed": 1775077436409,
       "keyFiles": [
         "EXECUTIVE-BRIEF.md",
         "QUICKSTART.md",
@@ -238,7 +262,7 @@
       "path": "support",
       "purpose": null,
       "fileCount": 6,
-      "lastAccessed": 1774909209383,
+      "lastAccessed": 1775077436409,
       "keyFiles": [
         "support-analytics-reporter.md",
         "support-executive-summary-generator.md",
@@ -251,7 +275,7 @@
       "path": "testing",
       "purpose": null,
       "fileCount": 8,
-      "lastAccessed": 1774909209383,
+      "lastAccessed": 1775077436409,
       "keyFiles": [
         "testing-accessibility-auditor.md",
         "testing-api-tester.md",
@@ -263,40 +287,77 @@
     "workshop": {
       "path": "workshop",
       "purpose": null,
-      "fileCount": 6,
-      "lastAccessed": 1774909209383,
+      "fileCount": 10,
+      "lastAccessed": 1775077436410,
       "keyFiles": [
+        "config.yaml",
         "main.py",
+        "manual.log",
         "requirements.txt",
-        "task_envelope_v2.py",
-        "workshop.log"
+        "requirements_no_mcp.txt"
       ]
-    },
-    "hq/config": {
-      "path": "hq/config",
-      "purpose": "Configuration files",
-      "fileCount": 3,
-      "lastAccessed": 1774909209384,
-      "keyFiles": [
-        "capability-bindings.json",
-        "host-manifest.json",
-        "host-policy.json"
-      ]
-    },
-    "workshop/tests": {
-      "path": "workshop/tests",
-      "purpose": "Test files",
-      "fileCount": 0,
-      "lastAccessed": 1774909209385,
-      "keyFiles": []
     }
   },
   "hotPaths": [
     {
-      "path": "hq/backend/src/api/intents.ts",
-      "accessCount": 3,
-      "lastAccessed": 1774925547410,
+      "path": "workshop/main.py",
+      "accessCount": 11,
+      "lastAccessed": 1775080604308,
       "type": "file"
+    },
+    {
+      "path": "hq/backend/src/api/intents.ts",
+      "accessCount": 8,
+      "lastAccessed": 1775078273422,
+      "type": "file"
+    },
+    {
+      "path": "workshop/config.yaml",
+      "accessCount": 8,
+      "lastAccessed": 1775080250150,
+      "type": "file"
+    },
+    {
+      "path": "workshop/deer-flow/backend/packages/harness/deerflow/client.py",
+      "accessCount": 6,
+      "lastAccessed": 1775080950032,
+      "type": "file"
+    },
+    {
+      "path": "hq/backend/src/orchestration/brainstorming-service.ts",
+      "accessCount": 5,
+      "lastAccessed": 1775097649757,
+      "type": "file"
+    },
+    {
+      "path": "hq/frontend/src/hooks/useIntentWizard.ts",
+      "accessCount": 4,
+      "lastAccessed": 1775078307728,
+      "type": "file"
+    },
+    {
+      "path": "hq/frontend/src/components/tasks/AdvancedTaskWizard.tsx",
+      "accessCount": 4,
+      "lastAccessed": 1775078372829,
+      "type": "file"
+    },
+    {
+      "path": "workshop",
+      "accessCount": 3,
+      "lastAccessed": 1775078029059,
+      "type": "directory"
+    },
+    {
+      "path": "hq/frontend/src/components/intent/ClarificationPanel.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1775078356097,
+      "type": "file"
+    },
+    {
+      "path": "workshop/deer-flow/backend/packages/harness/deerflow/agents/checkpointer/provider.py",
+      "accessCount": 3,
+      "lastAccessed": 1775079510627,
+      "type": "directory"
     },
     {
       "path": "hq/backend/src/orchestration/mvp-preset.ts",
@@ -323,15 +384,39 @@
       "type": "file"
     },
     {
-      "path": "TODOS.md",
-      "accessCount": 1,
-      "lastAccessed": 1774910055799,
+      "path": "hq/backend/.env",
+      "accessCount": 2,
+      "lastAccessed": 1775077512932,
       "type": "file"
     },
     {
       "path": "docs/plans/staffai_superpowers_latest_dev_plan.md",
+      "accessCount": 2,
+      "lastAccessed": 1775078052633,
+      "type": "file"
+    },
+    {
+      "path": "workshop/deer-flow/backend/packages/harness/deerflow/agents/checkpointer/__init__.py",
+      "accessCount": 2,
+      "lastAccessed": 1775079489939,
+      "type": "directory"
+    },
+    {
+      "path": "workshop/.env",
+      "accessCount": 2,
+      "lastAccessed": 1775080531785,
+      "type": "file"
+    },
+    {
+      "path": "workshop/deer-flow/backend/packages/harness/deerflow/config/app_config.py",
+      "accessCount": 2,
+      "lastAccessed": 1775081281035,
+      "type": "directory"
+    },
+    {
+      "path": "TODOS.md",
       "accessCount": 1,
-      "lastAccessed": 1774910074360,
+      "lastAccessed": 1774910055799,
       "type": "file"
     },
     {
@@ -423,6 +508,42 @@
       "accessCount": 1,
       "lastAccessed": 1774957898450,
       "type": "file"
+    },
+    {
+      "path": "hq",
+      "accessCount": 1,
+      "lastAccessed": 1775077985626,
+      "type": "directory"
+    },
+    {
+      "path": "hq/backend/src/shared/intent-types.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775078014746,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 1,
+      "lastAccessed": 1775078047930,
+      "type": "directory"
+    },
+    {
+      "path": "hq/frontend/src/components/intent",
+      "accessCount": 1,
+      "lastAccessed": 1775078098590,
+      "type": "directory"
+    },
+    {
+      "path": "workshop/deer-flow/backend/langgraph.json",
+      "accessCount": 1,
+      "lastAccessed": 1775079449567,
+      "type": "file"
+    },
+    {
+      "path": "workshop/deer-flow/backend/packages/harness/deerflow/agents/checkpointer/async_provider.py",
+      "accessCount": 1,
+      "lastAccessed": 1775079472088,
+      "type": "directory"
     }
   ],
   "userDirectives": []

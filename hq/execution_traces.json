@@ -46843,5 +46843,673 @@
       "executor": "deerflow",
       "runtimeName": "python_deerflow_workshop"
     }
+  },
+  {
+    "id": "trace_ba61c6ce-2d89-4283-853d-1552caf5aa3b_1775023015115",
+    "type": "approval_requested",
+    "taskId": "20260401001",
+    "approvalId": "ba61c6ce-2d89-4283-853d-1552caf5aa3b",
+    "occurredAt": "2026-04-01T05:56:55.115Z",
+    "actor": "system",
+    "summary": "Approval requested: ba61c6ce-2d89-4283-853d-1552caf5aa3b",
+    "data": {
+      "status": "pending",
+      "riskLevel": "MEDIUM"
+    }
+  },
+  {
+    "id": "trace_cd49e39e-dafe-4da9-acad-a18c2d638165_1775023016140",
+    "type": "approval_requested",
+    "taskId": "20260401001",
+    "approvalId": "cd49e39e-dafe-4da9-acad-a18c2d638165",
+    "occurredAt": "2026-04-01T05:56:56.140Z",
+    "actor": "system",
+    "summary": "Approval requested: cd49e39e-dafe-4da9-acad-a18c2d638165",
+    "data": {
+      "status": "pending",
+      "riskLevel": "HIGH"
+    }
+  },
+  {
+    "id": "trace_exec_a842e2b1-759a-4e51-bdb6-936b8f32c463_1775023018983",
+    "type": "execution_started",
+    "taskId": "20260401001",
+    "executionId": "a842e2b1-759a-4e51-bdb6-936b8f32c463",
+    "occurredAt": "2026-04-01T05:56:58.983Z",
+    "actor": "codex",
+    "summary": "开始执行任务：20260401001",
+    "data": {
+      "executor": "codex",
+      "runtimeName": "local_codex_cli",
+      "executionMode": "serial"
+    }
+  },
+  {
+    "id": "trace_exec_a842e2b1-759a-4e51-bdb6-936b8f32c463_1775023057473",
+    "type": "execution_completed",
+    "taskId": "20260401001",
+    "executionId": "a842e2b1-759a-4e51-bdb6-936b8f32c463",
+    "occurredAt": "2026-04-01T05:57:37.473Z",
+    "actor": "codex",
+    "summary": "完成任务：20260401001",
+    "data": {
+      "status": "completed",
+      "degraded": false,
+      "retryCount": 0,
+      "executor": "codex",
+      "runtimeName": "local_codex_cli"
+    }
+  },
+  {
+    "id": "trace_exec_0b68a623-d943-4269-aad3-abf4c3fce55e_1775023059608",
+    "type": "execution_started",
+    "taskId": "20260401001",
+    "executionId": "0b68a623-d943-4269-aad3-abf4c3fce55e",
+    "occurredAt": "2026-04-01T05:57:39.608Z",
+    "actor": "codex",
+    "summary": "开始执行任务：20260401001",
+    "data": {
+      "executor": "codex",
+      "runtimeName": "local_codex_cli",
+      "executionMode": "serial"
+    }
+  },
+  {
+    "id": "trace_exec_0b68a623-d943-4269-aad3-abf4c3fce55e_1775023075919",
+    "type": "execution_completed",
+    "taskId": "20260401001",
+    "executionId": "0b68a623-d943-4269-aad3-abf4c3fce55e",
+    "occurredAt": "2026-04-01T05:57:55.919Z",
+    "actor": "codex",
+    "summary": "完成任务：20260401001",
+    "data": {
+      "status": "completed",
+      "degraded": false,
+      "retryCount": 0,
+      "executor": "codex",
+      "runtimeName": "local_codex_cli"
+    }
+  },
+  {
+    "id": "trace_10dff5da-2eef-417b-96d1-fd8cdff8b66e_1775023076647",
+    "type": "approval_requested",
+    "taskId": "20260401001",
+    "approvalId": "10dff5da-2eef-417b-96d1-fd8cdff8b66e",
+    "occurredAt": "2026-04-01T05:57:56.647Z",
+    "actor": "system",
+    "summary": "Approval requested: 10dff5da-2eef-417b-96d1-fd8cdff8b66e",
+    "data": {
+      "status": "pending",
+      "riskLevel": "HIGH"
+    }
+  },
+  {
+    "id": "trace_10dff5da-2eef-417b-96d1-fd8cdff8b66e_1775023076658",
+    "type": "approval_resolved",
+    "taskId": "20260401001",
+    "approvalId": "10dff5da-2eef-417b-96d1-fd8cdff8b66e",
+    "occurredAt": "2026-04-01T05:57:56.658Z",
+    "actor": "system",
+    "summary": "Approval approved: 10dff5da-2eef-417b-96d1-fd8cdff8b66e",
+    "data": {
+      "previousStatus": "pending",
+      "status": "approved"
+    }
+  },
+  {
+    "id": "trace_exec_3834a2c4-f2de-410d-a0be-e962723de518_1775023077056",
+    "type": "execution_started",
+    "taskId": "20260401001",
+    "executionId": "3834a2c4-f2de-410d-a0be-e962723de518",
+    "occurredAt": "2026-04-01T05:57:57.056Z",
+    "actor": "codex",
+    "summary": "开始执行任务：20260401001",
+    "data": {
+      "executor": "codex",
+      "runtimeName": "local_codex_cli",
+      "executionMode": "serial"
+    }
+  },
+  {
+    "id": "trace_exec_3834a2c4-f2de-410d-a0be-e962723de518_1775023084144",
+    "type": "execution_completed",
+    "taskId": "20260401001",
+    "executionId": "3834a2c4-f2de-410d-a0be-e962723de518",
+    "occurredAt": "2026-04-01T05:58:04.144Z",
+    "actor": "codex",
+    "summary": "完成任务：20260401001",
+    "data": {
+      "status": "completed",
+      "degraded": true,
+      "retryCount": 0,
+      "executor": "codex",
+      "runtimeName": "local_codex_cli"
+    }
+  },
+  {
+    "id": "trace_appr_tool_8d97e0d6-868a-42b4-b8c0-ce4486d4ae8a_1775023084349",
+    "type": "approval_requested",
+    "taskId": "task-high-risk",
+    "approvalId": "appr_tool_8d97e0d6-868a-42b4-b8c0-ce4486d4ae8a",
+    "occurredAt": "2026-04-01T05:58:04.349Z",
+    "actor": "backend-developer",
+    "summary": "Approval requested: appr_tool_8d97e0d6-868a-42b4-b8c0-ce4486d4ae8a",
+    "data": {
+      "status": "pending",
+      "riskLevel": "HIGH"
+    }
+  },
+  {
+    "id": "trace_exec_63bf0b25-d1f6-483c-a0f1-a064047f3dc6_1775023084649",
+    "type": "execution_started",
+    "taskId": "20260401001",
+    "executionId": "63bf0b25-d1f6-483c-a0f1-a064047f3dc6",
+    "occurredAt": "2026-04-01T05:58:04.649Z",
+    "actor": "codex",
+    "summary": "开始执行任务：20260401001",
+    "data": {
+      "executor": "codex",
+      "runtimeName": "local_codex_cli",
+      "executionMode": "single"
+    }
+  },
+  {
+    "id": "trace_exec_63bf0b25-d1f6-483c-a0f1-a064047f3dc6_1775023091020",
+    "type": "execution_failed",
+    "taskId": "20260401001",
+    "executionId": "63bf0b25-d1f6-483c-a0f1-a064047f3dc6",
+    "occurredAt": "2026-04-01T05:58:11.020Z",
+    "actor": "codex",
+    "summary": "失败任务：20260401001",
+    "data": {
+      "status": "failed",
+      "degraded": true,
+      "retryCount": 0,
+      "executor": "codex",
+      "runtimeName": "local_codex_cli"
+    }
+  },
+  {
+    "id": "trace_tool_107fc7cc-fdef-40f5-8f5c-080edcedff05_1775023091040",
+    "type": "tool_call_logged",
+    "taskId": "20260401001",
+    "executionId": "63bf0b25-d1f6-483c-a0f1-a064047f3dc6",
+    "toolCallLogId": "107fc7cc-fdef-40f5-8f5c-080edcedff05",
+    "occurredAt": "2026-04-01T05:58:11.040Z",
+    "actor": "backend-developer",
+    "summary": "工具调用完成：test_runner",
+    "data": {
+      "status": "completed",
+      "riskLevel": "medium"
+    }
+  },
+  {
+    "id": "trace_exec_cda084df-471f-4056-a668-bbb10c4c39af_1775023091356",
+    "type": "execution_started",
+    "taskId": "20260401001",
+    "executionId": "cda084df-471f-4056-a668-bbb10c4c39af",
+    "occurredAt": "2026-04-01T05:58:11.356Z",
+    "actor": "codex",
+    "summary": "开始执行任务：20260401001",
+    "data": {
+      "executor": "codex",
+      "runtimeName": "local_codex_cli",
+      "executionMode": "single"
+    }
+  },
+  {
+    "id": "trace_exec_cda084df-471f-4056-a668-bbb10c4c39af_1775023097064",
+    "type": "execution_failed",
+    "taskId": "20260401001",
+    "executionId": "cda084df-471f-4056-a668-bbb10c4c39af",
+    "occurredAt": "2026-04-01T05:58:17.064Z",
+    "actor": "codex",
+    "summary": "失败任务：20260401001",
+    "data": {
+      "status": "failed",
+      "degraded": true,
+      "retryCount": 0,
+      "executor": "codex",
+      "runtimeName": "local_codex_cli"
+    }
+  },
+  {
+    "id": "trace_exec_9b426f38-09e7-41f2-9b0e-e93a5b777e69_1775023097410",
+    "type": "execution_started",
+    "taskId": "20260401001",
+    "executionId": "9b426f38-09e7-41f2-9b0e-e93a5b777e69",
+    "occurredAt": "2026-04-01T05:58:17.410Z",
+    "actor": "codex",
+    "summary": "开始执行任务：20260401001",
+    "data": {
+      "executor": "codex",
+      "runtimeName": "local_codex_cli",
+      "executionMode": "single"
+    }
+  },
+  {
+    "id": "trace_exec_9b426f38-09e7-41f2-9b0e-e93a5b777e69_1775023103562",
+    "type": "execution_failed",
+    "taskId": "20260401001",
+    "executionId": "9b426f38-09e7-41f2-9b0e-e93a5b777e69",
+    "occurredAt": "2026-04-01T05:58:23.562Z",
+    "actor": "codex",
+    "summary": "失败任务：20260401001",
+    "data": {
+      "status": "failed",
+      "degraded": true,
+      "retryCount": 0,
+      "executor": "codex",
+      "runtimeName": "local_codex_cli"
+    }
+  },
+  {
+    "id": "trace_exec_a8844c42-8f33-4e02-a8c4-5a1157f34987_1775023103895",
+    "type": "execution_started",
+    "taskId": "20260401001",
+    "executionId": "a8844c42-8f33-4e02-a8c4-5a1157f34987",
+    "occurredAt": "2026-04-01T05:58:23.895Z",
+    "actor": "codex",
+    "summary": "开始执行任务：20260401001",
+    "data": {
+      "executor": "codex",
+      "runtimeName": "local_codex_cli",
+      "executionMode": "single"
+    }
+  },
+  {
+    "id": "trace_exec_a8844c42-8f33-4e02-a8c4-5a1157f34987_1775023110214",
+    "type": "execution_failed",
+    "taskId": "20260401001",
+    "executionId": "a8844c42-8f33-4e02-a8c4-5a1157f34987",
+    "occurredAt": "2026-04-01T05:58:30.214Z",
+    "actor": "codex",
+    "summary": "失败任务：20260401001",
+    "data": {
+      "status": "failed",
+      "degraded": true,
+      "retryCount": 0,
+      "executor": "codex",
+      "runtimeName": "local_codex_cli"
+    }
+  },
+  {
+    "id": "trace_tool_b5517a50-ee7d-41d4-b3ff-1adbca26f9d2_1775023110236",
+    "type": "tool_call_logged",
+    "taskId": "20260401001",
+    "executionId": "a8844c42-8f33-4e02-a8c4-5a1157f34987",
+    "toolCallLogId": "b5517a50-ee7d-41d4-b3ff-1adbca26f9d2",
+    "occurredAt": "2026-04-01T05:58:30.236Z",
+    "actor": "backend-developer",
+    "summary": "工具调用完成：test_runner",
+    "data": {
+      "status": "completed",
+      "riskLevel": "medium"
+    }
+  },
+  {
+    "id": "trace_2992ddf3-3ace-4a7c-9462-3c4bb4fafcb7_1775023110454",
+    "type": "approval_requested",
+    "taskId": "20260401001",
+    "approvalId": "2992ddf3-3ace-4a7c-9462-3c4bb4fafcb7",
+    "occurredAt": "2026-04-01T05:58:30.454Z",
+    "actor": "system",
+    "summary": "Approval requested: 2992ddf3-3ace-4a7c-9462-3c4bb4fafcb7",
+    "data": {
+      "status": "pending",
+      "riskLevel": "HIGH"
+    }
+  },
+  {
+    "id": "trace_949f8077-48fd-4894-9d7b-c0a1d4eed2f8_1775023110663",
+    "type": "approval_requested",
+    "taskId": "20260401001",
+    "approvalId": "949f8077-48fd-4894-9d7b-c0a1d4eed2f8",
+    "occurredAt": "2026-04-01T05:58:30.663Z",
+    "actor": "system",
+    "summary": "Approval requested: 949f8077-48fd-4894-9d7b-c0a1d4eed2f8",
+    "data": {
+      "status": "pending",
+      "riskLevel": "HIGH"
+    }
+  },
+  {
+    "id": "trace_949f8077-48fd-4894-9d7b-c0a1d4eed2f8_1775023110672",
+    "type": "approval_resolved",
+    "taskId": "20260401001",
+    "approvalId": "949f8077-48fd-4894-9d7b-c0a1d4eed2f8",
+    "occurredAt": "2026-04-01T05:58:30.672Z",
+    "actor": "manager1",
+    "summary": "Approval approved: 949f8077-48fd-4894-9d7b-c0a1d4eed2f8",
+    "data": {
+      "previousStatus": "pending",
+      "status": "approved"
+    }
+  },
+  {
+    "id": "trace_exec_96d3d759-1450-44c1-8a0e-acfe645d9dfb_1775023110774",
+    "type": "execution_started",
+    "taskId": "20260401001",
+    "executionId": "96d3d759-1450-44c1-8a0e-acfe645d9dfb",
+    "occurredAt": "2026-04-01T05:58:30.774Z",
+    "actor": "codex",
+    "summary": "开始执行任务：20260401001",
+    "data": {
+      "executor": "codex",
+      "runtimeName": "local_codex_cli",
+      "executionMode": "single"
+    }
+  },
+  {
+    "id": "trace_exec_96d3d759-1450-44c1-8a0e-acfe645d9dfb_1775023117771",
+    "type": "execution_failed",
+    "taskId": "20260401001",
+    "executionId": "96d3d759-1450-44c1-8a0e-acfe645d9dfb",
+    "occurredAt": "2026-04-01T05:58:37.771Z",
+    "actor": "codex",
+    "summary": "失败任务：20260401001",
+    "data": {
+      "status": "failed",
+      "degraded": true,
+      "retryCount": 0,
+      "executor": "codex",
+      "runtimeName": "local_codex_cli"
+    }
+  },
+  {
+    "id": "trace_b05bfb89-695d-4065-a375-97565b2eed48_1775023118030",
+    "type": "approval_requested",
+    "taskId": "20260401001",
+    "approvalId": "b05bfb89-695d-4065-a375-97565b2eed48",
+    "occurredAt": "2026-04-01T05:58:38.030Z",
+    "actor": "system",
+    "summary": "Approval requested: b05bfb89-695d-4065-a375-97565b2eed48",
+    "data": {
+      "status": "pending",
+      "riskLevel": "HIGH"
+    }
+  },
+  {
+    "id": "trace_e34a271f-e04b-4207-8af8-3ed358534a74_1775023118343",
+    "type": "approval_requested",
+    "taskId": "20260401001",
+    "approvalId": "e34a271f-e04b-4207-8af8-3ed358534a74",
+    "occurredAt": "2026-04-01T05:58:38.343Z",
+    "actor": "system",
+    "summary": "Approval requested: e34a271f-e04b-4207-8af8-3ed358534a74",
+    "data": {
+      "status": "pending",
+      "riskLevel": "MEDIUM"
+    }
+  },
+  {
+    "id": "trace_e34a271f-e04b-4207-8af8-3ed358534a74_1775023118354",
+    "type": "approval_resolved",
+    "taskId": "20260401001",
+    "approvalId": "e34a271f-e04b-4207-8af8-3ed358534a74",
+    "occurredAt": "2026-04-01T05:58:38.354Z",
+    "actor": "system",
+    "summary": "Approval approved: e34a271f-e04b-4207-8af8-3ed358534a74",
+    "data": {
+      "previousStatus": "pending",
+      "status": "approved"
+    }
+  },
+  {
+    "id": "trace_exec_fc5492e1-9f6c-42fb-bffc-09148cb88de4_1775023118457",
+    "type": "execution_started",
+    "taskId": "20260401001",
+    "executionId": "fc5492e1-9f6c-42fb-bffc-09148cb88de4",
+    "occurredAt": "2026-04-01T05:58:38.457Z",
+    "actor": "codex",
+    "summary": "开始执行任务：20260401001",
+    "data": {
+      "executor": "codex",
+      "runtimeName": "local_codex_cli",
+      "executionMode": "single"
+    }
+  },
+  {
+    "id": "trace_exec_fc5492e1-9f6c-42fb-bffc-09148cb88de4_1775023125779",
+    "type": "execution_failed",
+    "taskId": "20260401001",
+    "executionId": "fc5492e1-9f6c-42fb-bffc-09148cb88de4",
+    "occurredAt": "2026-04-01T05:58:45.779Z",
+    "actor": "codex",
+    "summary": "失败任务：20260401001",
+    "data": {
+      "status": "failed",
+      "degraded": true,
+      "retryCount": 0,
+      "executor": "codex",
+      "runtimeName": "local_codex_cli"
+    }
+  },
+  {
+    "id": "trace_38dadc3c-517f-4d9e-8376-a8b8ced0a58b_1775023126013",
+    "type": "approval_requested",
+    "taskId": "20260401002",
+    "approvalId": "38dadc3c-517f-4d9e-8376-a8b8ced0a58b",
+    "occurredAt": "2026-04-01T05:58:46.013Z",
+    "actor": "system",
+    "summary": "Approval requested: 38dadc3c-517f-4d9e-8376-a8b8ced0a58b",
+    "data": {
+      "status": "pending",
+      "riskLevel": "MEDIUM"
+    }
+  },
+  {
+    "id": "trace_38dadc3c-517f-4d9e-8376-a8b8ced0a58b_1775023126022",
+    "type": "approval_resolved",
+    "taskId": "20260401002",
+    "approvalId": "38dadc3c-517f-4d9e-8376-a8b8ced0a58b",
+    "occurredAt": "2026-04-01T05:58:46.022Z",
+    "actor": "system",
+    "summary": "Approval rejected: 38dadc3c-517f-4d9e-8376-a8b8ced0a58b",
+    "data": {
+      "previousStatus": "pending",
+      "status": "rejected"
+    }
+  },
+  {
+    "id": "trace_147729a1-8f51-4e79-8fe0-1079ac2eaf15_1775023126237",
+    "type": "approval_requested",
+    "taskId": "20260401001",
+    "approvalId": "147729a1-8f51-4e79-8fe0-1079ac2eaf15",
+    "occurredAt": "2026-04-01T05:58:46.237Z",
+    "actor": "system",
+    "summary": "Approval requested: 147729a1-8f51-4e79-8fe0-1079ac2eaf15",
+    "data": {
+      "status": "pending",
+      "riskLevel": "HIGH"
+    }
+  },
+  {
+    "id": "trace_147729a1-8f51-4e79-8fe0-1079ac2eaf15_1775023126247",
+    "type": "approval_resolved",
+    "taskId": "20260401001",
+    "approvalId": "147729a1-8f51-4e79-8fe0-1079ac2eaf15",
+    "occurredAt": "2026-04-01T05:58:46.247Z",
+    "actor": "manager1",
+    "summary": "Approval approved: 147729a1-8f51-4e79-8fe0-1079ac2eaf15",
+    "data": {
+      "previousStatus": "pending",
+      "status": "approved"
+    }
+  },
+  {
+    "id": "trace_exec_346115a8-f085-413b-83b7-7878073c0d48_1775023126350",
+    "type": "execution_started",
+    "taskId": "20260401001",
+    "executionId": "346115a8-f085-413b-83b7-7878073c0d48",
+    "occurredAt": "2026-04-01T05:58:46.350Z",
+    "actor": "codex",
+    "summary": "开始执行任务：20260401001",
+    "data": {
+      "executor": "codex",
+      "runtimeName": "local_codex_cli",
+      "executionMode": "single"
+    }
+  },
+  {
+    "id": "trace_exec_346115a8-f085-413b-83b7-7878073c0d48_1775023133274",
+    "type": "execution_failed",
+    "taskId": "20260401001",
+    "executionId": "346115a8-f085-413b-83b7-7878073c0d48",
+    "occurredAt": "2026-04-01T05:58:53.274Z",
+    "actor": "codex",
+    "summary": "失败任务：20260401001",
+    "data": {
+      "status": "failed",
+      "degraded": true,
+      "retryCount": 0,
+      "executor": "codex",
+      "runtimeName": "local_codex_cli"
+    }
+  },
+  {
+    "id": "trace_exec_9a4f79d3-534e-41aa-90fd-51562264beaf_1775023133796",
+    "type": "execution_started",
+    "taskId": "20260401001",
+    "executionId": "9a4f79d3-534e-41aa-90fd-51562264beaf",
+    "occurredAt": "2026-04-01T05:58:53.796Z",
+    "actor": "codex",
+    "summary": "开始执行任务：20260401001",
+    "data": {
+      "executor": "codex",
+      "runtimeName": "local_codex_cli",
+      "executionMode": "single"
+    }
+  },
+  {
+    "id": "trace_exec_9a4f79d3-534e-41aa-90fd-51562264beaf_1775023140003",
+    "type": "execution_failed",
+    "taskId": "20260401001",
+    "executionId": "9a4f79d3-534e-41aa-90fd-51562264beaf",
+    "occurredAt": "2026-04-01T05:59:00.003Z",
+    "actor": "codex",
+    "summary": "失败任务：20260401001",
+    "data": {
+      "status": "failed",
+      "degraded": true,
+      "retryCount": 0,
+      "executor": "codex",
+      "runtimeName": "local_codex_cli"
+    }
+  },
+  {
+    "id": "trace_exec_b76122d5-a623-4653-8120-fbd8d96f459d_1775023140132",
+    "type": "execution_started",
+    "taskId": "20260401002",
+    "executionId": "b76122d5-a623-4653-8120-fbd8d96f459d",
+    "occurredAt": "2026-04-01T05:59:00.132Z",
+    "actor": "claude",
+    "summary": "开始执行任务：20260401002",
+    "data": {
+      "executor": "claude",
+      "runtimeName": "local_claude_cli",
+      "executionMode": "single"
+    }
+  },
+  {
+    "id": "trace_exec_b76122d5-a623-4653-8120-fbd8d96f459d_1775023264070",
+    "type": "execution_completed",
+    "taskId": "20260401002",
+    "executionId": "b76122d5-a623-4653-8120-fbd8d96f459d",
+    "occurredAt": "2026-04-01T06:01:04.070Z",
+    "actor": "claude",
+    "summary": "完成任务：20260401002",
+    "data": {
+      "status": "completed",
+      "degraded": false,
+      "retryCount": 0,
+      "executor": "claude",
+      "runtimeName": "local_claude_cli"
+    }
+  },
+  {
+    "id": "trace_exec_bc2ac9cd-cc7b-4856-81ed-1d4dfefed79f_1775023267357",
+    "type": "execution_started",
+    "taskId": "20260401001",
+    "executionId": "bc2ac9cd-cc7b-4856-81ed-1d4dfefed79f",
+    "occurredAt": "2026-04-01T06:01:07.357Z",
+    "actor": "openai",
+    "summary": "开始执行任务：20260401001",
+    "data": {
+      "executor": "openai",
+      "runtimeName": "openai_api",
+      "executionMode": "single"
+    }
+  },
+  {
+    "id": "trace_exec_bc2ac9cd-cc7b-4856-81ed-1d4dfefed79f_1775023267365",
+    "type": "execution_failed",
+    "taskId": "20260401001",
+    "executionId": "bc2ac9cd-cc7b-4856-81ed-1d4dfefed79f",
+    "occurredAt": "2026-04-01T06:01:07.365Z",
+    "actor": "openai",
+    "summary": "失败任务：20260401001",
+    "data": {
+      "status": "failed",
+      "degraded": true,
+      "retryCount": 0,
+      "executor": "openai",
+      "runtimeName": "openai_api"
+    }
+  },
+  {
+    "id": "trace_approval-1_1775023267707",
+    "type": "approval_requested",
+    "taskId": "task-1",
+    "approvalId": "approval-1",
+    "occurredAt": "2026-04-01T06:01:07.707Z",
+    "actor": "system",
+    "summary": "Approval requested: approval-1",
+    "data": {
+      "status": "pending"
+    }
+  },
+  {
+    "id": "trace_approval-1_1775023267717",
+    "type": "approval_resolved",
+    "taskId": "task-1",
+    "approvalId": "approval-1",
+    "occurredAt": "2026-04-01T06:01:07.717Z",
+    "actor": "system",
+    "summary": "Approval approved: approval-1",
+    "data": {
+      "previousStatus": "pending",
+      "status": "approved"
+    }
+  },
+  {
+    "id": "trace_exec_f133f59e-a824-4ecc-b5e1-9ac657d93a09_1775023384328",
+    "type": "execution_started",
+    "taskId": "20260401004",
+    "executionId": "f133f59e-a824-4ecc-b5e1-9ac657d93a09",
+    "occurredAt": "2026-04-01T06:03:04.328Z",
+    "actor": "deerflow",
+    "summary": "开始执行任务：20260401004",
+    "data": {
+      "executor": "deerflow",
+      "runtimeName": "python_deerflow_workshop",
+      "executionMode": "single"
+    }
+  },
+  {
+    "id": "trace_exec_f133f59e-a824-4ecc-b5e1-9ac657d93a09_1775023384470",
+    "type": "execution_completed",
+    "taskId": "20260401004",
+    "executionId": "f133f59e-a824-4ecc-b5e1-9ac657d93a09",
+    "occurredAt": "2026-04-01T06:03:04.470Z",
+    "actor": "deerflow",
+    "summary": "完成任务：20260401004",
+    "data": {
+      "status": "completed",
+      "degraded": false,
+      "retryCount": 0,
+      "executor": "deerflow",
+      "runtimeName": "python_deerflow_workshop"
+    }
   }
 ]

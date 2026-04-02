@@ -69683,19 +69683,19 @@
     ]
   },
   {
-    "id": "60ba42c6-a691-4fe0-ba02-e311f189b32b",
+    "id": "a972f75f-23d8-4a09-b6cb-bf409fdd1b23",
     "taskId": "20260401001",
     "mode": "serial",
     "synthesisRequired": true,
     "status": "completed",
-    "createdAt": "2026-04-01T04:03:27.821Z",
-    "updatedAt": "2026-04-01T04:03:36.385Z",
+    "createdAt": "2026-04-01T05:57:56.782Z",
+    "updatedAt": "2026-04-01T05:58:04.143Z",
     "steps": [
       {
-        "id": "9be9fdf5-21cb-4179-9129-09551c403049",
+        "id": "30105fc7-c912-412d-95eb-2eea5069db3f",
         "title": "执行任务",
         "description": "为任务「Deploy to production with parallel rollout」执行步骤 1",
-        "assignmentId": "dd4bb634-640b-4887-8f24-830e695bfc37",
+        "assignmentId": "cf5357ee-19c3-4487-8c95-eb0179812f70",
         "agentId": "dispatcher",
         "assignmentRole": "primary",
         "status": "completed",
@@ -69731,7 +69731,7 @@
     "synthesisRequired": false,
     "status": "completed",
     "createdAt": "2026-03-31T22:44:17.596Z",
-    "updatedAt": "2026-04-01T04:04:29.125Z",
+    "updatedAt": "2026-04-01T05:59:00.131Z",
     "steps": [
       {
         "id": "da41a2f4-91e9-4c5d-9897-0000c49ae0c1",
@@ -71751,6 +71751,538 @@
         "title": "执行任务",
         "description": "为任务「Test Workshop Task」执行步骤 1",
         "assignmentId": "c1a7b16c-e4f0-4391-b4e3-1cc8a5ee21a4",
+        "agentId": "dispatcher",
+        "assignmentRole": "primary",
+        "status": "completed",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "bb25f4b0-5323-4e33-aa1c-7ef67462757b",
+    "taskId": "20260401001",
+    "mode": "serial",
+    "synthesisRequired": true,
+    "status": "planned",
+    "createdAt": "2026-04-01T05:56:54.627Z",
+    "updatedAt": "2026-04-01T05:56:54.627Z",
+    "steps": [
+      {
+        "id": "e5dd590b-65d7-44cd-8ed3-7db52eb58081",
+        "title": "执行架构评估与技术决策",
+        "description": "为任务「Refactor server composition」执行步骤 1",
+        "assignmentId": "49ab899e-1489-4aa6-9ffe-5bafe88be3ca",
+        "agentId": "software-architect",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      },
+      {
+        "id": "82422f15-f453-454a-889a-8d1d5d07c48a",
+        "title": "汇总架构结论并推进后续任务",
+        "description": "为任务「Refactor server composition」执行步骤 2",
+        "assignmentId": "db9852c2-bbd4-4045-bb53-9611459923f8",
+        "agentId": "dispatcher",
+        "assignmentRole": "dispatcher",
+        "status": "pending",
+        "order": 2
+      }
+    ]
+  },
+  {
+    "id": "18feaaf7-2858-40f8-bad3-cc18d56cb474",
+    "taskId": "20260401001",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-04-01T05:56:55.273Z",
+    "updatedAt": "2026-04-01T05:56:55.273Z",
+    "steps": [
+      {
+        "id": "8c833c4b-15d6-464b-941f-e05e864dfcec",
+        "title": "执行任务",
+        "description": "为任务「Older task」执行步骤 1",
+        "assignmentId": "f924c7cd-bec5-45cc-b743-e296c8e1db63",
+        "agentId": "dispatcher",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "8ba0516f-a6e4-4c03-aa45-2cc1a838a5fb",
+    "taskId": "20260401002",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-04-01T05:56:55.490Z",
+    "updatedAt": "2026-04-01T05:56:55.490Z",
+    "steps": [
+      {
+        "id": "33320e55-e1f9-4d3d-95f5-d57179e18da7",
+        "title": "执行任务",
+        "description": "为任务「Newer task」执行步骤 1",
+        "assignmentId": "4d7dc119-b218-445c-b9ff-c4916c483ff8",
+        "agentId": "dispatcher",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "1dfab2cb-c6c6-4ff8-9f5f-2f68c96ede8d",
+    "taskId": "20260401001",
+    "mode": "single",
+    "synthesisRequired": true,
+    "status": "planned",
+    "createdAt": "2026-04-01T05:56:55.750Z",
+    "updatedAt": "2026-04-01T05:56:55.750Z",
+    "steps": [
+      {
+        "id": "7103993e-6f03-4338-8482-f2b63ed1be6d",
+        "title": "执行架构评估与技术决策",
+        "description": "为任务「Run a multi-expert architecture review」执行步骤 1",
+        "assignmentId": "1cd66bbe-5c7d-48f5-bfbe-7e90365b65af",
+        "agentId": "software-architect",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      },
+      {
+        "id": "6ba27656-5b19-4844-a777-1c76cc910921",
+        "title": "汇总架构结论并推进后续任务",
+        "description": "为任务「Run a multi-expert architecture review」执行步骤 2",
+        "assignmentId": "0a79f393-f458-4d18-974f-8d4099d407f0",
+        "agentId": "dispatcher",
+        "assignmentRole": "dispatcher",
+        "status": "pending",
+        "order": 2
+      }
+    ]
+  },
+  {
+    "id": "c2d70669-9f20-44b6-b0ce-ea70d2fbe70f",
+    "taskId": "20260401001",
+    "mode": "single",
+    "synthesisRequired": true,
+    "status": "planned",
+    "createdAt": "2026-04-01T05:56:56.150Z",
+    "updatedAt": "2026-04-01T05:56:56.151Z",
+    "steps": [
+      {
+        "id": "6cf299b8-899e-4d28-b69b-07931e441994",
+        "title": "执行任务",
+        "description": "为任务「Summarize meeting notes with experts」执行步骤 1",
+        "assignmentId": "27dbfe96-1364-47df-bc3b-5478c1bae084",
+        "agentId": "dispatcher",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "d9f3b5f0-1b54-40e1-a809-4090d675fed0",
+    "taskId": "20260401001",
+    "mode": "serial",
+    "synthesisRequired": true,
+    "status": "planned",
+    "createdAt": "2026-04-01T05:56:56.360Z",
+    "updatedAt": "2026-04-01T05:56:56.360Z",
+    "steps": [
+      {
+        "id": "57062c7a-a8a6-4686-a27b-9db547c79502",
+        "title": "Analyze requirements and dispatch implementation tasks",
+        "description": "为任务「Execute a single task」执行步骤 1",
+        "assignmentId": "24c2fa8c-5482-43d4-83d2-4664ad62763f",
+        "agentId": "dispatcher",
+        "assignmentRole": "dispatcher",
+        "status": "pending",
+        "order": 1
+      },
+      {
+        "id": "2e80b290-8650-40a6-8482-5ca417fda4c0",
+        "title": "Design architecture and technical approach",
+        "description": "为任务「Execute a single task」执行步骤 2",
+        "assignmentId": "b3ced7cb-30b5-457d-988e-ce3c8e1d85f2",
+        "agentId": "software-architect",
+        "assignmentRole": "secondary",
+        "status": "pending",
+        "order": 2
+      },
+      {
+        "id": "48c5114b-89a8-41ca-a4ee-54575d8dbb69",
+        "title": "Implement the requested delivery slice",
+        "description": "为任务「Execute a single task」执行步骤 3",
+        "assignmentId": "371f4fe4-d1e8-46cb-a08a-a95b9d55ee90",
+        "agentId": "backend-architect",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 3
+      },
+      {
+        "id": "7b7756e1-a3c9-490b-86bc-a26b3f50bb68",
+        "title": "Review implementation for risks and regressions",
+        "description": "为任务「Execute a single task」执行步骤 4",
+        "assignmentId": "2c58f6b6-b826-46bf-b008-24e18840a026",
+        "agentId": "code-reviewer",
+        "assignmentRole": "reviewer",
+        "status": "pending",
+        "order": 4
+      },
+      {
+        "id": "33a3c4a2-204f-4907-af76-3a18d5fba5d7",
+        "title": "Produce documentation for the implementation",
+        "description": "为任务「Execute a single task」执行步骤 5",
+        "assignmentId": "7ce1b097-207a-4932-8270-3bcba8029dc3",
+        "agentId": "technical-writer",
+        "assignmentRole": "secondary",
+        "status": "pending",
+        "order": 5
+      }
+    ]
+  },
+  {
+    "id": "5b25439b-fd46-422a-9587-77648ea6fd65",
+    "taskId": "20260401001",
+    "mode": "parallel",
+    "synthesisRequired": true,
+    "status": "planned",
+    "createdAt": "2026-04-01T05:57:38.554Z",
+    "updatedAt": "2026-04-01T05:57:38.555Z",
+    "steps": [
+      {
+        "id": "36c87896-954c-4a0e-bf81-54df0a38ed62",
+        "title": "拆分任务并协调执行路径",
+        "description": "为任务「Execute a serial workflow」执行步骤 1",
+        "assignmentId": "4bd67ef7-5be5-4aab-9d82-7ed881ec4c56",
+        "agentId": "dispatcher",
+        "assignmentRole": "dispatcher",
+        "status": "pending",
+        "order": 1
+      },
+      {
+        "id": "8dc8f5cd-b3e6-4b79-a2e3-43b3a83d383f",
+        "title": "验证编排和计划质量",
+        "description": "为任务「Execute a serial workflow」执行步骤 2",
+        "assignmentId": "2eef5463-0948-4801-b27b-ab2d3b3964fe",
+        "agentId": "software-architect",
+        "assignmentRole": "secondary",
+        "status": "pending",
+        "order": 2
+      }
+    ]
+  },
+  {
+    "id": "50e66ed1-7da3-47af-8cdf-755fcfbfd2c0",
+    "taskId": "20260401001",
+    "mode": "parallel",
+    "synthesisRequired": true,
+    "status": "planned",
+    "createdAt": "2026-04-01T05:57:56.423Z",
+    "updatedAt": "2026-04-01T05:57:56.424Z",
+    "steps": [
+      {
+        "id": "34f97f29-a757-4fa3-ac72-01142c0f632f",
+        "title": "执行任务",
+        "description": "为任务「Deploy to production with parallel rollout」执行步骤 1",
+        "assignmentId": "9297b83c-ce98-43da-94a4-9cfea1dbc33e",
+        "agentId": "dispatcher",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "6af7a865-a835-4ca8-b0d3-4ce835e3b863",
+    "taskId": "20260401001",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-04-01T05:58:04.359Z",
+    "updatedAt": "2026-04-01T05:58:04.359Z",
+    "steps": [
+      {
+        "id": "6bdf5b22-1fd7-4333-96cc-981f5c9d1ae6",
+        "title": "执行任务",
+        "description": "为任务「Inspect tool call logs」执行步骤 1",
+        "assignmentId": "1e8503ab-710d-422b-919d-a9a039acb8f8",
+        "agentId": "dispatcher",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "91f6feb3-8dc2-4eaa-bd16-d5a07c22102b",
+    "taskId": "20260401001",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-04-01T05:58:11.060Z",
+    "updatedAt": "2026-04-01T05:58:11.060Z",
+    "steps": [
+      {
+        "id": "8ccdc703-8fd6-41ca-99d5-c80aa8ec664c",
+        "title": "执行任务",
+        "description": "为任务「Emit task events」执行步骤 1",
+        "assignmentId": "a2355d35-172b-4c9e-b35d-4030839e9d85",
+        "agentId": "dispatcher",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "671e6a2d-070d-45a5-95e3-ea95205d86db",
+    "taskId": "20260401001",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-04-01T05:58:17.092Z",
+    "updatedAt": "2026-04-01T05:58:17.092Z",
+    "steps": [
+      {
+        "id": "e8766bae-231c-407e-abe6-c6f86333f7b0",
+        "title": "执行任务",
+        "description": "为任务「Document execution memory」执行步骤 1",
+        "assignmentId": "c76f6ab2-602b-4903-b788-ff38f512f036",
+        "agentId": "dispatcher",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "96d121c2-599f-4dc8-af1d-2802985ec89e",
+    "taskId": "20260401001",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-04-01T05:58:23.597Z",
+    "updatedAt": "2026-04-01T05:58:23.597Z",
+    "steps": [
+      {
+        "id": "771e3446-37ad-4c7a-abac-f59742d03e02",
+        "title": "执行任务",
+        "description": "为任务「Capture tool call logs」执行步骤 1",
+        "assignmentId": "825e57de-6962-4fb6-bfd5-a6ccebff92c3",
+        "agentId": "dispatcher",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "e0243a36-4898-45a1-ac7f-701cf8204680",
+    "taskId": "20260401001",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-04-01T05:58:30.254Z",
+    "updatedAt": "2026-04-01T05:58:30.254Z",
+    "steps": [
+      {
+        "id": "484891ac-2f2f-4dc4-bb8e-686f56364b39",
+        "title": "执行任务",
+        "description": "为任务「Delete core configuration」执行步骤 1",
+        "assignmentId": "42c5de8d-a070-4c49-9681-4e0279c98f4f",
+        "agentId": "dispatcher",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "a1b9d4ac-c8ce-472c-a04c-7937032ccf51",
+    "taskId": "20260401001",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-04-01T05:58:30.465Z",
+    "updatedAt": "2026-04-01T05:58:30.466Z",
+    "steps": [
+      {
+        "id": "fe86e3c8-1b69-4457-a9f7-ae99548c50bf",
+        "title": "执行任务",
+        "description": "为任务「Auto execute after approval」执行步骤 1",
+        "assignmentId": "6bc0e3ac-4d0a-41c4-8913-99c78f92b17b",
+        "agentId": "dispatcher",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "f7ed60f4-7bd6-4c9f-a083-7f3c8f966f40",
+    "taskId": "20260401001",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-04-01T05:58:37.793Z",
+    "updatedAt": "2026-04-01T05:58:37.793Z",
+    "steps": [
+      {
+        "id": "6e4bf519-6684-4d08-b58b-f016469d9861",
+        "title": "执行任务",
+        "description": "为任务「Delete core configuration」执行步骤 1",
+        "assignmentId": "1b93bf89-b49b-4c96-a317-5cd305884314",
+        "agentId": "dispatcher",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "9c968ab9-b70f-48f9-b351-4d0f63075d41",
+    "taskId": "20260401001",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-04-01T05:58:38.132Z",
+    "updatedAt": "2026-04-01T05:58:38.133Z",
+    "steps": [
+      {
+        "id": "ae5d7575-c662-48ae-b609-ac12a192afd3",
+        "title": "执行任务",
+        "description": "为任务「Delete protected data」执行步骤 1",
+        "assignmentId": "aa974e05-a45e-485d-8d4c-dd0e2f30f33a",
+        "agentId": "dispatcher",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "853abd0d-0861-4ff8-8242-21828b87e907",
+    "taskId": "20260401002",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-04-01T05:58:45.803Z",
+    "updatedAt": "2026-04-01T05:58:45.803Z",
+    "steps": [
+      {
+        "id": "f6d8e513-eee9-4288-b492-9225833b5ee6",
+        "title": "执行任务",
+        "description": "为任务「Delete user access」执行步骤 1",
+        "assignmentId": "6d6d7f8e-1b34-4f14-b16f-c9416cabdc5d",
+        "agentId": "dispatcher",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "29afea8a-7d80-43c8-a26d-eba2790d9e49",
+    "taskId": "20260401001",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-04-01T05:58:46.033Z",
+    "updatedAt": "2026-04-01T05:58:46.033Z",
+    "steps": [
+      {
+        "id": "51fb07c7-00c9-42bd-80ab-f565b2852b53",
+        "title": "执行任务",
+        "description": "为任务「Deploy to production」执行步骤 1",
+        "assignmentId": "cf50dc89-e531-4128-a922-f7ca17670210",
+        "agentId": "dispatcher",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "22aa5e63-5f8c-409f-85b5-3bc0738b95db",
+    "taskId": "20260401001",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-04-01T05:58:53.302Z",
+    "updatedAt": "2026-04-01T05:58:53.302Z",
+    "steps": [
+      {
+        "id": "c1c824e5-9c07-45a6-b0ca-8fffc7ff60ec",
+        "title": "执行任务",
+        "description": "为任务「Execution history task A」执行步骤 1",
+        "assignmentId": "2c4038c9-2817-49ef-9eff-de2329f92677",
+        "agentId": "dispatcher",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "5ffca041-7bd8-4d54-9b31-8a5ba01949e5",
+    "taskId": "20260401002",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-04-01T05:58:53.512Z",
+    "updatedAt": "2026-04-01T05:58:53.512Z",
+    "steps": [
+      {
+        "id": "77b21c54-4b40-4fea-8c4e-69de1649577b",
+        "title": "执行任务",
+        "description": "为任务「Execution history task B」执行步骤 1",
+        "assignmentId": "ff587ca4-adb6-40f9-aad4-c0bde13c22ec",
+        "agentId": "dispatcher",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "041c83c4-ff85-4878-a59a-22b02353db9a",
+    "taskId": "20260401001",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "planned",
+    "createdAt": "2026-04-01T06:01:07.075Z",
+    "updatedAt": "2026-04-01T06:01:07.075Z",
+    "steps": [
+      {
+        "id": "832abca1-505f-48fb-b61f-65a0a73f6333",
+        "title": "执行任务",
+        "description": "为任务「Execution projection task」执行步骤 1",
+        "assignmentId": "6d0dcd98-3229-49a1-8f67-ecfa46ad6f12",
+        "agentId": "dispatcher",
+        "assignmentRole": "primary",
+        "status": "pending",
+        "order": 1
+      }
+    ]
+  },
+  {
+    "id": "da7306c3-86fe-45eb-bac9-bb0f95e599e0",
+    "taskId": "20260401004",
+    "mode": "single",
+    "synthesisRequired": false,
+    "status": "completed",
+    "createdAt": "2026-04-01T06:03:03.886Z",
+    "updatedAt": "2026-04-01T06:03:04.301Z",
+    "steps": [
+      {
+        "id": "4005187c-0a2c-4a01-aed5-52a90122b9ce",
+        "title": "执行任务",
+        "description": "为任务「Test Workshop Task」执行步骤 1",
+        "assignmentId": "6b602a1b-3945-4d2e-b6f7-bcfcaabc49a0",
         "agentId": "dispatcher",
         "assignmentRole": "primary",
         "status": "completed",

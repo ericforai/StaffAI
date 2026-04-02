@@ -2197,5 +2197,26 @@
     "routingStatus": "manual_review",
     "createdAt": "2026-04-01T04:07:00.747Z",
     "updatedAt": "2026-04-01T04:07:01.548Z"
+  },
+  {
+    "id": "20260401004",
+    "title": "Test Workshop Task",
+    "description": "Test orchestration",
+    "taskType": "general",
+    "priority": "medium",
+    "status": "completed",
+    "executionMode": "single",
+    "approvalRequired": false,
+    "riskLevel": "low",
+    "requestedBy": "system",
+    "requestedAt": "2026-04-01T06:03:03.883Z",
+    "recommendedAgentRole": "dispatcher",
+    "candidateAgentRoles": [
+      "dispatcher"
+    ],
+    "routeReason": "No strong route match was found, so dispatcher should triage the task.",
+    "routingStatus": "manual_review",
+    "createdAt": "2026-04-01T06:03:03.883Z",
+    "updatedAt": "2026-04-01T06:03:04.690Z"
   }
 ]
