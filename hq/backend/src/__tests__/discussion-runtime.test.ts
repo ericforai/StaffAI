@@ -12,6 +12,7 @@ test('discussion runtime startup check reflects unavailable local executors', as
     workspaceRoot: path.resolve(__dirname, '../../..'),
     claudePath: '/path/does/not/exist/claude',
     codexPath: '/path/does/not/exist/codex',
+    geminiPath: '/path/does/not/exist/gemini',
   });
 
   const status = await runtime.getStartupCheck();
@@ -28,6 +29,7 @@ test('discussion runtime returns explicit executor failure when configured execu
     workspaceRoot: path.resolve(__dirname, '../../..'),
     claudePath: '/path/does/not/exist/claude',
     codexPath: '/path/does/not/exist/codex',
+    geminiPath: '/path/does/not/exist/gemini',
   });
 
   try {
@@ -69,6 +71,7 @@ test('discussion runtime falls back to the next executor when the preferred one 
     workspaceRoot: path.resolve(__dirname, '../../..'),
     claudePath: '/path/does/not/exist/claude',
     codexPath: '/path/does/not/exist/codex',
+    geminiPath: '/path/does/not/exist/gemini',
   });
 
   const stubbedRuntime = runtime as unknown as {

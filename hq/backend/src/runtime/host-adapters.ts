@@ -3,7 +3,7 @@ import path from 'node:path';
 
 export type HostCapabilityLevel = 'full' | 'partial' | 'advisory';
 export type HostId = 'claude' | 'codex' | 'gemini' | 'cursor';
-export type ExecutorName = 'claude' | 'codex' | 'openai' | 'deerflow';
+export type ExecutorName = 'claude' | 'codex' | 'gemini' | 'openai' | 'deerflow';
 
 export interface HostManifest {
   project: {

@@ -43,18 +43,21 @@ interface DiscussionRuntimeOptions {
   workspaceRoot: string;
   claudePath: string;
   codexPath: string;
+  geminiPath: string;
 }
 
 export class DiscussionRuntime {
   private workspaceRoot: string;
   private claudePath: string;
   private codexPath: string;
+  private geminiPath: string;
   private codexSchemaFilePath?: string;
 
   constructor(options: DiscussionRuntimeOptions) {
     this.workspaceRoot = options.workspaceRoot;
     this.claudePath = options.claudePath;
     this.codexPath = options.codexPath;
+    this.geminiPath = options.geminiPath;
   }
 
   public async generateText(systemPrompt: string, userPrompt: string): Promise<{ text: string; executor: ExecutorName }> {
@@ -70,6 +73,9 @@ export class DiscussionRuntime {
         if (executor === 'claude') {
           return { text: await this.runClaude(systemPrompt, userPrompt), executor };
         }
+        if (executor === 'gemini') {
+          return { text: await this.runGemini(systemPrompt, userPrompt), executor };
+        }
         return { text: await this.runOpenAI(systemPrompt, userPrompt), executor };
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
@@ -84,17 +90,20 @@ export class DiscussionRuntime {
     const preferredExecutor = resolveExecutorPreference(process.env.AGENCY_DISCUSSION_EXECUTOR);
     const claudeReady = await this.isExecutableAvailable(this.claudePath);
     const codexReady = await this.isExecutableAvailable(this.codexPath);
+    const geminiReady = await this.isExecutableAvailable(this.geminiPath);
     const openAiReady = Boolean(process.env.OPENAI_API_KEY);
     const sandboxNetworkDisabled = process.env.CODEX_SANDBOX_NETWORK_DISABLED === '1';
     return buildDiscussionStartupCheck({
       preferredExecutor,
       claudeReady,
       codexReady,
+      geminiReady,
       openAiReady,
       discussionTimeoutMs: this.getDiscussionTimeoutMs(),
       sandboxNetworkDisabled,
       claudePath: this.claudePath,
       codexPath: this.codexPath,
+      geminiPath: this.geminiPath,
     });
   }
 
@@ -189,6 +198,35 @@ export class DiscussionRuntime {
       return extractStructuredResponse(text, 'codex');
     } finally {
       await fs.rm(outputFile, { force: true }).catch(() => undefined);
+    }
+  }
+
+  private async runGemini(systemPrompt: string, userPrompt: string): Promise<string> {
+    const prompt = this.getAgentPrompt(systemPrompt, userPrompt);
+    await this.ensureExecutable(this.geminiPath, 'Gemini');
+
+    try {
+      const { stdout } = await execFileAsync(
+        this.geminiPath,
+        [
+          '-p',
+          prompt,
+          '-o',
+          'json',
+          '--approval-mode',
+          'yolo',
+          '--sandbox',
+        ],
+        {
+          cwd: this.workspaceRoot,
+          env: this.getExecutorEnv(),
+          timeout: this.getDiscussionTimeoutMs(),
+          maxBuffer: 1024 * 1024 * 8,
+        }
+      );
+      return extractStructuredResponse(stdout, 'gemini');
+    } catch (error) {
+      throw formatExecutorError(error, 'gemini', 'Gemini 执行失败。');
     }
   }
 

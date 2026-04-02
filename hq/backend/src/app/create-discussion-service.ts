@@ -64,6 +64,9 @@ export function createDiscussionService(
         codexPath:
           process.env.AGENCY_DISCUSSION_CODEX_PATH ||
           '/Users/user/.nvm/versions/node/v22.16.0/bin/codex',
+        geminiPath:
+          process.env.AGENCY_DISCUSSION_GEMINI_PATH ||
+          '/Users/user/.nvm/versions/node/v22.16.0/bin/gemini',
       });
 
   return new DiscussionService(scanner, store, publish, {

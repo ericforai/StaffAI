@@ -10,18 +10,22 @@ export function resolveExecutorPreference(raw: string | undefined): ExecutorName
 
 export function resolveExecutorAttempts(preferred: ExecutorName): ExecutorName[] {
   if (preferred === 'deerflow') {
-    return ['deerflow', 'claude', 'codex', 'openai'];
+    return ['deerflow', 'claude', 'gemini', 'codex', 'openai'];
+  }
+
+  if (preferred === 'gemini') {
+    return ['gemini', 'claude', 'codex', 'openai'];
   }
 
   if (preferred === 'codex') {
-    return ['codex', 'claude', 'openai'];
+    return ['codex', 'claude', 'gemini', 'openai'];
   }
 
   if (preferred === 'openai') {
-    return ['openai', 'claude', 'codex'];
+    return ['openai', 'claude', 'gemini', 'codex'];
   }
 
-  return ['claude', 'codex', 'openai'];
+  return ['claude', 'gemini', 'codex', 'openai'];
 }
 
 export function buildExecutorEnv(baseEnv: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
