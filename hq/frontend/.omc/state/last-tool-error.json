@@ -1,7 +1,7 @@
 {
   "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"ls /Users/user/agency-agents/hq/frontend/src/hooks/useIntentWizard.ts 2>&1\",\"description\":\"Check if hook exists\"}",
-  "error": "Exit code 1\nls: /Users/user/agency-agents/hq/frontend/src/hooks/useIntentWizard.ts: No such file or directory",
-  "timestamp": "2026-03-30T22:02:20.725Z",
+  "tool_input_preview": "{\"command\":\"lsof -i :3333 -i :8000 2>/dev/null\",\"description\":\"Check ports\"}",
+  "error": "Exit code 1\nCOMMAND     PID USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME\npython3.1 48871 user    8u  IPv4 0x7723679f703c79ec      0t0  TCP *:irdmi (LISTEN)\npython3.1 48871 user    9u  IPv4 0xe6e78b9d087c5a9d      0t0  TCP localhost:irdmi->localhost:54029 (ESTABLISHED)\nGoogle    76418 user   29u  IPv4 0xd9a756b38a4a2ca2      0t0  TCP localhost:54029->localhost:irdmi (ESTABLISHED)",
+  "timestamp": "2026-04-02T03:23:48.876Z",
   "retry_count": 1
 }

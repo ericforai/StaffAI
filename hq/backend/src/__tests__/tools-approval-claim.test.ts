@@ -9,6 +9,9 @@ function makeGateway(): ToolGateway {
     async saveToolCallLog(_log: ToolCallLog) {
       /* noop */
     },
+    async saveApproval(_approval: any) {
+      /* noop */
+    },
   });
 }
 

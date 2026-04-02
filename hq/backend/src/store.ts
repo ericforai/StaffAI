@@ -12,7 +12,7 @@ import {
   ToolCallLog,
   WorkflowPlan,
 } from './shared/task-types';
-import type { RequirementDraft } from './shared/intent-types';
+import type { RequirementDraft, AgentMemory, TemplateRecord, OKRRecord } from './shared/intent-types';
 import {
   ApprovalChainRepository,
   ApprovalRepository,
@@ -44,7 +44,17 @@ import {
   TaskRepository,
   ToolCallLogRepository,
   WorkflowPlanRepository,
+  PendingHumanInputRepository,
+  createFilePendingHumanInputRepository,
+  createInMemoryPendingHumanInputRepository,
+  AgentMemoryRepository,
+  createFileAgentMemoryRepository,
+  createInMemoryAgentMemoryRepository,
+  OKRRepository,
+  createFileOKRRepository,
+  createInMemoryOKRRepository,
 } from './persistence/file-repositories';
+import { randomUUID } from 'node:crypto';
 import {
   createPostgresApprovalRepository,
   createPostgresExecutionRepository,
@@ -76,7 +86,8 @@ import {
   createPostgresAuditLogRepository,
   type AuditLogRepository,
 } from './persistence/audit-log-repositories';
-import { ApprovalChain } from './shared/approval-chain-types';
+import type { ApprovalChain } from './shared/approval-chain-types';
+import type { PendingHumanInput } from './shared/hitl-types';
 
 const STORE_FILE = path.join(__dirname, '../../active_squad.json');
 const TEMPLATES_FILE = path.join(__dirname, '../../templates.json');
@@ -89,6 +100,9 @@ const WORKFLOW_PLANS_FILE = process.env.AGENCY_WORKFLOW_PLANS_FILE || path.join(
 const TOOL_CALL_LOGS_FILE = process.env.AGENCY_TOOL_CALL_LOGS_FILE || path.join(__dirname, '../../tool_call_logs.json');
 const EXECUTION_TRACES_FILE = process.env.AGENCY_EXECUTION_TRACES_FILE || path.join(__dirname, '../../execution_traces.json');
 const COST_LOGS_FILE = process.env.AGENCY_COST_LOGS_FILE || path.join(__dirname, '../../cost_logs.json');
+const PENDING_HUMAN_INPUT_FILE = process.env.AGENCY_PENDING_HUMAN_INPUT_FILE || path.join(__dirname, '../../pending_human_input.json');
+const AGENT_MEMORY_FILE = process.env.AGENCY_AGENT_MEMORY_FILE || path.join(__dirname, '../../agent_memory.json');
+const OKRS_FILE = process.env.AGENCY_OKRS_FILE || path.join(__dirname, '../../okrs.json');
 
 function getAuditLogsDir() {
   return process.env.AGENCY_AUDIT_LOGS_DIR || path.join(__dirname, '../../.ai/audit');
@@ -130,13 +144,37 @@ function getCostLogsFilePath() {
   return process.env.AGENCY_COST_LOGS_FILE || COST_LOGS_FILE;
 }
 
+function getPendingHumanInputFilePath() {
+  return process.env.AGENCY_PENDING_HUMAN_INPUT_FILE || PENDING_HUMAN_INPUT_FILE;
+}
+
+function getAgentMemoryFilePath() {
+  return process.env.AGENCY_AGENT_MEMORY_FILE || AGENT_MEMORY_FILE;
+}
+
+function getOKRsFilePath() {
+  return process.env.AGENCY_OKRS_FILE || OKRS_FILE;
+}
+
 function getRequirementDraftsFilePath(dataDir: string) {
   return process.env.AGENCY_REQUIREMENT_DRAFTS_FILE || path.join(dataDir, 'requirement_drafts.json');
 }
 
 export interface Template {
+  id?: string;
   name: string;
+  title?: string;
+  scenario?: string;
+  type: 'requirement_clarification' | 'design_summary' | 'delivery_plan' | 'role_collaboration' | 'approval' | 'full_scenario';
   activeAgentIds: string[];
+  designSummary?: any;
+  implementationPlan?: any;
+  roles?: string[];
+  description?: string;
+  sourceTaskId?: string;
+  tags?: string[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface KnowledgeEntry {
@@ -159,9 +197,12 @@ interface StorePersistenceDependencies {
   requirementDraftRepository?: RequirementDraftRepository;
   knowledgeAdapter?: KnowledgeRepository;
   auditLogRepository?: AuditLogRepository;
+  pendingHumanInputRepository?: PendingHumanInputRepository;
+  agentMemoryRepository?: AgentMemoryRepository;
+  okrRepository?: OKRRepository;
 }
 
-function getPersistenceMode(): 'file' | 'memory' | 'postgres' {
+export function getPersistenceMode(): 'file' | 'memory' | 'postgres' {
   const raw = (process.env.AGENCY_PERSISTENCE_MODE || 'file').toLowerCase();
   if (raw === 'postgres') {
     return 'postgres';
@@ -193,6 +234,9 @@ export class Store extends EventEmitter {
   private requirementDraftRepository: RequirementDraftRepository;
   private knowledgeAdapter: KnowledgeRepository | null;
   private auditLogger: AuditLogger | null;
+  private pendingHumanInputRepository: PendingHumanInputRepository;
+  private agentMemoryRepository: AgentMemoryRepository;
+  private okrRepository: OKRRepository;
 
   constructor(dependencies: StorePersistenceDependencies = {}) {
     super();
@@ -276,6 +320,22 @@ export class Store extends EventEmitter {
         ? createInMemoryRequirementDraftRepository()
         : createFileRequirementDraftRepository(getRequirementDraftsFilePath(process.env.AGENCY_MEMORY_ROOT_DIR || path.join(__dirname, '../../.ai'))));
 
+    this.pendingHumanInputRepository =
+      dependencies.pendingHumanInputRepository ??
+      (mode === 'memory'
+        ? createInMemoryPendingHumanInputRepository()
+        : createFilePendingHumanInputRepository(getPendingHumanInputFilePath()));
+
+    this.agentMemoryRepository =
+      dependencies.agentMemoryRepository ??
+      (mode === 'memory'
+        ? createInMemoryAgentMemoryRepository()
+        : createFileAgentMemoryRepository(getAgentMemoryFilePath()));
+
+    this.okrRepository =
+      dependencies.okrRepository ??
+      (mode === 'memory' ? createInMemoryOKRRepository() : createFileOKRRepository(getOKRsFilePath()));
+
     // Initialize knowledge adapter (optional - backward compatible)
     this.knowledgeAdapter =
       dependencies.knowledgeAdapter ??
@@ -350,16 +410,64 @@ export class Store extends EventEmitter {
     return [];
   }
 
+  public getTemplateById(id: string): Template | null {
+    const templates = this.getTemplates();
+    return templates.find(t => (t as any).id === id || t.name === id) || null;
+  }
+
   public saveTemplate(name: string, activeAgentIds: string[]) {
     const templates = this.getTemplates();
     const index = templates.findIndex(t => t.name === name);
     if (index >= 0) {
       templates[index].activeAgentIds = activeAgentIds;
     } else {
-      templates.push({ name, activeAgentIds });
+      templates.push({ name, activeAgentIds, type: 'full_scenario' });
     }
     fs.writeFileSync(TEMPLATES_FILE, JSON.stringify(templates, null, 2), 'utf-8');
   }
+
+  public async saveTemplateFromTask(taskId: string, templateName: string, description?: string): Promise<Template | null> {
+    const task = await this.getTaskById(taskId);
+    if (!task) return null;
+
+    const intentId = (task as any).intentId;
+    let designSummary: any = null;
+    let implementationPlan: any = null;
+
+    if (intentId) {
+      const intent = await this.getRequirementDraftById(intentId);
+      if (intent) {
+        designSummary = intent.designSummary;
+        implementationPlan = intent.implementationPlan;
+      }
+    }
+
+    const assignments = await this.getTaskAssignmentsByTaskId(taskId);
+    const roles = Array.from(new Set(assignments.map(a => a.agentId)));
+
+    const template: Template = {
+      id: randomUUID(),
+      name: templateName,
+      title: templateName,
+      type: 'full_scenario',
+      scenario: implementationPlan?.scenario || 'feature-delivery',
+      activeAgentIds: roles,
+      roles: roles,
+      designSummary,
+      implementationPlan,
+      description: description || task.description.substring(0, 100),
+      sourceTaskId: taskId,
+      tags: ['reuse'],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    const templates = this.getTemplates();
+    templates.push(template);
+    fs.writeFileSync(TEMPLATES_FILE, JSON.stringify(templates, null, 2), 'utf-8');
+    return template;
+  }
+
 
   public deleteTemplate(name: string) {
     const templates = this.getTemplates().filter(t => t.name !== name);
@@ -704,6 +812,16 @@ export class Store extends EventEmitter {
     return await this.taskAssignmentRepository.update(assignmentId, updater);
   }
 
+  public async addArtifactToAssignment(assignmentId: string, artifact: any): Promise<TaskAssignment | null> {
+    return await this.taskAssignmentRepository.update(assignmentId, (asgn) => {
+      const artifacts = asgn.artifacts || [];
+      return {
+        ...asgn,
+        artifacts: [...artifacts, { ...artifact, createdAt: artifact.createdAt || new Date().toISOString() }],
+      };
+    });
+  }
+
   // --- Workflow Plan Logic ---
 
   public async getWorkflowPlans(): Promise<WorkflowPlan[]> {
@@ -816,5 +934,62 @@ export class Store extends EventEmitter {
 
   public async deleteRequirementDraft(id: string): Promise<boolean> {
     return await this.requirementDraftRepository.delete(id);
+  }
+
+  // --- Pending Human Input Logic ---
+
+  public async getPendingHumanInputs(): Promise<PendingHumanInput[]> {
+    return await this.pendingHumanInputRepository.list();
+  }
+
+  public async savePendingHumanInput(input: PendingHumanInput): Promise<void> {
+    await this.pendingHumanInputRepository.save(input);
+  }
+
+  public async getPendingHumanInputById(id: string): Promise<PendingHumanInput | null> {
+    return await this.pendingHumanInputRepository.getById(id);
+  }
+
+  public async getPendingHumanInputsByAssignmentId(assignmentId: string): Promise<PendingHumanInput[]> {
+    return await this.pendingHumanInputRepository.listByAssignmentId(assignmentId);
+  }
+
+  public async getPendingHumanInputsByTaskId(taskId: string): Promise<PendingHumanInput[]> {
+    return await this.pendingHumanInputRepository.listByTaskId(taskId);
+  }
+
+  public async updatePendingHumanInput(
+    id: string,
+    updater: (input: PendingHumanInput) => PendingHumanInput
+  ): Promise<PendingHumanInput | null> {
+    return await this.pendingHumanInputRepository.update(id, updater);
+  }
+
+  // --- Agent Memory Logic ---
+
+  public async getAgentMemoryByAgentId(agentId: string): Promise<AgentMemory | null> {
+    return await this.agentMemoryRepository.getAgentMemoryByAgentId(agentId);
+  }
+
+  public async saveAgentMemory(memory: AgentMemory): Promise<void> {
+    await this.agentMemoryRepository.saveAgentMemory(memory);
+  }
+
+  // --- OKR Logic ---
+
+  public async getOKRs(): Promise<OKRRecord[]> {
+    return await this.okrRepository.list();
+  }
+
+  public async getOKRById(id: string): Promise<OKRRecord | null> {
+    return await this.okrRepository.getById(id);
+  }
+
+  public async saveOKR(okr: OKRRecord): Promise<void> {
+    await this.okrRepository.save(okr);
+  }
+
+  public async updateOKR(id: string, updater: (okr: OKRRecord) => OKRRecord): Promise<OKRRecord | null> {
+    return await this.okrRepository.update(id, updater);
   }
 }

@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cd hq/frontend && npm run build 2>&1 | tail -10\",\"description\":\"Rebuild frontend\"}",
+  "error": "Exit code 1\n(eval):cd:1: no such file or directory: hq/frontend",
+  "timestamp": "2026-04-02T02:56:22.945Z",
+  "retry_count": 2
+}

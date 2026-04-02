@@ -43,6 +43,7 @@ test('discussion execution facade builds expert prompt with knowledge context an
       ];
     },
     getAgent: (id) => (id === 'reviewer' ? makeAgent('reviewer', 'Reviewer') : undefined),
+    getAgentMemoryByAgentId: async () => null,
   });
 
   const result = await facade.generateExpertReply(makeAgent('architect', 'Architect'), 'Assess architecture risks');
@@ -68,6 +69,7 @@ test('discussion execution facade builds synthesis prompt with host system promp
     },
     searchKnowledge: async () => [],
     getAgent: () => undefined,
+    getAgentMemoryByAgentId: async () => null,
   });
 
   const result = await facade.synthesizeDiscussion('Architecture topic', [

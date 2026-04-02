@@ -1,3 +1,4 @@
+import { buildAgentL3MemoryContext } from '../prompt-builder';
 import type { RuntimeAdapter, RuntimeExecutionContext, RuntimeExecutionResult, RuntimeOutputSnapshot } from '../runtime-adapter';
 
 interface OpenAIChatMessage {
@@ -41,10 +42,11 @@ export class OpenAIRuntimeAdapter implements RuntimeAdapter {
 
     const taskDescription = context.task.description || context.task.title;
     const userPrompt = [taskDescription, '', 'Context:', context.summary].join('\n');
+    const l3MemoryContext = buildAgentL3MemoryContext(context.l3Memory ?? null);
     const messages: OpenAIChatMessage[] = [
       {
         role: 'system',
-        content: 'You are an execution agent. Return only the final useful result for the task.',
+        content: `You are an execution agent. Return only the final useful result for the task.${l3MemoryContext}`,
       },
       {
         role: 'user',

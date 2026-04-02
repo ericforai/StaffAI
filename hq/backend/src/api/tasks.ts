@@ -234,6 +234,93 @@ export function registerTaskRoutes(
       task,
     });
   });
+
+  /**
+   * GET /api/tasks/:id/pending-human-inputs
+   * Returns all pending human inputs for a task's assignments.
+   */
+  app.get('/api/tasks/:id/pending-human-inputs', async (req, res) => {
+    const taskId = req.params.id;
+    const task = await store.getTaskById(taskId);
+    if (!task) {
+      return res.status(404).json({ error: 'task not found', taskId });
+    }
+
+    const assignments = await store.getTaskAssignmentsByTaskId(taskId);
+    const allInputs = await store.getPendingHumanInputs();
+    const relevantInputs = allInputs.filter(
+      (input) => input.taskId === taskId && assignments.some((a) => a.id === input.assignmentId)
+    );
+
+    return res.json({ inputs: relevantInputs });
+  });
+
+  app.post('/api/assignments/:id/artifacts', async (req, res) => {
+    const { type, title, content, structuredData, createdBy } = req.body;
+    if (!type || !title || !content) {
+      return res.status(400).json({ error: 'type, title and content are required' });
+    }
+
+    const artifact = {
+      id: `art_${Date.now()}`,
+      type,
+      title,
+      content,
+      structuredData,
+      createdBy,
+      createdAt: new Date().toISOString(),
+    };
+
+    const updated = await store.addArtifactToAssignment(req.params.id, artifact);
+    if (!updated) {
+      return res.status(404).json({ error: 'Assignment not found' });
+    }
+
+    return res.status(201).json(artifact);
+  });
+
+  /**
+   * POST /api/assignments/:id/respond
+   * Respond to a pending human input request and resume the assignment.
+   */
+  app.post('/api/assignments/:id/respond', async (req, res) => {
+    const assignmentId = req.params.id;
+    const { answer, answeredBy } = req.body;
+
+    if (typeof answer !== 'string' || !answer.trim()) {
+      return res.status(400).json({ error: 'answer is required and must be a non-empty string' });
+    }
+
+    // Find pending input for this assignment
+    const pendingInputs = await store.getPendingHumanInputsByAssignmentId(assignmentId);
+    const pendingInput = pendingInputs.find((p) => p.status === 'pending');
+
+    if (!pendingInput) {
+      return res.status(404).json({ error: 'No pending human input found for this assignment' });
+    }
+
+    // Update the pending input with the answer
+    await store.updatePendingHumanInput(pendingInput.id, (current) => ({
+      ...current,
+      status: 'answered',
+      answer: answer.trim(),
+      answeredBy: typeof answeredBy === 'string' ? answeredBy : 'anonymous',
+      answeredAt: new Date().toISOString(),
+    }));
+
+    // Resume the assignment - update status back to running
+    await store.updateTaskAssignment(assignmentId, (current) => ({
+      ...current,
+      status: 'running',
+      updatedAt: new Date().toISOString(),
+    }));
+
+    return res.status(200).json({
+      success: true,
+      pendingInputId: pendingInput.id,
+      assignmentId,
+    });
+  });
 }
 
 /**

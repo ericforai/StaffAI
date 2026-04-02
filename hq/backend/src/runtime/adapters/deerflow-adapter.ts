@@ -1,12 +1,19 @@
 import { RuntimeAdapter, RuntimeExecutionContext, RuntimeExecutionResult } from '../runtime-adapter';
+import { WorkshopRegistry } from '../../orchestration/workshop-registry';
+import { buildAgentL3MemoryContext } from '../prompt-builder';
 
 export class DeerFlowRuntimeAdapter implements RuntimeAdapter {
   name = 'python_deerflow_workshop';
   supports: Array<'single' | 'serial' | 'parallel' | 'advanced_discussion'> = ['single', 'serial', 'parallel'];
 
-  private readonly WORKSHOP_URL = process.env.WORKSHOP_URL || 'http://127.0.0.1:8000';
-
   async run(context: RuntimeExecutionContext): Promise<RuntimeExecutionResult> {
+    const registry = WorkshopRegistry.getInstance();
+    const workshops = registry.list();
+    // 优先从注册中心寻找具备 deer-flow 能力的 Workshop
+    const capableWorkshop = workshops.find((w) => w.capabilities.includes('deer-flow'));
+
+    const workshopUrl = capableWorkshop?.url || process.env.WORKSHOP_URL || 'http://127.0.0.1:8000';
+
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 300000); // 增加到 5min，因为多步搜索较慢
@@ -25,7 +32,9 @@ ${context.task.description}
 ---
 `.trim();
 
-      const response = await fetch(`${this.WORKSHOP_URL}/api/v1/tasks/stream`, {
+      const l3MemoryContext = buildAgentL3MemoryContext(context.l3Memory ?? null);
+
+      const response = await fetch(`${workshopUrl}/api/v1/tasks/stream`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -36,8 +45,8 @@ ${context.task.description}
           agent_role: context.task.recommendedAgentRole,
           // 注入负责人的身份角色（从任务路由信息提取）
           identity_context: context.task.recommendedAgentRole
-            ? `You are acting as: ${context.task.recommendedAgentRole}. ${context.task.description}`
-            : context.task.description,
+            ? `You are acting as: ${context.task.recommendedAgentRole}. ${context.task.description}${l3MemoryContext}`
+            : `${context.task.description}${l3MemoryContext}`,
           description: enhancedDescription,
           memory_context: context.memoryContextExcerpt,
           payload: context.inputSnapshot || {}

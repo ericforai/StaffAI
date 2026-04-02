@@ -9,6 +9,8 @@ export interface AssignmentExecutionWithRetryResult {
   outputSnapshot?: Record<string, unknown>;
   error?: string;
   attempts: number;
+  needsHumanInput?: boolean;
+  humanInput?: string;
 }
 
 /**
@@ -46,6 +48,8 @@ export async function executeAssignmentWithRetry(
         outputSummary: runtimeResult.outputSummary,
         outputSnapshot: runtimeResult.outputSnapshot,
         attempts: attempt,
+        needsHumanInput: runtimeResult.needsHumanInput,
+        humanInput: runtimeResult.humanInput,
       };
     } catch (error) {
       lastError = error instanceof Error ? error.message : 'Unknown error';

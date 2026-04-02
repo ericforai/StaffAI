@@ -22,6 +22,8 @@ export interface MvpPreset {
   roles: string[];
   /** Default execution mode when using this preset */
   defaultExecutionMode: 'single' | 'serial' | 'parallel';
+  /** The specific task type this preset is designed for */
+  taskType?: string;
   /** Default context paths to include in task context */
   defaultContextPaths: string[];
 }
@@ -45,6 +47,7 @@ const MVP_PRESETS: ReadonlyMap<string, MvpPreset> = new Map([
       description: '架构分析 — 专注于系统架构评估与演进',
       roles: ['software-architect', 'backend-architect', 'code-reviewer'],
       defaultExecutionMode: 'serial' as const,
+      taskType: 'architecture_analysis',
       defaultContextPaths: ['docs/architecture', 'docs/system-design'],
     },
   ],
@@ -55,6 +58,7 @@ const MVP_PRESETS: ReadonlyMap<string, MvpPreset> = new Map([
       description: '后端设计 — 专注于服务端接口与数据模型设计',
       roles: ['backend-architect', 'software-architect', 'code-reviewer'],
       defaultExecutionMode: 'serial' as const,
+      taskType: 'backend_implementation',
       defaultContextPaths: ['docs/backend', 'hq/backend/src'],
     },
   ],
@@ -65,6 +69,7 @@ const MVP_PRESETS: ReadonlyMap<string, MvpPreset> = new Map([
       description: '代码评审 — 专注于代码质量与工程实践',
       roles: ['code-reviewer', 'software-architect'],
       defaultExecutionMode: 'serial' as const,
+      taskType: 'code_review',
       defaultContextPaths: ['docs/guidelines', '.github/pull_request_template.md'],
     },
   ],
@@ -75,6 +80,7 @@ const MVP_PRESETS: ReadonlyMap<string, MvpPreset> = new Map([
       description: '文档撰写 — 专注于技术文档与用户指南',
       roles: ['technical-writer', 'software-architect'],
       defaultExecutionMode: 'serial' as const,
+      taskType: 'documentation',
       defaultContextPaths: ['docs/user-guides', 'README.md'],
     },
   ],
@@ -85,6 +91,7 @@ const MVP_PRESETS: ReadonlyMap<string, MvpPreset> = new Map([
       description: '工作流编排 — 专注于自动化脚本与流水线设计',
       roles: ['devops-engineer', 'software-architect', 'backend-architect'],
       defaultExecutionMode: 'serial' as const,
+      taskType: 'workflow_dispatch',
       defaultContextPaths: ['.github/workflows', 'scripts'],
     },
   ],
@@ -101,7 +108,26 @@ const MVP_PRESETS: ReadonlyMap<string, MvpPreset> = new Map([
         'technical-writer',
       ],
       defaultExecutionMode: 'serial' as const,
+      taskType: 'general',
       defaultContextPaths: ['context/project.md', 'context/architecture.md'],
+    },
+  ],
+  [
+    'feature-delivery',
+    {
+      name: 'feature-delivery',
+      description: '产品研发交付小组 — 从需求澄清到最终交付的全流程团队',
+      roles: [
+        'sprint-prioritizer',
+        'software-architect',
+        'frontend-developer',
+        'backend-architect',
+        'security-engineer',
+        'code-reviewer',
+      ],
+      defaultExecutionMode: 'serial' as const,
+      taskType: 'feature_delivery',
+      defaultContextPaths: ['docs/plans', 'docs/system-design'],
     },
   ],
 ]);

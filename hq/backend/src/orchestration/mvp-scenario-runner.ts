@@ -121,6 +121,7 @@ export async function runMvpScenario(
     {
       title: input.title,
       description: finalDescription,
+      taskType: preset.taskType,
       executionMode,
       requestedBy,
     },

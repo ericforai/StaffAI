@@ -1,0 +1,7 @@
+{
+  "taskTitle": "Wipe production data",
+  "riskLevel": "HIGH",
+  "approvalType": "generic",
+  "riskReason": "Contains destructive operation keywords, Involves production environment, General routine task",
+  "id": "7cec5dc9-143e-4a27-bac1-9669b09f3f71"
+}

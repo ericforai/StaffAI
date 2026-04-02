@@ -1,9 +1,11 @@
 import type express from 'express';
 import type { Scanner } from '../scanner';
 import type { UserContextService } from '../identity/user-context.js';
+import type { Store } from '../store';
 
 export interface AgentRouteDependencies {
   scanner: Scanner;
+  store: Store;
   userContextService?: UserContextService;
 }
 
@@ -55,5 +57,22 @@ export function registerAgentRoutes(app: express.Application, dependencies: Agen
       content: agent.content,
       systemPrompt: agent.systemPrompt,
     });
+  });
+
+  app.get('/api/agents/:id/memory', async (req, res) => {
+    const agentId = req.params.id;
+    const memory = await dependencies.store.getAgentMemoryByAgentId(agentId);
+
+    if (!memory) {
+      return res.json({
+        agentId,
+        experienceLog: [],
+        behavioralHeuristics: [],
+        organizationalAwareness: { teamEvaluations: {} },
+        updatedAt: new Date().toISOString(),
+      });
+    }
+
+    return res.json(memory);
   });
 }

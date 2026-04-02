@@ -1,15 +1,30 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { API_CONFIG } from '../utils/constants';
 import type { ApprovalSummary } from '../types';
+
+/** Stable string so we only sync when server data meaningfully changed (avoids `|| []` new reference loops). */
+function approvalsSyncKey(list: ApprovalSummary[]): string {
+  if (list.length === 0) return '';
+  return list
+    .map((a) => `${a.id}\0${a.status}\0${a.resolvedAt ?? ''}`)
+    .sort()
+    .join('\n');
+}
 
 export function useApprovalActions(initialApprovals: ApprovalSummary[]) {
   const [approvals, setApprovals] = useState(initialApprovals);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const prevSyncKeyRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
+    const nextKey = approvalsSyncKey(initialApprovals);
+    if (prevSyncKeyRef.current === nextKey) {
+      return;
+    }
+    prevSyncKeyRef.current = nextKey;
     setApprovals(initialApprovals);
   }, [initialApprovals]);
 

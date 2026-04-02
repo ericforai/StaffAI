@@ -6,16 +6,22 @@ import { useCallback, useState, useEffect } from 'react';
 import { useTaskDetail } from '../../../hooks/useTaskDetail';
 import { useTaskActions } from '../../../hooks/useTaskActions';
 import { useTaskEvents } from '../../../hooks/useTaskEvents';
+import { usePendingHumanInputs } from '../../../hooks/usePendingHumanInputs';
 import { useGlobalWebSocket, type WsMessage } from '../../../hooks/useGlobalWebSocket';
 import { useAgents } from '../../../hooks/useAgents';
-import type { TaskEvent } from '../../../types';
+import { useApprovalActions } from '../../../hooks/useApprovalActions';
+import { useExecutionTrace } from '../../../hooks/useExecutionTrace';
+import type { ExecutionTrace, TaskEvent } from '../../../types';
 import { API_CONFIG } from '../../../utils/constants';
 import { SuspendedTaskPanel } from '../../../components/SuspendedTaskPanel';
+import { HumanInputPanel } from '../../../components/tasks/HumanInputPanel';
 import { TaskInfoCard } from '../../../components/tasks/TaskInfoCard';
 import { WorkflowPlanPanel } from '../../../components/tasks/WorkflowPlanPanel';
 import { AssignmentPanel } from '../../../components/tasks/AssignmentPanel';
 import { ExecutionList } from '../../../components/tasks/ExecutionList';
 import { EventTimeline } from '../../../components/tasks/EventTimeline';
+import { ArtifactsPanel } from '../../../components/tasks/ArtifactsPanel';
+import { ApprovalDetailPanel } from '../../../components/approvals/ApprovalDetailPanel';
 
 /**
  * Task Detail Page (StaffAI 1.0 Atomic Version)
@@ -26,20 +32,55 @@ import { EventTimeline } from '../../../components/tasks/EventTimeline';
 export default function TaskDetailPage() {
   const params = useParams<{ id: string }>();
   const taskId = Array.isArray(params.id) ? params.id[0] : params.id;
-  
+
   // Data Fetching
   const { data, loading, error, setData, reload } = useTaskDetail(taskId);
-  const { executeTask, suspendTask, submitting, error: actionError } = useTaskActions(taskId, setData);
+  const { executeTask, pauseTask, resumeTask, cancelTask, submitting, error: actionError } = useTaskActions(
+    taskId,
+    setData
+  );
   const { events, loading: eventsLoading, refresh: refreshEvents, pushEvent } = useTaskEvents(taskId);
+  const { inputs: pendingInputs, submitting: inputSubmitting, submitError, respondToAssignment, reload: reloadInputs } = usePendingHumanInputs(taskId);
   const { agents } = useAgents();
+  const { approveApproval, rejectApproval, pendingId } = useApprovalActions(data?.approvals || []);
 
   // State
-  const [selectedExecutor, setSelectedExecutor] = useState<'openai' | 'claude' | 'codex' | 'deerflow'>('openai');
+  const [selectedExecutor, setSelectedExecutor] = useState<'openai' | 'claude' | 'codex' | 'deerflow'>('claude');
   const [expandedExecutionId, setExpandedExecutionId] = useState<string | null>(null);
+  const [copiedExecutionId, setCopiedExecutionId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'overview' | 'plan' | 'artifacts'>('overview');
+
+  const { trace: rawTrace, loading: traceLoading, error: traceError, reload: reloadTrace } = useExecutionTrace(
+    expandedExecutionId || ''
+  );
+
+  const executionTraceForList: ExecutionTrace | null =
+    rawTrace?.traceEvents && expandedExecutionId
+      ? {
+          executionId: expandedExecutionId,
+          traceEvents: rawTrace.traceEvents.map((e) => ({
+            id: e.id,
+            type: e.type,
+            summary: e.summary ?? '',
+            occurredAt: e.occurredAt,
+          })),
+        }
+      : null;
+
+  const copyOutputSummary = useCallback(async (id: string, content: string) => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopiedExecutionId(id);
+      window.setTimeout(() => setCopiedExecutionId(null), 2000);
+    } catch {
+      alert('复制失败');
+    }
+  }, []);
 
   // Derived Data
   const workflowPlan = data?.workflowPlan ?? data?.task.workflowPlan ?? null;
   const assignments = data?.assignments ?? data?.task.assignments ?? [];
+  const pendingApproval = (data?.approvals || []).find(a => a.status === 'pending');
 
   // Auto-expand latest execution
   useEffect(() => {
@@ -85,7 +126,21 @@ export default function TaskDetailPage() {
   }
 
   async function handlePauseTask() {
-    const success = await suspendTask('Manual pause by user');
+    const missingAgents = assignments.filter(
+      (a) => !agents.some((agent) => agent.id === a.agentId) && !a.agentName
+    );
+    if (missingAgents.length > 0) {
+      const missingRoles = missingAgents.map((a) => a.agentId).join(', ');
+      alert(`组织中缺少以下类型的专家：${missingRoles}\n\n请先前往人才市场聘用对应的专家。`);
+      return;
+    }
+    // Find the latest running execution to pause
+    const runningExecution = data?.executions?.find((e) => e.status === 'running');
+    if (!runningExecution) {
+      alert('没有正在运行的任务可以暂停');
+      return;
+    }
+    const success = await pauseTask(runningExecution.id);
     if (!success) {
       alert('暂停任务失败，请重试');
     }
@@ -125,44 +180,108 @@ export default function TaskDetailPage() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          {/* Left Column: Task Info & Plan */}
+          {/* Left Column: Task Info & Plan & Artifacts */}
           <div className="space-y-6">
-            <TaskInfoCard 
-              task={data.task}
-              executor={selectedExecutor}
-              onExecutorChange={setSelectedExecutor}
-              onExecute={handleExecuteTask}
-              onPause={handlePauseTask}
-              submitting={submitting}
-              actionError={actionError}
-            />
-
-            {data.task.status === 'suspended' && (
-              <SuspendedTaskPanel 
-                taskId={taskId} 
-                onResumed={() => reload()} 
+            {pendingApproval && (
+              <ApprovalDetailPanel
+                approval={pendingApproval}
+                loading={!!pendingId}
+                onApprove={async () => {
+                  await approveApproval(pendingApproval.id);
+                  await reload();
+                }}
+                onReject={async () => {
+                  await rejectApproval(pendingApproval.id);
+                  await reload();
+                }}
               />
             )}
 
-            <div className="grid gap-6 sm:grid-cols-2">
-              <WorkflowPlanPanel workflowPlan={workflowPlan} />
-              <AssignmentPanel assignments={assignments} agents={agents} />
-            </div>
-          </div>
-
-          {/* Right Column: Execution History & Events */}
-          <div className="space-y-6">
-            <ExecutionList 
-              executions={data.executions}
-              expandedId={expandedExecutionId}
-              onToggleExpand={setExpandedExecutionId}
-              onReload={reload}
+            <TaskInfoCard
+              task={data.task}
+              latestExecution={data.executions?.[0] ?? null}
+              selectedExecutor={selectedExecutor}
+              setSelectedExecutor={setSelectedExecutor}
+              onExecute={handleExecuteTask}
+              onPause={handlePauseTask}
+              submitting={submitting}
             />
 
-            <EventTimeline 
-              events={events} 
-              loading={eventsLoading} 
-              onRefresh={refreshEvents} 
+            {/* Tabs for Plan / Artifacts */}
+            <div className="rounded-2xl border border-slate-200 bg-white/80 p-1 shadow-sm backdrop-blur-sm">
+              <div className="flex gap-1">
+                <button
+                  onClick={() => setActiveTab('overview')}
+                  className={`flex-1 rounded-xl px-4 py-2 text-xs font-bold transition-all ${activeTab === 'overview' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}
+                >
+                  执行摘要
+                </button>
+                <button
+                  onClick={() => setActiveTab('plan')}
+                  className={`flex-1 rounded-xl px-4 py-2 text-xs font-bold transition-all ${activeTab === 'plan' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}
+                >
+                  工作计划
+                </button>
+                <button
+                  onClick={() => setActiveTab('artifacts')}
+                  className={`flex-1 rounded-xl px-4 py-2 text-xs font-bold transition-all ${activeTab === 'artifacts' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}
+                >
+                  交付产物
+                </button>
+              </div>
+            </div>
+
+            {activeTab === 'overview' && (
+              <div className="space-y-6">
+                <ExecutionList
+                  executions={data.executions}
+                  expandedExecutionId={expandedExecutionId}
+                  setExpandedExecutionId={setExpandedExecutionId}
+                  copiedExecutionId={copiedExecutionId}
+                  copyOutputSummary={copyOutputSummary}
+                  trace={executionTraceForList}
+                  traceLoading={traceLoading}
+                  traceError={traceError}
+                  reloadTrace={() => void reloadTrace()}
+                  onPause={(id) => void pauseTask(id)}
+                  onResume={(id) => void resumeTask(id)}
+                  onCancel={(id) => void cancelTask(id)}
+                  submitting={submitting}
+                />
+                <AssignmentPanel assignments={assignments} agents={agents} />
+              </div>
+            )}
+
+            {activeTab === 'plan' && (
+              <WorkflowPlanPanel workflowPlan={workflowPlan} />
+            )}
+
+            {activeTab === 'artifacts' && (
+              <ArtifactsPanel assignments={assignments} />
+            )}
+          </div>
+
+          {/* Right Column: Timeline & HITL */}
+          <div className="space-y-6">
+            <SuspendedTaskPanel taskId={taskId} />
+            
+            {pendingInputs.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest px-2">需要人类输入</h3>
+                <HumanInputPanel
+                  inputs={pendingInputs}
+                  onRespond={respondToAssignment}
+                  submitting={inputSubmitting}
+                  submitError={submitError}
+                />
+              </div>
+            )}
+
+            <EventTimeline
+              events={events}
+              loading={eventsLoading}
+              error={null}
+              onRefresh={refreshEvents}
             />
           </div>
         </div>

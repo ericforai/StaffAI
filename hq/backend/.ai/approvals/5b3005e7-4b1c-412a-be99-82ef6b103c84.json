@@ -1,0 +1,7 @@
+{
+  "taskTitle": "Drop table users",
+  "riskLevel": "HIGH",
+  "approvalType": "generic",
+  "riskReason": "Contains destructive operation keywords, Database destructive operation, General routine task",
+  "id": "5b3005e7-4b1c-412a-be99-82ef6b103c84"
+}

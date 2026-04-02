@@ -92,7 +92,8 @@ const TASK_STATE_TRANSITIONS: Record<TaskStatus, TaskStatus[]> = {
 
 const ASSIGNMENT_STATE_TRANSITIONS: Record<TaskAssignmentStatus, TaskAssignmentStatus[]> = {
   pending: ['running', 'skipped', 'failed', 'completed'],
-  running: ['completed', 'failed', 'skipped'],
+  running: ['completed', 'failed', 'skipped', 'waiting_input'],
+  waiting_input: ['running', 'completed', 'failed', 'skipped'],
   completed: [],
   failed: ['pending', 'running'],
   skipped: ['pending'],
@@ -157,6 +158,15 @@ export function buildAssignmentRoleSequence(routeDecision: TaskRouteDecision): R
       return [
         { role: 'dispatcher', assignmentRole: 'dispatcher', title: '拆分任务并协调执行路径', order: 1 },
         { role: 'software-architect', assignmentRole: 'secondary', title: '验证编排和计划质量', order: 2 },
+      ];
+    case 'feature_delivery':
+      return [
+        { role: 'sprint-prioritizer', assignmentRole: 'primary', title: 'Refine product requirements and acceptance criteria', order: 1 },
+        { role: 'software-architect', assignmentRole: 'secondary', title: 'Define module boundaries and API contracts', order: 2 },
+        { role: 'frontend-developer', assignmentRole: 'executor', title: 'Implement frontend components and state flow', order: 3 },
+        { role: 'backend-architect', assignmentRole: 'executor', title: 'Implement backend services and data persistence', order: 4 },
+        { role: 'security-engineer', assignmentRole: 'reviewer', title: 'Review security posture and permission boundaries', order: 5 },
+        { role: 'code-reviewer', assignmentRole: 'reviewer', title: 'Final system-wide review and integration check', order: 6 },
       ];
     default:
       return [{ role: routeDecision.recommendedAgentRole, assignmentRole: 'primary', title: '执行任务', order: 1 }];
@@ -351,7 +361,7 @@ export async function createTask(
     id: taskId,
     title: input.title.trim(),
     description: input.description.trim(),
-    taskType: routeDecision.taskType,
+    taskType: normalizeTaskType(input.taskType) || routeDecision.taskType,
     priority: normalizePriority(input.priority),
     status: approvalDecision.approvalRequired ? 'waiting_approval' : 'routed',
     executionMode: normalizeExecutionMode(input.executionMode, routeDecision.executionMode),

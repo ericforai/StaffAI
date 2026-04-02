@@ -17,6 +17,7 @@ import type {
   ApprovalRecord,
   ApprovalRiskLevel,
   ApprovalStatus,
+  ApprovalType,
   TaskRecord,
 } from '../shared/task-types';
 import {
@@ -53,6 +54,10 @@ export class InvalidApprovalStateError extends Error {
 interface ExtendedApprovalRecord extends ApprovalRecord {
   taskTitle?: string;
   riskLevel?: ApprovalRiskLevel;
+  approvalType?: ApprovalType;
+  riskReason?: string;
+  resumeTarget?: string;
+  blockingArtifacts?: string[];
   approver?: string;
   approvedAt?: string;
   reason?: string;
@@ -66,6 +71,10 @@ export interface CreateApprovalInput {
   taskId: string;
   taskTitle?: string;
   requestedBy: string;
+  approvalType?: ApprovalType;
+  riskReason?: string;
+  resumeTarget?: string;
+  blockingArtifacts?: string[];
   task?: TaskRecord;
 }
 
@@ -135,8 +144,13 @@ export class ApprovalServiceV2 {
       id: randomUUID(),
       taskId: input.taskId,
       status: 'pending',
+      approvalType: input.approvalType || 'generic',
       requestedBy: input.requestedBy,
       requestedAt: new Date().toISOString(),
+      riskLevel: riskResult.riskLevel,
+      riskReason: input.riskReason || riskResult.factors.join(', '),
+      resumeTarget: input.resumeTarget,
+      blockingArtifacts: input.blockingArtifacts,
     };
 
     // Save to Store
@@ -146,6 +160,10 @@ export class ApprovalServiceV2 {
     await this.saveExtendedApproval(approval.id, {
       taskTitle: input.taskTitle || input.task?.title,
       riskLevel: riskResult.riskLevel,
+      approvalType: approval.approvalType,
+      riskReason: approval.riskReason,
+      resumeTarget: approval.resumeTarget,
+      blockingArtifacts: approval.blockingArtifacts,
     });
 
     // Log audit event
@@ -155,7 +173,7 @@ export class ApprovalServiceV2 {
       action: 'created',
       actor: input.requestedBy,
       newState: { ...approval } as Record<string, unknown>,
-      reason: `Risk: ${riskResult.riskLevel} - ${riskResult.factors.join(', ')}`,
+      reason: `Type: ${approval.approvalType}, Risk: ${riskResult.riskLevel} - ${approval.riskReason}`,
     });
 
     return approval;

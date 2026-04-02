@@ -2,7 +2,8 @@
  * 专家卡片组件（侧边栏和主区域通用）
  */
 import { motion } from 'framer-motion';
-import { UserMinus, Loader2, Zap, BriefcaseBusiness, UserPlus, Check } from 'lucide-react';
+import Link from 'next/link';
+import { UserMinus, Loader2, Zap, BriefcaseBusiness, UserPlus, Check, ExternalLink } from 'lucide-react';
 import { DEPT_MAP } from '../utils/constants';
 import { Agent } from '../types';
 
@@ -45,7 +46,14 @@ export function AgentCard({ agent, isActive, isWorking, variant, onToggle, onCli
               )}
             </div>
             <div>
-              <div className="text-sm font-semibold text-slate-900 leading-tight">{agent.frontmatter.name}</div>
+              <div className="text-sm font-semibold text-slate-900 leading-tight flex items-center gap-1.5">
+                {agent.frontmatter.name}
+                {isActive && (
+                  <Link href={`/agents/${agent.id}`} className="text-slate-300 hover:text-blue-500 transition-colors">
+                    <ExternalLink size={10} />
+                  </Link>
+                )}
+              </div>
               <div className="mt-0.5 flex items-center gap-1.5 text-[10px] font-medium tracking-wide text-slate-400">
                 <span className="h-1.5 w-1.5 rounded-full bg-sky-500" />
                 {department?.label}

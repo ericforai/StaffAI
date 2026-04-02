@@ -14,4 +14,8 @@ export interface DashboardEvent {
   participantCount?: number;
   participants?: Array<{ id: string; name: string }>;
   hiredAgentIds?: string[];
+  // For proactive proposals
+  intentId?: string;
+  objective?: string;
+  metricGap?: string;
 }

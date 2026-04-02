@@ -47,6 +47,7 @@ export class DiscussionService implements DiscussionServiceContract {
       runtime: this.runtime,
       searchKnowledge: (task) => this.store.searchKnowledge(task),
       getAgent: (id) => this.scanner.getAgent(id),
+      getAgentMemoryByAgentId: (id) => this.store.getAgentMemoryByAgentId(id),
     });
     this.workflowFacade =
       options.workflowFacade ??

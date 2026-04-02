@@ -34,7 +34,7 @@ export async function resolveToolApprovalClaim(
 
 export function registerToolRoutes(
   app: express.Application,
-  store: Pick<Store, 'saveToolCallLog' | 'getApprovalsByTaskId'>,
+  store: Pick<Store, 'saveToolCallLog' | 'getApprovalsByTaskId' | 'saveApproval'>,
 ) {
   const gateway = new ToolGateway(store);
 

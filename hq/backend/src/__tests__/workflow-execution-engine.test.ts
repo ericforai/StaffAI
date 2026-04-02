@@ -28,6 +28,8 @@ interface MockStore {
   saveExecution(execution: unknown): Promise<void>;
   getTaskAssignments?(): Promise<TaskAssignment[]>;
   logAudit(event: AuditEvent): Promise<void>;
+  savePendingHumanInput(input: { id: string; assignmentId: string; taskId: string; questions: string; status: string; createdAt: string; outputSnapshot?: Record<string, unknown> }): Promise<void>;
+  getAgentMemoryByAgentId(agentId: string): Promise<any | null>;
 }
 
 // Mock AuditLogger
@@ -166,6 +168,8 @@ test('WorkflowExecutionEngine executes serial workflow plan successfully', async
     },
     async saveExecution() {},
     async logAudit(event) {},
+    async savePendingHumanInput() {},
+    async getAgentMemoryByAgentId() { return null; },
   };
 
   const assignmentResults: AssignmentResult[] = [
@@ -238,6 +242,8 @@ test('WorkflowExecutionEngine handles assignment failure', async () => {
     },
     async saveExecution() {},
     async logAudit(event) {},
+    async savePendingHumanInput() {},
+    async getAgentMemoryByAgentId() { return null; },
   };
 
   const mockAssignmentExecutor: AssignmentExecutor = {
@@ -299,6 +305,8 @@ test('WorkflowExecutionEngine executes parallel workflow plan', async () => {
     },
     async saveExecution() {},
     async logAudit(event) {},
+    async savePendingHumanInput() {},
+    async getAgentMemoryByAgentId() { return null; },
   };
 
   const mockAssignmentExecutor: AssignmentExecutor = {
@@ -356,6 +364,8 @@ test('WorkflowExecutionEngine returns workflow plan not found', async () => {
     },
     async saveExecution() {},
     async logAudit(event) {},
+    async savePendingHumanInput() {},
+    async getAgentMemoryByAgentId() { return null; },
   };
 
   const engine = createWorkflowExecutionEngine({
@@ -417,6 +427,8 @@ test('WorkflowExecutionEngine cancels running workflow', async () => {
     },
     async saveExecution() {},
     async logAudit(event) {},
+    async savePendingHumanInput() {},
+    async getAgentMemoryByAgentId() { return null; },
   };
 
   const mockAssignmentExecutor: AssignmentExecutor = {
@@ -480,6 +492,8 @@ test('WorkflowExecutionEngine getStatus returns current status', async () => {
     },
     async saveExecution() {},
     async logAudit(event) {},
+    async savePendingHumanInput() {},
+    async getAgentMemoryByAgentId() { return null; },
   };
 
   const engine = createWorkflowExecutionEngine({
@@ -529,7 +543,10 @@ test('AssignmentExecutor executes assignment successfully', async () => {
       return assignments;
     },
     async logAudit() {},
-  };
+    async savePendingHumanInput() {},
+    async getAgentMemoryByAgentId() { return null; },
+    };
+
 
   const executor = createAssignmentExecutor({
     store,
@@ -590,7 +607,10 @@ test('AssignmentExecutor updates assignment status during execution', async () =
       return assignments;
     },
     async logAudit() {},
-  };
+    async savePendingHumanInput() {},
+    async getAgentMemoryByAgentId() { return null; },
+    };
+
 
   const executor = createAssignmentExecutor({
     store,
@@ -639,6 +659,8 @@ test('AssignmentExecutor returns status', async () => {
       return [];
     },
     async logAudit(event) {},
+    async savePendingHumanInput() {},
+    async getAgentMemoryByAgentId() { return null; },
   };
 
   const executor = createAssignmentExecutor({
@@ -687,7 +709,10 @@ test('AssignmentExecutor handles execution timeout', async () => {
       return assignments;
     },
     async logAudit() {},
-  };
+    async savePendingHumanInput() {},
+    async getAgentMemoryByAgentId() { return null; },
+    };
+
 
   const executor = createAssignmentExecutor({
     store,
@@ -753,6 +778,8 @@ test('AssignmentExecutor cancels running assignment', async () => {
       return assignments;
     },
     async logAudit(event) {},
+    async savePendingHumanInput() {},
+    async getAgentMemoryByAgentId() { return null; },
   };
 
   const executor = createAssignmentExecutor({

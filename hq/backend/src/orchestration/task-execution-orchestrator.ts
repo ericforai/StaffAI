@@ -8,6 +8,7 @@ import type { TaskAssignment, TaskExecutionMode, TaskRecord, WorkflowPlan } from
 import { resolveExecutionDecision, type SessionCapabilities } from '../execution-strategy';
 import { createAssignmentExecutor } from './assignment-executor';
 import { rebuildWorkflowBundleForSerialExecution } from './task-orchestrator';
+import { ReflectorService } from './reflector-service';
 
 interface ExecuteTaskInput {
   executor: 'claude' | 'codex' | 'openai' | 'deerflow';
@@ -15,6 +16,7 @@ interface ExecuteTaskInput {
   executionMode?: TaskExecutionMode;
   timeoutMs?: number;
   maxRetries?: number;
+  approvalGranted?: boolean;
 }
 
 interface TaskExecutionDependencies {
@@ -38,17 +40,25 @@ type TaskExecutionStore = Pick<Store, 'saveExecution' | 'updateExecution' | 'upd
       | 'updateWorkflowPlan'
       | 'logAudit'
       | 'getTaskAssignmentById'
+      | 'savePendingHumanInput'
+      | 'getAgentMemoryByAgentId'
+      | 'saveAgentMemory'
     >
   >;
 
-type AssignmentExecutorStore = Pick<Store, 'getTaskById' | 'updateTaskAssignment' | 'saveExecution' | 'logAudit'>;
+type AssignmentExecutorStore = Pick<
+  Store,
+  'getTaskById' | 'updateTaskAssignment' | 'saveExecution' | 'logAudit' | 'savePendingHumanInput' | 'getAgentMemoryByAgentId'
+>;
 
 function hasAssignmentExecutorStore(store: TaskExecutionStore): store is TaskExecutionStore & AssignmentExecutorStore {
   return (
     typeof store.getTaskById === 'function' &&
     typeof store.updateTaskAssignment === 'function' &&
     typeof store.saveExecution === 'function' &&
-    typeof store.logAudit === 'function'
+    typeof store.logAudit === 'function' &&
+    typeof store.savePendingHumanInput === 'function' &&
+    typeof store.getAgentMemoryByAgentId === 'function'
   );
 }
 
@@ -60,9 +70,10 @@ async function runWorkflowPlanWithAssignments(input: {
   timeoutMs: number;
   maxRetries: number;
   memoryContextExcerpt?: string;
+  approvalGranted?: boolean;
   store: TaskExecutionStore;
 }): Promise<{ outputSummary: string; outputSnapshot?: Record<string, unknown> }> {
-  const { task, workflowPlan, executor, timeoutMs, maxRetries, memoryContextExcerpt, store } = input;
+  const { task, workflowPlan, executor, timeoutMs, maxRetries, memoryContextExcerpt, approvalGranted, store } = input;
 
   if (
     !store.updateWorkflowPlan ||
@@ -115,10 +126,28 @@ async function runWorkflowPlanWithAssignments(input: {
             timeoutMs,
             maxRetries,
             memoryContextExcerpt,
+            approvalGranted,
           });
+          
+          if (result.status === 'waiting_input') {
+            return 'suspended';
+          }
           return result.status !== 'failed';
         }),
       );
+
+      if (results.some((r) => r === 'suspended')) {
+        return {
+          outputSummary: `Workflow suspended: multiple parallel steps awaiting human input in order ${order}`,
+          outputSnapshot: {
+            workflowPlanId: workflowPlan.id,
+            mode: workflowPlan.mode,
+            suspended: true,
+            suspendedAtOrder: order,
+          },
+        };
+      }
+
       if (results.some((ok) => !ok)) {
         failed = true;
         break phaseLoop;
@@ -127,6 +156,7 @@ async function runWorkflowPlanWithAssignments(input: {
   } else {
     for (const step of steps) {
       const assignment = input.assignments.find((a) => a.id === step.assignmentId);
+      const label = step.title || step.id;
       if (!assignment) {
         failed = true;
         break;
@@ -140,6 +170,19 @@ async function runWorkflowPlanWithAssignments(input: {
         maxRetries,
         memoryContextExcerpt,
       });
+      if (result.status === 'waiting_input') {
+        // Workflow is suspended for HITL
+        return {
+          outputSummary: `Workflow suspended: awaiting human input for ${label}`,
+          outputSnapshot: {
+            workflowPlanId: workflowPlan.id,
+            mode: workflowPlan.mode,
+            suspended: true,
+            suspendedStepId: step.id,
+          },
+        };
+      }
+
       if (result.status === 'failed') {
         failed = true;
         break;
@@ -147,9 +190,10 @@ async function runWorkflowPlanWithAssignments(input: {
     }
   }
 
+  const finalStatus = failed ? 'failed' : 'completed';
   await store.updateWorkflowPlan(task.id, (current) => ({
     ...current,
-    status: failed ? 'failed' : 'completed',
+    status: finalStatus,
     updatedAt: new Date().toISOString(),
   }));
 
@@ -170,6 +214,7 @@ async function runWorkflowPlanWithAssignments(input: {
       workflowPlanId: workflowPlan.id,
       mode: workflowPlan.mode,
       failed,
+      degraded: failed,
     },
   };
 }
@@ -333,6 +378,7 @@ export async function executeTaskRecord(
             timeoutMs,
             maxRetries,
             memoryContextExcerpt,
+            approvalGranted: input.approvalGranted,
             store,
           }),
         inputSnapshot: {
@@ -348,6 +394,16 @@ export async function executeTaskRecord(
     );
 
     await dependencies.writeExecutionSummary?.(task, result.execution);
+
+    // Trigger reflection for agent evolution
+    if (
+      (result.execution.status === 'completed' || result.execution.status === 'failed') &&
+      store.getAgentMemoryByAgentId &&
+      store.saveAgentMemory
+    ) {
+      const reflector = new ReflectorService(store as any);
+      await reflector.reflect(task, result.execution);
+    }
 
     return {
       mode: requestedMode,
@@ -385,6 +441,7 @@ export async function executeTaskRecord(
                 timeoutMs,
                 maxRetries,
                 memoryContextExcerpt,
+                approvalGranted: input.approvalGranted,
                 store,
               })
           : undefined,
@@ -401,6 +458,16 @@ export async function executeTaskRecord(
   );
 
   await dependencies.writeExecutionSummary?.(task, result.execution);
+
+  // Trigger reflection for agent evolution
+  if (
+    (result.execution.status === 'completed' || result.execution.status === 'failed') &&
+    store.getAgentMemoryByAgentId &&
+    store.saveAgentMemory
+  ) {
+    const reflector = new ReflectorService(store as any);
+    await reflector.reflect(task, result.execution);
+  }
 
   return {
     mode: requestedMode,

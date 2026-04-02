@@ -46,7 +46,9 @@ test('executeTaskRecord fails single execution when Codex CLI degrades', async (
       updatedTaskStatus = updated.status;
       return updated;
     },
-  } as Pick<Store, 'saveExecution' | 'updateExecution' | 'updateTask'>;
+    getAgentMemoryByAgentId: async () => null,
+    saveAgentMemory: async () => {},
+  } as any;
 
   const result = await executeTaskRecord(
     task,
@@ -80,7 +82,9 @@ test('executeTaskRecord loads memory context before execution and writes back su
     async updateTask(_id: string, updater: (task: TaskRecord) => TaskRecord) {
       return updater(task);
     },
-  } as Pick<Store, 'saveExecution' | 'updateExecution' | 'updateTask'>;
+    getAgentMemoryByAgentId: async () => null,
+    saveAgentMemory: async () => {},
+  } as any;
 
   await executeTaskRecord(
     task,
@@ -114,7 +118,9 @@ test('executeTaskRecord keeps advanced discussion as a distinct branch', async (
     async updateTask(_id: string, _updater: (task: TaskRecord) => TaskRecord) {
       return task;
     },
-  } as Pick<Store, 'saveExecution' | 'updateExecution' | 'updateTask'>;
+    getAgentMemoryByAgentId: async () => null,
+    saveAgentMemory: async () => {},
+  } as any;
 
   const result = await executeTaskRecord(
     task,
@@ -148,7 +154,9 @@ test('executeTaskRecord can complete advanced discussion through an injected run
       updatedTaskStatus = updated.status;
       return updated;
     },
-  } as Pick<Store, 'saveExecution' | 'updateExecution' | 'updateTask'>;
+    getAgentMemoryByAgentId: async () => null,
+    saveAgentMemory: async () => {},
+  } as any;
 
   const result = await executeTaskRecord(
     task,
@@ -185,7 +193,9 @@ test('executeTaskRecord emits serial workflow plan and assignments for serial ta
     async updateTask(_id: string, updater: (task: TaskRecord) => TaskRecord) {
       return updater(task);
     },
-  } as Pick<Store, 'saveExecution' | 'updateExecution' | 'updateTask'>;
+    getAgentMemoryByAgentId: async () => null,
+    saveAgentMemory: async () => {},
+  } as any;
 
   const result = await executeTaskRecord(
     task,
@@ -222,7 +232,9 @@ test('executeTaskRecord degrades parallel mode to serial when sampling is unavai
     async updateTask(_id: string, updater: (task: TaskRecord) => TaskRecord) {
       return updater(task);
     },
-  } as Pick<Store, 'saveExecution' | 'updateExecution' | 'updateTask'>;
+    getAgentMemoryByAgentId: async () => null,
+    saveAgentMemory: async () => {},
+  } as any;
 
   const result = await executeTaskRecord(
     task,

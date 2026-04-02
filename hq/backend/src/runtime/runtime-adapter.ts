@@ -1,4 +1,5 @@
 import type { TaskExecutionMode, TaskRecord } from '../shared/task-types';
+import type { AgentMemory } from '../shared/intent-types';
 import { ClaudeRuntimeAdapter } from './adapters/claude-adapter';
 import { CodexRuntimeAdapter } from './adapters/codex-adapter';
 import { OpenAIRuntimeAdapter } from './adapters/openai-adapter';
@@ -13,9 +14,11 @@ export interface RuntimeExecutionContext {
   executionMode: TaskExecutionMode;
   summary: string;
   memoryContextExcerpt?: string;
+  l3Memory?: AgentMemory;
   timeoutMs: number;
   maxRetries: number;
   inputSnapshot?: Record<string, unknown>;
+  approvalGranted?: boolean;
   onEvent?: (event: { type: string; data: any }) => void;
 }
 
@@ -44,6 +47,10 @@ export interface RuntimeOutputSnapshot extends Record<string, unknown> {
 export interface RuntimeExecutionResult {
   outputSummary: string;
   outputSnapshot?: RuntimeOutputSnapshot;
+  /** When true, the agent needs human input before continuing */
+  needsHumanInput?: boolean;
+  /** Human input that was provided to continue */
+  humanInput?: string;
 }
 
 export interface RuntimeExecutionError {

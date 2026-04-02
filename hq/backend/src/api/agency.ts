@@ -19,6 +19,7 @@ type AgencyRouteDependencies = AgentRouteDependencies &
 export function registerAgencyRoutes(app: express.Application, dependencies: AgencyRouteDependencies) {
   registerAgentRoutes(app, {
     scanner: dependencies.scanner,
+    store: dependencies.store,
     userContextService: dependencies.userContextService,
   });
   registerSkillRoutes(app, dependencies);

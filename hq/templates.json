@@ -1,0 +1,55 @@
+[
+  {
+    "name": "标准 Web 功能开发模板",
+    "type": "full_scenario",
+    "activeAgentIds": [
+      "sprint-prioritizer",
+      "software-architect",
+      "frontend-developer",
+      "backend-architect",
+      "security-engineer",
+      "code-reviewer"
+    ],
+    "description": "适用于大多数 Web 新功能开发，包含完整的 PRD、架构、前后端实现及审计。",
+    "designSummary": {
+      "goal": "开发一个标准功能",
+      "targetUser": "通用用户",
+      "coreFlow": "输入 -> 处理 -> 展示",
+      "deliverables": "代码 + 文档 + 测试"
+    },
+    "implementationPlan": {
+      "scenario": "feature-delivery",
+      "steps": [
+        {
+          "id": "step_1",
+          "order": 1,
+          "role": "sprint-prioritizer",
+          "goal": "产品定义",
+          "input": "模板",
+          "verification": "PRD",
+          "approvalRequired": true
+        },
+        {
+          "id": "step_2",
+          "order": 2,
+          "role": "software-architect",
+          "goal": "技术方案",
+          "input": "PRD",
+          "verification": "架构文档",
+          "approvalRequired": true
+        },
+        {
+          "id": "step_3",
+          "order": 3,
+          "role": "frontend-developer",
+          "goal": "UI 实现",
+          "input": "方案",
+          "verification": "组件",
+          "approvalRequired": false
+        }
+      ],
+      "recommendedAutonomyLevel": "L2"
+    },
+    "createdAt": "2026-03-31T03:20:02.266Z"
+  }
+]

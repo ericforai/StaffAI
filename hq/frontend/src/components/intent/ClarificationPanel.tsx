@@ -1,26 +1,63 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import type { RequirementDraft } from '@/types/domain';
 
 interface Props {
   draft: RequirementDraft;
   onSendMessage: (message: string) => void;
+  onSendMessageStream?: (
+    message: string,
+    onChunk: (content: string, id: string) => void,
+    onDone: (isComplete: boolean, draft?: RequirementDraft) => void,
+    onError: (error: string) => void
+  ) => void;
   loading: boolean;
 }
 
-export function ClarificationPanel({ draft, onSendMessage, loading }: Props) {
+export function ClarificationPanel({ draft, onSendMessage, onSendMessageStream, loading }: Props) {
   const [input, setInput] = useState('');
+  const [streamingContent, setStreamingContent] = useState('');
+  const [streamingMsgId, setStreamingMsgId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isStreaming = streamingContent !== '' && loading;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [draft.clarificationMessages]);
+  }, [draft.clarificationMessages, streamingContent]);
+
+  const handleChunk = useCallback((content: string, id: string) => {
+    setStreamingMsgId(id);
+    setStreamingContent(prev => prev + content);
+  }, []);
+
+  const handleDone = useCallback((isComplete: boolean, updatedDraft?: RequirementDraft) => {
+    setStreamingContent('');
+    setStreamingMsgId(null);
+    // Trigger parent update if needed
+    if (isComplete && updatedDraft) {
+      // The parent hook will handle updating the draft state
+    }
+  }, []);
+
+  const handleError = useCallback((error: string) => {
+    console.error('[ClarificationPanel] Stream error:', error);
+    setStreamingContent('');
+    setStreamingMsgId(null);
+  }, []);
 
   const handleSend = () => {
     if (!input.trim() || loading) return;
-    onSendMessage(input.trim());
+
+    const message = input.trim();
     setInput('');
+
+    // Use streaming if available
+    if (onSendMessageStream) {
+      onSendMessageStream(message, handleChunk, handleDone, handleError);
+    } else {
+      onSendMessage(message);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -42,19 +79,34 @@ export function ClarificationPanel({ draft, onSendMessage, loading }: Props) {
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-800 text-gray-200 border border-gray-600'
               }`}>
-                <p className="text-sm">{msg.content}</p>
+                <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
               </div>
             </div>
           ))}
-          {loading && (
+
+          {/* Streaming message */}
+          {isStreaming && streamingContent && (
+            <div className="flex justify-start">
+              <div className="bg-gray-800 text-gray-200 rounded-lg px-4 py-2 border border-gray-600 max-w-[80%]">
+                <p className="text-sm whitespace-pre-wrap">{streamingContent}</p>
+                <span className="inline-block animate-pulse ml-1">▊</span>
+              </div>
+            </div>
+          )}
+
+          {/* Loading indicator without content */}
+          {loading && !streamingContent && (
             <div className="flex justify-start">
               <div className="bg-gray-800 text-gray-400 rounded-lg px-4 py-2 border border-gray-600">
                 <p className="text-sm animate-pulse">Thinking...</p>
               </div>
             </div>
           )}
+
           <div ref={messagesEndRef} />
         </div>
+
+        {/* Input Area */}
         <div className="border-t border-gray-700 p-4">
           <div className="flex gap-2">
             <input
@@ -83,9 +135,12 @@ export function ClarificationPanel({ draft, onSendMessage, loading }: Props) {
         <div className="space-y-3">
           <SummaryField label="Goal" value={draft.designSummary?.goal} />
           <SummaryField label="Target User" value={draft.designSummary?.targetUser} />
+          <SummaryField label="Core Flow" value={draft.designSummary?.coreFlow} />
           <SummaryField label="Deliverables" value={draft.designSummary?.deliverables} />
           <SummaryField label="Constraints" value={draft.designSummary?.constraints} />
           <SummaryField label="Scope" value={draft.designSummary?.scope} />
+          <SummaryField label="Out of Scope" value={draft.designSummary?.outOfScope} />
+          <SummaryField label="Risks" value={draft.designSummary?.risks} />
         </div>
         <div className="mt-4 pt-4 border-t border-gray-700">
           <div className="flex justify-between text-xs text-gray-500">
@@ -109,7 +164,7 @@ function SummaryField({ label, value }: { label: string; value?: string }) {
   return (
     <div>
       <dt className="text-xs text-gray-500">{label}</dt>
-      <dd className="text-sm text-gray-300 mt-0.5">{value}</dd>
+      <dd className="text-sm text-gray-300 mt-0.5 whitespace-pre-wrap">{value}</dd>
     </div>
   );
 }

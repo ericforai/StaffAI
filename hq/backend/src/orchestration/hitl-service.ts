@@ -38,14 +38,14 @@ export class HitlService {
 
     await this.stateMachine.transition(
       taskId,
-      'suspend',
+      'request_approval',
       suspendedBy,
       `Suspended: ${reason}`
     );
 
     const updatedTask = await this.store.updateTask(taskId, (current) => ({
       ...current,
-      status: 'suspended' as TaskStatus,
+      status: 'waiting_approval' as TaskStatus,
       updatedAt: new Date().toISOString(),
     }));
 
@@ -68,13 +68,13 @@ export class HitlService {
     if (!task) {
       throw new Error(`Task not found: ${taskId}`);
     }
-    if (task.status !== 'suspended') {
+    if (task.status !== 'waiting_approval') {
       throw new Error(`Task is not suspended: status=${task.status}`);
     }
 
     await this.stateMachine.transition(
       taskId,
-      'resume',
+      'approve',
       resumedBy,
       'Resumed with human feedback'
     );

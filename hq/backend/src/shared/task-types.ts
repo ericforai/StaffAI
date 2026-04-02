@@ -34,6 +34,7 @@ export const TASK_TYPES = [
   'workflow_dispatch',
   'frontend_implementation',
   'quality_assurance',
+  'feature_delivery',
   'general',
 ] as const;
 export type TaskType = (typeof TASK_TYPES)[number];
@@ -41,7 +42,7 @@ export type TaskType = (typeof TASK_TYPES)[number];
 export const TASK_RISK_LEVELS = ['low', 'medium', 'high'] as const;
 export type TaskRiskLevel = (typeof TASK_RISK_LEVELS)[number];
 
-export const TASK_ASSIGNMENT_STATUSES = ['pending', 'running', 'completed', 'failed', 'skipped'] as const;
+export const TASK_ASSIGNMENT_STATUSES = ['pending', 'running', 'waiting_input', 'completed', 'failed', 'skipped'] as const;
 export type TaskAssignmentStatus = (typeof TASK_ASSIGNMENT_STATUSES)[number];
 
 export const WORKFLOW_PLAN_MODES = ['single', 'serial', 'parallel'] as const;
@@ -80,6 +81,8 @@ export interface TaskRecord {
   candidateAgentRoles: string[];
   routeReason: string;
   routingStatus: 'matched' | 'manual_review';
+  // 关联的需求意图 ID
+  intentId?: string;
   // 任务负责人（从组织架构选择的员工）
   assigneeId?: string;
   assigneeName?: string;
@@ -104,18 +107,26 @@ export interface TaskRouteDecision {
   executionMode: TaskExecutionMode;
 }
 
+export type ApprovalType = 'plan_approval' | 'tool_call' | 'delivery_check' | 'generic';
+
 export interface ApprovalRecord {
   id: string;
   taskId: string;
-  taskTitle?: string;           // NEW: Task title for display
+  taskTitle?: string;
   status: ApprovalStatus;
+  approvalType?: ApprovalType;
+  // 被拦截的具体动作描述
+  blockedAction?: string;
   requestedBy: string;
   requestedAt: string;
-  riskLevel?: ApprovalRiskLevel;  // NEW: Risk level assessment
-  approver?: string;           // NEW: Approver name/ID
-  approvedAt?: string;         // NEW: When approval was granted/denied
-  reason?: string;             // NEW: Reason for decision
-  decisionContext?: Record<string, unknown>;  // NEW: Additional context
+  riskLevel?: ApprovalRiskLevel;
+  riskReason?: string;
+  resumeTarget?: string; // e.g., stepId or execution state
+  blockingArtifacts?: string[]; // IDs of artifacts that must be reviewed
+  approver?: string;
+  approvedAt?: string;
+  reason?: string; // Reason for approval/rejection decision
+  decisionContext?: Record<string, unknown>;
   resolvedAt?: string;
 }
 
@@ -127,6 +138,16 @@ export type TaskAssignmentRole =
   | 'commander'
   | 'executor'
   | 'critic';
+
+export interface Artifact {
+  id: string;
+  type: 'prd' | 'architecture' | 'frontend_spec' | 'backend_spec' | 'security_report' | 'review_report' | 'generic';
+  title: string;
+  content: string; // Markdown or JSON string
+  structuredData?: Record<string, any>;
+  createdAt: string;
+  createdBy: string; // agentId
+}
 
 export interface TaskAssignment {
   id: string;
@@ -144,6 +165,7 @@ export interface TaskAssignment {
   completedAt?: string;
   resultSummary?: string;
   errorMessage?: string;
+  artifacts?: Artifact[];
 }
 
 export interface WorkflowPlanStep {
@@ -193,6 +215,7 @@ export interface ExecutionRecord {
   };
   outputSummary?: string;
   errorMessage?: string;
+  artifacts?: Artifact[];
   memoryContextExcerpt?: string;
   startedAt?: string;
   endedAt?: string;
