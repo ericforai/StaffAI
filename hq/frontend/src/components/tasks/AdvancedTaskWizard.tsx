@@ -13,7 +13,7 @@ interface AdvancedTaskWizardProps {
 }
 
 export function AdvancedTaskWizard({ onTaskCreated, onCancel }: AdvancedTaskWizardProps) {
-  const { state, createIntent, sendMessage, confirmDesign, createTask, loadIntent } = useIntentWizard();
+  const { state, createIntent, sendMessage, sendMessageStream, confirmDesign, createTask, loadIntent } = useIntentWizard();
   const searchParams = useSearchParams();
   const intentId = searchParams.get('intentId');
 
@@ -53,6 +53,7 @@ export function AdvancedTaskWizard({ onTaskCreated, onCancel }: AdvancedTaskWiza
         <ClarificationPanel
           draft={state.draft}
           onSendMessage={sendMessage}
+          onSendMessageStream={sendMessageStream}
           loading={state.loading}
         />
         {state.error && <p className="mt-4 text-sm text-rose-500">{state.error}</p>}

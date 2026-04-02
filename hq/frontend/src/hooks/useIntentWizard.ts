@@ -124,5 +124,92 @@ export function useIntentWizard() {
     }
   }, []);
 
-  return { state, createIntent, sendMessage, confirmDesign, createTask, loadIntent };
+  /**
+   * SSE streaming version of sendMessage for real-time LLM responses
+   */
+  const sendMessageStream = useCallback(async (
+    message: string,
+    onChunk: (content: string, id: string) => void,
+    onDone: (isComplete: boolean, draft?: RequirementDraft) => void,
+    onError: (error: string) => void
+  ) => {
+    if (!state.draft) return;
+    setState(s => ({ ...s, loading: true, error: null }));
+
+    try {
+      const response = await fetch(`${API_BASE}/intents/${state.draft!.id}/clarify/stream`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message }),
+      });
+
+      if (!response.ok) throw new Error(`Stream failed: ${response.status}`);
+      if (!response.body) throw new Error('No response body');
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let currentMsgId: string | null = null;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (!data.trim()) continue;
+
+            try {
+              const event = JSON.parse(data);
+
+              if (event.type === 'user_message') {
+                // User message was saved, update local state
+                continue;
+              }
+
+              if (event.type === 'done') {
+                // Stream complete
+                setState(s => ({
+                  ...s,
+                  loading: false,
+                  draft: event.draft || s.draft,
+                  step: event.isComplete ? 2 : 1
+                }));
+                onDone(event.isComplete, event.draft);
+                return;
+              }
+
+              if (event.type === 'error') {
+                throw new Error(event.error);
+              }
+
+              // Content chunk
+              if (event.content !== undefined) {
+                if (!currentMsgId && event.id) {
+                  currentMsgId = event.id;
+                }
+                onChunk(event.content, currentMsgId || '');
+              }
+            } catch {
+              // Skip malformed JSON
+            }
+          }
+        }
+      }
+
+      // Stream ended without explicit done
+      setState(s => ({ ...s, loading: false }));
+      onDone(false);
+    } catch (err) {
+      setState(s => ({ ...s, loading: false, error: String(err) }));
+      onError(String(err));
+    }
+  }, [state.draft]);
+
+  return { state, createIntent, sendMessage, sendMessageStream, confirmDesign, createTask, loadIntent };
 }

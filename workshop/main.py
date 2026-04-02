@@ -20,9 +20,9 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("workshop")
 
-# 切换到根目录以确保 read_file 等工具能找到文件
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-os.chdir(ROOT_DIR)
+# 切换到 workshop 目录以确保 DeerFlow config 能找到
+WORKSHOP_ROOT = os.path.dirname(os.path.abspath(__file__))
+os.chdir(WORKSHOP_ROOT)
 logger.info(f"Workshop working directory switched to: {os.getcwd()}")
 
 # 检查 API KEY
@@ -38,6 +38,24 @@ sys.path.extend([
     os.path.join(WORKSHOP_DIR, "deer-flow", "backend"),
     os.path.join(WORKSHOP_DIR, "deer-flow", "backend", "packages", "harness"),
 ])
+
+# Direct LLM client for simple chat without agent middleware
+def create_direct_llm_stream(model_name: str = "glm-4-plus"):
+    """Create a direct LLM streaming callable using LangChain."""
+    from deerflow.models import create_chat_model
+    from langchain_core.messages import HumanMessage
+
+    model = create_chat_model(name=model_name, thinking_enabled=False)
+
+    def stream(prompt: str, thread_id: str | None = None):
+        messages = [HumanMessage(content=prompt)]
+        for chunk in model.stream(messages):
+            text = chunk.content if hasattr(chunk, "content") else str(chunk)
+            if text:
+                yield {"type": "ai", "content": text}
+
+    return stream
+
 
 class MockDeerFlowClient:
     def __init__(self, *args, **kwargs):
@@ -161,6 +179,13 @@ class TaskEnvelope(BaseModel):
     payload: dict = {}
 
 
+class ChatRequest(BaseModel):
+    """Simple chat request for direct LLM streaming without agent middleware."""
+    message: str
+    system_prompt: Optional[str] = None
+    model_name: Optional[str] = "glm-4-plus"
+
+
 class CreateThreadRequest(BaseModel):
     metadata: Optional[dict] = None
 
@@ -280,7 +305,7 @@ async def execute_task(task: TaskEnvelope):
         raise HTTPException(status_code=500, detail="DeerFlow engine not initialized")
 
     try:
-        client = DeerFlowClient(config_path=CONFIG_PATH, model_name="gpt-4o", agent_name=task.agent_role)
+        client = DeerFlowClient(config_path=CONFIG_PATH, model_name="glm-4-plus", agent_name=task.agent_role)
         prompt = f"任务标题: {task.action}\n描述: {task.description or ''}"
         result = client.chat(prompt)
         return {
@@ -301,7 +326,7 @@ async def stream_task(task: TaskEnvelope, request: Request):
 
     async def event_generator():
         try:
-            client = DeerFlowClient(config_path=CONFIG_PATH, model_name="gpt-4o", agent_name=task.agent_role)
+            client = DeerFlowClient(config_path=CONFIG_PATH, model_name="glm-4-plus", agent_name=task.agent_role)
             
             # 注入负责人灵魂 (System Identity)
             system_instruction = task.identity_context if task.identity_context else ""
@@ -314,28 +339,50 @@ async def stream_task(task: TaskEnvelope, request: Request):
 
             full_prompt += "\n请开始执行上述任务。"
 
-            logger.info(f"Starting stream for task {task.task_id} with identity context length: {len(system_instruction)}")
+            logger.info(f"Starting stream for task {task.task_id}")
             # 使用 system_instruction 启动流
-            for event in client.stream(full_prompt, thread_id=task.task_id, system_message=system_instruction):
+            for event in client.stream(full_prompt, thread_id=task.task_id):
                 if await request.is_disconnected():
                     logger.info(f"Client disconnected for task {task.task_id}")
                     break
 
-                # 支持对象和字典两种格式
-                if hasattr(event, "type") and hasattr(event, "model_dump"):
+                # 统一事件序列化：提取 type 和可 JSON 序列化的 data
+                # StreamEvent 是 dataclass，没有 model_dump()
+                if hasattr(event, "type") and hasattr(event, "data"):
+                    # dataclass StreamEvent
                     event_type = event.type
-                    event_data = event.model_dump()
+                    raw_data = event.data
+                    # Recursively convert any remaining Pydantic model to dict
+                    def to_primitive(obj):
+                        if hasattr(obj, "model_dump"):
+                            d = obj.model_dump()
+                            return {k: to_primitive(v) for k, v in d.items()}
+                        elif isinstance(obj, dict):
+                            return {k: to_primitive(v) for k, v in obj.items()}
+                        elif isinstance(obj, (list, tuple)):
+                            return [to_primitive(i) for i in obj]
+                        return obj
+                    event_data = to_primitive(raw_data)
                 elif isinstance(event, dict):
                     event_type = event.get("type", "message")
-                    event_data = event
+
+                    def to_primitive_dict(obj):
+                        if hasattr(obj, "model_dump"):
+                            d = obj.model_dump()
+                            return {k: to_primitive_dict(v) for k, v in d.items()}
+                        elif isinstance(obj, dict):
+                            return {k: to_primitive_dict(v) for k, v in obj.items()}
+                        elif isinstance(obj, (list, tuple)):
+                            return [to_primitive_dict(i) for i in obj]
+                        return obj
+                    event_data = to_primitive_dict(event)
                 else:
                     event_type = "message"
-                    event_data = event
+                    event_data = str(event)
 
-                # 统一包装 SSE 数据格式
                 yield {
                     "event": event_type,
-                    "data": json.dumps(event_data)
+                    "data": json.dumps(event_data, ensure_ascii=False)
                 }
 
                 await asyncio.sleep(0.01)
@@ -345,6 +392,58 @@ async def stream_task(task: TaskEnvelope, request: Request):
             yield {
                 "event": "error",
                 "data": json.dumps({"error": "Internal streaming error"})
+            }
+
+    return EventSourceResponse(event_generator())
+
+
+@app.post("/api/v1/chat/stream")
+async def chat_stream(chat_req: ChatRequest, request: Request):
+    """Direct LLM chat streaming without agent middleware (for brainstorming).
+
+    Bypasses ClarificationMiddleware to allow normal text-only responses.
+    """
+    async def event_generator():
+        try:
+            from deerflow.models import create_chat_model
+            from langchain_core.messages import HumanMessage, SystemMessage
+
+            model = create_chat_model(name=chat_req.model_name or "glm-4-plus", thinking_enabled=False)
+
+            # Build messages with optional system prompt
+            messages = []
+            if chat_req.system_prompt:
+                messages.append(SystemMessage(content=chat_req.system_prompt))
+            messages.append(HumanMessage(content=chat_req.message))
+
+            logger.info(f"Starting direct chat stream with model {chat_req.model_name}")
+            full_content = ""
+
+            for chunk in model.stream(messages):
+                if await request.is_disconnected():
+                    logger.info("Client disconnected during chat stream")
+                    break
+
+                text = chunk.content if hasattr(chunk, "content") else str(chunk)
+                if text:
+                    full_content += text
+                    yield {
+                        "event": "message",
+                        "data": json.dumps({"type": "ai", "content": text}, ensure_ascii=False)
+                    }
+                    await asyncio.sleep(0.01)
+
+            # Send completion signal
+            yield {
+                "event": "done",
+                "data": json.dumps({"type": "end", "content": full_content}, ensure_ascii=False)
+            }
+
+        except Exception as e:
+            logger.exception("Chat streaming failed")
+            yield {
+                "event": "error",
+                "data": json.dumps({"error": str(e)})
             }
 
     return EventSourceResponse(event_generator())
@@ -534,7 +633,7 @@ async def lg_stream_run(thread_id: str, request: Request):
     async def event_generator():
         run_id = str(uuid.uuid4())
         try:
-            model_name = context.get("model_name", "gpt-4o")
+            model_name = context.get("model_name", "glm-4-plus")
             client = DeerFlowClient(
                 config_path=CONFIG_PATH,
                 model_name=model_name,
@@ -618,7 +717,7 @@ async def lg_create_run(thread_id: str, request: Request):
         raise HTTPException(status_code=400, detail="No message content provided")
 
     try:
-        model_name = context.get("model_name", "gpt-4o")
+        model_name = context.get("model_name", "glm-4-plus")
         client = DeerFlowClient(
             config_path=CONFIG_PATH,
             model_name=model_name,

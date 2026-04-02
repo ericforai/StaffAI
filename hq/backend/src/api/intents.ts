@@ -96,13 +96,111 @@ export function registerIntentRoutes(app: Application, store: Store) {
 
       const result = await brainstormingService.clarify(draft, message);
       await store.saveRequirementDraft(result.updatedDraft);
-      
+
       res.json({
         draft: result.updatedDraft,
         isComplete: result.isComplete,
       });
     } catch (err) {
       res.status(400).json({ error: String(err) });
+    }
+  });
+
+  // POST /api/intents/:id/clarify/stream - SSE streaming for real-time dialogue
+  app.post('/api/intents/:id/clarify/stream', async (req: Request, res: Response) => {
+    try {
+      const { message } = clarifySchema.parse(req.body);
+      const draft = await store.getRequirementDraftById(req.params.id as string);
+      if (!draft) {
+        res.status(404).json({ error: 'Intent not found' });
+        return;
+      }
+
+      // Record user message
+      const now = new Date().toISOString();
+      const userMsgId = `msg_${Date.now()}_u`;
+      draft.clarificationMessages.push({
+        id: userMsgId,
+        role: 'user',
+        content: message,
+        timestamp: now,
+      });
+      draft.status = 'clarifying';
+      draft.updatedAt = now;
+      await store.saveRequirementDraft(draft);
+
+      // Send user message acknowledgment
+      res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'X-Accel-Buffering': 'no',
+      });
+
+      // Send user message event
+      res.write(`data: ${JSON.stringify({ type: 'user_message', id: userMsgId, content: message })}\n\n`);
+
+      // Stream from Workshop LLM
+      const streamingClient = brainstormingService.getStreamingClient();
+      let isComplete = false;
+      let assistantMsgId: string | null = null;
+
+      for await (const event of streamingClient.streamClarification(draft, message)) {
+        if (event.type === 'done' && event.done) {
+          // Save final draft state
+          if (event.designSummary) {
+            draft.status = 'design_ready';
+            draft.designSummary = event.designSummary;
+            draft.confidenceScore = 0.9;
+          }
+          draft.updatedAt = new Date().toISOString();
+          await store.saveRequirementDraft(draft);
+
+          res.write(`data: ${JSON.stringify({
+            type: 'done',
+            isComplete: event.isComplete,
+            draft: draft
+          })}\n\n`);
+          isComplete = true;
+        } else if (event.content) {
+          if (!assistantMsgId) {
+            assistantMsgId = `msg_${Date.now()}_a`;
+            draft.clarificationMessages.push({
+              id: assistantMsgId,
+              role: 'assistant',
+              content: event.content,
+              timestamp: new Date().toISOString(),
+            });
+          } else {
+            // Append to existing message
+            const lastMsg = draft.clarificationMessages[draft.clarificationMessages.length - 1];
+            if (lastMsg && lastMsg.id === assistantMsgId) {
+              lastMsg.content += event.content;
+            }
+          }
+
+          res.write(`data: ${JSON.stringify({
+            type: event.type,
+            id: assistantMsgId,
+            content: event.content,
+            isComplete: false
+          })}\n\n`);
+        }
+      }
+
+      if (!isComplete) {
+        // Update confidence score based on exchange count
+        const userMsgCount = draft.clarificationMessages.filter(m => m.role === 'user').length;
+        draft.confidenceScore = Math.min(0.4 + (userMsgCount * 0.15), 0.85);
+        draft.updatedAt = new Date().toISOString();
+        await store.saveRequirementDraft(draft);
+      }
+
+      res.end();
+    } catch (err) {
+      console.error('[Clarify Stream] Error:', err);
+      res.write(`data: ${JSON.stringify({ type: 'error', error: String(err) })}\n\n`);
+      res.end();
     }
   });
 
