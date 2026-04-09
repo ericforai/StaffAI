@@ -19,12 +19,42 @@ export function ClarificationPanel({ draft, onSendMessage, onSendMessageStream, 
   const [input, setInput] = useState('');
   const [streamingContent, setStreamingContent] = useState('');
   const [streamingMsgId, setStreamingMsgId] = useState<string | null>(null);
+  const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
+  const [isNearBottom, setIsNearBottom] = useState(true);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isStreaming = streamingContent !== '' && loading;
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Auto-follow only if the user hasn't scrolled up to read older messages.
+    if (!autoScrollEnabled || !isNearBottom) return;
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [draft.clarificationMessages, streamingContent]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const update = () => {
+      // "Near bottom" heuristic prevents scroll-jank during streaming.
+      const thresholdPx = 80;
+      const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+      const near = distanceFromBottom <= thresholdPx;
+      setIsNearBottom(near);
+      if (near) setAutoScrollEnabled(true);
+    };
+
+    update();
+    el.addEventListener('scroll', update, { passive: true });
+    return () => {
+      el.removeEventListener('scroll', update);
+    };
+  }, []);
+
+  const scrollToBottom = useCallback(() => {
+    setAutoScrollEnabled(true);
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, []);
 
   const handleChunk = useCallback((content: string, id: string) => {
     setStreamingMsgId(id);
@@ -71,7 +101,8 @@ export function ClarificationPanel({ draft, onSendMessage, onSendMessageStream, 
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Chat Panel */}
       <div className="lg:col-span-2 bg-gray-900 rounded-lg border border-gray-700 flex flex-col h-[600px]">
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="relative flex-1 min-h-0">
+          <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
           {draft.clarificationMessages.map((msg) => (
             <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[80%] rounded-lg px-4 py-2 ${
@@ -98,12 +129,24 @@ export function ClarificationPanel({ draft, onSendMessage, onSendMessageStream, 
           {loading && !streamingContent && (
             <div className="flex justify-start">
               <div className="bg-gray-800 text-gray-400 rounded-lg px-4 py-2 border border-gray-600">
-                <p className="text-sm animate-pulse">Thinking...</p>
+                <p className="text-sm animate-pulse">思考中...</p>
               </div>
             </div>
           )}
 
           <div ref={messagesEndRef} />
+          </div>
+
+          {/* Jump-to-bottom affordance when user scrolls up */}
+          {!isNearBottom && (
+            <button
+              type="button"
+              onClick={scrollToBottom}
+              className="absolute bottom-3 right-3 rounded-full bg-gray-800/90 text-gray-200 border border-gray-600 px-3 py-1.5 text-xs hover:bg-gray-700"
+            >
+              回到底部
+            </button>
+          )}
         </div>
 
         {/* Input Area */}
@@ -112,7 +155,7 @@ export function ClarificationPanel({ draft, onSendMessage, onSendMessageStream, 
             <input
               type="text"
               className="flex-1 bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-              placeholder="Type your answer..."
+              placeholder="请输入你的回答..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -123,7 +166,7 @@ export function ClarificationPanel({ draft, onSendMessage, onSendMessageStream, 
               onClick={handleSend}
               disabled={loading || !input.trim()}
             >
-              Send
+              发送
             </button>
           </div>
         </div>
@@ -131,20 +174,20 @@ export function ClarificationPanel({ draft, onSendMessage, onSendMessageStream, 
 
       {/* Summary Card */}
       <div className="bg-gray-900 rounded-lg border border-gray-700 p-4">
-        <h3 className="text-sm font-semibold text-gray-300 mb-4">Requirement Summary</h3>
+        <h3 className="text-sm font-semibold text-gray-300 mb-4">需求摘要</h3>
         <div className="space-y-3">
-          <SummaryField label="Goal" value={draft.designSummary?.goal} />
-          <SummaryField label="Target User" value={draft.designSummary?.targetUser} />
-          <SummaryField label="Core Flow" value={draft.designSummary?.coreFlow} />
-          <SummaryField label="Deliverables" value={draft.designSummary?.deliverables} />
-          <SummaryField label="Constraints" value={draft.designSummary?.constraints} />
-          <SummaryField label="Scope" value={draft.designSummary?.scope} />
-          <SummaryField label="Out of Scope" value={draft.designSummary?.outOfScope} />
-          <SummaryField label="Risks" value={draft.designSummary?.risks} />
+          <SummaryField label="目标" value={draft.designSummary?.goal} />
+          <SummaryField label="目标用户" value={draft.designSummary?.targetUser} />
+          <SummaryField label="核心流程" value={draft.designSummary?.coreFlow} />
+          <SummaryField label="交付物" value={draft.designSummary?.deliverables} />
+          <SummaryField label="约束" value={draft.designSummary?.constraints} />
+          <SummaryField label="范围" value={draft.designSummary?.scope} />
+          <SummaryField label="不在范围内" value={draft.designSummary?.outOfScope} />
+          <SummaryField label="风险" value={draft.designSummary?.risks} />
         </div>
         <div className="mt-4 pt-4 border-t border-gray-700">
           <div className="flex justify-between text-xs text-gray-500">
-            <span>Confidence</span>
+            <span>置信度</span>
             <span>{Math.round(draft.confidenceScore * 100)}%</span>
           </div>
           <div className="mt-1 h-2 bg-gray-800 rounded-full overflow-hidden">

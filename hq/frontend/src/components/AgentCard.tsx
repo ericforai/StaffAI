@@ -4,7 +4,7 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { UserMinus, Loader2, Zap, BriefcaseBusiness, UserPlus, Check, ExternalLink } from 'lucide-react';
-import { DEPT_MAP } from '../utils/constants';
+import { AGENT_DESCRIPTION_ZH, DEPT_MAP } from '../utils/constants';
 import { Agent } from '../types';
 
 export interface AgentCardProps {
@@ -123,7 +123,7 @@ export function AgentCard({ agent, isActive, isWorking, variant, onToggle, onCli
         {agent.frontmatter.name}
       </h3>
       <p className="line-clamp-2 text-xs leading-relaxed text-slate-500 transition-colors duration-200 group-hover:text-slate-600">
-        {agent.frontmatter.description}
+        {AGENT_DESCRIPTION_ZH[agent.id] ?? agent.frontmatter.description}
       </p>
 
       {/* 入职/解聘按钮 */}

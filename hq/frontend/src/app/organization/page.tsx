@@ -4,7 +4,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { ChevronRight, Users, Palette, Megaphone, Building2, ChevronDown, Cpu, FolderKanban, Plus, Trash2, Activity } from 'lucide-react';
 import { useAgents } from '../../hooks/useAgents';
 import { useGlobalWebSocket, type WsMessage } from '../../hooks/useGlobalWebSocket';
-import { API_CONFIG, DEPT_MAP } from '../../utils/constants';
+import { AGENT_DESCRIPTION_ZH, API_CONFIG, DEPT_MAP } from '../../utils/constants';
 
 interface ProjectTeam {
   name: string;
@@ -308,7 +308,9 @@ export default function OrganizationPage() {
                       </div>
                       <div>
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">描述</p>
-                        <p className="text-xs text-slate-600 mt-1 leading-relaxed">{selectedAgent.frontmatter.description}</p>
+                        <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                          {AGENT_DESCRIPTION_ZH[selectedAgent.id] ?? selectedAgent.frontmatter.description}
+                        </p>
                       </div>
                       <button
                         onClick={() => {

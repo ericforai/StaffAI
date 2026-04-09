@@ -4,6 +4,7 @@ import { useAgents } from '../../hooks/useAgents';
 import Link from 'next/link';
 import { BrainCircuit, Search, ArrowRight, TrendingUp } from 'lucide-react';
 import { AgentCard } from '../../components/AgentCard';
+import { AGENT_DESCRIPTION_ZH, DEPT_MAP } from '../../utils/constants';
 
 export default function AgentsIndexPage() {
   const { agents, activeIds, loading } = useAgents();
@@ -14,7 +15,7 @@ export default function AgentsIndexPage() {
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-blue-600">
             <BrainCircuit size={20} />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Asset Management</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">资产管理</span>
           </div>
           <h1 className="text-4xl font-black tracking-tight text-slate-900">人才进化档案</h1>
           <p className="text-slate-500 max-w-lg leading-relaxed">
@@ -24,11 +25,11 @@ export default function AgentsIndexPage() {
         
         <div className="flex items-center gap-4">
           <div className="text-center px-6 py-3 bg-slate-50 rounded-2xl border border-slate-100">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Assets</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">资产总数</p>
             <p className="text-2xl font-black text-slate-900">{agents.length}</p>
           </div>
           <div className="text-center px-6 py-3 bg-blue-50 rounded-2xl border border-blue-100">
-            <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1">Active Now</p>
+            <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1">当前活跃</p>
             <p className="text-2xl font-black text-blue-600">{activeIds.length}</p>
           </div>
         </div>
@@ -48,16 +49,18 @@ export default function AgentsIndexPage() {
                 </div>
                 <div>
                   <h3 className="font-black text-slate-900 group-hover:text-blue-600 transition-colors">{agent.frontmatter.name}</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{agent.department}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    {DEPT_MAP[agent.department]?.label ?? agent.department}
+                  </p>
                 </div>
               </div>
 
               <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-6 flex-1 italic">
-                {agent.frontmatter.description}
+                {AGENT_DESCRIPTION_ZH[agent.id] ?? agent.frontmatter.description}
               </p>
 
               <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">View Evolution</span>
+                <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">查看进化</span>
                 <ArrowRight size={14} className="text-slate-300 group-hover:translate-x-1 group-hover:text-blue-500 transition-all" />
               </div>
             </div>

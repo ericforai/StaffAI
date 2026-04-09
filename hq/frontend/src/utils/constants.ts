@@ -144,3 +144,9 @@ export const DEPT_MAP: Record<
     gradient: 'from-rose-500/20 to-red-500/20',
   },
 };
+
+// 面向用户展示的中文描述（用于覆盖 agent frontmatter 中的英文 description）
+export const AGENT_DESCRIPTION_ZH: Record<string, string> = {
+  dispatcher:
+    '负责路由任务、拆解工作、分派专家，并将产出汇总成清晰的交付叙事。',
+};
