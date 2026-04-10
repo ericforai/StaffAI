@@ -429,6 +429,30 @@ test('delivery lighthouse hero shows approval focus when pending approvals exist
   await expect(page.getByTestId('delivery-primary-cta')).toContainText('前往审批');
 });
 
+test('advanced mode: hero stays on wizard when approvals exist until approvals-over-wizard is enabled', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    localStorage.removeItem('staffai-delivery-approvals-over-wizard');
+    localStorage.removeItem('staffai-delivery-pinned-task-id');
+  });
+
+  await page.goto('/tasks?mode=advanced', { waitUntil: 'domcontentloaded', timeout: 60_000 });
+
+  await expect(page.getByTestId('delivery-lighthouse-hero')).toBeVisible();
+  await expect(page.getByTestId('delivery-current')).toContainText('向导');
+  await expect(page.getByTestId('delivery-current')).not.toContainText('审批队列');
+  await expect(page.getByTestId('delivery-primary-cta')).toContainText('回到向导继续');
+
+  const prefs = page.getByTestId('delivery-hero-preferences');
+  await prefs.locator('summary').click();
+  await prefs.getByRole('checkbox', { name: /高级向导时仍优先待审批/ }).check();
+
+  await expect(page.getByTestId('delivery-current')).toContainText('审批');
+  await expect(page.getByTestId('delivery-blocker')).toContainText('待处理审批');
+  await expect(page.getByTestId('delivery-primary-cta')).toContainText('前往审批');
+});
+
 test('advanced wizard shows step rail and completion hint', async ({ page }) => {
   await page.goto('/tasks?mode=advanced', { waitUntil: 'domcontentloaded', timeout: 60_000 });
   await expect(page.getByTestId('intent-wizard-steps')).toBeVisible();
