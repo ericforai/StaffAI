@@ -1,8 +1,0 @@
-{
-  "taskTitle": "Should be rejected",
-  "riskLevel": "MEDIUM",
-  "id": "b13117db-b6a4-445f-9fa2-29acb622b602",
-  "approver": "manager1",
-  "approvedAt": "2026-03-25T14:26:48.886Z",
-  "reason": "Too risky"
-}

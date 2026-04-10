@@ -1,8 +1,0 @@
-{
-  "taskTitle": "Dangerous operation",
-  "riskLevel": "HIGH",
-  "id": "69cab739-5ad3-44c4-901f-8ef3aa0e8081",
-  "approver": "manager1",
-  "approvedAt": "2026-03-27T09:39:19.083Z",
-  "reason": "Operation too dangerous"
-}

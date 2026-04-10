@@ -1,8 +1,0 @@
-{
-  "taskTitle": "Execute after approval",
-  "riskLevel": "HIGH",
-  "id": "2d5fda88-f6be-494f-91b9-364ea439b6b7",
-  "approver": "manager1",
-  "approvedAt": "2026-03-27T07:20:50.368Z",
-  "reason": "Approved for execution"
-}

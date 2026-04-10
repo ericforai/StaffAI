@@ -1,7 +1,0 @@
-{
-  "taskTitle": "请删除生产数据库中的用户表",
-  "riskLevel": "HIGH",
-  "approvalType": "generic",
-  "riskReason": "Contains destructive operation keywords, Involves production environment, Database destructive operation, General routine task",
-  "id": "675e1a25-877d-48a9-ac8b-ebbaf07b84fb"
-}

@@ -1,8 +1,0 @@
-{
-  "taskTitle": "Delete production data",
-  "riskLevel": "HIGH",
-  "id": "30e582b4-48dc-49ca-b698-aab49333320b",
-  "approver": "admin",
-  "approvedAt": "2026-03-25T14:03:35.339Z",
-  "reason": "Too risky"
-}

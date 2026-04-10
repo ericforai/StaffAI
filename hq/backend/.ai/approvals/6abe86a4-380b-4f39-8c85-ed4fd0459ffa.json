@@ -1,9 +1,0 @@
-{
-  "taskTitle": "Delete production data",
-  "riskLevel": "HIGH",
-  "approvalType": "generic",
-  "riskReason": "Contains destructive operation keywords, Involves production environment, General routine task",
-  "id": "6abe86a4-380b-4f39-8c85-ed4fd0459ffa",
-  "approver": "admin",
-  "approvedAt": "2026-03-31T03:53:00.781Z"
-}

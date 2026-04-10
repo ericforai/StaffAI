@@ -90,3 +90,14 @@ workshop/deer-flow/
 
 # OMC runtime files
 .omc/
+
+# HQ runtime state (local development artifacts)
+hq/agent_memory.json
+hq/execution_traces.json
+hq/executions.json
+hq/task_assignments.json
+hq/tasks.json
+hq/workflow_plans.json
+hq/.ai/
+hq/backend/.ai/
+hq/backend/.omc/

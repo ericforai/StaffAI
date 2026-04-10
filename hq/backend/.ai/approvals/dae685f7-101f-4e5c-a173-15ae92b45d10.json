@@ -1,7 +1,0 @@
-{
-  "taskTitle": "Deploy to production",
-  "riskLevel": "HIGH",
-  "approvalType": "generic",
-  "riskReason": "Involves production environment, General routine task",
-  "id": "dae685f7-101f-4e5c-a173-15ae92b45d10"
-}
