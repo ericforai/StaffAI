@@ -55,7 +55,7 @@ export class ClaudeRuntimeAdapter implements RuntimeAdapter {
     // Test mode: return mock data
     if (process.env.AGENCY_UNDER_NODE_TEST === '1' && process.env.AGENCY_TEST_MODE === 'mock') {
       return {
-        outputSummary: 'Mocked Claude output for testing',
+        outputSummary: context.summary || 'Mocked Claude output for testing',
         outputSnapshot: {
           runtimeName: this.name,
           executor: 'claude',

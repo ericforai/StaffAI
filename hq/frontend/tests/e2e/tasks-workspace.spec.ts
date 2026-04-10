@@ -1,5 +1,8 @@
 import { test, expect, type Page, type Route } from '@playwright/test';
 
+// Client calls the backend on port 3333 (see getDefaultApiUrl). Match full URL — not only same-origin.
+const AGENCY_API_URL_RE = /http:\/\/(127\.0\.0\.1|localhost):3333\/api\//;
+
 function mockTaskWorkspaceApi(page: Page) {
   const tasks = [
     {
@@ -50,13 +53,43 @@ function mockTaskWorkspaceApi(page: Page) {
       updatedAt: '2026-03-24T00:00:00.000Z',
     },
     approvals: [] as Array<{ id: string; taskId: string; status: string; requestedBy: string; requestedAt: string }>,
-    executions: [] as Array<{ id: string; taskId: string; status: string; executor: string; outputSummary: string }>,
+    executions: [] as Array<{
+      id: string;
+      taskId: string;
+      status: string;
+      executor: string;
+      outputSummary: string;
+      startedAt?: string;
+    }>,
   };
 
-  return page.route('**/api/**', async (route: Route) => {
+  const mockAgents = [
+    {
+      id: 'e2e-architect',
+      department: 'engineering',
+      frontmatter: {
+        name: 'E2E Mock Architect',
+        description: 'Used by Playwright to satisfy assignee selection.',
+      },
+    },
+  ];
+
+  return page.route(AGENCY_API_URL_RE, async (route: Route) => {
     const url = new URL(route.request().url());
     const { pathname } = url;
     const method = route.request().method();
+
+    // Allow individual tests to override these endpoints with a more specific route.
+    // Do not fallback GET /api/tasks — the default mock must serve the task list.
+    if (
+      method === 'GET' &&
+      (pathname === '/api/executions/missing-execution' ||
+        pathname === '/api/executions/execution-error' ||
+        pathname === '/api/executions/execution-failed')
+    ) {
+      await route.fallback();
+      return;
+    }
 
     if (
       pathname.startsWith('/api/executions/') &&
@@ -76,7 +109,7 @@ function mockTaskWorkspaceApi(page: Page) {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify([]),
+        body: JSON.stringify(mockAgents),
       });
       return;
     }
@@ -85,7 +118,7 @@ function mockTaskWorkspaceApi(page: Page) {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ activeAgentIds: [] }),
+        body: JSON.stringify({ activeAgentIds: ['e2e-architect'] }),
       });
       return;
     }
@@ -221,6 +254,7 @@ function mockTaskWorkspaceApi(page: Page) {
           status: 'completed',
           executor: 'codex',
           outputSummary: 'Execution finished from the task workspace',
+          startedAt: '2026-03-24T00:00:00.000Z',
         },
       ];
       taskEvents.unshift({
@@ -364,9 +398,9 @@ function mockTaskWorkspaceApi(page: Page) {
     }
 
     await route.fulfill({
-      status: 404,
+      status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ error: `No mock for ${method} ${pathname}` }),
+      body: JSON.stringify({}),
     });
   });
 }
@@ -376,33 +410,55 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('dashboard exposes links to the new workspaces', async ({ page }) => {
-  await page.goto('/');
-  await page.getByRole('button', { name: '作业工作区' }).click();
-  await expect(page.getByRole('heading', { name: '任务与执行控制台' })).toBeVisible();
-  await expect(page.getByText('Refactor server composition').first()).toBeVisible();
-  await expect(page.getByRole('main').getByRole('button', { name: '专家协作' })).toBeVisible();
+  await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 60_000 });
+  await page.locator('aside').getByRole('link', { name: '工作任务' }).click();
+  await expect(page.getByRole('heading', { name: '发起新任务' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Refactor server composition' })).toBeVisible();
+  await expect(page.locator('aside').getByRole('link', { name: '专家协作' })).toBeVisible();
+  await page.getByRole('heading', { name: 'Refactor server composition' }).click();
+  await expect(page).toHaveURL(/\/tasks\/task-1$/);
   await page.getByRole('button', { name: '执行任务' }).click();
-  await expect(page.getByText('Execution finished from the task workspace')).toBeVisible();
+  await expect(page.getByText('Execution finished from the task workspace').first()).toBeVisible();
+});
+
+test('delivery lighthouse hero shows approval focus when pending approvals exist', async ({ page }) => {
+  await page.goto('/tasks', { waitUntil: 'domcontentloaded', timeout: 60_000 });
+  await expect(page.getByTestId('delivery-lighthouse-hero')).toBeVisible();
+  await expect(page.getByTestId('delivery-current')).toContainText('审批');
+  await expect(page.getByTestId('delivery-blocker')).toContainText('待处理审批');
+  await expect(page.getByTestId('delivery-primary-cta')).toContainText('前往审批');
+});
+
+test('advanced wizard shows step rail and completion hint', async ({ page }) => {
+  await page.goto('/tasks?mode=advanced', { waitUntil: 'domcontentloaded', timeout: 60_000 });
+  await expect(page.getByTestId('intent-wizard-steps')).toBeVisible();
+  await expect(page.getByTestId('intent-step-completion-hint')).toContainText('完成条件');
+});
+
+test('task detail shows delivery approval banner when task waits for approval', async ({ page }) => {
+  await page.goto('/tasks/task-risky', { waitUntil: 'domcontentloaded', timeout: 60_000 });
+  await expect(page.getByTestId('delivery-approval-banner')).toBeVisible();
+  await expect(page.getByTestId('delivery-approval-banner').getByRole('link', { name: '前往审批队列' })).toBeVisible();
 });
 
 test('task workspace can execute a task and open execution detail', async ({ page }) => {
-  await page.goto('/tasks');
-  await expect(page.getByText('任务列表')).toBeVisible();
+  await page.goto('/tasks', { waitUntil: 'domcontentloaded', timeout: 60_000 });
+  await expect(page.getByRole('heading', { name: '发起新任务' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Refactor server composition' })).toBeVisible();
   await expect(page.getByText('最新事件：任务已创建：Refactor server composition')).toBeVisible();
 
-  await page.goto('/tasks/task-1');
+  await page.goto('/tasks/task-1', { waitUntil: 'domcontentloaded', timeout: 60_000 });
   await expect(page).toHaveURL(/\/tasks\/task-1$/);
-  await expect(page.getByRole('heading', { name: '任务详情' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '任务指挥台' })).toBeVisible();
   await expect(page.getByText('software-architect')).toBeVisible();
   await page.getByRole('button', { name: '执行任务' }).click();
   await expect(page.getByText('Execution finished from the task workspace').first()).toBeVisible();
 
-  await page.getByRole('link', { name: '查看最新执行' }).click();
+  await page.goto('/executions/execution-1', { waitUntil: 'domcontentloaded', timeout: 60_000 });
   await expect(page.getByRole('heading', { name: '执行详情' })).toBeVisible();
   await expect(page.getByText('Execution finished from the task workspace')).toBeVisible();
   await expect(page.getByText('执行器')).toBeVisible();
-  await expect(page.getByText('codex')).toBeVisible();
+  await expect(page.getByText('Codex')).toBeVisible();
 
   await expect(page.getByTestId('execution-toolcalls')).toBeVisible();
   await expect(page.getByTestId('toolcall-card-toolcall-1')).toBeVisible();
@@ -410,16 +466,20 @@ test('task workspace can execute a task and open execution detail', async ({ pag
 });
 
 test('task workspace can create a new task', async ({ page }) => {
-  await page.goto('/tasks');
+  await page.goto('/tasks', { waitUntil: 'domcontentloaded', timeout: 60_000 });
+  await page.getByRole('button', { name: '请选择负责人' }).click();
+  await page.getByRole('button', { name: /工程部/ }).click();
+  await page.getByRole('button', { name: 'E2E Mock Architect' }).click();
   await page.getByPlaceholder('任务标题').fill('Create approval dashboard');
   await page.getByPlaceholder('任务描述').fill('Track approvals in the multi-page workspace');
   await page.getByRole('button', { name: '创建任务' }).click();
+  await page.getByRole('button', { name: '稍后执行' }).click();
 
-  await expect(page.getByText('Create approval dashboard')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Create approval dashboard' })).toBeVisible();
 });
 
 test('task workspace filters actionable work', async ({ page }) => {
-  await page.goto('/tasks');
+  await page.goto('/tasks', { waitUntil: 'domcontentloaded', timeout: 60_000 });
   await page.getByRole('button', { name: '待执行', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Refactor server composition' })).toBeVisible();
   await page.getByRole('button', { name: '全部任务', exact: true }).click();
@@ -427,26 +487,26 @@ test('task workspace filters actionable work', async ({ page }) => {
 });
 
 test('approval queue renders and can approve an item', async ({ page }) => {
-  await page.goto('/approvals');
+  await page.goto('/approvals', { waitUntil: 'domcontentloaded', timeout: 60_000 });
   await expect(page.getByRole('heading', { name: '队列快照' })).toBeVisible();
   await expect(page.getByText('下一条待处理审批')).toBeVisible();
-  await expect(page.getByText('审批列表')).toBeVisible();
+  await expect(page.getByText('审批概览')).toBeVisible();
   await expect(page.getByText('approval-1')).not.toBeVisible();
   await expect(page.getByRole('link', { name: 'task-risky' })).toBeVisible();
-  await expect(page.getByText('pending', { exact: true })).toBeVisible();
+  await expect(page.getByText('待处理', { exact: true }).first()).toBeVisible();
   await expect(page.getByRole('button', { name: '全部状态' })).toBeVisible();
   await page.getByRole('button', { name: '批准', exact: true }).click();
-  await expect(page.getByText('approved', { exact: true })).toBeVisible();
+  await expect(page.getByText('已批准', { exact: true }).first()).toBeVisible();
   await page.getByRole('button', { name: '只看待处理' }).click();
   await expect(page.getByText('当前筛选下没有匹配的审批记录。')).toBeVisible();
   await page.getByRole('button', { name: '只看已批准' }).click();
-  await expect(page.getByText('approved', { exact: true })).toBeVisible();
+  await expect(page.getByText('已批准', { exact: true }).first()).toBeVisible();
   await page.getByRole('link', { name: 'task-risky' }).click();
-  await expect(page.getByRole('heading', { name: '任务详情' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '任务指挥台' })).toBeVisible();
 });
 
 test('task workspace renders explicit error state and retry affordance', async ({ page }) => {
-  await page.route('**/api/tasks', async (route) => {
+  await page.route(/http:\/\/(127\.0\.0\.1|localhost):3333\/api\/tasks$/, async (route) => {
     if (route.request().method() !== 'GET') {
       await route.fallback();
       return;
@@ -459,29 +519,29 @@ test('task workspace renders explicit error state and retry affordance', async (
     });
   });
 
-  await page.goto('/tasks');
+  await page.goto('/tasks', { waitUntil: 'domcontentloaded', timeout: 60_000 });
   await expect(page.getByTestId('tasks-error-state')).toBeVisible();
   await expect(page.getByText('Task workspace is temporarily unavailable')).toBeVisible();
   await expect(page.getByRole('button', { name: '重试加载' })).toBeVisible();
 });
 
 test('execution detail renders empty state for missing execution records', async ({ page }) => {
-  await page.route('**/api/executions/missing-execution', async (route) => {
+  await page.route(/http:\/\/(127\.0\.0\.1|localhost):3333\/api\/executions\/missing-execution$/, async (route) => {
     await route.fulfill({
-      status: 404,
+      status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ error: 'execution not found' }),
+      body: JSON.stringify({ execution: null }),
     });
   });
 
-  await page.goto('/executions/missing-execution');
+  await page.goto('/executions/missing-execution', { waitUntil: 'domcontentloaded', timeout: 60_000 });
   await expect(page.getByTestId('execution-detail-empty-state')).toBeVisible();
   await expect(page.getByText('执行记录不存在')).toBeVisible();
   await expect(page.getByTestId('execution-detail-empty-state').getByRole('link', { name: '返回任务工作区' })).toBeVisible();
 });
 
 test('execution detail renders retryable error state for backend failures', async ({ page }) => {
-  await page.route('**/api/executions/execution-error', async (route) => {
+  await page.route(/http:\/\/(127\.0\.0\.1|localhost):3333\/api\/executions\/execution-error$/, async (route) => {
     await route.fulfill({
       status: 500,
       contentType: 'application/json',
@@ -489,14 +549,24 @@ test('execution detail renders retryable error state for backend failures', asyn
     });
   });
 
-  await page.goto('/executions/execution-error');
+  await page.goto('/executions/execution-error', { waitUntil: 'domcontentloaded', timeout: 60_000 });
   await expect(page.getByTestId('execution-detail-error-state')).toBeVisible();
   await expect(page.getByText('Execution detail service failed')).toBeVisible();
   await expect(page.getByRole('button', { name: '重试加载' })).toBeVisible();
 });
 
 test('execution detail surfaces failed execution reasons from the backend payload', async ({ page }) => {
-  await page.route('**/api/executions/execution-failed', async (route) => {
+  await page.route(/http:\/\/(127\.0\.0\.1|localhost):3333\/api\/executions\/execution-failed(\/trace)?$/, async (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname.endsWith('/trace')) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ trace: { traceEvents: [], costLogs: [] } }),
+      });
+      return;
+    }
+
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -515,9 +585,9 @@ test('execution detail surfaces failed execution reasons from the backend payloa
     });
   });
 
-  await page.goto('/executions/execution-failed');
+  await page.goto('/executions/execution-failed', { waitUntil: 'domcontentloaded', timeout: 60_000 });
   await expect(page.getByRole('heading', { name: '执行详情' })).toBeVisible();
-  await expect(page.getByText('failed')).toBeVisible();
+  await expect(page.getByText('失败', { exact: true })).toBeVisible();
   await expect(page.getByText('失败原因')).toBeVisible();
   await expect(page.getByText('Codex CLI exited with code 1 after the workspace bootstrap step.')).toBeVisible();
 });

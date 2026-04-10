@@ -63,28 +63,45 @@ export function TaskInfoCard({
   submitting
 }: TaskInfoCardProps) {
   const [isSaving, setIsSaving] = useState(false);
+  const [templateSaveError, setTemplateSaveError] = useState<string | null>(null);
+  const [lastTemplateName, setLastTemplateName] = useState<string | null>(null);
   const statusMessage = getTaskStatusMessage(task.status, task.executionMode);
 
-  const handleSaveTemplate = async () => {
-    const name = prompt('请输入模板名称:', `${task.title} 模板`);
-    if (!name) return;
-
+  const saveTemplateWithName = async (name: string) => {
+    setTemplateSaveError(null);
+    setIsSaving(true);
     try {
-      setIsSaving(true);
       const res = await fetch(`${API_BASE}/tasks/${task.id}/save-template`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name }),
       });
       if (res.ok) {
+        setLastTemplateName(null);
         alert('模板保存成功！您可以在模板中心查看。');
       } else {
-        alert('保存失败，请重试。');
+        const payload = (await res.json().catch(() => ({}))) as { error?: string };
+        const msg = payload.error || `保存失败（${res.status}）`;
+        setTemplateSaveError(msg);
+        setLastTemplateName(name);
       }
     } catch (err) {
-      alert('保存出错：' + String(err));
+      setTemplateSaveError(String(err));
+      setLastTemplateName(name);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleSaveTemplate = async () => {
+    const name = prompt('请输入模板名称:', lastTemplateName || `${task.title} 模板`);
+    if (!name) return;
+    await saveTemplateWithName(name.trim());
+  };
+
+  const handleRetrySaveTemplate = () => {
+    if (lastTemplateName) {
+      void saveTemplateWithName(lastTemplateName);
     }
   };
 
@@ -201,6 +218,25 @@ export function TaskInfoCard({
           <Save size={16} />
           {isSaving ? '正在沉淀...' : '保存为模板'}
         </button>
+        {templateSaveError ? (
+          <div
+            data-testid="task-save-template-error"
+            className="w-full rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800"
+          >
+            <p className="font-bold">模板保存失败</p>
+            <p className="mt-1 text-xs">{templateSaveError}</p>
+            {lastTemplateName ? (
+              <button
+                type="button"
+                onClick={handleRetrySaveTemplate}
+                disabled={isSaving}
+                className="mt-2 rounded-lg border border-rose-300 bg-white px-3 py-1 text-xs font-black text-rose-700 hover:bg-rose-100 disabled:opacity-50"
+              >
+                使用「{lastTemplateName}」重试
+              </button>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </section>
   );

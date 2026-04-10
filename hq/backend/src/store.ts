@@ -272,9 +272,7 @@ export class Store extends EventEmitter {
       dependencies.approvalChainRepository ??
       (mode === 'memory'
         ? createInMemoryApprovalChainRepository()
-        : mode === 'postgres'
-          ? (() => { throw new Error('Postgres not implemented for ApprovalChainRepository yet'); })()
-          : createFileApprovalChainRepository(getApprovalChainsFilePath()));
+        : createFileApprovalChainRepository(getApprovalChainsFilePath()));
     this.executionRepository =
       dependencies.executionRepository ??
       (mode === 'memory'

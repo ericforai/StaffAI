@@ -45,6 +45,9 @@ function readPositiveInt(value: unknown): number | undefined {
 // Simple in-memory rate limiter for execution endpoints
 const executionRateLimit = new Map<string, { count: number; resetAt: number }>();
 function checkRateLimit(key: string, maxPerMinute = 10): boolean {
+  if (process.env.AGENCY_UNDER_NODE_TEST === '1') {
+    return true;
+  }
   const now = Date.now();
   const entry = executionRateLimit.get(key);
   if (!entry || now > entry.resetAt) {

@@ -1,12 +1,11 @@
 import { createWebServerRuntime } from './app/create-web-server-runtime';
-import { McpGateway } from './mcp';
 
 type WebServerRuntimeInput = Parameters<typeof createWebServerRuntime>[0];
 type WebServerRuntime = ReturnType<typeof createWebServerRuntime>;
 
 export class WebServer {
   private runtime: WebServerRuntime;
-  public mcp: McpGateway | null = null;
+  public mcp: WebServerRuntime['mcp'];
 
   constructor(
     scanner: WebServerRuntimeInput['scanner'],

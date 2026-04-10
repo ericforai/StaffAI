@@ -29,3 +29,9 @@ To provide a comprehensive platform for deploying and managing specialized AI ag
 - **Governance**: Auditability and adherence to approval gates for high-risk tasks.
 - **Performance**: Low latency in task routing and execution within the dual-core system.
 - **Cost Efficiency**: Accurate tracking and management of AI usage costs.
+
+## Delivery Lighthouse (in progress)
+
+End-to-end **single main path** from raw idea → clarified spec → plan → staffed task → verifiable artifacts → save as template, with explicit per-step **done criteria** and **failure recovery**. Primary workspace surfaces **current focus + next action + blocker** instead of dashboard-only layouts.
+
+- Spec & plan: `conductor/tracks/delivery_lighthouse_main_path_20260410/spec.md` and `plan.md`.

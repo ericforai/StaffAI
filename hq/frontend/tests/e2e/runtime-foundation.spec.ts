@@ -1,5 +1,7 @@
 import { test, expect, type Page, type Route } from '@playwright/test';
 
+const AGENCY_API_URL_RE = /http:\/\/(127\.0\.0\.1|localhost):3333\/api\//;
+
 function mockRuntimeApi(page: Page) {
   const hosts = [
     {
@@ -58,7 +60,7 @@ function mockRuntimeApi(page: Page) {
     },
   ];
 
-  return page.route('**/api/**', async (route: Route) => {
+  return page.route(AGENCY_API_URL_RE, async (route: Route) => {
     const url = new URL(route.request().url());
     const method = route.request().method();
     const { pathname } = url;
@@ -123,6 +125,15 @@ function mockRuntimeApi(page: Page) {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ events: [] }),
+      });
+      return;
+    }
+
+    if (pathname === '/api/tasks' && method === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ tasks: [] }),
       });
       return;
     }
@@ -280,10 +291,12 @@ function mockRuntimeApi(page: Page) {
       return;
     }
 
+    // Keep the mock suite resilient to newly-added endpoints on the dashboard.
+    // Returning a 404 here can short-circuit UI rendering and create unrelated failures.
     await route.fulfill({
-      status: 404,
+      status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ error: `No mock for ${method} ${pathname}` }),
+      body: JSON.stringify({}),
     });
   });
 }
@@ -293,9 +306,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('renders runtime foundation panel and default recommendations', async ({ page }) => {
-  await page.goto('/');
-
-  await page.getByRole('button', { name: '专家协作' }).click();
+  await page.goto('/brainstorm', { waitUntil: 'domcontentloaded', timeout: 60_000 });
 
   await expect(page.getByText('宿主能力与降级状态')).toBeVisible();
   await expect(page.getByRole('button', { name: 'codex' })).toBeVisible();
@@ -303,9 +314,7 @@ test('renders runtime foundation panel and default recommendations', async ({ pa
 });
 
 test('switches runtime host and shows degraded recommendations', async ({ page }) => {
-  await page.goto('/');
-
-  await page.getByRole('button', { name: '专家协作' }).click();
+  await page.goto('/brainstorm', { waitUntil: 'domcontentloaded', timeout: 60_000 });
   await page.getByRole('button', { name: 'gemini' }).click();
 
   await expect(page.getByText('Fallback to Web UI')).toBeVisible();
@@ -314,9 +323,7 @@ test('switches runtime host and shows degraded recommendations', async ({ page }
 });
 
 test('shows degraded badge and notice after discussion run', async ({ page }) => {
-  await page.goto('/');
-
-  await page.getByRole('button', { name: '专家协作' }).click();
+  await page.goto('/brainstorm', { waitUntil: 'domcontentloaded', timeout: 60_000 });
   await page
     .getByPlaceholder('描述你希望这场专家讨论解决的问题、目标和限制。')
     .fill('debug runtime degraded behavior before release');

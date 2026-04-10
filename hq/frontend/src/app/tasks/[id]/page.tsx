@@ -179,6 +179,24 @@ export default function TaskDetailPage() {
           </Link>
         </div>
 
+        {(data.task.status === 'waiting_approval' || pendingApproval) && (
+          <div
+            data-testid="delivery-approval-banner"
+            className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-300 bg-amber-50 px-5 py-4 text-amber-950 shadow-sm"
+          >
+            <div>
+              <p className="text-xs font-black uppercase tracking-wider text-amber-800">交付阻塞</p>
+              <p className="mt-1 text-sm font-bold">当前任务正在等待审批，通过后方可继续执行。</p>
+            </div>
+            <Link
+              href="/approvals"
+              className="shrink-0 rounded-full border border-amber-400 bg-white px-5 py-2 text-sm font-black text-amber-900 hover:bg-amber-100"
+            >
+              前往审批队列
+            </Link>
+          </div>
+        )}
+
         <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
           {/* Left Column: Task Info & Plan & Artifacts */}
           <div className="space-y-6">

@@ -12,10 +12,18 @@ interface Props {
     onDone: (isComplete: boolean, draft?: RequirementDraft) => void,
     onError: (error: string) => void
   ) => void;
+  /** Fires when user sends a message (for retry / recovery). */
+  onMessageSent?: (message: string) => void;
   loading: boolean;
 }
 
-export function ClarificationPanel({ draft, onSendMessage, onSendMessageStream, loading }: Props) {
+export function ClarificationPanel({
+  draft,
+  onSendMessage,
+  onSendMessageStream,
+  onMessageSent,
+  loading,
+}: Props) {
   const [input, setInput] = useState('');
   const [streamingContent, setStreamingContent] = useState('');
   const [streamingMsgId, setStreamingMsgId] = useState<string | null>(null);
@@ -81,6 +89,7 @@ export function ClarificationPanel({ draft, onSendMessage, onSendMessageStream, 
 
     const message = input.trim();
     setInput('');
+    onMessageSent?.(message);
 
     // Use streaming if available
     if (onSendMessageStream) {

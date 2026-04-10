@@ -1,11 +1,21 @@
 'use client';
 
-import { useMemo, useState, useEffect, Suspense } from 'react';
+import { useMemo, useState, useEffect, Suspense, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTasks } from '../../hooks/useTasks';
 import { useTaskEventFeed } from '../../hooks/useTaskEventFeed';
 import { useAgents } from '../../hooks/useAgents';
+import { useApprovals } from '../../hooks/useApprovals';
+import { deriveDeliveryFocus, type WizardContext } from '../../lib/delivery-focus';
+import {
+  loadDeliveryHeroPrefs,
+  savePinnedTaskId,
+  type DeliveryHeroPrefs,
+} from '../../lib/delivery-hero-prefs';
+import { deliveryAnalytics } from '../../lib/delivery-analytics';
+import { DeliveryLighthouseHero } from '../../components/tasks/DeliveryLighthouseHero';
+import { DeliveryHeroPreferences } from '../../components/tasks/DeliveryHeroPreferences';
 import { API_CONFIG } from '../../utils/constants';
 import { TaskComposer } from '../../components/tasks/TaskComposer';
 import { AdvancedTaskWizard } from '../../components/tasks/AdvancedTaskWizard';
@@ -34,11 +44,21 @@ function TasksPageContent() {
   const { tasks, loading, error, setTasks, reload } = useTasks();
   const { latestSummaryByTaskId } = useTaskEventFeed();
   const { agents, activeIds } = useAgents();
+  const { approvals } = useApprovals();
 
   const [viewMode, setViewMode] = useState<'all' | 'active'>(statusFilter ? 'active' : 'all');
   const [creationMode, setCreationMode] = useState<'simple' | 'advanced'>(initialMode);
   const [newTaskId, setNewTaskId] = useState<string | null>(null);
   const [executing, setExecuting] = useState(false);
+  const [wizardContext, setWizardContext] = useState<WizardContext | null>(null);
+  const [heroPrefs, setHeroPrefs] = useState<DeliveryHeroPrefs>({
+    approvalsOverWizard: false,
+    pinnedTaskId: '',
+  });
+
+  useEffect(() => {
+    setHeroPrefs(loadDeliveryHeroPrefs());
+  }, []);
 
   useEffect(() => {
     if (searchParams.get('mode') === 'advanced') {
@@ -80,26 +100,78 @@ function TasksPageContent() {
     return viewMode === 'active' ? actionableTasks : tasks;
   }, [tasks, statusFilter, viewMode, actionableTasks]);
 
+  const handleWizardContext = useCallback((ctx: WizardContext) => {
+    setWizardContext(ctx);
+  }, []);
+
+  const pinnedTaskTitle = useMemo(() => {
+    if (!heroPrefs.pinnedTaskId) return null;
+    return tasks.find((t) => t.id === heroPrefs.pinnedTaskId)?.title ?? null;
+  }, [tasks, heroPrefs.pinnedTaskId]);
+
+  const handlePinToggle = useCallback(
+    (taskId: string) => {
+      const next = heroPrefs.pinnedTaskId === taskId ? '' : taskId;
+      savePinnedTaskId(next);
+      setHeroPrefs((p) => ({ ...p, pinnedTaskId: next }));
+      if (next) {
+        deliveryAnalytics({ event: 'hero_pin_set', pinnedTaskId: next });
+      } else {
+        deliveryAnalytics({ event: 'hero_pin_clear' });
+      }
+    },
+    [heroPrefs.pinnedTaskId],
+  );
+
+  const deliveryFocus = useMemo(
+    () =>
+      deriveDeliveryFocus({
+        tasks,
+        pendingApprovals: approvals,
+        creationMode,
+        wizardContext: creationMode === 'advanced' ? wizardContext : null,
+        prefs: {
+          approvalsOverWizard: heroPrefs.approvalsOverWizard,
+          pinnedTaskId: heroPrefs.pinnedTaskId,
+        },
+      }),
+    [tasks, approvals, creationMode, wizardContext, heroPrefs.approvalsOverWizard, heroPrefs.pinnedTaskId],
+  );
+
   return (
     <div className="mx-auto w-full max-w-[1800px]">
-      {creationMode === 'simple' ? (
-        <TaskComposer
-          agents={agents}
-          activeIds={activeIds}
-          onTaskCreated={(task) => {
-            setTasks((current) => [task, ...current]);
-            setNewTaskId(task.id);
-          }}
-          onSwitchToAdvanced={() => setCreationMode('advanced')}
-        />
-      ) : (
-        <AdvancedTaskWizard
-          onTaskCreated={(taskId) => {
-            router.push(`/tasks/${taskId}`);
-          }}
-          onCancel={() => setCreationMode('simple')}
-        />
-      )}
+      <DeliveryLighthouseHero
+        focus={deliveryFocus}
+        preferencesSlot={
+          <DeliveryHeroPreferences
+            prefs={heroPrefs}
+            onPrefsChange={setHeroPrefs}
+            pinnedTaskTitle={pinnedTaskTitle}
+          />
+        }
+      />
+
+      <div id="delivery-wizard" className="scroll-mt-4">
+        {creationMode === 'simple' ? (
+          <TaskComposer
+            agents={agents}
+            activeIds={activeIds}
+            onTaskCreated={(task) => {
+              setTasks((current) => [task, ...current]);
+              setNewTaskId(task.id);
+            }}
+            onSwitchToAdvanced={() => setCreationMode('advanced')}
+          />
+        ) : (
+          <AdvancedTaskWizard
+            onTaskCreated={(taskId) => {
+              router.push(`/tasks/${taskId}`);
+            }}
+            onCancel={() => setCreationMode('simple')}
+            onWizardContextChange={handleWizardContext}
+          />
+        )}
+      </div>
 
       <div className="mt-5 rounded-[1.8rem] border border-slate-200 bg-white p-6 shadow-sm">
         <TaskFilter
@@ -142,7 +214,10 @@ function TasksPageContent() {
         {loading && <p className="text-sm text-slate-600">正在加载任务...</p>}
 
         {error && (
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-rose-200 bg-rose-50 p-4">
+          <div
+            data-testid="tasks-error-state"
+            className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-rose-200 bg-rose-50 p-4"
+          >
             <div>
               <p className="text-xs font-black uppercase tracking-[0.2em] text-rose-500">任务加载失败</p>
               <p className="mt-2 text-sm text-rose-600">{error}</p>
@@ -185,6 +260,8 @@ function TasksPageContent() {
               key={task.id}
               task={task}
               latestSummary={latestSummaryByTaskId.get(task.id)}
+              pinnedTaskId={heroPrefs.pinnedTaskId}
+              onPinToggle={handlePinToggle}
             />
           ))}
         </div>

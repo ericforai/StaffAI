@@ -657,11 +657,16 @@ export async function runTaskExecution(
   const completedOrFailed =
     finalizedExecution ??
     failExecution({ ...started, executor: resolvedExecutor, runtimeName: resolvedRuntimeName }, {
-      errorMessage: lastError?.message || '执行失败',
+      // Failed CLI-driven runtimes (and timeouts) should be treated as degraded so downstream
+      // systems can distinguish "no output" vs "output was attempted but runtime failed".
+      degraded:
+        Boolean(input.degraded) ||
+        ['codex', 'claude', 'gemini'].includes((resolvedExecutor ?? input.executor ?? '').toLowerCase()) ||
+        lastError?.code === 'timeout',
+      errorMessage: formatRuntimeFailureMessage(resolvedExecutor ?? input.executor, lastError?.message || '执行失败'),
       retryCount: finalAttempt,
       maxRetries,
       timeoutMs,
-      degraded: input.degraded,
       structuredError: lastError,
     });
   await store.updateExecution(started.id, () => completedOrFailed);
@@ -916,4 +921,15 @@ function toRuntimeError(error: unknown, timeoutMs: number): RuntimeExecutionErro
     message,
     retriable,
   };
+}
+
+function formatRuntimeFailureMessage(executor: string | undefined, message: string): string {
+  const normalized = message?.trim() ? message.trim() : 'Execution failed';
+  if (!executor) {
+    return normalized;
+  }
+  if (/^Error executing\s+\w+:/i.test(normalized)) {
+    return normalized;
+  }
+  return `Error executing ${executor}: ${normalized}`;
 }

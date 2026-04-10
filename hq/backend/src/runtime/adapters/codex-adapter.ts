@@ -15,7 +15,7 @@ export class CodexRuntimeAdapter implements RuntimeAdapter {
     // Test mode: return mock data
     if (process.env.AGENCY_UNDER_NODE_TEST === '1' && process.env.AGENCY_TEST_MODE === 'mock') {
       return {
-        outputSummary: 'Mocked Codex output for testing',
+        outputSummary: context.summary || 'Mocked Codex output for testing',
         outputSnapshot: {
           runtimeName: this.name,
           executor: 'codex',

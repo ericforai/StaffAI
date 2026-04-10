@@ -74,6 +74,16 @@ function sortExecutionsByMostRecent(executions: ExecutionRecord[]): ExecutionRec
   });
 }
 
+function ensureExecutionHasStartedAt(execution: ExecutionRecord): ExecutionRecord {
+  if (execution.startedAt) {
+    return execution;
+  }
+  return {
+    ...execution,
+    startedAt: execution.completedAt || execution.endedAt || new Date().toISOString(),
+  };
+}
+
 function countByStatus(executions: ExecutionRecord[]): Record<string, number> {
   const counts: Record<string, number> = {};
   for (const execution of executions) {
@@ -279,7 +289,7 @@ export function registerExecutionRoutes(
 
       return true;
     });
-    const sorted = sortExecutionsByMostRecent(matched);
+    const sorted = sortExecutionsByMostRecent(matched).map(ensureExecutionHasStartedAt);
     const limited = typeof limit === 'number' ? sorted.slice(0, limit) : sorted;
     const projected = limited.map((execution) => projectExecution(execution, fields));
 

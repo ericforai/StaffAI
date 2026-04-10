@@ -93,7 +93,14 @@ export function createWebServerRuntime({
   const app = express();
   const allowedOrigins = process.env.CORS_ORIGINS
     ? process.env.CORS_ORIGINS.split(',').map((o) => o.trim())
-    : ['http://localhost:8888', 'http://127.0.0.1:8888', 'http://localhost:3008', 'http://127.0.0.1:3008'];
+    : [
+        'http://localhost:8888',
+        'http://127.0.0.1:8888',
+        'http://localhost:3008',
+        'http://127.0.0.1:3008',
+        'http://localhost:3010',
+        'http://127.0.0.1:3010',
+      ];
   app.use(cors({ origin: allowedOrigins }));
   app.use(express.json());
 

@@ -5,15 +5,20 @@ export default defineConfig({
   fullyParallel: true,
   retries: 0,
   use: {
-    baseURL: 'http://127.0.0.1:3008',
+    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:3010',
     trace: 'on-first-retry',
+    navigationTimeout: 60_000,
   },
+  // Production server: next dev HMR WebSocket often fails under Playwright, leaving client hooks
+  // (useTasks, etc.) without running effects — no API fetch and perpetual loading states.
   webServer: {
-    command: 'npm run dev -- --hostname 127.0.0.1 --port 3008',
+    command:
+      'npm run build && npx next start --hostname 127.0.0.1 --port ' +
+      (process.env.PLAYWRIGHT_FRONTEND_PORT ?? '3010'),
     cwd: __dirname,
-    url: 'http://127.0.0.1:3008',
+    url: process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:3010',
     reuseExistingServer: !process.env.CI,
-    timeout: 120000,
+    timeout: 300000,
   },
   projects: [
     {
