@@ -29,7 +29,14 @@
 
 - [x] **E1** Playwright：`delivery lighthouse`、`advanced wizard`、`task-risky` 横幅。
 - [x] **E2** 手测走查：`manual-qa-report.md`（§3 对照 + Happy path + F1/F2）；缺口 `github-issues-draft.md`。**「手测结果」列须真人勾选签收。**
-- [x] **E3** `CI=1 npm run test:e2e` 全绿（15/15）。
+- [x] **E3** `CI=1 npm run test:e2e` 全绿（随用例增长更新计数；当前 18/18）。
+
+## Phase F — QA 缺口落地（DL-01 / DL-03 / DL-04 + 文档）
+
+- [x] **F1** S0：`AdvancedTaskWizard` — `sessionStorage` + URL `intentId` 恢复；建任务成功后清除。
+- [x] **F2** S8：`TaskInfoCard` — 保存模板模态框，替代 `prompt`/`alert`。
+- [x] **F3** E2E：mock `POST/GET /api/intents` + **创建 intent 500 → 重试成功** + **S0 简易/高级切换恢复草稿**。
+- [x] **F4** 文档：`spec.md` §8–§9、`manual-qa-report.md` 与 DL-02 说明对齐。
 
 ## Checkpoint
 

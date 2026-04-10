@@ -2,6 +2,8 @@
 
 复制下列标题与正文到 GitHub New Issue（可打标签 `delivery-lighthouse`、`qa`、`frontend`）。
 
+**仓库内落地状态（2026-04-10）：** DL-01 / DL-03 / DL-04 已在 `hq/frontend` 实现；DL-02 已由 `ArtifactsPanel` 复制/导出覆盖（spec §8 已同步）。若无需对外建 Issue，可将对应段落归档。
+
 ---
 
 ## DL-01 — 简易/高级切换时保留 intent 草稿

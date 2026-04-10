@@ -82,7 +82,16 @@
 
 1. **焦点仲裁（简易模式 /tasks）**：`deriveDeliveryFocus` 优先级为 — **待处理审批（全队列）** → **执行中任务** → **`waiting_approval` 任务** → **其他未完成（按 `updatedAt` 最新）** → **空闲**。高级向导模式下 **始终以向导进度为 Hero 焦点**（审批不抢占，避免打断漏斗）。  
 2. **跳过澄清**：**首版不做**；仅提供澄清失败后的 **重试**（非流式 `sendMessage` 重发上一句）。  
-3. **产出物 MVP**：沿用任务详情 **Assignments → Artifacts** 中的 **结构化正文展示**；空态保留 `delivery-artifacts-panel` 测点。下载/外链列为后续迭代。
+3. **产出物 MVP**：任务详情 **Assignments → Artifacts** 提供 **结构化正文**；`ArtifactsPanel` 另支持 **复制全文、单条/合并导出 Markdown**（满足 spec §3 **S7**「结构化摘要」及可带走的导出形态）。外链/独立下载文件列为后续迭代。
+
+## 9. QA / 工程收口（与 `manual-qa-report.md` 对齐）
+
+| 编号 | 主题 | 行为 / 验收 |
+|------|------|-------------|
+| **DL-01** | S0 模式切换保留 intent | `sessionStorage` 键 `staffai-intent-draft-id`；从简易再进高级时若已有草稿：`/tasks` 页用 **`location.assign` 带上 `intentId`**（保证地址栏与 `useSearchParams` 同步）；向导内仍保留 `router.replace` 兜底。任务从 intent 创建成功后清除 session。Playwright：`S0: simple and advanced toggle preserves intent draft via sessionStorage`。 |
+| **DL-02** | S7 产出物 | 以 Artifacts 正文 + 导出为准；手测表「仅正文」表述作废。 |
+| **DL-03** | S8 存模板 | 任务详情「保存为模板」使用 **模态框**（`data-testid="save-template-modal"`），成功后用 **内联提示** + 链到 `/templates`，禁止 `prompt`/`alert`。 |
+| **DL-04** | F2 向导 API 失败 | Playwright：`POST /api/intents` 首次 500、重试后成功，断言进入澄清步。 |
 
 ---
 

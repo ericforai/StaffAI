@@ -65,6 +65,9 @@ export function TaskInfoCard({
   const [isSaving, setIsSaving] = useState(false);
   const [templateSaveError, setTemplateSaveError] = useState<string | null>(null);
   const [lastTemplateName, setLastTemplateName] = useState<string | null>(null);
+  const [saveTemplateModalOpen, setSaveTemplateModalOpen] = useState(false);
+  const [templateNameDraft, setTemplateNameDraft] = useState('');
+  const [templateSaveSuccess, setTemplateSaveSuccess] = useState<string | null>(null);
   const statusMessage = getTaskStatusMessage(task.status, task.executionMode);
 
   const saveTemplateWithName = async (name: string) => {
@@ -78,7 +81,8 @@ export function TaskInfoCard({
       });
       if (res.ok) {
         setLastTemplateName(null);
-        alert('模板保存成功！您可以在模板中心查看。');
+        setSaveTemplateModalOpen(false);
+        setTemplateSaveSuccess('模板已保存。可在模板中心查看或从模板快速发起任务。');
       } else {
         const payload = (await res.json().catch(() => ({}))) as { error?: string };
         const msg = payload.error || `保存失败（${res.status}）`;
@@ -93,10 +97,16 @@ export function TaskInfoCard({
     }
   };
 
-  const handleSaveTemplate = async () => {
-    const name = prompt('请输入模板名称:', lastTemplateName || `${task.title} 模板`);
+  const openSaveTemplateModal = () => {
+    setTemplateSaveSuccess(null);
+    setTemplateNameDraft((lastTemplateName || `${task.title} 模板`).trim());
+    setSaveTemplateModalOpen(true);
+  };
+
+  const handleSaveTemplateFromModal = async () => {
+    const name = templateNameDraft.trim();
     if (!name) return;
-    await saveTemplateWithName(name.trim());
+    await saveTemplateWithName(name);
   };
 
   const handleRetrySaveTemplate = () => {
@@ -107,6 +117,54 @@ export function TaskInfoCard({
 
   return (
     <section className="rounded-[1.8rem] border border-slate-200 bg-white/88 p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)]">
+      {saveTemplateModalOpen ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          data-testid="save-template-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="save-template-modal-title"
+        >
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
+            <h3 id="save-template-modal-title" className="text-lg font-black text-slate-900">
+              保存为模板
+            </h3>
+            <p className="mt-1 text-sm text-slate-500">将当前任务沉淀为可复用模板，便于一键发起相似交付。</p>
+            <label className="mt-4 block text-xs font-black tracking-[0.16em] text-slate-500" htmlFor="save-template-name-input">
+              模板名称
+            </label>
+            <input
+              id="save-template-name-input"
+              type="text"
+              value={templateNameDraft}
+              onChange={(e) => setTemplateNameDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') void handleSaveTemplateFromModal();
+              }}
+              className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none focus:border-slate-400"
+              autoFocus
+            />
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setSaveTemplateModalOpen(false)}
+                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-600 hover:bg-slate-50"
+              >
+                取消
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleSaveTemplateFromModal()}
+                disabled={isSaving || !templateNameDraft.trim()}
+                className="rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-black text-sky-800 hover:bg-sky-100 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isSaving ? '保存中…' : '保存'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <h2 className="text-2xl font-black text-slate-950">{task.title}</h2>
       <div className="mt-3 text-sm leading-7 text-slate-600 prose prose-sm prose-slate max-w-none">
         <ReactMarkdown>{task.description}</ReactMarkdown>
@@ -211,13 +269,27 @@ export function TaskInfoCard({
         </Link>
         <button
           type="button"
-          onClick={handleSaveTemplate}
+          onClick={openSaveTemplateModal}
           disabled={isSaving}
           className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 transition-all hover:border-slate-300 hover:text-slate-950 flex items-center gap-2 disabled:opacity-50"
         >
           <Save size={16} />
           {isSaving ? '正在沉淀...' : '保存为模板'}
         </button>
+        {templateSaveSuccess ? (
+          <div
+            data-testid="save-template-success"
+            className="w-full rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900"
+          >
+            <p>{templateSaveSuccess}</p>
+            <Link
+              href="/templates"
+              className="mt-2 inline-block text-xs font-black text-emerald-800 underline hover:text-emerald-950"
+            >
+              打开模板中心
+            </Link>
+          </div>
+        ) : null}
         {templateSaveError ? (
           <div
             data-testid="task-save-template-error"

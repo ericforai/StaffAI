@@ -160,7 +160,21 @@ function TasksPageContent() {
               setTasks((current) => [task, ...current]);
               setNewTaskId(task.id);
             }}
-            onSwitchToAdvanced={() => setCreationMode('advanced')}
+            onSwitchToAdvanced={() => {
+              if (typeof window === 'undefined') {
+                setCreationMode('advanced');
+                return;
+              }
+              const savedId = sessionStorage.getItem('staffai-intent-draft-id')?.trim();
+              if (savedId) {
+                const params = new URLSearchParams(window.location.search);
+                params.set('mode', 'advanced');
+                params.set('intentId', savedId);
+                window.location.assign(`${window.location.pathname}?${params.toString()}`);
+                return;
+              }
+              setCreationMode('advanced');
+            }}
           />
         ) : (
           <AdvancedTaskWizard

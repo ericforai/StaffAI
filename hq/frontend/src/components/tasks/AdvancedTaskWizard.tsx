@@ -1,13 +1,17 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useIntentWizard } from '../../hooks/useIntentWizard';
 import { deliveryAnalytics } from '../../lib/delivery-analytics';
 import { ClarificationPanel } from '../intent/ClarificationPanel';
 import { DesignConfirmPanel } from '../intent/DesignConfirmPanel';
 import { PlanPreviewPanel } from '../intent/PlanPreviewPanel';
 import { IntentWizardStepRail } from './IntentWizardStepRail';
+import {
+  clearIntentDraftSession,
+  INTENT_DRAFT_SESSION_KEY,
+} from '../../lib/intent-draft-session';
 
 interface AdvancedTaskWizardProps {
   onTaskCreated: (taskId: string) => void;
@@ -52,11 +56,44 @@ export function AdvancedTaskWizard({ onTaskCreated, onCancel, onWizardContextCha
   const { state, createIntent, sendMessage, sendMessageStream, confirmDesign, createTask, loadIntent } =
     useIntentWizard();
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const intentId = searchParams.get('intentId');
   const [lastRawInput, setLastRawInput] = useState('');
   const [lastClarifyMessage, setLastClarifyMessage] = useState('');
   const prevStepRef = useRef(state.step);
   const lastLoggedErrorRef = useRef<string | null>(null);
+  const resumeFromSessionDoneRef = useRef(false);
+
+  /** S0：简易 ↔ 高级切换时保留未完成 intent（sessionStorage + URL intentId） */
+  useEffect(() => {
+    if (resumeFromSessionDoneRef.current) return;
+    if (intentId) {
+      resumeFromSessionDoneRef.current = true;
+      return;
+    }
+    if (typeof window === 'undefined') return;
+    const saved = sessionStorage.getItem(INTENT_DRAFT_SESSION_KEY)?.trim();
+    if (!saved) {
+      resumeFromSessionDoneRef.current = true;
+      return;
+    }
+    resumeFromSessionDoneRef.current = true;
+    const params = new URLSearchParams(window.location.search);
+    params.set('mode', 'advanced');
+    params.set('intentId', saved);
+    router.replace(`${pathname}?${params.toString()}`);
+  }, [intentId, pathname, router]);
+
+  useEffect(() => {
+    const id = state.draft?.id;
+    if (!id) return;
+    try {
+      sessionStorage.setItem(INTENT_DRAFT_SESSION_KEY, id);
+    } catch {
+      /* ignore quota */
+    }
+  }, [state.draft?.id]);
 
   useEffect(() => {
     if (intentId && !state.draft && !state.loading) {
@@ -141,6 +178,7 @@ export function AdvancedTaskWizard({ onTaskCreated, onCancel, onWizardContextCha
       const taskId = await createTask();
       if (taskId) {
         deliveryAnalytics({ event: 'wizard_create_task_success', taskId, intentId: state.draft?.id });
+        clearIntentDraftSession();
         onTaskCreated(taskId);
       }
     }
@@ -210,10 +248,21 @@ export function AdvancedTaskWizard({ onTaskCreated, onCancel, onWizardContextCha
     return (
       <div className="rounded-[1.8rem] border border-slate-200 bg-white p-8 shadow-sm">
         <IntentWizardStepRail step={1} />
-        <h2 className="text-2xl font-black text-slate-900 mb-2">完善你的需求</h2>
-        <p className="text-xs font-semibold text-slate-500 mb-6" data-testid="intent-step-completion-hint">
-          完成条件：与 AI 对齐需求，直至系统允许进入「确认设计方案」。
-        </p>
+        <div className="mb-6 flex items-start justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-black text-slate-900">完善你的需求</h2>
+            <p className="mt-2 text-xs font-semibold text-slate-500" data-testid="intent-step-completion-hint">
+              完成条件：与 AI 对齐需求，直至系统允许进入「确认设计方案」。
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="shrink-0 text-sm font-bold text-slate-400 hover:text-slate-600"
+          >
+            返回简易模式
+          </button>
+        </div>
         <ClarificationPanel
           draft={state.draft}
           onSendMessage={async (message) => {
@@ -291,6 +340,7 @@ export function AdvancedTaskWizard({ onTaskCreated, onCancel, onWizardContextCha
             const taskId = await createTask();
             if (taskId) {
               deliveryAnalytics({ event: 'wizard_create_task_success', taskId, intentId: state.draft?.id });
+              clearIntentDraftSession();
               onTaskCreated(taskId);
             }
           }}

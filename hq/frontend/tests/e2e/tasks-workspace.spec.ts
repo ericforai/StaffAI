@@ -74,6 +74,21 @@ function mockTaskWorkspaceApi(page: Page) {
     },
   ];
 
+  const buildE2eIntentDraft = (rawInput = '') => ({
+    id: 'intent-e2e-draft',
+    rawInput,
+    status: 'clarifying' as const,
+    clarificationMessages: [] as Array<{ id: string; role: 'user' | 'assistant'; content: string; timestamp: string }>,
+    designSummary: null,
+    implementationPlan: null,
+    suggestedAutonomyLevel: 'L1' as const,
+    suggestedScenario: null,
+    confidenceScore: 0.3,
+    createdTaskId: null,
+    createdAt: '2026-03-24T00:00:00.000Z',
+    updatedAt: '2026-03-24T00:00:00.000Z',
+  });
+
   return page.route(AGENCY_API_URL_RE, async (route: Route) => {
     const url = new URL(route.request().url());
     const { pathname } = url;
@@ -164,6 +179,31 @@ function mockTaskWorkspaceApi(page: Page) {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ recommendations: [] }),
+      });
+      return;
+    }
+
+    if (pathname === '/api/intents' && method === 'POST') {
+      let rawInput = '';
+      try {
+        const body = JSON.parse(route.request().postData() || '{}') as { rawInput?: string };
+        rawInput = body.rawInput ?? '';
+      } catch {
+        rawInput = '';
+      }
+      await route.fulfill({
+        status: 201,
+        contentType: 'application/json',
+        body: JSON.stringify(buildE2eIntentDraft(rawInput)),
+      });
+      return;
+    }
+
+    if (pathname === '/api/intents/intent-e2e-draft' && method === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(buildE2eIntentDraft('e2e-resumed')),
       });
       return;
     }
@@ -457,6 +497,54 @@ test('advanced wizard shows step rail and completion hint', async ({ page }) => 
   await page.goto('/tasks?mode=advanced', { waitUntil: 'domcontentloaded', timeout: 60_000 });
   await expect(page.getByTestId('intent-wizard-steps')).toBeVisible();
   await expect(page.getByTestId('intent-step-completion-hint')).toContainText('完成条件');
+});
+
+test('advanced wizard: create intent API fails then retry succeeds', async ({ page }) => {
+  let postAttempts = 0;
+  await page.route(AGENCY_API_URL_RE, async (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname === '/api/intents' && route.request().method() === 'POST') {
+      postAttempts += 1;
+      if (postAttempts === 1) {
+        await route.fulfill({
+          status: 500,
+          contentType: 'application/json',
+          body: JSON.stringify({ error: 'intent service unavailable' }),
+        });
+        return;
+      }
+    }
+    await route.fallback();
+  });
+
+  await page.goto('/tasks?mode=advanced', { waitUntil: 'domcontentloaded', timeout: 60_000 });
+  await page.locator('textarea').first().fill('E2E intent retry flow');
+  await page.getByRole('button', { name: '开始需求对齐' }).click();
+
+  await expect(page.getByTestId('intent-wizard-error')).toBeVisible();
+  await expect(page.getByTestId('intent-wizard-error')).toContainText('Failed to create intent');
+
+  await page.getByRole('button', { name: '重试创建需求' }).click();
+  await expect(page.getByRole('heading', { name: '完善你的需求' })).toBeVisible();
+  expect(postAttempts).toBe(2);
+});
+
+test('S0: simple and advanced toggle preserves intent draft via sessionStorage', async ({ page }) => {
+  await page.goto('/tasks?mode=advanced', { waitUntil: 'domcontentloaded', timeout: 60_000 });
+
+  await page.locator('textarea').first().fill('Draft survives mode switch');
+  await page.getByRole('button', { name: '开始需求对齐' }).click();
+  await expect(page.getByRole('heading', { name: '完善你的需求' })).toBeVisible();
+
+  expect(await page.evaluate(() => sessionStorage.getItem('staffai-intent-draft-id'))).toBe('intent-e2e-draft');
+
+  await page.getByRole('button', { name: '返回简易模式' }).click();
+  await expect(page.getByRole('heading', { name: '发起新任务' })).toBeVisible();
+  expect(await page.evaluate(() => sessionStorage.getItem('staffai-intent-draft-id'))).toBe('intent-e2e-draft');
+
+  await page.getByRole('button', { name: /使用 AI 向导/ }).click();
+  await page.waitForURL(/intentId=intent-e2e-draft/, { timeout: 30_000 });
+  await expect(page.getByRole('heading', { name: '完善你的需求' })).toBeVisible({ timeout: 20_000 });
 });
 
 test('task detail shows delivery approval banner when task waits for approval', async ({ page }) => {
