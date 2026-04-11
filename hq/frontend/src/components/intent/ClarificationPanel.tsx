@@ -79,7 +79,9 @@ export function ClarificationPanel({
   }, []);
 
   const handleError = useCallback((error: string) => {
-    console.error('[ClarificationPanel] Stream error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('[ClarificationPanel] Stream error:', error);
+    }
     setStreamingContent('');
     setStreamingMsgId(null);
   }, []);
@@ -99,11 +101,13 @@ export function ClarificationPanel({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== 'Enter' || e.shiftKey) return;
+    // Do not intercept Enter while IME is composing (e.g. 拼音选词), or input cannot commit / send.
+    const ne = e.nativeEvent as KeyboardEvent & { isComposing?: boolean };
+    if (ne.isComposing || ne.keyCode === 229) return;
+    e.preventDefault();
+    handleSend();
   };
 
   return (
@@ -171,6 +175,7 @@ export function ClarificationPanel({
               disabled={loading}
             />
             <button
+              type="button"
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
               onClick={handleSend}
               disabled={loading || !input.trim()}

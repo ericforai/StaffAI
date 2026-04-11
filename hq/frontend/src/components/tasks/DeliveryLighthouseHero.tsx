@@ -17,7 +17,7 @@ export function DeliveryLighthouseHero({ focus, preferencesSlot }: DeliveryLight
   return (
     <section
       data-testid="delivery-lighthouse-hero"
-      className="mb-5 rounded-[1.8rem] border border-sky-200/80 bg-gradient-to-br from-sky-50/90 via-white to-white p-6 shadow-sm ring-1 ring-sky-100/60"
+      className="relative z-0 mb-5 rounded-[1.8rem] border border-sky-200/80 bg-gradient-to-br from-sky-50/90 via-white to-white p-6 shadow-sm ring-1 ring-sky-100/60"
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="flex gap-4">

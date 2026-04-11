@@ -151,7 +151,7 @@ function TasksPageContent() {
         }
       />
 
-      <div id="delivery-wizard" className="scroll-mt-4">
+      <div id="delivery-wizard" className="scroll-mt-4 relative z-10">
         {creationMode === 'simple' ? (
           <TaskComposer
             agents={agents}

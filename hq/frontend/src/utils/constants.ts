@@ -48,9 +48,10 @@ export function getWsUrl() {
   return process.env.NEXT_PUBLIC_WS_URL || getDefaultWsUrl();
 }
 
-export function getApiBaseUrl() {
-  const url = process.env.NEXT_PUBLIC_API_URL || getDefaultApiUrl();
-  return url;
+export function getApiBaseUrl(): string {
+  const fromEnv = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (fromEnv) return fromEnv;
+  return getDefaultApiUrl();
 }
 
 // WebSocket 配置
@@ -59,10 +60,12 @@ export const WS_CONFIG = {
   RECONNECT_DELAY: 3000,
 } as const;
 
-// API 配置
+// API 配置（getter：浏览器端按当前页 hostname 解析后端，避免 SSR 把 BASE_URL 固定成 localhost 导致局域网访问失败）
 export const API_CONFIG = {
-  BASE_URL: getApiBaseUrl(),
-} as const;
+  get BASE_URL(): string {
+    return getApiBaseUrl();
+  },
+};
 
 // UI 配置
 export const UI_CONFIG = {

@@ -101,7 +101,44 @@ export function createWebServerRuntime({
         'http://localhost:3010',
         'http://127.0.0.1:3010',
       ];
-  app.use(cors({ origin: allowedOrigins }));
+
+  /** 允许通过局域网 IP 打开前端（如 Next 的 Network URL）；生产环境默认关闭，可用 CORS_ORIGINS 或 AGENCY_DEV_LAN_CORS=1。 */
+  const allowLanOrigins =
+    process.env.NODE_ENV !== 'production' || process.env.AGENCY_DEV_LAN_CORS === '1';
+
+  function isPrivateLanHostname(hostname: string): boolean {
+    if (hostname === 'localhost' || hostname === '127.0.0.1') return true;
+    return /^(10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})$/.test(
+      hostname,
+    );
+  }
+
+  app.use(
+    cors({
+      origin(origin, callback) {
+        if (!origin) {
+          callback(null, true);
+          return;
+        }
+        if (allowedOrigins.includes(origin)) {
+          callback(null, true);
+          return;
+        }
+        if (allowLanOrigins) {
+          try {
+            const u = new URL(origin);
+            if ((u.protocol === 'http:' || u.protocol === 'https:') && isPrivateLanHostname(u.hostname)) {
+              callback(null, true);
+              return;
+            }
+          } catch {
+            /* ignore */
+          }
+        }
+        callback(null, false);
+      },
+    }),
+  );
   app.use(express.json());
 
   const server = http.createServer(app);

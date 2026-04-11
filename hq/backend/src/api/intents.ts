@@ -168,7 +168,8 @@ export function registerIntentRoutes(app: Application, store: Store) {
 
       // Stream from Workshop LLM
       const streamingClient = brainstormingService.getStreamingClient();
-      let isComplete = false;
+      /** True once we emit a terminal `done` SSE frame (LLM or fallback). */
+      let sseDoneSent = false;
       let assistantMsgId: string | null = null;
 
       for await (const event of streamingClient.streamClarification(draft, message)) {
@@ -187,7 +188,7 @@ export function registerIntentRoutes(app: Application, store: Store) {
             isComplete: event.isComplete,
             draft: draft
           })}\n\n`);
-          isComplete = true;
+          sseDoneSent = true;
         } else if (event.content) {
           if (!assistantMsgId) {
             assistantMsgId = `msg_${Date.now()}_a`;
@@ -214,12 +215,18 @@ export function registerIntentRoutes(app: Application, store: Store) {
         }
       }
 
-      if (!isComplete) {
+      if (!sseDoneSent) {
         // Update confidence score based on exchange count
         const userMsgCount = draft.clarificationMessages.filter(m => m.role === 'user').length;
         draft.confidenceScore = Math.min(0.4 + (userMsgCount * 0.15), 0.85);
         draft.updatedAt = new Date().toISOString();
         await store.saveRequirementDraft(draft);
+        // Always emit terminal `done` so the client merges `draft` and clears loading.
+        res.write(`data: ${JSON.stringify({
+          type: 'done',
+          isComplete: false,
+          draft,
+        })}\n\n`);
       }
 
       res.end();

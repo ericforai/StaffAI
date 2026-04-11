@@ -35,11 +35,13 @@ export function TaskComposer({ agents, activeIds, onTaskCreated, onSwitchToAdvan
           <p className="text-[11px] font-black tracking-[0.2em] text-slate-500">新建任务</p>
           <h2 className="mt-2 text-2xl font-black text-slate-900">发起新任务</h2>
         </div>
-        <button 
+        <button
+          type="button"
           onClick={onSwitchToAdvanced}
-          className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold text-slate-600 hover:border-slate-300 hover:bg-slate-100 transition-all flex items-center gap-2"
+          className="relative z-[1] cursor-pointer rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-bold text-slate-600 hover:border-slate-300 hover:bg-slate-100 transition-all flex items-center gap-2"
+          aria-label="切换到 AI 需求向导"
         >
-          <span>✨</span> 使用 AI 向导
+          <span aria-hidden>✨</span> 使用 AI 向导
         </button>
       </div>
 
