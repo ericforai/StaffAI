@@ -1,6 +1,6 @@
 import { test, expect, type Page, type Route } from '@playwright/test';
 
-const AGENCY_API_URL_RE = /http:\/\/(127\.0\.0\.1|localhost):3333\/api\//;
+const AGENCY_API_URL_RE = /http:\/\/(127\.0\.0\.1|localhost):(3010|3333)\/api\//;
 
 function mockRuntimeApi(page: Page) {
   const hosts = [

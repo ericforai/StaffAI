@@ -7,6 +7,7 @@ import { ArrowLeft, ShieldCheck, Target, TrendingUp, Award, BrainCircuit } from 
 import { useAgentMemory } from '../../../hooks/useAgentMemory';
 import { AgentGrowthTimeline } from '../../../components/AgentGrowthTimeline';
 import type { Agent } from '../../../types/domain';
+import { getApiBaseUrl } from '../../../utils/constants';
 
 export default function AgentProfilePage() {
   const params = useParams<{ id: string }>();
@@ -15,12 +16,11 @@ export default function AgentProfilePage() {
   const { memory, loading, error } = useAgentMemory(agentId);
   const [agent, setAgent] = useState<Agent | null>(null);
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333/api';
-
   useEffect(() => {
     async function loadAgent() {
       try {
-        const res = await fetch(`${API_BASE}/agents/${agentId}`);
+        const api = getApiBaseUrl();
+        const res = await fetch(`${api}/agents/${agentId}`, { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
           setAgent(data);
@@ -30,7 +30,7 @@ export default function AgentProfilePage() {
       }
     }
     void loadAgent();
-  }, [agentId, API_BASE]);
+  }, [agentId]);
 
   if (!agent) return <div className="p-20 text-center">正在加载档案...</div>;
 

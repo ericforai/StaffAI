@@ -1,7 +1,7 @@
 import { test, expect, type Page, type Route } from '@playwright/test';
 
-// Client calls the backend on port 3333 (see getDefaultApiUrl). Match full URL — not only same-origin.
-const AGENCY_API_URL_RE = /http:\/\/(127\.0\.0\.1|localhost):3333\/api\//;
+// Browser uses same-origin /api (Next rewrites to HQ) in dev/start; CI may still hit :3333 directly.
+const AGENCY_API_URL_RE = /http:\/\/(127\.0\.0\.1|localhost):(3010|3333)\/api\//;
 
 function mockTaskWorkspaceApi(page: Page) {
   const tasks = [

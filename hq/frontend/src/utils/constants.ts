@@ -37,11 +37,26 @@ function getDefaultWsUrl() {
 }
 
 function getDefaultApiUrl() {
-  const host = getBrowserBackendHost();
-  const actualHost = host === 'localhost' || !host ? 'localhost' : host;
+  if (typeof window !== 'undefined') {
+    // 浏览器：同源 /api → next.config rewrites 转发到 HQ，避免跨域、局域网主机名、::1/127.0.0.1 混用导致的 fetch failed
+    return '/api';
+  }
+  // SSR / 无 window：Node 直连后端（127.0.0.1 减少 IPv6 localhost 歧义）
+  return `http://127.0.0.1:${DEFAULT_BACKEND_PORT}/api`;
+}
 
-  const protocol = typeof window !== 'undefined' && window.location.protocol === 'https:' && actualHost !== '127.0.0.1' ? 'https' : 'http';
-  return `${protocol}://${actualHost}:${DEFAULT_BACKEND_PORT}/api`;
+/** localhost / 127.0.0.1 / ::1 — 在浏览器里直连易被策略挡住，应走 Next /api 代理 */
+function isLoopbackApiBaseUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    return u.hostname === 'localhost' || u.hostname === '127.0.0.1' || u.hostname === '[::1]' || u.hostname === '::1';
+  } catch {
+    return false;
+  }
+}
+
+function normalizeApiBase(url: string): string {
+  return url.replace(/\/+$/, '');
 }
 
 export function getWsUrl() {
@@ -50,7 +65,20 @@ export function getWsUrl() {
 
 export function getApiBaseUrl(): string {
   const fromEnv = process.env.NEXT_PUBLIC_API_URL?.trim();
-  if (fromEnv) return fromEnv;
+  const forceDirect = process.env.NEXT_PUBLIC_API_USE_DIRECT === '1';
+
+  if (typeof window !== 'undefined') {
+    // 浏览器：loopback 的 NEXT_PUBLIC_API_URL 与「同源 /api 代理」冲突，默认忽略 env，改走 /api
+    if (fromEnv && forceDirect) {
+      return normalizeApiBase(fromEnv);
+    }
+    if (fromEnv && !isLoopbackApiBaseUrl(fromEnv)) {
+      return normalizeApiBase(fromEnv);
+    }
+    return '/api';
+  }
+
+  if (fromEnv) return normalizeApiBase(fromEnv);
   return getDefaultApiUrl();
 }
 

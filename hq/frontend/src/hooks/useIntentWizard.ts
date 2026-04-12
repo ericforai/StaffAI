@@ -3,25 +3,13 @@
 import { useState, useCallback } from 'react';
 import type { RequirementDraft, DesignSummary } from '../types/domain';
 import { getApiBaseUrl } from '../utils/constants';
+import { formatIntentClientError, isLikelyNetworkFailure } from '../lib/api-reachability';
 
 interface IntentWizardState {
   draft: RequirementDraft | null;
   loading: boolean;
   error: string | null;
   step: 1 | 2 | 3;
-}
-
-function isLikelyNetworkFailure(err: unknown): boolean {
-  if (err instanceof TypeError) return true;
-  const s = String(err);
-  return /fetch failed|Failed to fetch|NetworkError|ECONNREFUSED|ENOTFOUND|ETIMEDOUT/i.test(s);
-}
-
-function formatIntentApiError(err: unknown, apiBase: string): string {
-  if (isLikelyNetworkFailure(err)) {
-    return `无法连接后端 API（${apiBase}）。请确认 hq 后端已启动，且 NEXT_PUBLIC_BACKEND_PORT / NEXT_PUBLIC_API_URL 与后端一致。`;
-  }
-  return err instanceof Error ? err.message : String(err);
 }
 
 async function postClarifyNonStream(
@@ -62,7 +50,8 @@ export function useIntentWizard() {
       setState({ draft, loading: false, error: null, step: 1 });
       return draft;
     } catch (err) {
-      setState(s => ({ ...s, loading: false, error: String(err) }));
+      const api = getApiBaseUrl();
+      setState(s => ({ ...s, loading: false, error: formatIntentClientError(err, api) }));
       return null;
     }
   }, []);
@@ -85,7 +74,8 @@ export function useIntentWizard() {
       setState({ draft: updatedDraft, loading: false, error: null, step });
       return data;
     } catch (err) {
-      setState(s => ({ ...s, loading: false, error: String(err) }));
+      const api = getApiBaseUrl();
+      setState(s => ({ ...s, loading: false, error: formatIntentClientError(err, api) }));
       return null;
     }
   }, [state.draft]);
@@ -114,7 +104,8 @@ export function useIntentWizard() {
       setState({ draft: planDraft, loading: false, error: null, step: 3 });
       return planDraft;
     } catch (err) {
-      setState(s => ({ ...s, loading: false, error: String(err) }));
+      const api = getApiBaseUrl();
+      setState(s => ({ ...s, loading: false, error: formatIntentClientError(err, api) }));
       return null;
     }
   }, [state.draft]);
@@ -133,7 +124,8 @@ export function useIntentWizard() {
       const data = await res.json();
       return data.taskId;
     } catch (err) {
-      setState(s => ({ ...s, loading: false, error: String(err) }));
+      const api = getApiBaseUrl();
+      setState(s => ({ ...s, loading: false, error: formatIntentClientError(err, api) }));
       return null;
     } finally {
       setState(s => ({ ...s, loading: false }));
@@ -156,7 +148,8 @@ export function useIntentWizard() {
       setState({ draft, loading: false, error: null, step });
       return draft;
     } catch (err) {
-      setState(s => ({ ...s, loading: false, error: String(err) }));
+      const api = getApiBaseUrl();
+      setState(s => ({ ...s, loading: false, error: formatIntentClientError(err, api) }));
       return null;
     }
   }, []);
@@ -196,13 +189,13 @@ export function useIntentWizard() {
           onDone(data.isComplete, data.draft);
           return;
         } catch (fallbackErr) {
-          const msg = formatIntentApiError(fallbackErr, api);
+          const msg = formatIntentClientError(fallbackErr, api);
           setState(s => ({ ...s, loading: false, error: msg }));
           onError(msg);
           return;
         }
       }
-      const msg = formatIntentApiError(fetchErr, api);
+      const msg = formatIntentClientError(fetchErr, api);
       setState(s => ({ ...s, loading: false, error: msg }));
       onError(msg);
       return;
@@ -293,7 +286,7 @@ export function useIntentWizard() {
       setState((s) => ({ ...s, loading: false }));
       onDone(false);
     } catch (err) {
-      const msg = formatIntentApiError(err, api);
+      const msg = formatIntentClientError(err, api);
       setState(s => ({ ...s, loading: false, error: msg }));
       onError(msg);
     }

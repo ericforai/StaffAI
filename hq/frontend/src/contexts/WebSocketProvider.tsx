@@ -90,31 +90,42 @@ export function WebSocketProvider({ children, onMessage }: WebSocketProviderProp
             return;
           }
           hasConnectedRef.current = true;
-          setStatus('connected');
+          // Defer so we never run in the same turn as socket setup / React commit (avoids
+          // "state update on a component that hasn't mounted yet" under React 19).
+          queueMicrotask(() => {
+            if (cancelled) return;
+            setStatus('connected');
+          });
         };
 
         socket.onmessage = (event) => {
           if (cancelled) return;
-          try {
-            const data = JSON.parse(event.data) as WsMessage;
-            onMessageRef.current?.(data);
-          } catch (err) {
-            console.error('Failed to parse WebSocket message:', err);
-          }
+          queueMicrotask(() => {
+            if (cancelled) return;
+            try {
+              const data = JSON.parse(event.data) as WsMessage;
+              onMessageRef.current?.(data);
+            } catch (err) {
+              console.error('Failed to parse WebSocket message:', err);
+            }
+          });
         };
 
         socket.onclose = () => {
           if (cancelled) return;
-          setStatus('disconnected');
           activeWs = null;
+          queueMicrotask(() => {
+            if (cancelled) return;
+            setStatus('disconnected');
 
-          if (hasConnectedRef.current) {
-            console.warn(`WebSocket disconnected; retrying in ${WS_CONFIG.RECONNECT_DELAY}ms.`);
-          }
+            if (hasConnectedRef.current) {
+              console.warn(`WebSocket disconnected; retrying in ${WS_CONFIG.RECONNECT_DELAY}ms.`);
+            }
 
-          if (!cancelled) {
-            reconnectTimer.current = setTimeout(connectSocket, WS_CONFIG.RECONNECT_DELAY);
-          }
+            if (!cancelled) {
+              reconnectTimer.current = setTimeout(connectSocket, WS_CONFIG.RECONNECT_DELAY);
+            }
+          });
         };
 
         socket.onerror = (error) => {
@@ -125,8 +136,11 @@ export function WebSocketProvider({ children, onMessage }: WebSocketProviderProp
       } catch (err) {
         console.error('Failed to create WebSocket:', err);
         if (cancelled) return;
-        setStatus('disconnected');
-        reconnectTimer.current = setTimeout(connectSocket, WS_CONFIG.RECONNECT_DELAY);
+        queueMicrotask(() => {
+          if (cancelled) return;
+          setStatus('disconnected');
+          reconnectTimer.current = setTimeout(connectSocket, WS_CONFIG.RECONNECT_DELAY);
+        });
       }
     };
 

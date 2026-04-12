@@ -60,8 +60,8 @@ export default function DashboardLayout({
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-800 font-sans">
-      {/* Sidebar */}
-      <aside className="w-56 flex-shrink-0 flex flex-col border-r border-slate-200 bg-white">
+      {/* Sidebar：高于页面内 fixed z-50 弹窗，避免全屏遮罩挡住全局导航（点击侧栏看似无反应） */}
+      <aside className="relative z-[100] w-56 flex-shrink-0 flex flex-col border-r border-slate-200 bg-white">
         <div className="p-5 border-b border-slate-100">
           <div className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] text-slate-400">
             <span className="rounded bg-slate-900 px-1.5 py-0.5 text-white">AI员工</span>
