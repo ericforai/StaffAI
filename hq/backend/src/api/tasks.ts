@@ -11,7 +11,7 @@ import {
 } from '../orchestration/task-read-model';
 import { runMvpScenario } from '../orchestration/mvp-scenario-runner';
 import type { ExecutionLifecycleRecord } from '../runtime/execution-service';
-import { TASK_EXECUTION_MODES, type TaskExecutionMode, type TaskRecord } from '../shared/task-types';
+import { TASK_EXECUTION_MODES, type TaskAttachment, type TaskExecutionMode, type TaskRecord } from '../shared/task-types';
 
 interface TaskRouteDependencies {
   getAgentProfiles?: () => AgentProfile[];
@@ -214,6 +214,22 @@ export function registerTaskRoutes(
     if (assigneeName && assigneeName.length > 200) {
       return res.status(400).json({ error: 'assigneeName too long (max 200 characters)' });
     }
+
+    const rawAttachments = Array.isArray(req.body?.attachments) ? req.body.attachments : [];
+    const attachments: TaskAttachment[] = [];
+    for (const att of rawAttachments) {
+      if (att && typeof att.id === 'string' && typeof att.filename === 'string') {
+        attachments.push({
+          id: att.id,
+          filename: att.filename,
+          originalName: typeof att.originalName === 'string' ? att.originalName : att.filename,
+          mimeType: typeof att.mimeType === 'string' ? att.mimeType : 'application/octet-stream',
+          size: typeof att.size === 'number' ? att.size : 0,
+          uploadedAt: typeof att.uploadedAt === 'string' ? att.uploadedAt : new Date().toISOString(),
+        });
+      }
+    }
+
     const validation = validateTaskDraft({ title, description, taskType, priority, requestedBy, executionMode, assigneeId, assigneeName });
 
     if (!validation.valid) {
@@ -227,6 +243,12 @@ export function registerTaskRoutes(
         getAgentProfiles: dependencies.getAgentProfiles,
       },
     );
+
+    if (attachments.length > 0) {
+      await store.updateTask(task.id, (t) => ({ ...t, attachments }));
+      task.attachments = attachments;
+    }
+
     dependencies.onTaskCreated?.(task);
 
     if (task.approvalRequired) {

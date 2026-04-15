@@ -17,6 +17,7 @@ import { registerAuditRoutes } from '../api/audit';
 import { registerPresetRoutes } from '../api/presets';
 import { registerSquadTemplateRoutes } from '../api/squad-templates';
 import { registerIntentRoutes } from '../api/intents';
+import { registerUploadRoutes } from '../api/uploads';
 import { registerOkrRoutes } from '../api/okrs';
 import { registerCrmRoutes } from '../api/crm';
 import { registerWorkshopRoutes } from '../api/workshop';
@@ -289,6 +290,9 @@ export function registerBackendRoutes({
 
   // Register approval chain routes
   registerApprovalChainRoutes(app, store);
+
+  // Register upload routes
+  registerUploadRoutes(app);
 
   // Register intent routes (HITL)
   registerIntentRoutes(app, store);

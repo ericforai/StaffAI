@@ -65,6 +65,15 @@ export type TaskExecutionMode = (typeof TASK_EXECUTION_MODES)[number];
 
 export const DEFAULT_ADVANCED_EXECUTION_MODE: TaskExecutionMode = 'advanced_discussion';
 
+export interface TaskAttachment {
+  id: string;
+  filename: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  uploadedAt: string;
+}
+
 export interface TaskRecord {
   id: string;
   title: string;
@@ -86,6 +95,7 @@ export interface TaskRecord {
   // 任务负责人（从组织架构选择的员工）
   assigneeId?: string;
   assigneeName?: string;
+  attachments?: TaskAttachment[];
   createdAt: string;
   updatedAt: string;
 }

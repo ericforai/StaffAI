@@ -55,6 +55,15 @@ export interface TaskAssignment {
   resultSummary?: string;
 }
 
+export interface TaskAttachment {
+  id: string;
+  filename: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  uploadedAt: string;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -67,6 +76,7 @@ export interface Task {
   routingStatus: string;
   assigneeId?: string;
   assigneeName?: string;
+  attachments?: TaskAttachment[];
   createdAt: string;
   updatedAt: string;
   latestApproval?: Approval | null;
