@@ -276,8 +276,7 @@ export function registerEliteRoutes(app: Router, deps: EliteRouteDependencies) {
           throw new Error(`Failed to fetch repo: ${repoResponse.status}`);
         }
 
-        const contentsResponse = await fetch(
-          `${GITHUB_API_BASE}/repos/${target.owner}/${target.repo}/contents`,
+        const contentsResponse = await fetch(`${GITHUB_API_BASE}/repos/${target.owner}/${target.repo}/contents`, {
           headers: getGitHubHeaders(),
         });
         if (!contentsResponse.ok) {
