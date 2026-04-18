@@ -136,6 +136,7 @@ function getGitHubHeaders() {
 function parseGitHubImportTarget(input: string):
   | { kind: 'repo'; owner: string; repo: string }
   | { kind: 'raw'; url: string } {
+  const isSafeName = (value: string) => /^[a-zA-Z0-9._-]+$/.test(value);
   let parsedUrl: URL;
   try {
     parsedUrl = new URL(input);
@@ -143,10 +144,17 @@ function parseGitHubImportTarget(input: string):
     throw new Error('Only GitHub repository, blob, or raw URLs are allowed');
   }
 
-  const segments = parsedUrl.pathname.replace(/^\/+|\/+$/g, '').split('/').filter(Boolean);
+  if (parsedUrl.protocol !== 'https:') {
+    throw new Error('Only GitHub repository, blob, or raw URLs are allowed');
+  }
+
+  const segments = parsedUrl.pathname.split('/').filter(Boolean);
 
   if (parsedUrl.hostname === 'github.com') {
     if (segments.length === 2) {
+      if (!isSafeName(segments[0]) || !isSafeName(segments[1])) {
+        throw new Error('Only GitHub repository, blob, or raw URLs are allowed');
+      }
       return {
         kind: 'repo',
         owner: segments[0],
@@ -155,9 +163,12 @@ function parseGitHubImportTarget(input: string):
     }
 
     if (segments.length >= 5 && segments[2] === 'blob') {
+      if (!isSafeName(segments[0]) || !isSafeName(segments[1])) {
+        throw new Error('Only GitHub repository, blob, or raw URLs are allowed');
+      }
       return {
         kind: 'raw',
-        url: `https://${GITHUB_RAW_HOST}/${segments[0]}/${segments[1]}/${segments[3]}/${segments.slice(4).join('/')}`,
+        url: `https://${GITHUB_RAW_HOST}/${segments[0]}/${segments[1]}/${segments[3]}/${segments.slice(4).map(encodeURIComponent).join('/')}`,
       };
     }
   }
@@ -265,8 +276,8 @@ export function registerEliteRoutes(app: Router, deps: EliteRouteDependencies) {
           throw new Error(`Failed to fetch repo: ${repoResponse.status}`);
         }
 
-        const repoData = await repoResponse.json() as { full_name: string };
-        const contentsResponse = await fetch(`${GITHUB_API_BASE}/repos/${repoData.full_name}/contents`, {
+        const contentsResponse = await fetch(
+          `${GITHUB_API_BASE}/repos/${target.owner}/${target.repo}/contents`,
           headers: getGitHubHeaders(),
         });
         if (!contentsResponse.ok) {

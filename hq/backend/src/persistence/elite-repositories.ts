@@ -20,6 +20,10 @@ function getSkillContentPath(filePath: string): string {
   return path.join(agencyHome, filePath);
 }
 
+function getSkillDirectory(id: string): string {
+  return path.join(getEliteSkillsDir(), id);
+}
+
 export interface EliteSkillRegistryRecord {
   id: string;
   name: string;
@@ -64,11 +68,17 @@ export async function listAllSkills(): Promise<EliteSkillRegistryRecord[]> {
 }
 
 export async function getSkillById(id: string): Promise<EliteSkillRegistryRecord | null> {
+  if (!isValidSkillId(id)) {
+    return null;
+  }
   const registry = await loadRegistry();
   return registry.skills.find((skill) => skill.id === id) || null;
 }
 
 export async function getSkillContent(id: string): Promise<string | null> {
+  if (!isValidSkillId(id)) {
+    return null;
+  }
   const skill = await getSkillById(id);
   if (!skill) return null;
 
@@ -80,6 +90,9 @@ export async function getSkillContent(id: string): Promise<string | null> {
 }
 
 export async function getSkillFile(id: string): Promise<EliteSkillFile | null> {
+  if (!isValidSkillId(id)) {
+    return null;
+  }
   const skill = await getSkillById(id);
   if (!skill) return null;
 
@@ -115,7 +128,7 @@ export async function createSkill(input: {
     createdAt: now,
     updatedAt: now,
     createdBy: input.createdBy,
-    filePath: path.join(ELITE_SKILLS_DIR, 'skills', id, 'SKILL.md'),
+    filePath: path.join('elite-skills', 'skills', id, 'SKILL.md'),
   };
 
   await writeSkillFile(record, input.content);
@@ -131,6 +144,9 @@ export async function updateSkill(
   id: string,
   updates: UpdateEliteSkillInput,
 ): Promise<EliteSkillRegistryRecord | null> {
+  if (!isValidSkillId(id)) {
+    return null;
+  }
   const registry = await loadRegistry();
   const index = registry.skills.findIndex((skill) => skill.id === id);
   if (index === -1) return null;
@@ -151,12 +167,15 @@ export async function updateSkill(
 }
 
 export async function deleteSkill(id: string): Promise<boolean> {
+  if (!isValidSkillId(id)) {
+    return false;
+  }
   const registry = await loadRegistry();
   const index = registry.skills.findIndex((skill) => skill.id === id);
   if (index === -1) return false;
 
   const skill = registry.skills[index];
-  const skillDir = path.join(getEliteSkillsDir(), id);
+  const skillDir = getSkillDirectory(id);
 
   try {
     await fs.rm(skillDir, { recursive: true });
@@ -179,12 +198,31 @@ export async function deprecateSkill(id: string): Promise<EliteSkillRegistryReco
 }
 
 function generateSkillId(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9\u4e00-\u9fa5-]/g, '')
-    .replace(/--+/g, '-')
-    .replace(/^-+|-+$/g, '');
+  const normalized = name.toLowerCase().trim();
+  let result = '';
+
+  for (const char of normalized) {
+    if (/[a-zA-Z0-9\u4e00-\u9fa5-]/.test(char) || char === ' ') {
+      result += char === ' ' ? '-' : char;
+    }
+  }
+
+  while (result.includes('--')) {
+    result = result.replace('--', '-');
+  }
+
+  while (result.startsWith('-')) {
+    result = result.slice(1);
+  }
+  while (result.endsWith('-')) {
+    result = result.slice(0, -1);
+  }
+
+  return result;
+}
+
+function isValidSkillId(id: string): boolean {
+  return /^[a-z0-9\u4e00-\u9fa5-]+$/.test(id);
 }
 
 function extractBody(content: string | null): string | null {
