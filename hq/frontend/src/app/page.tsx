@@ -5,14 +5,16 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useAgents } from '../hooks/useAgents';
 import { useTasks } from '../hooks/useTasks';
+import { useEliteSkills } from '../hooks/useEliteSkills';
 import { DEPT_MAP } from '../utils/constants';
-import { Building2, ClipboardList, BrainCircuit, BookOpenText } from 'lucide-react';
+import { Building2, ClipboardList, BrainCircuit, BookOpenText, Users } from 'lucide-react';
 
 export default function Dashboard() {
   const { agents, activeIds, loading: agentsLoading } = useAgents();
   const { tasks, loading: tasksLoading } = useTasks();
+  const { skills: eliteSkills, loading: eliteLoading } = useEliteSkills();
 
-  const isLoading = agentsLoading || tasksLoading;
+  const isLoading = agentsLoading || tasksLoading || eliteLoading;
 
   const deptStats = useMemo(() => {
     const stats: Record<string, number> = {};
@@ -27,6 +29,7 @@ export default function Dashboard() {
     { href: '/tasks', title: '工作任务', desc: '任务执行与审批链路', color: 'from-amber-500 to-orange-500', icon: ClipboardList },
     { href: '/brainstorm', title: '专家协作', desc: '多专家讨论与顾问求解', color: 'from-purple-500 to-violet-500', icon: BrainCircuit },
     { href: '/knowledge', title: '知识资产', desc: '历史结论与专家归档', color: 'from-rose-500 to-pink-500', icon: BookOpenText },
+    { href: '/elite', title: '精英克隆', desc: '专家技能转化与复用', color: 'from-cyan-500 to-blue-500', icon: Users },
   ];
 
   return (
@@ -65,7 +68,7 @@ export default function Dashboard() {
           </section>
 
           {/* Stats Overview */}
-          <section className="grid gap-4 md:grid-cols-4">
+          <section className="grid gap-4 md:grid-cols-5">
             <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
               <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">专家总数</p>
               <p className="mt-2 text-2xl font-bold text-slate-900">{agents.length}</p>
@@ -90,6 +93,11 @@ export default function Dashboard() {
                   </span>
                 ))}
               </div>
+            </div>
+            <div className="rounded-lg border border-cyan-200 bg-gradient-to-br from-cyan-50 to-blue-50 p-4 shadow-sm">
+              <p className="text-[10px] font-bold tracking-wider text-cyan-600 uppercase">精英克隆</p>
+              <p className="mt-2 text-2xl font-bold text-cyan-700">{eliteSkills.length}</p>
+              <p className="mt-1 text-xs text-cyan-600">可复用技能</p>
             </div>
           </section>
         </>

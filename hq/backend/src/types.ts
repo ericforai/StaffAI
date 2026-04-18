@@ -186,3 +186,35 @@ export interface CrmActivity {
   ownerId?: string;
   createdAt: string;
 }
+
+// ─────────────────────────────────────────────
+// Elite Clone Domain Types
+// ─────────────────────────────────────────────
+
+export type EliteSkillStatus = 'pending' | 'published' | 'deprecated';
+
+export interface EliteSkillExpert {
+  name: string;
+  department: string;
+  title: string;
+}
+
+export interface EliteSkill {
+  id: string;                   // slug, e.g., 'xiakaifu-sales'
+  name: string;                // 技能名称
+  description: string;         // 一句话描述
+  version?: string;            // 版本号, e.g., '1.0.0'
+  expert: EliteSkillExpert;
+  category: string;             // 分类: sales/marketing/engineering/design/product/support
+  tags: string[];
+  status: EliteSkillStatus;
+  installCount: number;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;           // 创建人 (admin user id)
+}
+
+export interface EliteSkillFile {
+  skill: EliteSkill;
+  content: string;             // SKILL.md 完整内容
+}

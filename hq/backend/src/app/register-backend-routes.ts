@@ -20,6 +20,7 @@ import { registerIntentRoutes } from '../api/intents';
 import { registerOkrRoutes } from '../api/okrs';
 import { registerCrmRoutes } from '../api/crm';
 import { registerWorkshopRoutes } from '../api/workshop';
+import { registerEliteRoutes } from '../api/elite';
 import { createWriteBackService } from '../memory/write-back-service';
 import {
   createTaskEventPublisher,
@@ -168,6 +169,9 @@ export function registerBackendRoutes({
     discussionService,
   });
   registerWorkshopRoutes(app);
+
+  // Register elite clone routes
+  registerEliteRoutes(app, { store });
   registerTaskEventRoutes(app, { taskEventFeed });
 
   registerAgencyRoutes(app, {
