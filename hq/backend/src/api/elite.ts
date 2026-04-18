@@ -20,6 +20,7 @@ import type { Router } from 'express';
 import { z } from 'zod';
 import type { UserContext } from '../identity/user-types';
 import * as eliteRepo from '../persistence/elite-repositories';
+import { gitHubSearchService } from '../market/github-search';
 
 const ANTHROPIC_AUTH_TOKEN = process.env.ANTHROPIC_AUTH_TOKEN || '';
 const ANTHROPIC_BASE_URL = process.env.ANTHROPIC_BASE_URL || 'https://api.minimaxi.com/anthropic';
@@ -151,14 +152,19 @@ function parseGitHubImportTarget(input: string):
   const segments = parsedUrl.pathname.split('/').filter(Boolean);
 
   if (parsedUrl.hostname === 'github.com') {
-    if (segments.length === 2) {
-      if (!isSafeName(segments[0]) || !isSafeName(segments[1])) {
+    if (segments.length === 2 || (segments.length === 3 && segments[2] === '')) {
+      // Handle .git suffix by stripping it
+      let repo = segments[1] || segments[2];
+      if (repo.endsWith('.git')) {
+        repo = repo.slice(0, -4);
+      }
+      if (!isSafeName(segments[0]) || !isSafeName(repo)) {
         throw new Error('Only GitHub repository, blob, or raw URLs are allowed');
       }
       return {
         kind: 'repo',
         owner: segments[0],
-        repo: segments[1],
+        repo: repo,
       };
     }
 
@@ -214,88 +220,96 @@ export function registerEliteRoutes(app: Router, deps: EliteRouteDependencies) {
     }
 
     try {
-      const response = await fetch(
-        `${GITHUB_API_BASE}/search/code?q=SKILL.md+${encodeURIComponent(query)}&per_page=20`,
-        { headers: getGitHubHeaders() },
-      );
+      // Search for repositories containing SKILL.md using topic search
+      const searchQuery = `${query} in:readme SKILL.md`;
+      const repos = await gitHubSearchService.searchRepositories(searchQuery, { perPage: 20 });
 
-      if (!response.ok) {
-        if (response.status === 401) {
-          return res.status(401).json({ error: 'GitHub API 需要认证，请在环境变量中设置 GITHUB_TOKEN' });
-        }
-        if (response.status === 403) {
-          return res.status(403).json({ error: 'GitHub API 访问受限，请稍后重试或设置 GITHUB_TOKEN' });
-        }
-        throw new Error(`GitHub API error: ${response.status}`);
-      }
-
-      const data = await response.json() as {
-        items: Array<{
-          name: string;
-          html_url: string;
-          repository: {
-            full_name: string;
-            stargazers_count: number;
-            description: string;
-          };
-          path: string;
-        }>;
-      };
-
-      const results = data.items.map((item) => ({
-        name: item.repository.full_name.split('/')[1] || item.name,
-        description: item.repository.description || `来自 ${item.repository.full_name}`,
-        url: item.html_url,
-        stars: item.repository.stargazers_count,
-        author: item.repository.full_name.split('/')[0],
-        path: item.path,
+      const results = repos.map((repo) => ({
+        name: repo.name,
+        description: repo.description || `来自 ${repo.owner}/${repo.name}`,
+        url: repo.url,
+        stars: repo.stars,
+        author: repo.owner,
+        path: 'SKILL.md',
       }));
 
       return res.json({ results });
     } catch (error) {
       console.error('Search error:', error);
+
+      if (error instanceof Error && error.name === 'GitHubSearchError') {
+        const ghError = error as { code?: string; details?: { retryAfter?: number } };
+        if (ghError.code === 'RATE_LIMIT_EXCEEDED') {
+          return res.status(429).json({
+            error: 'GitHub rate limit exceeded',
+            retryAfter: ghError.details?.retryAfter,
+          });
+        }
+      }
+
       return res.status(500).json({ error: 'Search failed' });
     }
   });
 
   app.get('/api/elite/skills/import', async (req, res) => {
-    const url = req.query.url as string;
-    if (!url) {
+    const encodedUrl = req.query.url as string;
+    if (!encodedUrl) {
       return res.status(400).json({ error: 'Missing URL' });
     }
+
+    // Decode URL in case it's percent-encoded
+    const url = decodeURIComponent(encodedUrl);
 
     try {
       const target = parseGitHubImportTarget(url);
       let content = '';
 
       if (target.kind === 'repo') {
-        const repoResponse = await fetch(`${GITHUB_API_BASE}/repos/${target.owner}/${target.repo}`, {
-          headers: getGitHubHeaders(),
-        });
-        if (!repoResponse.ok) {
-          throw new Error(`Failed to fetch repo: ${repoResponse.status}`);
+        // Try common branch names for public repos (no auth needed for raw content)
+        const branches = ['main', 'master'];
+        let fetched = false;
+
+        for (const branch of branches) {
+          const rawUrl = `https://raw.githubusercontent.com/${target.owner}/${target.repo}/${branch}/SKILL.md`;
+          const fileResponse = await fetch(rawUrl, {
+            headers: { 'User-Agent': 'StaffAI-HQ' },
+          });
+
+          if (fileResponse.ok) {
+            content = await fileResponse.text();
+            fetched = true;
+            break;
+          }
         }
 
-        const contentsResponse = await fetch(`${GITHUB_API_BASE}/repos/${target.owner}/${target.repo}/contents`, {
-          headers: getGitHubHeaders(),
-        });
-        if (!contentsResponse.ok) {
-          throw new Error(`Failed to fetch repo contents: ${contentsResponse.status}`);
+        if (!fetched) {
+          // Fallback: try API to get default branch
+          try {
+            const repoResponse = await fetch(`${GITHUB_API_BASE}/repos/${target.owner}/${target.repo}`, {
+              headers: getGitHubHeaders(),
+            });
+
+            if (repoResponse.ok) {
+              const repoData = await repoResponse.json() as { default_branch?: string };
+              const branch = repoData.default_branch || 'main';
+              const rawUrl = `https://raw.githubusercontent.com/${target.owner}/${target.repo}/${branch}/SKILL.md`;
+              const fileResponse = await fetch(rawUrl, {
+                headers: { 'User-Agent': 'StaffAI-HQ' },
+              });
+
+              if (fileResponse.ok) {
+                content = await fileResponse.text();
+                fetched = true;
+              }
+            }
+          } catch {
+            // Ignore API errors
+          }
         }
 
-        const contents = await contentsResponse.json() as Array<{ name: string; download_url: string | null }>;
-        const skillFile = contents.find((file) => file.name === 'SKILL.md');
-        if (!skillFile?.download_url) {
-          throw new Error('仓库中未找到 SKILL.md 文件');
+        if (!fetched) {
+          throw new Error('仓库中未找到 SKILL.md 文件或无法访问');
         }
-
-        const fileResponse = await fetch(skillFile.download_url, {
-          headers: { 'User-Agent': 'StaffAI-HQ' },
-        });
-        if (!fileResponse.ok) {
-          throw new Error(`Failed to fetch file: ${fileResponse.status}`);
-        }
-        content = await fileResponse.text();
       } else {
         const fileResponse = await fetch(target.url, {
           headers: { 'User-Agent': 'StaffAI-HQ' },

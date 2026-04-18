@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import ReactMarkdown from 'react-markdown';
 import { ArrowLeft, Send, Sparkles, Lightbulb } from 'lucide-react';
 import { useEliteSkill } from '../../../../hooks/useEliteSkills';
 import { consultEliteSkill } from '../../../../lib/api-client';
@@ -19,6 +18,23 @@ const RECOMMENDED_QUESTIONS = [
   '如何使用这个技能提升工作效率？',
   '有哪些注意事项需要了解？',
 ];
+
+// 去掉 Markdown 格式符号，保留纯文本
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/#{1,6}\s+/g, '') // 去掉 # 标题
+    .replace(/\*\*(.+?)\*\*/g, '$1') // 去掉 **粗体**
+    .replace(/\*(.+?)\*/g, '$1') // 去掉 *斜体*
+    .replace(/`(.+?)`/g, '$1') // 去掉 `代码`
+    .replace(/```[\s\S]*?```/g, '') // 去掉 代码块
+    .replace(/\[(.+?)\]\(.+?\)/g, '$1') // 去掉 链接
+    .replace(/^\s*[-*+]\s+/gm, '') // 去掉 列表符号
+    .replace(/^\s*\d+\.\s+/gm, '') // 去掉 数字列表
+    .replace(/^\s*>\s+/gm, '') // 去掉 引用
+    .replace(/\|/g, ' ') // 去掉 表格竖线
+    .replace(/\n{3,}/g, '\n\n') // 压缩多余换行
+    .trim();
+}
 
 function getSkillIdParam(skillId: string | string[] | undefined) {
   if (Array.isArray(skillId)) {
@@ -166,15 +182,9 @@ export default function ChatPage() {
                     ? 'bg-purple-500 text-white'
                     : 'bg-white shadow-sm'
                 }`}>
-                  {msg.role === 'assistant' ? (
-                    <div className="text-sm leading-relaxed prose prose-sm max-w-none">
-                      <ReactMarkdown>{msg.content}</ReactMarkdown>
-                    </div>
-                  ) : (
-                    <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                      {msg.content}
-                    </div>
-                  )}
+                  <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                    {msg.role === 'assistant' ? stripMarkdown(msg.content) : msg.content}
+                  </div>
                 </div>
               </div>
             ))}
