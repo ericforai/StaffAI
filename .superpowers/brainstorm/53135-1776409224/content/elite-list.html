@@ -1,0 +1,103 @@
+<h2>精英克隆 - 技能广场</h2>
+<p class="subtitle">浏览公司专家沉淀的 Skills，安装即可使用</p>
+
+<div class="section">
+  <div class="mock-nav">← StaffAI | 🎭 精英克隆 | 🔍 搜索技能... | [+ 上传] [管理面板]</div>
+</div>
+
+<div class="section">
+  <div class="label">分类筛选</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+    <span class="mock-tag selected">全部</span>
+    <span class="mock-tag">销售</span>
+    <span class="mock-tag">营销</span>
+    <span class="mock-tag">工程</span>
+    <span class="mock-tag">设计</span>
+    <span class="mock-tag">产品</span>
+    <span class="mock-tag">客服</span>
+  </div>
+</div>
+
+<div class="cards">
+  <div class="card" data-choice="skill-sales" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:32px;color:white;text-align:center;">
+        <div style="font-size:48px;margin-bottom:8px;">🎯</div>
+        <div style="font-size:12px;opacity:0.8;">夏开福 · 销售部</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>顾问式销售技能体系</h3>
+      <p>从需求挖掘到方案呈现，闭环六阶段配合销售四力，结构化完成销售全流程</p>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <span class="mock-tag">销售</span>
+        <span class="mock-tag">已发布</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-choice="skill-mkt" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%);padding:32px;color:white;text-align:center;">
+        <div style="font-size:48px;margin-bottom:8px;">📢</div>
+        <div style="font-size:12px;opacity:0.8;">李明 · 市场部</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>内容营销方法论</h3>
+      <p>从选题到分发，建立系统化的内容生产流水线，提升内容复用率</p>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <span class="mock-tag">营销</span>
+        <span class="mock-tag">已发布</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-choice="skill-eng" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:linear-gradient(135deg,#4facfe 0%,#00f2fe 100%);padding:32px;color:white;text-align:center;">
+        <div style="font-size:48px;margin-bottom:8px;">💻</div>
+        <div style="font-size:12px;opacity:0.8;">张工 · 工程部</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>代码审查最佳实践</h3>
+      <p>规范代码审查流程，提升代码质量，减少线上故障率</p>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <span class="mock-tag">工程</span>
+        <span class="mock-tag">已发布</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-choice="skill-pending" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:linear-gradient(135deg,#43e97b 0%,#38f9d7 100%);padding:32px;color:white;text-align:center;">
+        <div style="font-size:48px;margin-bottom:8px;">🎨</div>
+        <div style="font-size:12px;opacity:0.8;">王设计 · 设计部</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>品牌设计规范</h3>
+      <p>企业视觉识别系统建立指南，统一品牌形象输出</p>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <span class="mock-tag">设计</span>
+        <span class="mock-tag" style="background:#fbbf24;color:#000;">待审核</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.mock-tag {
+  background: rgba(99,102,241,0.1);
+  color: #6366f1;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+.mock-tag.selected {
+  background: #6366f1;
+  color: white;
+}
+</style>
