@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Plus, Search, Check, X, ArrowDown, ArrowUp, Upload, Globe, Loader2, ExternalLink, FileText, Tag, User, Folder, Clipboard, Github, Download, Edit } from 'lucide-react';
+import { Plus, Search, Check, X, ArrowDown, ArrowUp, Upload, Globe, Loader2, ExternalLink, FileText, Tag, User, Folder, Clipboard, Github, Download, Edit, Copy } from 'lucide-react';
 import { useEliteSkills } from '../../../hooks/useEliteSkills';
 import { createEliteSkill, importEliteSkillFromUrl, searchEliteSkills, updateEliteSkill, getEliteSkillContent } from '../../../lib/api-client';
 import type { EliteSkill } from '../../../lib/api-client';
@@ -47,7 +47,7 @@ interface SearchResult {
 }
 
 export default function AdminPage() {
-  const { skills, loading, error, publishSkill, deprecateSkill, deleteSkill, fetchSkills } = useEliteSkills({ includeAll: true });
+  const { skills, loading, error, publishSkill, deprecateSkill, deleteSkill, fetchSkills, cloneSkill } = useEliteSkills({ includeAll: true });
   const [tab, setTab] = useState<TabType>('all');
   const [search, setSearch] = useState('');
 
@@ -68,6 +68,10 @@ export default function AdminPage() {
   const [pastedContent, setPastedContent] = useState('');
   const [directUrl, setDirectUrl] = useState('');
   const [isImporting, setIsImporting] = useState(false);
+
+  // 克隆操作反馈状态
+  const [cloneSuccessMsg, setCloneSuccessMsg] = useState('');
+  const [cloneErrorMsg, setCloneErrorMsg] = useState('');
 
   // 编辑技能弹窗状态
   const [showEditModal, setShowEditModal] = useState(false);
@@ -117,6 +121,21 @@ export default function AdminPage() {
       await deleteSkill(id);
     } catch (err) {
       console.error('Failed to delete:', err);
+    }
+  };
+
+  const handleClone = async (id: string) => {
+    setCloneErrorMsg('');
+    setCloneSuccessMsg('');
+    try {
+      const cloned = await cloneSkill(id);
+      setCloneSuccessMsg(`克隆成功！已将「${cloned.name}」添加到技能库`);
+      await fetchSkills();
+      // 3秒后自动清除提示
+      setTimeout(() => setCloneSuccessMsg(''), 3000);
+    } catch (err) {
+      setCloneErrorMsg(err instanceof Error ? err.message : '克隆失败');
+      setTimeout(() => setCloneErrorMsg(''), 3000);
     }
   };
 
@@ -400,6 +419,19 @@ export default function AdminPage() {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* 克隆操作反馈 */}
+        {cloneSuccessMsg && (
+          <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-600 text-sm flex items-center gap-2">
+            <Check className="w-4 h-4 flex-shrink-0" />
+            {cloneSuccessMsg}
+          </div>
+        )}
+        {cloneErrorMsg && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm flex items-center gap-2">
+            <X className="w-4 h-4 flex-shrink-0" />
+            {cloneErrorMsg}
+          </div>
+        )}
         {/* Search */}
         <div className="mb-6">
           <div className="relative max-w-md">
@@ -503,6 +535,13 @@ export default function AdminPage() {
                             title="编辑"
                           >
                             <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleClone(skill.id)}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="克隆"
+                          >
+                            <Copy className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(skill.id)}

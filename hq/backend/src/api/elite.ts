@@ -477,6 +477,25 @@ export function registerEliteRoutes(app: Router, deps: EliteRouteDependencies) {
     }
   });
 
+  app.post('/api/elite/skills/:id/clone', async (req, res) => {
+    if (!ensureAdmin(req, res)) {
+      return;
+    }
+
+    const adminUser = req.userContext!;
+
+    try {
+      const cloned = await eliteRepo.cloneSkill(req.params.id, adminUser.id);
+      if (!cloned) {
+        return res.status(404).json({ error: 'Skill not found' });
+      }
+      return res.status(201).json({ skill: cloned });
+    } catch (error) {
+      console.error('Clone elite skill error:', error);
+      return res.status(500).json({ error: 'Failed to clone skill' });
+    }
+  });
+
   app.post('/api/elite/skills/:id/consult', async (req, res) => {
     const validation = consultSchema.safeParse(req.body);
     if (!validation.success) {

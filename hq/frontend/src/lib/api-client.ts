@@ -163,6 +163,11 @@ export async function deleteEliteSkill(id: string): Promise<void> {
   await apiClient.delete(`/elite/skills/${id}`);
 }
 
+export async function cloneEliteSkill(id: string): Promise<EliteSkill> {
+  const data = await apiClient.post<{ skill: EliteSkill }>(`/elite/skills/${id}/clone`);
+  return data.skill;
+}
+
 export async function publishEliteSkill(id: string): Promise<EliteSkill> {
   const data = await apiClient.post<{ skill: EliteSkill }>(`/elite/skills/${id}/publish`);
   return data.skill;

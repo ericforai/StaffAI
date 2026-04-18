@@ -61,6 +61,12 @@ export function useEliteSkills(options: UseEliteSkillsOptions = {}) {
     return updated;
   }, []);
 
+  const cloneSkill = useCallback(async (id: string) => {
+    const cloned = await api.cloneEliteSkill(id);
+    setSkills(prev => [...prev, cloned]);
+    return cloned;
+  }, []);
+
   return {
     skills,
     loading,
@@ -71,6 +77,7 @@ export function useEliteSkills(options: UseEliteSkillsOptions = {}) {
     deleteSkill,
     publishSkill,
     deprecateSkill,
+    cloneSkill,
   };
 }
 
