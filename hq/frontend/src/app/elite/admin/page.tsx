@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { Plus, Search, Webhook, Check, X, ArrowDown, ArrowUp, Upload, Globe, Loader2, ExternalLink, FileText, Tag, User, Folder } from 'lucide-react';
+import { Plus, Search, Check, X, ArrowDown, ArrowUp, Upload, Globe, Loader2, ExternalLink, FileText, Tag, User, Folder } from 'lucide-react';
 import { useEliteSkills } from '../../../hooks/useEliteSkills';
-import { createEliteSkill } from '../../../lib/api-client';
+import { createEliteSkill, importEliteSkillFromUrl, searchEliteSkills } from '../../../lib/api-client';
 import type { EliteSkill } from '../../../lib/api-client';
 
 type TabType = 'all' | 'pending' | 'published' | 'deprecated';
@@ -46,7 +46,7 @@ interface SearchResult {
 }
 
 export default function AdminPage() {
-  const { skills, loading, error, publishSkill, deprecateSkill, deleteSkill, fetchSkills } = useEliteSkills();
+  const { skills, loading, error, publishSkill, deprecateSkill, deleteSkill, fetchSkills } = useEliteSkills({ includeAll: true });
   const [tab, setTab] = useState<TabType>('all');
   const [search, setSearch] = useState('');
 
@@ -63,7 +63,6 @@ export default function AdminPage() {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredSkills = skills.filter(skill => {
     const matchesTab = tab === 'all' || skill.status === tab;
@@ -154,10 +153,7 @@ export default function AdminPage() {
     setSearchResults([]);
 
     try {
-      const response = await fetch(`/api/elite/skills/search?q=${encodeURIComponent(searchQuery)}`);
-      if (!response.ok) throw new Error('搜索请求失败');
-
-      const data = await response.json() as { results: SearchResult[] };
+      const data = await searchEliteSkills(searchQuery);
       setSearchResults(data.results);
     } catch (err) {
       setSearchError(err instanceof Error ? err.message : '搜索失败');
@@ -169,10 +165,7 @@ export default function AdminPage() {
   // 从 URL 导入技能内容（通过后端代理避免 CORS）
   const handleImportFromUrl = async (url: string) => {
     try {
-      const response = await fetch(`/api/elite/skills/import?url=${encodeURIComponent(url)}`);
-      if (!response.ok) throw new Error('获取内容失败');
-
-      const data = await response.json() as { content: string; name: string; description: string };
+      const data = await importEliteSkillFromUrl(url);
 
       setFormData({
         ...DEFAULT_FORM,

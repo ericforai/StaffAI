@@ -5,7 +5,12 @@ import { useState, useEffect, useCallback } from 'react';
 import * as api from '../lib/api-client';
 import type { EliteSkill, CreateSkillInput } from '../lib/api-client';
 
-export function useEliteSkills() {
+interface UseEliteSkillsOptions {
+  includeAll?: boolean;
+}
+
+export function useEliteSkills(options: UseEliteSkillsOptions = {}) {
+  const { includeAll = false } = options;
   const [skills, setSkills] = useState<EliteSkill[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -14,14 +19,14 @@ export function useEliteSkills() {
     try {
       setLoading(true);
       setError(null);
-      const data = await api.getEliteSkills();
+      const data = includeAll ? await api.getAllEliteSkills() : await api.getEliteSkills();
       setSkills(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load skills');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [includeAll]);
 
   useEffect(() => {
     fetchSkills();

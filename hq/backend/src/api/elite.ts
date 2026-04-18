@@ -18,12 +18,14 @@
 
 import type { Router } from 'express';
 import { z } from 'zod';
+import type { UserContext } from '../identity/user-types';
 import * as eliteRepo from '../persistence/elite-repositories';
-import type { Store } from '../store';
 
 const ANTHROPIC_AUTH_TOKEN = process.env.ANTHROPIC_AUTH_TOKEN || '';
 const ANTHROPIC_BASE_URL = process.env.ANTHROPIC_BASE_URL || 'https://api.minimaxi.com/anthropic';
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN || '';
+const GITHUB_API_BASE = 'https://api.github.com';
+const GITHUB_RAW_HOST = 'raw.githubusercontent.com';
 
 async function consultWithAI(skillContent: string, skillName: string, expertName: string, question: string): Promise<string> {
   if (!ANTHROPIC_AUTH_TOKEN) {
@@ -52,7 +54,7 @@ ${skillContent}
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${ANTHROPIC_AUTH_TOKEN}`,
+        Authorization: `Bearer ${ANTHROPIC_AUTH_TOKEN}`,
         'anthropic-version': '2023-06-01',
         'anthropic-dangerous-direct-browser-access': 'true',
       },
@@ -60,9 +62,7 @@ ${skillContent}
         model: 'MiniMax-M2.7',
         max_tokens: 1024,
         system: systemPrompt,
-        messages: [
-          { role: 'user', content: question }
-        ],
+        messages: [{ role: 'user', content: question }],
       }),
     });
 
@@ -72,9 +72,7 @@ ${skillContent}
     }
 
     const data = await response.json() as { content: Array<{ type: string; text: string }> };
-
-    // Extract text from response
-    const textContent = data.content?.find(c => c.type === 'text')?.text;
+    const textContent = data.content?.find((item) => item.type === 'text')?.text;
     if (!textContent) {
       throw new Error('No text in AI response');
     }
@@ -86,11 +84,8 @@ ${skillContent}
   }
 }
 
-interface EliteRouteDependencies {
-  store: Store;
-}
+interface EliteRouteDependencies {}
 
-// Validation schemas
 const createSkillSchema = z.object({
   name: z.string().min(1),
   description: z.string().min(1),
@@ -111,13 +106,72 @@ const consultSchema = z.object({
   question: z.string().min(1),
 });
 
-export function registerEliteRoutes(app: Router, deps: EliteRouteDependencies) {
-  const { store } = deps;
+function isAdminUser(userContext?: UserContext | null): userContext is UserContext {
+  return userContext?.clearanceLevel === 'admin';
+}
 
-  /**
-   * GET /api/elite/skills
-   * List published skills (public)
-   */
+function ensureAdmin(
+  req: { userContext?: UserContext | null },
+  res: { status: (code: number) => { json: (payload: unknown) => unknown } },
+): boolean {
+  if (isAdminUser(req.userContext)) {
+    return true;
+  }
+
+  res.status(403).json({ error: 'Forbidden' });
+  return false;
+}
+
+function getGitHubHeaders() {
+  const headers: Record<string, string> = {
+    Accept: 'application/vnd.github.v3+json',
+    'User-Agent': 'StaffAI-HQ',
+  };
+  if (GITHUB_TOKEN) {
+    headers.Authorization = `Bearer ${GITHUB_TOKEN}`;
+  }
+  return headers;
+}
+
+function parseGitHubImportTarget(input: string):
+  | { kind: 'repo'; owner: string; repo: string }
+  | { kind: 'raw'; url: string } {
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(input);
+  } catch {
+    throw new Error('Only GitHub repository, blob, or raw URLs are allowed');
+  }
+
+  const segments = parsedUrl.pathname.replace(/^\/+|\/+$/g, '').split('/').filter(Boolean);
+
+  if (parsedUrl.hostname === 'github.com') {
+    if (segments.length === 2) {
+      return {
+        kind: 'repo',
+        owner: segments[0],
+        repo: segments[1],
+      };
+    }
+
+    if (segments.length >= 5 && segments[2] === 'blob') {
+      return {
+        kind: 'raw',
+        url: `https://${GITHUB_RAW_HOST}/${segments[0]}/${segments[1]}/${segments[3]}/${segments.slice(4).join('/')}`,
+      };
+    }
+  }
+
+  if (parsedUrl.hostname === GITHUB_RAW_HOST && segments.length >= 4) {
+    return { kind: 'raw', url: parsedUrl.toString() };
+  }
+
+  throw new Error('Only GitHub repository, blob, or raw URLs are allowed');
+}
+
+export function registerEliteRoutes(app: Router, deps: EliteRouteDependencies) {
+  void deps;
+
   app.get('/api/elite/skills', async (_req, res) => {
     try {
       const skills = await eliteRepo.listPublishedSkills();
@@ -128,11 +182,11 @@ export function registerEliteRoutes(app: Router, deps: EliteRouteDependencies) {
     }
   });
 
-  /**
-   * GET /api/elite/skills/all
-   * List all skills (admin only)
-   */
-  app.get('/api/elite/skills/all', async (_req, res) => {
+  app.get('/api/elite/skills/all', async (req, res) => {
+    if (!ensureAdmin(req, res)) {
+      return;
+    }
+
     try {
       const skills = await eliteRepo.listAllSkills();
       return res.json({ skills, total: skills.length });
@@ -142,11 +196,6 @@ export function registerEliteRoutes(app: Router, deps: EliteRouteDependencies) {
     }
   });
 
-  /**
-   * GET /api/elite/skills/search
-   * Search public skills via GitHub API (proxy to avoid CORS)
-   * NOTE: This route MUST be before /:id to avoid being matched as a skill ID
-   */
   app.get('/api/elite/skills/search', async (req, res) => {
     const query = req.query.q as string;
     if (!query) {
@@ -154,17 +203,9 @@ export function registerEliteRoutes(app: Router, deps: EliteRouteDependencies) {
     }
 
     try {
-      const headers: Record<string, string> = {
-        Accept: 'application/vnd.github.v3+json',
-        'User-Agent': 'StaffAI-HQ',
-      };
-      if (GITHUB_TOKEN) {
-        headers['Authorization'] = `Bearer ${GITHUB_TOKEN}`;
-      }
-
       const response = await fetch(
-        `https://api.github.com/search/code?q=SKILL.md+${encodeURIComponent(query)}&per_page=20`,
-        { headers }
+        `${GITHUB_API_BASE}/search/code?q=SKILL.md+${encodeURIComponent(query)}&per_page=20`,
+        { headers: getGitHubHeaders() },
       );
 
       if (!response.ok) {
@@ -190,7 +231,7 @@ export function registerEliteRoutes(app: Router, deps: EliteRouteDependencies) {
         }>;
       };
 
-      const results = data.items.map(item => ({
+      const results = data.items.map((item) => ({
         name: item.repository.full_name.split('/')[1] || item.name,
         description: item.repository.description || `来自 ${item.repository.full_name}`,
         url: item.html_url,
@@ -206,11 +247,6 @@ export function registerEliteRoutes(app: Router, deps: EliteRouteDependencies) {
     }
   });
 
-  /**
-   * GET /api/elite/skills/import
-   * Import skill content from a GitHub URL (supports SKILL.md files and repo URLs)
-   * NOTE: This route MUST be before /:id to avoid being matched as a skill ID
-   */
   app.get('/api/elite/skills/import', async (req, res) => {
     const url = req.query.url as string;
     if (!url) {
@@ -218,91 +254,48 @@ export function registerEliteRoutes(app: Router, deps: EliteRouteDependencies) {
     }
 
     try {
-      let rawUrl = '';
+      const target = parseGitHubImportTarget(url);
       let content = '';
 
-      // 判断是仓库 URL 还是文件 URL
-      const isRepoUrl = url.match(/github\.com\/[\w-]+\/[\w.-]+$/);
-      const isBlobUrl = url.includes('/blob/');
-
-      if (isRepoUrl || isBlobUrl) {
-        // 如果是仓库根 URL，先获取仓库内容查找 SKILL.md
-        if (isRepoUrl && !url.includes('/blob/')) {
-          // 仓库 URL - 查找 SKILL.md
-          const repoApiUrl = url
-            .replace('github.com', 'api.github.com/repos')
-            .replace(/\/$/, '');
-
-          const repoResponse = await fetch(repoApiUrl, {
-            headers: {
-              'User-Agent': 'StaffAI-HQ',
-              Accept: 'application/vnd.github.v3+json',
-            },
-          });
-
-          if (!repoResponse.ok) {
-            throw new Error(`Failed to fetch repo: ${repoResponse.status}`);
-          }
-
-          const repoData = await repoResponse.json() as { full_name: string; default_branch: string };
-          const defaultBranch = repoData.default_branch || 'main';
-
-          // 获取仓库根目录内容
-          const contentsUrl = `https://api.github.com/repos/${repoData.full_name}/contents`;
-          const contentsResponse = await fetch(contentsUrl, {
-            headers: {
-              'User-Agent': 'StaffAI-HQ',
-              Accept: 'application/vnd.github.v3+json',
-            },
-          });
-
-          if (!contentsResponse.ok) {
-            throw new Error(`Failed to fetch repo contents: ${contentsResponse.status}`);
-          }
-
-          const contents = await contentsResponse.json() as Array<{ name: string; download_url: string | null }>;
-
-          // 查找 SKILL.md
-          const skillFile = contents.find((f: { name: string }) => f.name === 'SKILL.md');
-          if (!skillFile || !skillFile.download_url) {
-            throw new Error('仓库中未找到 SKILL.md 文件');
-          }
-
-          rawUrl = skillFile.download_url;
-        } else {
-          // 文件 URL - 直接转换为 raw URL
-          rawUrl = url
-            .replace('github.com', 'raw.githubusercontent.com')
-            .replace('/blob/', '/');
+      if (target.kind === 'repo') {
+        const repoResponse = await fetch(`${GITHUB_API_BASE}/repos/${target.owner}/${target.repo}`, {
+          headers: getGitHubHeaders(),
+        });
+        if (!repoResponse.ok) {
+          throw new Error(`Failed to fetch repo: ${repoResponse.status}`);
         }
 
-        const fileResponse = await fetch(rawUrl, {
-          headers: {
-            'User-Agent': 'StaffAI-HQ',
-          },
+        const repoData = await repoResponse.json() as { full_name: string };
+        const contentsResponse = await fetch(`${GITHUB_API_BASE}/repos/${repoData.full_name}/contents`, {
+          headers: getGitHubHeaders(),
         });
+        if (!contentsResponse.ok) {
+          throw new Error(`Failed to fetch repo contents: ${contentsResponse.status}`);
+        }
 
+        const contents = await contentsResponse.json() as Array<{ name: string; download_url: string | null }>;
+        const skillFile = contents.find((file) => file.name === 'SKILL.md');
+        if (!skillFile?.download_url) {
+          throw new Error('仓库中未找到 SKILL.md 文件');
+        }
+
+        const fileResponse = await fetch(skillFile.download_url, {
+          headers: { 'User-Agent': 'StaffAI-HQ' },
+        });
         if (!fileResponse.ok) {
           throw new Error(`Failed to fetch file: ${fileResponse.status}`);
         }
-
         content = await fileResponse.text();
       } else {
-        // 其他 URL 直接尝试获取
-        const response = await fetch(url, {
-          headers: {
-            'User-Agent': 'StaffAI-HQ',
-          },
+        const fileResponse = await fetch(target.url, {
+          headers: { 'User-Agent': 'StaffAI-HQ' },
         });
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch: ${response.status}`);
+        if (!fileResponse.ok) {
+          throw new Error(`Failed to fetch file: ${fileResponse.status}`);
         }
-
-        content = await response.text();
+        content = await fileResponse.text();
       }
 
-      // Parse frontmatter if present
       const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
       let parsed = {
         content,
@@ -326,16 +319,16 @@ export function registerEliteRoutes(app: Router, deps: EliteRouteDependencies) {
 
       return res.json(parsed);
     } catch (error) {
+      if (error instanceof Error && error.message.includes('Only GitHub')) {
+        return res.status(400).json({ error: error.message });
+      }
+
       console.error('Import error:', error);
       const message = error instanceof Error ? error.message : 'Failed to import skill';
       return res.status(500).json({ error: message });
     }
   });
 
-  /**
-   * GET /api/elite/skills/:id
-   * Get skill details
-   */
   app.get('/api/elite/skills/:id', async (req, res) => {
     try {
       const skill = await eliteRepo.getSkillById(req.params.id);
@@ -349,10 +342,6 @@ export function registerEliteRoutes(app: Router, deps: EliteRouteDependencies) {
     }
   });
 
-  /**
-   * GET /api/elite/skills/:id/content
-   * Get skill SKILL.md content
-   */
   app.get('/api/elite/skills/:id/content', async (req, res) => {
     try {
       const skillFile = await eliteRepo.getSkillFile(req.params.id);
@@ -366,23 +355,22 @@ export function registerEliteRoutes(app: Router, deps: EliteRouteDependencies) {
     }
   });
 
-  /**
-   * POST /api/elite/skills
-   * Create new skill (admin only)
-   */
   app.post('/api/elite/skills', async (req, res) => {
+    if (!ensureAdmin(req, res)) {
+      return;
+    }
+
+    const adminUser = req.userContext!;
+
     const validation = createSkillSchema.safeParse(req.body);
     if (!validation.success) {
       return res.status(400).json({ error: 'Invalid skill data', details: validation.error.issues });
     }
 
     try {
-      // TODO: Check admin permission
-      const adminUserId = req.headers['x-user-id'] as string || 'admin';
-
       const skill = await eliteRepo.createSkill({
         ...validation.data,
-        createdBy: adminUserId,
+        createdBy: adminUser.id,
       });
 
       return res.status(201).json({ skill });
@@ -392,11 +380,11 @@ export function registerEliteRoutes(app: Router, deps: EliteRouteDependencies) {
     }
   });
 
-  /**
-   * PUT /api/elite/skills/:id
-   * Update skill (admin only)
-   */
   app.put('/api/elite/skills/:id', async (req, res) => {
+    if (!ensureAdmin(req, res)) {
+      return;
+    }
+
     const validation = updateSkillSchema.safeParse(req.body);
     if (!validation.success) {
       return res.status(400).json({ error: 'Invalid skill data', details: validation.error.issues });
@@ -414,11 +402,11 @@ export function registerEliteRoutes(app: Router, deps: EliteRouteDependencies) {
     }
   });
 
-  /**
-   * DELETE /api/elite/skills/:id
-   * Delete skill (admin only)
-   */
   app.delete('/api/elite/skills/:id', async (req, res) => {
+    if (!ensureAdmin(req, res)) {
+      return;
+    }
+
     try {
       const deleted = await eliteRepo.deleteSkill(req.params.id);
       if (!deleted) {
@@ -431,11 +419,11 @@ export function registerEliteRoutes(app: Router, deps: EliteRouteDependencies) {
     }
   });
 
-  /**
-   * POST /api/elite/skills/:id/publish
-   * Publish skill (admin only)
-   */
   app.post('/api/elite/skills/:id/publish', async (req, res) => {
+    if (!ensureAdmin(req, res)) {
+      return;
+    }
+
     try {
       const skill = await eliteRepo.publishSkill(req.params.id);
       if (!skill) {
@@ -448,11 +436,11 @@ export function registerEliteRoutes(app: Router, deps: EliteRouteDependencies) {
     }
   });
 
-  /**
-   * POST /api/elite/skills/:id/deprecate
-   * Deprecate skill (admin only)
-   */
   app.post('/api/elite/skills/:id/deprecate', async (req, res) => {
+    if (!ensureAdmin(req, res)) {
+      return;
+    }
+
     try {
       const skill = await eliteRepo.deprecateSkill(req.params.id);
       if (!skill) {
@@ -465,10 +453,6 @@ export function registerEliteRoutes(app: Router, deps: EliteRouteDependencies) {
     }
   });
 
-  /**
-   * POST /api/elite/skills/:id/consult
-   * Consult skill using AI
-   */
   app.post('/api/elite/skills/:id/consult', async (req, res) => {
     const validation = consultSchema.safeParse(req.body);
     if (!validation.success) {
@@ -485,12 +469,11 @@ export function registerEliteRoutes(app: Router, deps: EliteRouteDependencies) {
         return res.status(403).json({ error: 'Skill not available' });
       }
 
-      // Call AI to get the answer
       const answer = await consultWithAI(
         skillFile.content,
         skillFile.skill.name,
         skillFile.skill.expert.name,
-        validation.data.question
+        validation.data.question,
       );
 
       return res.json({
@@ -502,17 +485,16 @@ export function registerEliteRoutes(app: Router, deps: EliteRouteDependencies) {
       console.error('Consult elite skill error:', error);
       const message = error instanceof Error ? error.message : 'Failed to consult skill';
 
-      // Provide more specific error messages
       if (message.includes('529') || message.includes('overloaded')) {
         return res.status(503).json({
           error: 'AI 服务暂时繁忙，请稍后重试',
-          retryable: true
+          retryable: true,
         });
       }
       if (message.includes('401') || message.includes('unauthorized')) {
         return res.status(503).json({
           error: 'AI 服务认证失败，请检查配置',
-          retryable: false
+          retryable: false,
         });
       }
 

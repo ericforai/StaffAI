@@ -110,9 +110,7 @@ export async function getEliteSkills(): Promise<EliteSkill[]> {
 }
 
 export async function getAllEliteSkills(): Promise<EliteSkill[]> {
-  const response = await fetch(`${API_CONFIG.BASE_URL}/elite/skills/all`);
-  if (!response.ok) throw new Error('Failed to fetch all elite skills');
-  const data = await response.json();
+  const data = await apiClient.get<{ skills: EliteSkill[] }>('/elite/skills/all');
   return data.skills;
 }
 
@@ -131,60 +129,43 @@ export async function getEliteSkillContent(id: string): Promise<string> {
 }
 
 export async function createEliteSkill(input: CreateSkillInput): Promise<EliteSkill> {
-  const response = await fetch(`${API_CONFIG.BASE_URL}/elite/skills`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(input),
-  });
-  if (!response.ok) throw new Error('Failed to create elite skill');
-  const data = await response.json();
+  const data = await apiClient.post<{ skill: EliteSkill }>('/elite/skills', input);
   return data.skill;
 }
 
 export async function updateEliteSkill(id: string, input: Partial<CreateSkillInput>): Promise<EliteSkill> {
-  const response = await fetch(`${API_CONFIG.BASE_URL}/elite/skills/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(input),
-  });
-  if (!response.ok) throw new Error('Failed to update elite skill');
-  const data = await response.json();
+  const data = await apiClient.put<{ skill: EliteSkill }>(`/elite/skills/${id}`, input);
   return data.skill;
 }
 
 export async function deleteEliteSkill(id: string): Promise<void> {
-  const response = await fetch(`${API_CONFIG.BASE_URL}/elite/skills/${id}`, {
-    method: 'DELETE',
-  });
-  if (!response.ok) throw new Error('Failed to delete elite skill');
+  await apiClient.delete(`/elite/skills/${id}`);
 }
 
 export async function publishEliteSkill(id: string): Promise<EliteSkill> {
-  const response = await fetch(`${API_CONFIG.BASE_URL}/elite/skills/${id}/publish`, {
-    method: 'POST',
-  });
-  if (!response.ok) throw new Error('Failed to publish elite skill');
-  const data = await response.json();
+  const data = await apiClient.post<{ skill: EliteSkill }>(`/elite/skills/${id}/publish`);
   return data.skill;
 }
 
 export async function deprecateEliteSkill(id: string): Promise<EliteSkill> {
-  const response = await fetch(`${API_CONFIG.BASE_URL}/elite/skills/${id}/deprecate`, {
-    method: 'POST',
-  });
-  if (!response.ok) throw new Error('Failed to deprecate elite skill');
-  const data = await response.json();
+  const data = await apiClient.post<{ skill: EliteSkill }>(`/elite/skills/${id}/deprecate`);
   return data.skill;
 }
 
 export async function consultEliteSkill(id: string, question: string): Promise<ConsultResponse> {
-  const response = await fetch(`${API_CONFIG.BASE_URL}/elite/skills/${id}/consult`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question }),
+  return apiClient.post<ConsultResponse>(`/elite/skills/${id}/consult`, { question });
+}
+
+export async function searchEliteSkills(query: string): Promise<SearchEliteSkillsResponse> {
+  return apiClient.get<SearchEliteSkillsResponse>('/elite/skills/search', {
+    params: { q: query },
   });
-  if (!response.ok) throw new Error('Failed to consult elite skill');
-  return response.json();
+}
+
+export async function importEliteSkillFromUrl(url: string): Promise<ImportEliteSkillResponse> {
+  return apiClient.get<ImportEliteSkillResponse>('/elite/skills/import', {
+    params: { url },
+  });
 }
 
 // Types
@@ -217,4 +198,21 @@ export interface ConsultResponse {
   answer: string;
   skillId: string;
   skillName: string;
+}
+
+export interface SearchEliteSkillsResponse {
+  results: Array<{
+    name: string;
+    description: string;
+    url: string;
+    stars: number;
+    author: string;
+    path?: string;
+  }>;
+}
+
+export interface ImportEliteSkillResponse {
+  content: string;
+  name: string;
+  description: string;
 }
