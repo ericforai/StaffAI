@@ -38,6 +38,16 @@ const BRAINSTORMING_PROMPT = `你是一位资深产品经理，正在与用户�
  * Workshop LLM Client for Brainstorming
  * Calls the Workshop's DeerFlow streaming endpoint for real LLM-powered clarification
  */
+/** 与系统提示一致：模型可能输出中文开场 + ```json，不能把 JSON 当普通气泡流式展示 */
+function looksLikeDesignSummaryStream(content: string): boolean {
+  return (
+    /```\s*json/i.test(content) ||
+    /设计方案摘要/.test(content) ||
+    /基于我们的讨论/.test(content) ||
+    /Design\s+Summary/i.test(content)
+  );
+}
+
 export class WorkshopLLMClient {
   private workshopUrl: string;
 
@@ -80,10 +90,10 @@ export class WorkshopLLMClient {
     const decoder = new TextDecoder();
     let buffer = '';
 
-    // Check if we've seen the design summary marker
     let designSummaryText = '';
     let inDesignSummary = false;
-    let isComplete = false;
+    /** 已发出终端 `done`（含 isComplete / designSummary），避免重复 */
+    let terminalDoneSent = false;
 
     try {
       while (true) {
@@ -105,41 +115,44 @@ export class WorkshopLLMClient {
               if (event.type === 'message' || event.type === 'ai') {
                 const content = typeof event === 'string' ? event : (event.content || '');
 
-                // Check if this is a design summary response
-                if (content.includes('"goal"') || content.includes('```json')) {
+                if (inDesignSummary || looksLikeDesignSummaryStream(content)) {
                   inDesignSummary = true;
-                }
-
-                if (inDesignSummary) {
                   designSummaryText += content;
-                }
-
-                // Check for completion markers
-                if (content.includes('Design Summary') || content.includes('```json')) {
-                  if (!isComplete) {
-                    isComplete = true;
-                    // Try to parse design summary from the accumulated text
-                    const designSummary = this.parseDesignSummary(designSummaryText || content);
+                  const parsed = this.parseDesignSummary(designSummaryText);
+                  if (parsed && !terminalDoneSent) {
+                    terminalDoneSent = true;
                     yield {
                       type: 'done',
                       content: '',
                       done: true,
                       isComplete: true,
-                      designSummary
+                      designSummary: parsed,
                     };
                   }
-                } else if (!inDesignSummary) {
+                } else {
                   yield { type: 'message', content };
                 }
               } else if (event.type === 'done' || event.type === 'end') {
-                // End of stream (Workshop sends 'end' in data, SSE event is 'done')
-                if (!isComplete) {
-                  isComplete = true;
+                if (terminalDoneSent) {
+                  break;
+                }
+                if (inDesignSummary && designSummaryText) {
+                  const parsed = this.parseDesignSummary(designSummaryText);
+                  terminalDoneSent = true;
                   yield {
                     type: 'done',
                     content: '',
                     done: true,
-                    isComplete: false
+                    isComplete: !!parsed,
+                    designSummary: parsed,
+                  };
+                } else {
+                  terminalDoneSent = true;
+                  yield {
+                    type: 'done',
+                    content: '',
+                    done: true,
+                    isComplete: false,
                   };
                 }
               } else if (event.type === 'error') {
@@ -149,6 +162,28 @@ export class WorkshopLLMClient {
               // Skip malformed JSON
             }
           }
+        }
+      }
+
+      if (!terminalDoneSent) {
+        if (inDesignSummary && designSummaryText) {
+          const parsed = this.parseDesignSummary(designSummaryText);
+          terminalDoneSent = true;
+          yield {
+            type: 'done',
+            content: '',
+            done: true,
+            isComplete: !!parsed,
+            designSummary: parsed,
+          };
+        } else {
+          terminalDoneSent = true;
+          yield {
+            type: 'done',
+            content: '',
+            done: true,
+            isComplete: false,
+          };
         }
       }
     } finally {
@@ -240,19 +275,26 @@ export class WorkshopLLMClient {
 
       if (jsonMatch) {
         const jsonStr = jsonMatch[1] || jsonMatch[0];
-        const parsed = JSON.parse(jsonStr.trim());
+        const parsed = JSON.parse(jsonStr.trim()) as Record<string, unknown>;
+
+        const asText = (v: unknown, fallback: string): string => {
+          if (v == null || v === '') return fallback;
+          if (typeof v === 'string') return v;
+          if (Array.isArray(v)) return v.map((x) => String(x)).join('；');
+          return String(v);
+        };
 
         // Validate it has required fields
         if (parsed.goal && parsed.targetUser) {
           return {
-            goal: parsed.goal,
-            targetUser: parsed.targetUser,
-            coreFlow: parsed.coreFlow || 'To be determined',
-            scope: parsed.scope || 'Core functionality',
-            outOfScope: parsed.outOfScope || 'To be determined',
-            deliverables: parsed.deliverables || 'Full implementation',
-            constraints: parsed.constraints || 'Standard constraints apply',
-            risks: parsed.risks || 'Low risk',
+            goal: asText(parsed.goal, ''),
+            targetUser: asText(parsed.targetUser, ''),
+            coreFlow: asText(parsed.coreFlow, 'To be determined'),
+            scope: asText(parsed.scope, 'Core functionality'),
+            outOfScope: asText(parsed.outOfScope, 'To be determined'),
+            deliverables: asText(parsed.deliverables, 'Full implementation'),
+            constraints: asText(parsed.constraints, 'Standard constraints apply'),
+            risks: asText(parsed.risks, 'Low risk'),
           };
         }
       }

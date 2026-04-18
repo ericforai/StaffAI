@@ -113,9 +113,10 @@ export function ClarificationPanel({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Chat Panel */}
-      <div className="lg:col-span-2 bg-gray-900 rounded-lg border border-gray-700 flex flex-col h-[600px]">
-        <div className="relative flex-1 min-h-0">
-          <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="lg:col-span-2 bg-gray-900 rounded-lg border border-gray-700 flex min-h-0 flex-col h-[600px]">
+        {/* 必须是 flex 列 + 子项 min-h-0，否则 flex-1 在滚动区不生效，消息会把输入框顶出视口 */}
+        <div className="relative flex min-h-0 flex-1 flex-col">
+          <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto p-4 space-y-4">
           {draft.clarificationMessages.map((msg) => (
             <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[80%] rounded-lg px-4 py-2 ${
@@ -162,8 +163,8 @@ export function ClarificationPanel({
           )}
         </div>
 
-        {/* Input Area */}
-        <div className="border-t border-gray-700 p-4">
+        {/* Input Area：shrink-0 保证永远留在卡片底部可见，不被消息区挤出 */}
+        <div className="shrink-0 border-t border-gray-700 p-4 bg-gray-900">
           <div className="flex gap-2">
             <input
               type="text"

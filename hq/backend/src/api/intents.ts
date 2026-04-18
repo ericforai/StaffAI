@@ -179,6 +179,25 @@ export function registerIntentRoutes(app: Application, store: Store) {
             draft.status = 'design_ready';
             draft.designSummary = event.designSummary;
             draft.confidenceScore = 0.9;
+            // 不把 JSON/代码块写入对话历史：摘要只在右侧面板展示
+            const assistantDoneText =
+              '设计方案摘要已生成，请在右侧面板查看并确认。';
+            if (assistantMsgId) {
+              const msg = draft.clarificationMessages.find(
+                (m) => m.id === assistantMsgId
+              );
+              if (msg) {
+                msg.content = assistantDoneText;
+              }
+            } else {
+              for (let i = draft.clarificationMessages.length - 1; i >= 0; i--) {
+                const m = draft.clarificationMessages[i];
+                if (m.role === 'assistant') {
+                  m.content = assistantDoneText;
+                  break;
+                }
+              }
+            }
           }
           draft.updatedAt = new Date().toISOString();
           await store.saveRequirementDraft(draft);
