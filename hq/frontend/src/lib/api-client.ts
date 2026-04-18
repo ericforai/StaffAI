@@ -7,6 +7,23 @@ interface RequestOptions extends Omit<RequestInit, 'method' | 'body'> {
   params?: Record<string, string>;
 }
 
+function getAgencyUserId(): string | null {
+  const configured = process.env.NEXT_PUBLIC_AGENCY_USER_ID?.trim();
+  if (configured) {
+    return configured;
+  }
+
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  try {
+    return window.localStorage.getItem('agency-user-id');
+  } catch {
+    return null;
+  }
+}
+
 export class ApiError extends Error {
   status: number;
   payload: any;
@@ -43,6 +60,10 @@ async function request<T>(
   const defaultHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
   };
+  const agencyUserId = getAgencyUserId();
+  if (agencyUserId) {
+    defaultHeaders['X-User-Id'] = agencyUserId;
+  }
 
   // 构造 Fetch 参数
   const config: RequestInit = {

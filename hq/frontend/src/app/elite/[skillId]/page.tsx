@@ -1,12 +1,21 @@
 'use client';
 
-import { use } from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { ArrowLeft, MessageCircle, FileText, Clock, Download, Sparkles } from 'lucide-react';
 import { useEliteSkill } from '../../../hooks/useEliteSkills';
 
-export default function SkillDetailPage({ params }: { params: Promise<{ skillId: string }> }) {
-  const { skillId } = use(params);
+function getSkillIdParam(skillId: string | string[] | undefined) {
+  if (Array.isArray(skillId)) {
+    return skillId[0] || '';
+  }
+
+  return skillId || '';
+}
+
+export default function SkillDetailPage() {
+  const params = useParams<{ skillId: string | string[] }>();
+  const skillId = getSkillIdParam(params.skillId);
   const { skill, content, loading, error } = useEliteSkill(skillId);
 
   if (loading) {

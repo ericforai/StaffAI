@@ -81,6 +81,14 @@ export function useEliteSkill(skillId: string) {
   const [error, setError] = useState<string | null>(null);
 
   const fetchSkill = useCallback(async () => {
+    if (!skillId) {
+      setSkill(null);
+      setContent(null);
+      setError('技能不存在');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);

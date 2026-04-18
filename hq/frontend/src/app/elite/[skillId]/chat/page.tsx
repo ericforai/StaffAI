@@ -1,7 +1,8 @@
 'use client';
 
-import { use, useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import { ArrowLeft, Send, Sparkles, Lightbulb } from 'lucide-react';
 import { useEliteSkill } from '../../../../hooks/useEliteSkills';
@@ -19,8 +20,17 @@ const RECOMMENDED_QUESTIONS = [
   '有哪些注意事项需要了解？',
 ];
 
-export default function ChatPage({ params }: { params: Promise<{ skillId: string }> }) {
-  const { skillId } = use(params);
+function getSkillIdParam(skillId: string | string[] | undefined) {
+  if (Array.isArray(skillId)) {
+    return skillId[0] || '';
+  }
+
+  return skillId || '';
+}
+
+export default function ChatPage() {
+  const params = useParams<{ skillId: string | string[] }>();
+  const skillId = getSkillIdParam(params.skillId);
   const { skill, loading } = useEliteSkill(skillId);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
