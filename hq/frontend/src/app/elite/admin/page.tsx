@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Plus, Search, Check, X, ArrowDown, ArrowUp, Upload, Globe, Loader2, ExternalLink, FileText, Tag, User, Folder } from 'lucide-react';
+import { Plus, Search, Check, X, ArrowDown, ArrowUp, Upload, Globe, Loader2, ExternalLink, FileText, Tag, User, Folder, Clipboard, Github, Download, Edit, Copy } from 'lucide-react';
 import { useEliteSkills } from '../../../hooks/useEliteSkills';
-import { createEliteSkill, importEliteSkillFromUrl, searchEliteSkills } from '../../../lib/api-client';
+import { createEliteSkill, importEliteSkillFromUrl, searchEliteSkills, updateEliteSkill, getEliteSkillContent } from '../../../lib/api-client';
 import type { EliteSkill } from '../../../lib/api-client';
 
 type TabType = 'all' | 'pending' | 'published' | 'deprecated';
+type ImportMode = 'search' | 'paste';
 
 // 上传技能表单类型
 interface SkillFormData {
@@ -46,7 +47,7 @@ interface SearchResult {
 }
 
 export default function AdminPage() {
-  const { skills, loading, error, publishSkill, deprecateSkill, deleteSkill, fetchSkills } = useEliteSkills({ includeAll: true });
+  const { skills, loading, error, publishSkill, deprecateSkill, deleteSkill, fetchSkills, cloneSkill } = useEliteSkills({ includeAll: true });
   const [tab, setTab] = useState<TabType>('all');
   const [search, setSearch] = useState('');
 
@@ -59,10 +60,26 @@ export default function AdminPage() {
 
   // 联网搜索弹窗状态
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const [importMode, setImportMode] = useState<ImportMode>('search');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState('');
+  const [pastedContent, setPastedContent] = useState('');
+  const [directUrl, setDirectUrl] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
+
+  // 克隆操作反馈状态
+  const [cloneSuccessMsg, setCloneSuccessMsg] = useState('');
+  const [cloneErrorMsg, setCloneErrorMsg] = useState('');
+
+  // 编辑技能弹窗状态
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingSkill, setEditingSkill] = useState<EliteSkill | null>(null);
+  const [editFormData, setEditFormData] = useState<SkillFormData>(DEFAULT_FORM);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editError, setEditError] = useState('');
+  const [editSuccess, setEditSuccess] = useState('');
 
   const filteredSkills = skills.filter(skill => {
     const matchesTab = tab === 'all' || skill.status === tab;
@@ -104,6 +121,90 @@ export default function AdminPage() {
       await deleteSkill(id);
     } catch (err) {
       console.error('Failed to delete:', err);
+    }
+  };
+
+  const handleClone = async (id: string) => {
+    setCloneErrorMsg('');
+    setCloneSuccessMsg('');
+    try {
+      const cloned = await cloneSkill(id);
+      setCloneSuccessMsg(`克隆成功！已将「${cloned.name}」添加到技能库`);
+      await fetchSkills();
+      // 3秒后自动清除提示
+      setTimeout(() => setCloneSuccessMsg(''), 3000);
+    } catch (err) {
+      setCloneErrorMsg(err instanceof Error ? err.message : '克隆失败');
+      setTimeout(() => setCloneErrorMsg(''), 3000);
+    }
+  };
+
+  // 打开编辑弹窗
+  const handleEdit = async (skill: EliteSkill) => {
+    setEditingSkill(skill);
+    setEditError('');
+    setEditSuccess('');
+    setIsEditing(true);
+
+    try {
+      const content = await getEliteSkillContent(skill.id);
+      setEditFormData({
+        name: skill.name,
+        description: skill.description,
+        version: skill.version || '1.0.0',
+        expertName: skill.expert.name,
+        expertDepartment: skill.expert.department,
+        expertTitle: skill.expert.title,
+        category: skill.category,
+        tags: skill.tags?.join(', ') || '',
+        content: content,
+      });
+      setShowEditModal(true);
+    } catch (err) {
+      setEditError('加载技能内容失败');
+    } finally {
+      setIsEditing(false);
+    }
+  };
+
+  // 保存编辑
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingSkill) return;
+
+    setEditError('');
+    setEditSuccess('');
+
+    if (!editFormData.name || !editFormData.description || !editFormData.expertName || !editFormData.content) {
+      setEditError('请填写必填项：技能名称、描述、专家姓名和技能内容');
+      return;
+    }
+
+    setIsEditing(true);
+    try {
+      await updateEliteSkill(editingSkill.id, {
+        name: editFormData.name,
+        description: editFormData.description,
+        version: editFormData.version || '1.0.0',
+        expert: {
+          name: editFormData.expertName,
+          department: editFormData.expertDepartment || '未知部门',
+          title: editFormData.expertTitle || '专家',
+        },
+        category: editFormData.category,
+        tags: editFormData.tags.split(',').map(t => t.trim()).filter(Boolean),
+        content: editFormData.content,
+      });
+      setEditSuccess('技能更新成功！');
+      await fetchSkills();
+      setTimeout(() => {
+        setShowEditModal(false);
+        setEditingSkill(null);
+      }, 1500);
+    } catch (err) {
+      setEditError(err instanceof Error ? err.message : '更新失败');
+    } finally {
+      setIsEditing(false);
     }
   };
 
@@ -182,6 +283,73 @@ export default function AdminPage() {
     }
   };
 
+  // 直接通过 GitHub URL 导入
+  const handleDirectImport = async () => {
+    if (!directUrl.trim()) {
+      setSearchError('请输入 GitHub 仓库地址');
+      return;
+    }
+
+    setIsImporting(true);
+    setSearchError('');
+
+    try {
+      const data = await importEliteSkillFromUrl(directUrl);
+
+      setFormData({
+        ...DEFAULT_FORM,
+        name: data.name || '导入技能',
+        description: data.description || '从 GitHub 导入',
+        content: data.content,
+        category: 'other',
+      });
+
+      setShowSearchModal(false);
+      setShowUploadModal(true);
+      setDirectUrl('');
+    } catch (err) {
+      setSearchError('导入失败，请检查 URL 是否正确');
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  // 处理直接粘贴 SKILL.md 内容
+  const handlePasteContent = () => {
+    if (!pastedContent.trim()) {
+      setSearchError('请粘贴 SKILL.md 内容');
+      return;
+    }
+
+    // 解析 frontmatter
+    const frontmatterMatch = pastedContent.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+    let name = '粘贴技能';
+    let description = '直接粘贴导入';
+    let content = pastedContent;
+
+    if (frontmatterMatch) {
+      const frontmatter = frontmatterMatch[1];
+      const body = frontmatterMatch[2];
+      const nameMatch = frontmatter.match(/name:\s*"?([^"\n]+)"?/);
+      const descMatch = frontmatter.match(/description:\s*"?([^"\n]+)"?/);
+      name = nameMatch?.[1] || name;
+      description = descMatch?.[1] || description;
+      content = body.trim();
+    }
+
+    setFormData({
+      ...DEFAULT_FORM,
+      name,
+      description,
+      content,
+      category: 'other',
+    });
+
+    setShowSearchModal(false);
+    setShowUploadModal(true);
+    setPastedContent('');
+  };
+
   const counts = {
     all: skills.length,
     pending: skills.filter(s => s.status === 'pending').length,
@@ -251,6 +419,19 @@ export default function AdminPage() {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* 克隆操作反馈 */}
+        {cloneSuccessMsg && (
+          <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-600 text-sm flex items-center gap-2">
+            <Check className="w-4 h-4 flex-shrink-0" />
+            {cloneSuccessMsg}
+          </div>
+        )}
+        {cloneErrorMsg && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm flex items-center gap-2">
+            <X className="w-4 h-4 flex-shrink-0" />
+            {cloneErrorMsg}
+          </div>
+        )}
         {/* Search */}
         <div className="mb-6">
           <div className="relative max-w-md">
@@ -348,6 +529,20 @@ export default function AdminPage() {
                               <ArrowUp className="w-4 h-4" />
                             </button>
                           )}
+                          <button
+                            onClick={() => handleEdit(skill)}
+                            className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                            title="编辑"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleClone(skill.id)}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="克隆"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </button>
                           <button
                             onClick={() => handleDelete(skill.id)}
                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -584,38 +779,132 @@ export default function AdminPage() {
               </button>
             </div>
 
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex gap-3">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleWebSearch()}
-                  placeholder="搜索公开的 SKILL.md 文件..."
-                  className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            {/* 导入模式切换 */}
+            <div className="flex border-b border-gray-200">
+              <button
+                onClick={() => setImportMode('search')}
+                className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors ${
+                  importMode === 'search'
+                    ? 'text-purple-600 border-b-2 border-purple-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Github className="w-4 h-4" />
+                GitHub 搜索
+              </button>
+              <button
+                onClick={() => setImportMode('paste')}
+                className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors ${
+                  importMode === 'paste'
+                    ? 'text-purple-600 border-b-2 border-purple-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Clipboard className="w-4 h-4" />
+                直接粘贴
+              </button>
+            </div>
+
+            {/* 搜索模式 */}
+            {importMode === 'search' && (
+              <>
+                <div className="p-6 border-b border-gray-200">
+                  <div className="flex gap-3">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleWebSearch()}
+                      placeholder="搜索公开的 SKILL.md 文件..."
+                      className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                    <button
+                      onClick={handleWebSearch}
+                      disabled={isSearching}
+                      className="flex items-center gap-2 px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors disabled:opacity-50"
+                    >
+                      {isSearching ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          搜索中...
+                        </>
+                      ) : (
+                        <>
+                          <Search className="w-4 h-4" />
+                          搜索
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    通过 GitHub 搜索公开的 SKILL.md 文件，找到后可一键导入到技能库
+                  </p>
+                </div>
+
+                {/* 直接 URL 导入 */}
+                <div className="p-6 border-b border-gray-200 bg-gray-50">
+                  <p className="text-sm text-gray-600 mb-3">或直接输入 GitHub 仓库地址导入</p>
+                  <div className="flex gap-3">
+                    <input
+                      type="text"
+                      value={directUrl}
+                      onChange={(e) => setDirectUrl(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleDirectImport()}
+                      placeholder="https://github.com/username/repo"
+                      className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                    <button
+                      onClick={handleDirectImport}
+                      disabled={isImporting || !directUrl.trim()}
+                      className="flex items-center gap-2 px-6 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+                    >
+                      {isImporting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          导入中...
+                        </>
+                      ) : (
+                        <>
+                          <Download className="w-4 h-4" />
+                          直接导入
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* 粘贴模式 */}
+            {importMode === 'paste' && (
+              <div className="p-6 border-b border-gray-200">
+                <p className="text-sm text-gray-600 mb-3">
+                  直接粘贴 SKILL.md 文件的完整内容，系统会自动解析 frontmatter 信息
+                </p>
+                <textarea
+                  value={pastedContent}
+                  onChange={(e) => setPastedContent(e.target.value)}
+                  placeholder={`---
+name: 技能名称
+description: 技能描述
+---
+
+# 技能标题
+
+技能内容...`}
+                  rows={12}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 font-mono text-sm resize-none"
                 />
                 <button
-                  onClick={handleWebSearch}
-                  disabled={isSearching}
-                  className="flex items-center gap-2 px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors disabled:opacity-50"
+                  onClick={handlePasteContent}
+                  disabled={!pastedContent.trim()}
+                  className="mt-3 flex items-center gap-2 px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors disabled:opacity-50"
                 >
-                  {isSearching ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      搜索中...
-                    </>
-                  ) : (
-                    <>
-                      <Search className="w-4 h-4" />
-                      搜索
-                    </>
-                  )}
+                  <Upload className="w-4 h-4" />
+                  导入内容
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-2">
-                通过 GitHub 搜索公开的 SKILL.md 文件，找到后可一键导入到技能库
-              </p>
-            </div>
+            )}
 
             <div className="flex-1 overflow-y-auto p-6">
               {searchError && (
@@ -631,7 +920,7 @@ export default function AdminPage() {
                 </div>
               )}
 
-              {!isSearching && searchResults.length === 0 && !searchError && (
+              {!isSearching && searchResults.length === 0 && !searchError && importMode === 'search' && (
                 <div className="text-center py-12">
                   <Globe className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                   <p className="text-gray-500">输入关键词搜索公开技能</p>
@@ -676,6 +965,196 @@ export default function AdminPage() {
                   ))}
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 编辑技能弹窗 */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <Edit className="w-5 h-5 text-purple-500" />
+                编辑技能
+              </h2>
+              <button
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditingSkill(null);
+                }}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6">
+              <form id="edit-form" onSubmit={handleEditSubmit} className="space-y-4">
+                {/* 技能名称 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    技能名称 <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={editFormData.name}
+                    onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                    placeholder="例如：顾问式销售技能体系"
+                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+
+                {/* 技能描述 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    技能描述 <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={editFormData.description}
+                    onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                    placeholder="简要描述这个技能的核心价值..."
+                    rows={2}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+                  />
+                </div>
+
+                {/* 版本号 */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <Tag className="w-4 h-4 inline mr-1" />
+                      版本号
+                    </label>
+                    <input
+                      type="text"
+                      value={editFormData.version}
+                      onChange={(e) => setEditFormData({ ...editFormData, version: e.target.value })}
+                      placeholder="1.0.0"
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <Folder className="w-4 h-4 inline mr-1" />
+                      分类
+                    </label>
+                    <select
+                      value={editFormData.category}
+                      onChange={(e) => setEditFormData({ ...editFormData, category: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      {CATEGORIES.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* 专家信息 */}
+                <div className="border-t border-gray-100 pt-4">
+                  <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    专家信息
+                  </h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm text-gray-500 mb-1">姓名 <span className="text-red-500">*</span></label>
+                      <input
+                        type="text"
+                        value={editFormData.expertName}
+                        onChange={(e) => setEditFormData({ ...editFormData, expertName: e.target.value })}
+                        placeholder="专家姓名"
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-500 mb-1">部门</label>
+                      <input
+                        type="text"
+                        value={editFormData.expertDepartment}
+                        onChange={(e) => setEditFormData({ ...editFormData, expertDepartment: e.target.value })}
+                        placeholder="所在部门"
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-500 mb-1">职位</label>
+                      <input
+                        type="text"
+                        value={editFormData.expertTitle}
+                        onChange={(e) => setEditFormData({ ...editFormData, expertTitle: e.target.value })}
+                        placeholder="职位名称"
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 标签 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    标签（用逗号分隔）
+                  </label>
+                  <input
+                    type="text"
+                    value={editFormData.tags}
+                    onChange={(e) => setEditFormData({ ...editFormData, tags: e.target.value })}
+                    placeholder="例如：销售, 电子签章, 顾问式销售"
+                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+
+                {/* 技能内容 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <FileText className="w-4 h-4 inline mr-1" />
+                    SKILL.md 内容 <span className="text-red-500">*</span>
+                  </label>
+                  <p className="text-xs text-gray-500 mb-2">粘贴技能的全部内容（支持 Markdown 格式）</p>
+                  <textarea
+                    value={editFormData.content}
+                    onChange={(e) => setEditFormData({ ...editFormData, content: e.target.value })}
+                    rows={12}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 font-mono text-sm resize-none"
+                  />
+                </div>
+
+                {editError && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                    {editError}
+                  </div>
+                )}
+
+                {editSuccess && (
+                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-600 text-sm">
+                    {editSuccess}
+                  </div>
+                )}
+              </form>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditingSkill(null);
+                }}
+                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                取消
+              </button>
+              <button
+                type="submit"
+                form="edit-form"
+                disabled={isEditing}
+                className="flex items-center gap-2 px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors disabled:opacity-50"
+              >
+                {isEditing && <Loader2 className="w-4 h-4 animate-spin" />}
+                {isEditing ? '保存中...' : '保存修改'}
+              </button>
             </div>
           </div>
         </div>

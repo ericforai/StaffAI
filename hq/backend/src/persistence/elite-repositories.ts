@@ -197,6 +197,66 @@ export async function deprecateSkill(id: string): Promise<EliteSkillRegistryReco
   return updateSkill(id, { status: 'deprecated' });
 }
 
+/**
+ * Clone a skill by copying its content and creating a new registry entry.
+ * The cloned skill starts in 'pending' status and uses a new generated ID.
+ */
+export async function cloneSkill(
+  sourceId: string,
+  createdBy: string,
+): Promise<EliteSkillRegistryRecord | null> {
+  if (!isValidSkillId(sourceId)) {
+    return null;
+  }
+
+  const sourceSkill = await getSkillById(sourceId);
+  if (!sourceSkill) {
+    return null;
+  }
+
+  const sourceContent = await getSkillContent(sourceId);
+  if (!sourceContent) {
+    return null;
+  }
+
+  // Generate a new ID by appending "-副本" to the source name, ensure uniqueness
+  let cloneName = `${sourceSkill.name}-副本`;
+  let id = generateSkillId(cloneName);
+  const now = new Date().toISOString();
+
+  // Ensure ID is unique
+  const registry = await loadRegistry();
+  let suffix = 1;
+  while (registry.skills.some((s) => s.id === id)) {
+    cloneName = `${sourceSkill.name}-副本-${suffix}`;
+    id = generateSkillId(cloneName);
+    suffix++;
+  }
+
+  const clonedRecord: EliteSkillRegistryRecord = {
+    id,
+    name: cloneName,
+    description: sourceSkill.description,
+    version: sourceSkill.version || '1.0.0',
+    expert: { ...sourceSkill.expert },
+    category: sourceSkill.category,
+    tags: [...sourceSkill.tags],
+    status: 'pending',
+    installCount: 0,
+    createdAt: now,
+    updatedAt: now,
+    createdBy,
+    filePath: path.join('elite-skills', 'skills', id, 'SKILL.md'),
+  };
+
+  await writeSkillFile(clonedRecord, sourceContent);
+
+  registry.skills.push(clonedRecord);
+  await saveRegistry(registry);
+
+  return clonedRecord;
+}
+
 function generateSkillId(name: string): string {
   const normalized = name.toLowerCase().trim();
   let result = '';
