@@ -141,7 +141,7 @@ export default function ChatPage() {
       <div className="flex-1 flex max-w-6xl mx-auto w-full">
         {/* Messages */}
         <div className="flex-1 flex flex-col">
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          <div className="flex-1 overflow-y-auto p-6 space-y-4 pb-32 custom-scrollbar">
             {messages.length === 0 && (
               <div className="text-center py-12">
                 <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -208,8 +208,8 @@ export default function ChatPage() {
           </div>
 
           {/* Input */}
-          <div className="border-t border-gray-200 bg-white p-4">
-            <div className="max-w-4xl mx-auto">
+          <div className="fixed left-4 right-4 bottom-4 max-w-4xl mx-auto" style={{ transform: 'translateX(-80px) translateY(-5px) scale(0.9)', transformOrigin: 'right center' }}>
+            <div className="bg-white border border-gray-200 rounded-2xl shadow-lg p-4">
               <div className="flex gap-3">
                 <input
                   type="text"
@@ -229,9 +229,6 @@ export default function ChatPage() {
                   发送
                 </button>
               </div>
-              <p className="text-xs text-gray-400 mt-2 text-center">
-                💡 基于「{skill.name} v{skill.version || '1.0.0'}」内容回答
-              </p>
             </div>
           </div>
         </div>
@@ -241,15 +238,28 @@ export default function ChatPage() {
           {/* Skill Summary */}
           <div className="mb-6">
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-              技能核心内容
+              技能简介
             </h3>
             <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-700">
               <div className="font-medium mb-2">{skill.name}</div>
               <div className="text-gray-500 text-xs mb-3">
                 {skill.expert.name} · {skill.expert.department}
               </div>
-              <div className="prose prose-sm prose-gray">
-                {skill.description}
+              <div className="space-y-2">
+                <div>
+                  <span className="text-xs font-medium text-gray-600">功能说明：</span>
+                  <p className="text-xs text-gray-600 mt-1">{skill.description}</p>
+                </div>
+                {skill.tags && skill.tags.length > 0 && (
+                  <div>
+                    <span className="text-xs font-medium text-gray-600">标签：</span>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {skill.tags.map((tag: string, i: number) => (
+                        <span key={i} className="px-2 py-0.5 bg-purple-100 text-purple-600 rounded text-xs">{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -258,12 +268,13 @@ export default function ChatPage() {
           <div className="bg-amber-50 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <Lightbulb className="w-4 h-4 text-amber-600" />
-              <span className="font-medium text-amber-800 text-sm">使用技巧</span>
+              <span className="font-medium text-amber-800 text-sm">咨询建议</span>
             </div>
-            <ul className="text-xs text-amber-700 space-y-1">
-              <li>• 问题越具体，回答越精准</li>
-              <li>• 可以追问，AI 会深入解答</li>
-              <li>• 点击推荐问题快速开始</li>
+            <ul className="text-xs text-amber-700 space-y-2">
+              <li>• 描述具体场景和遇到的问题</li>
+              <li>• 可以结合多个技巧或方法提问</li>
+              <li>• 追问时可以说"请详细说明"</li>
+              <li>• 涉及隐私信息时可简化描述</li>
             </ul>
           </div>
         </div>
