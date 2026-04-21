@@ -74,32 +74,35 @@ try:
     from deerflow.client import DeerFlowClient
     from deerflow.config.extensions_config import ExtensionsConfig, McpServerConfig, set_extensions_config
     from deerflow.mcp.cache import initialize_mcp_tools
+    from deerflow.config.paths import set_base_dir
+    from app.gateway.routers.agents import router as agents_router
 except ImportError as e:
     logger.error(f"Failed to import DeerFlow core modules: {e}")
     logger.warning("Using MockDeerFlowClient as fallback for connection testing.")
     DeerFlowClient = MockDeerFlowClient
+    agents_router = None
     # 为缺少的组件提供占位符以防崩溃
     class ExtensionsConfig:
         def __init__(self, **kwargs): pass
     class McpServerConfig:
         def __init__(self, **kwargs): pass
     def set_extensions_config(config): pass
+    def set_base_dir(path): pass
     async def initialize_mcp_tools(): pass
 
 # --- Module-level constants ---
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config.yaml")
 MAX_THREADS = 10_000
 
+# Initialize DeerFlow paths
+WORKSHOP_DIR = os.path.dirname(os.path.abspath(__file__))
+set_base_dir(WORKSHOP_DIR)
+
 app = FastAPI(title="StaffAI Workshop", description="Python Execution Core for StaffAI")
 
-# Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3008", "http://127.0.0.1:3008", "http://localhost:8888", "http://127.0.0.1:8888"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Include routers
+if agents_router:
+    app.include_router(agents_router)
 
 # ---------------------------------------------------------------------------
 # Thread Store — in-memory storage for LangGraph-compatible thread state
@@ -284,8 +287,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[o for o in _trusted_origins if o],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PATCH", "DELETE"],
-    allow_headers=["Content-Type", "Authorization"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
