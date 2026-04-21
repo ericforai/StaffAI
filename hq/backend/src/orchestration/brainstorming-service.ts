@@ -74,7 +74,7 @@ export class WorkshopLLMClient {
       body: JSON.stringify({
         message: fullPrompt,
         system_prompt: BRAINSTORMING_PROMPT,
-        model_name: 'glm-4-plus'
+        model_name: 'minimax-m2.7'
       }),
     });
 
@@ -101,10 +101,16 @@ export class WorkshopLLMClient {
         if (done) break;
 
         buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
+        // Split on \n and remove \r from each line (SSE uses CRLF)
+        const lines = buffer.split('\n').map(l => l.replace(/\r$/, ''));
         buffer = lines.pop() || '';
 
+        let eventType = 'message';
         for (const line of lines) {
+          if (line.startsWith('event: ')) {
+            eventType = line.slice(7).trim();
+            continue;
+          }
           if (line.startsWith('data: ')) {
             const data = line.slice(6);
             if (!data.trim()) continue;

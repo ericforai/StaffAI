@@ -207,6 +207,7 @@ export function registerIntentRoutes(app: Application, store: Store) {
             isComplete: event.isComplete,
             draft: draft
           })}\n\n`);
+          
           sseDoneSent = true;
         } else if (event.content) {
           if (!assistantMsgId) {
@@ -231,6 +232,7 @@ export function registerIntentRoutes(app: Application, store: Store) {
             content: event.content,
             isComplete: false
           })}\n\n`);
+          
         }
       }
 
@@ -246,12 +248,14 @@ export function registerIntentRoutes(app: Application, store: Store) {
           isComplete: false,
           draft,
         })}\n\n`);
+        
       }
 
       res.end();
     } catch (err) {
       console.error('[Clarify Stream] Error:', err);
       res.write(`data: ${JSON.stringify({ type: 'error', error: String(err) })}\n\n`);
+      
       res.end();
     }
   });

@@ -405,39 +405,130 @@ async def chat_stream(chat_req: ChatRequest, request: Request):
     """
     async def event_generator():
         try:
-            from deerflow.models import create_chat_model
-            from langchain_core.messages import HumanMessage, SystemMessage
+            # Check if deerflow.models is available
+            try:
+                from deerflow.models import create_chat_model
+                model = create_chat_model(name=chat_req.model_name or "glm-4-plus", thinking_enabled=False)
 
-            model = create_chat_model(name=chat_req.model_name or "glm-4-plus", thinking_enabled=False)
+                # Build messages with optional system prompt
+                messages = []
+                if chat_req.system_prompt:
+                    messages.append(SystemMessage(content=chat_req.system_prompt))
+                messages.append(HumanMessage(content=chat_req.message))
 
-            # Build messages with optional system prompt
-            messages = []
-            if chat_req.system_prompt:
-                messages.append(SystemMessage(content=chat_req.system_prompt))
-            messages.append(HumanMessage(content=chat_req.message))
+                logger.info(f"Starting direct chat stream with model {chat_req.model_name}")
+                full_content = ""
 
-            logger.info(f"Starting direct chat stream with model {chat_req.model_name}")
-            full_content = ""
+                for chunk in model.stream(messages):
+                    if await request.is_disconnected():
+                        logger.info("Client disconnected during chat stream")
+                        break
 
-            for chunk in model.stream(messages):
-                if await request.is_disconnected():
-                    logger.info("Client disconnected during chat stream")
-                    break
+                    text = chunk.content if hasattr(chunk, "content") else str(chunk)
+                    if text:
+                        full_content += text
+                        yield {
+                            "event": "message",
+                            "data": json.dumps({"type": "ai", "content": text}, ensure_ascii=False)
+                        }
+                        await asyncio.sleep(0.01)
 
-                text = chunk.content if hasattr(chunk, "content") else str(chunk)
-                if text:
-                    full_content += text
-                    yield {
-                        "event": "message",
-                        "data": json.dumps({"type": "ai", "content": text}, ensure_ascii=False)
-                    }
-                    await asyncio.sleep(0.01)
+                # Send completion signal
+                yield {
+                    "event": "done",
+                    "data": json.dumps({"type": "end", "content": full_content}, ensure_ascii=False)
+                }
+            except ImportError:
+                # Fallback: use direct HTTP to MiniMax API with retry
+                import os as os_module
+                api_key = os_module.getenv("MINIMAX_API_KEY")
+                if not api_key:
+                    raise RuntimeError("MINIMAX_API_KEY not configured")
 
-            # Send completion signal
-            yield {
-                "event": "done",
-                "data": json.dumps({"type": "end", "content": full_content}, ensure_ascii=False)
-            }
+                import httpx
+
+                # Retry configuration for overloaded API (529)
+                max_retries = 3
+                retry_delay = 2.0
+                last_error = None
+
+                for attempt in range(max_retries):
+                    try:
+                        async with httpx.AsyncClient(timeout=60.0) as http_client:
+                            # Build messages
+                            messages = []
+                            if chat_req.system_prompt:
+                                messages.append({"role": "system", "content": chat_req.system_prompt})
+                            messages.append({"role": "user", "content": chat_req.message})
+
+                            model_name = chat_req.model_name or "minimax-m2.7"
+                            if "minimax" in model_name.lower():
+                                model_id = "MiniMax-M2.7"
+                            else:
+                                model_id = model_name
+
+                            full_content = ""
+                            async with http_client.stream(
+                                "POST",
+                                "https://api.minimaxi.com/v1/chat/completions",
+                                headers={
+                                    "Authorization": f"Bearer {api_key}",
+                                    "Content-Type": "application/json",
+                                },
+                                json={
+                                    "model": model_id,
+                                    "messages": messages,
+                                    "stream": True,
+                                },
+                            ) as response:
+                                if response.status_code == 529:
+                                    last_error = f"MiniMax API overloaded (attempt {attempt + 1}/{max_retries})"
+                                    logger.warning(last_error)
+                                    await asyncio.sleep(retry_delay * (attempt + 1))
+                                    continue
+
+                                response.raise_for_status()
+
+                                async for line in response.aiter_lines():
+                                    if line.startswith("data: "):
+                                        data = line[6:]
+                                        if data == "[DONE]":
+                                            yield {
+                                                "event": "done",
+                                                "data": json.dumps({"type": "end", "content": full_content}, ensure_ascii=False)
+                                            }
+                                        else:
+                                            try:
+                                                chunk_data = json.loads(data)
+                                                if chunk_data.get("choices",[{}])[0].get("delta",{}).get("content"):
+                                                    content = chunk_data["choices"][0]["delta"]["content"]
+                                                    full_content += content
+                                                    yield {
+                                                        "event": "message",
+                                                        "data": json.dumps({"type": "ai", "content": content}, ensure_ascii=False)
+                                                    }
+                                            except json.JSONDecodeError:
+                                                pass
+
+                        # Success - exit retry loop
+                        break
+
+                    except httpx.HTTPStatusError as e:
+                        if e.response.status_code == 529:
+                            last_error = f"MiniMax API overloaded (attempt {attempt + 1}/{max_retries})"
+                            logger.warning(last_error)
+                            await asyncio.sleep(retry_delay * (attempt + 1))
+                            continue
+                        raise
+
+                else:
+                    # All retries exhausted
+                    if last_error:
+                        yield {
+                            "event": "error",
+                            "data": json.dumps({"error": f"MiniMax API overloaded after {max_retries} attempts"})
+                        }
+                        return
 
         except Exception as e:
             logger.exception("Chat streaming failed")

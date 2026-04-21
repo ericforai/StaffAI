@@ -29,6 +29,7 @@ export function ClarificationPanel({
   const [streamingMsgId, setStreamingMsgId] = useState<string | null>(null);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
   const [isNearBottom, setIsNearBottom] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isStreaming = streamingContent !== '' && loading;
@@ -70,20 +71,18 @@ export function ClarificationPanel({
   }, []);
 
   const handleDone = useCallback((isComplete: boolean, updatedDraft?: RequirementDraft) => {
+    // 流式结束，清空状态
+    // 注意：消息已由后端保存在 draft.clarificationMessages 中，
+    // 父组件 useIntentWizard 会在 done 事件中更新 draft 状态
     setStreamingContent('');
     setStreamingMsgId(null);
-    // Trigger parent update if needed
-    if (isComplete && updatedDraft) {
-      // The parent hook will handle updating the draft state
-    }
   }, []);
 
-  const handleError = useCallback((error: string) => {
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('[ClarificationPanel] Stream error:', error);
-    }
+  const handleError = useCallback((errorMsg: string) => {
+    setError(errorMsg);
     setStreamingContent('');
     setStreamingMsgId(null);
+    setTimeout(() => setError(null), 5000);
   }, []);
 
   const handleSend = () => {
@@ -101,13 +100,17 @@ export function ClarificationPanel({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key !== 'Enter' || e.shiftKey) return;
-    // Do not intercept Enter while IME is composing (e.g. 拼音选词), or input cannot commit / send.
-    const ne = e.nativeEvent as KeyboardEvent & { isComposing?: boolean };
-    if (ne.isComposing || ne.keyCode === 229) return;
-    e.preventDefault();
-    handleSend();
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  const getConfidenceColor = (score: number) => {
+    if (score < 0.4) return 'bg-red-500';
+    if (score < 0.7) return 'bg-yellow-500';
+    return 'bg-green-500';
   };
 
   return (
@@ -124,6 +127,12 @@ export function ClarificationPanel({
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-800 text-gray-200 border border-gray-600'
               }`}>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs opacity-70">{msg.role === 'user' ? '👤' : '🤖'}</span>
+                  <span className="text-xs opacity-70">
+                    {new Date(msg.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
                 <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
               </div>
             </div>
@@ -165,10 +174,15 @@ export function ClarificationPanel({
 
         {/* Input Area：shrink-0 保证永远留在卡片底部可见，不被消息区挤出 */}
         <div className="shrink-0 border-t border-gray-700 p-4 bg-gray-900">
+          {error && (
+            <div className="mb-3 bg-red-600/90 text-white text-sm rounded-lg px-4 py-2">
+              {error}
+            </div>
+          )}
           <div className="flex gap-2">
-            <input
-              type="text"
-              className="flex-1 bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+            <textarea
+              className="flex-1 bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"
+              rows={3}
               placeholder="请输入你的回答..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -207,7 +221,7 @@ export function ClarificationPanel({
           </div>
           <div className="mt-1 h-2 bg-gray-800 rounded-full overflow-hidden">
             <div
-              className="h-full bg-blue-600 rounded-full transition-all duration-500"
+              className={`h-full rounded-full transition-all duration-500 ${getConfidenceColor(draft.confidenceScore)}`}
               style={{ width: `${draft.confidenceScore * 100}%` }}
             />
           </div>
