@@ -92,8 +92,9 @@ async function request<T>(
     }
 
     return data as T;
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof ApiError) throw error;
+    if (error.name === 'AbortError') throw error;
     
     throw new ApiError(
       error instanceof Error ? error.message : '网络请求发生意外错误',
@@ -124,9 +125,7 @@ export const apiClient = {
 
 // Elite Clone APIs
 export async function getEliteSkills(): Promise<EliteSkill[]> {
-  const response = await fetch(`${API_CONFIG.BASE_URL}/elite/skills`);
-  if (!response.ok) throw new Error('Failed to fetch elite skills');
-  const data = await response.json();
+  const data = await apiClient.get<{ skills: EliteSkill[] }>('/elite/skills');
   return data.skills;
 }
 
@@ -136,16 +135,12 @@ export async function getAllEliteSkills(): Promise<EliteSkill[]> {
 }
 
 export async function getEliteSkill(id: string): Promise<EliteSkill> {
-  const response = await fetch(`${API_CONFIG.BASE_URL}/elite/skills/${id}`);
-  if (!response.ok) throw new Error('Failed to fetch elite skill');
-  const data = await response.json();
+  const data = await apiClient.get<{ skill: EliteSkill }>(`/elite/skills/${id}`);
   return data.skill;
 }
 
 export async function getEliteSkillContent(id: string): Promise<string> {
-  const response = await fetch(`${API_CONFIG.BASE_URL}/elite/skills/${id}/content`);
-  if (!response.ok) throw new Error('Failed to fetch skill content');
-  const data = await response.json();
+  const data = await apiClient.get<{ content: string }>(`/elite/skills/${id}/content`);
   return data.content;
 }
 
