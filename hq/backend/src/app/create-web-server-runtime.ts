@@ -181,12 +181,12 @@ export function createWebServerRuntime({
         };
 
         server.once('error', onError);
-        server.listen(port, '0.0.0.0', () => {
+        server.listen(port, () => {
           server.off('error', onError);
           const address = server.address();
           const actualPort =
             typeof address === 'object' && address !== null ? address.port : port;
-          console.log(`Agency HQ Web Server running on http://0.0.0.0:${actualPort}`);
+          console.log(`Agency HQ Web Server running on port ${actualPort}`);
           console.log(`Startup check available at http://127.0.0.1:${actualPort}/startup-check`);
           resolve(actualPort);
         });

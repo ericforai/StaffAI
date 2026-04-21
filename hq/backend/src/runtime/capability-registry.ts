@@ -42,7 +42,14 @@ export function createCapabilityRegistry(): CapabilityDefinition[] {
 
 export function bindAgentCapabilities(agent: Agent): BoundAgentCapabilities {
   const capabilities = new Set<string>(['discussion.consult']);
-  const tools = (agent.frontmatter.tools || '').toLowerCase();
+  const rawTools = agent.frontmatter.tools;
+  const tools = (
+    Array.isArray(rawTools)
+      ? rawTools.join(',')
+      : typeof rawTools === 'string'
+        ? rawTools
+        : ''
+  ).toLowerCase();
 
   if (agent.department === 'engineering' || agent.department === 'testing') {
     capabilities.add('workflow.recommend');

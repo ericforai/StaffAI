@@ -75,12 +75,10 @@ try:
     from deerflow.config.extensions_config import ExtensionsConfig, McpServerConfig, set_extensions_config
     from deerflow.mcp.cache import initialize_mcp_tools
     from deerflow.config.paths import set_base_dir
-    from app.gateway.routers.agents import router as agents_router
 except ImportError as e:
     logger.error(f"Failed to import DeerFlow core modules: {e}")
     logger.warning("Using MockDeerFlowClient as fallback for connection testing.")
     DeerFlowClient = MockDeerFlowClient
-    agents_router = None
     # 为缺少的组件提供占位符以防崩溃
     class ExtensionsConfig:
         def __init__(self, **kwargs): pass
@@ -90,17 +88,137 @@ except ImportError as e:
     def set_base_dir(path): pass
     async def initialize_mcp_tools(): pass
 
-# --- Module-level constants ---
-CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config.yaml")
-MAX_THREADS = 10_000
+# Try to import agents router standalone
+agents_router = None
+try:
+    import importlib.util
+    _agents_spec = importlib.util.spec_from_file_location(
+        "_workshop_agents_router",
+        os.path.join(WORKSHOP_DIR, "deer-flow", "backend", "app", "gateway", "routers", "agents.py"),
+    )
+    if _agents_spec and _agents_spec.loader:
+        _agents_mod = importlib.util.module_from_spec(_agents_spec)
+        _agents_spec.loader.exec_module(_agents_mod)
+        agents_router = _agents_mod.router
+        logger.info("agents_router loaded (standalone mode)")
+except Exception as e:
+    logger.error(f"Failed to load agents_router standalone: {e}")
 
-# Initialize DeerFlow paths
-WORKSHOP_DIR = os.path.dirname(os.path.abspath(__file__))
-set_base_dir(WORKSHOP_DIR)
+# --- Manual implementation of agents router as fallback ---
+# This ensures that even if DeerFlow imports are broken, the essential agent management APIs work.
 
-app = FastAPI(title="StaffAI Workshop", description="Python Execution Core for StaffAI")
+import yaml
+from pathlib import Path
+import re
 
-# Include routers
+AGENT_NAME_PATTERN = re.compile(r"^[A-Za-z0-9-]+$")
+
+def _get_deer_flow_paths():
+    base_dir = Path(os.getenv("DEER_FLOW_HOME") or os.path.join(os.path.expanduser("~"), ".deer-flow"))
+    return {
+        "base": base_dir,
+        "agents": base_dir / "agents",
+        "user_md": base_dir / "USER.md"
+    }
+
+class AgentResponse(BaseModel):
+    name: str
+    description: str = ""
+    model: str | None = None
+    tool_groups: list[str] | None = None
+    soul: str | None = None
+
+class AgentsListResponse(BaseModel):
+    agents: list[AgentResponse]
+
+class AgentCreateRequest(BaseModel):
+    name: str
+    description: str = ""
+    model: str | None = None
+    tool_groups: list[str] | None = None
+    soul: str = ""
+
+class AgentUpdateRequest(BaseModel):
+    description: str | None = None
+    model: str | None = None
+    tool_groups: list[str] | None = None
+    soul: str | None = None
+
+if not agents_router:
+    @app.get("/api/agents", response_model=AgentsListResponse)
+    async def list_agents():
+        paths = _get_deer_flow_paths()
+        agents = []
+        if paths["agents"].exists():
+            for entry in sorted(paths["agents"].iterdir()):
+                if entry.is_dir() and (entry / "config.yaml").exists():
+                    try:
+                        with open(entry / "config.yaml", encoding="utf-8") as f:
+                            cfg = yaml.safe_load(f) or {}
+                        agents.append(AgentResponse(
+                            name=cfg.get("name", entry.name),
+                            description=cfg.get("description", ""),
+                            model=cfg.get("model"),
+                            tool_groups=cfg.get("tool_groups")
+                        ))
+                    except Exception:
+                        continue
+        return {"agents": agents}
+
+    @app.get("/api/agents/check")
+    async def check_agent_name(name: str):
+        if not AGENT_NAME_PATTERN.match(name):
+            raise HTTPException(status_code=422, detail="Invalid name format")
+        paths = _get_deer_flow_paths()
+        available = not (paths["agents"] / name.lower()).exists()
+        return {"available": available, "name": name.lower()}
+
+    @app.get("/api/agents/{name}", response_model=AgentResponse)
+    async def get_agent(name: str):
+        paths = _get_deer_flow_paths()
+        agent_dir = paths["agents"] / name.lower()
+        if not agent_dir.exists():
+            raise HTTPException(status_code=404, detail="Agent not found")
+        
+        try:
+            with open(agent_dir / "config.yaml", encoding="utf-8") as f:
+                cfg = yaml.safe_load(f) or {}
+            soul = ""
+            if (agent_dir / "SOUL.md").exists():
+                soul = (agent_dir / "SOUL.md").read_text(encoding="utf-8")
+            
+            return AgentResponse(
+                name=cfg.get("name", name),
+                description=cfg.get("description", ""),
+                model=cfg.get("model"),
+                tool_groups=cfg.get("tool_groups"),
+                soul=soul
+            )
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @app.post("/api/agents", response_model=AgentResponse, status_code=201)
+    async def create_agent(request: AgentCreateRequest):
+        if not AGENT_NAME_PATTERN.match(request.name):
+            raise HTTPException(status_code=422, detail="Invalid name")
+        
+        paths = _get_deer_flow_paths()
+        agent_dir = paths["agents"] / request.name.lower()
+        if agent_dir.exists():
+            raise HTTPException(status_code=409, detail="Agent exists")
+            
+        agent_dir.mkdir(parents=True, exist_ok=True)
+        config = {"name": request.name.lower(), "description": request.description}
+        if request.model: config["model"] = request.model
+        if request.tool_groups: config["tool_groups"] = request.tool_groups
+        
+        with open(agent_dir / "config.yaml", "w", encoding="utf-8") as f:
+            yaml.dump(config, f)
+        (agent_dir / "SOUL.md").write_text(request.soul, encoding="utf-8")
+        
+        return AgentResponse(**config, soul=request.soul)
+
+# Include routers (if standalone load succeeded, it will override/co-exist)
 if agents_router:
     app.include_router(agents_router)
 
