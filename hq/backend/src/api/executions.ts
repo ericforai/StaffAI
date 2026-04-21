@@ -156,7 +156,7 @@ function mapExecutionRecordToState(execution: ExecutionRecord): ExecutionState {
     taskId: execution.taskId,
     workflowPlanId: execution.workflowPlanId,
     assignmentId: execution.assignmentId,
-    executor: (execution.executor === 'claude' || execution.executor === 'codex' || execution.executor === 'openai' || execution.executor === 'deerflow') ? execution.executor : 'claude',
+    executor: (execution.executor === 'claude' || execution.executor === 'codex' || execution.executor === 'gemini' || execution.executor === 'openai' || execution.executor === 'deerflow') ? execution.executor : 'claude',
     startedAt,
     ...(execution.completedAt ? { completedAt: execution.completedAt } : {}),
     ...(execution.status === 'cancelled' ? { cancelledAt: execution.endedAt ?? new Date().toISOString() } : {}),

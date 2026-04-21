@@ -306,6 +306,12 @@
       "type": "file"
     },
     {
+      "path": "hq/frontend/src/components/TaskWorkspacePanel.tsx",
+      "accessCount": 10,
+      "lastAccessed": 1776755779279,
+      "type": "file"
+    },
+    {
       "path": "hq/backend/src/api/intents.ts",
       "accessCount": 8,
       "lastAccessed": 1775078273422,
@@ -324,21 +330,27 @@
       "type": "file"
     },
     {
+      "path": "hq/frontend/src/components/intent/PlanPreviewPanel.tsx",
+      "accessCount": 6,
+      "lastAccessed": 1776755514798,
+      "type": "file"
+    },
+    {
       "path": "hq/backend/src/orchestration/brainstorming-service.ts",
       "accessCount": 5,
       "lastAccessed": 1775097649757,
       "type": "file"
     },
     {
-      "path": "hq/frontend/src/hooks/useIntentWizard.ts",
-      "accessCount": 4,
-      "lastAccessed": 1775078307728,
+      "path": "hq/frontend/src/components/tasks/AdvancedTaskWizard.tsx",
+      "accessCount": 5,
+      "lastAccessed": 1776755265261,
       "type": "file"
     },
     {
-      "path": "hq/frontend/src/components/tasks/AdvancedTaskWizard.tsx",
+      "path": "hq/frontend/src/hooks/useIntentWizard.ts",
       "accessCount": 4,
-      "lastAccessed": 1775078372829,
+      "lastAccessed": 1775078307728,
       "type": "file"
     },
     {
@@ -360,6 +372,12 @@
       "type": "directory"
     },
     {
+      "path": "hq/frontend/src/components/ChatPanel.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1776755526210,
+      "type": "file"
+    },
+    {
       "path": "hq/backend/src/orchestration/mvp-preset.ts",
       "accessCount": 2,
       "lastAccessed": 1774910151980,
@@ -375,12 +393,6 @@
       "path": "hq/frontend/src/app/tasks/[id]/page.tsx",
       "accessCount": 2,
       "lastAccessed": 1774925377120,
-      "type": "file"
-    },
-    {
-      "path": "hq/frontend/src/components/TaskWorkspacePanel.tsx",
-      "accessCount": 2,
-      "lastAccessed": 1774925377487,
       "type": "file"
     },
     {
@@ -412,6 +424,18 @@
       "accessCount": 2,
       "lastAccessed": 1775081281035,
       "type": "directory"
+    },
+    {
+      "path": "hq/frontend/src/components/ActivityLog.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1776755597600,
+      "type": "file"
+    },
+    {
+      "path": "hq/frontend/src/components/tasks/TaskCard.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1776755649844,
+      "type": "file"
     },
     {
       "path": "TODOS.md",
@@ -544,6 +568,36 @@
       "accessCount": 1,
       "lastAccessed": 1775079472088,
       "type": "directory"
+    },
+    {
+      "path": "hq/frontend/src/app/page.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1776755246928,
+      "type": "file"
+    },
+    {
+      "path": "hq/frontend/src/app/executions/[id]/page.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1776755259872,
+      "type": "file"
+    },
+    {
+      "path": "hq/frontend/src/app/approvals/page.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1776755259935,
+      "type": "file"
+    },
+    {
+      "path": "hq/frontend/src/app/tasks/page.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1776755259958,
+      "type": "file"
+    },
+    {
+      "path": "hq/frontend/src/app/layout.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1776755265199,
+      "type": "file"
     }
   ],
   "userDirectives": []

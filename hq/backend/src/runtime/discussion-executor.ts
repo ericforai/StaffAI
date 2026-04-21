@@ -2,7 +2,7 @@ import type { ExecutorName } from './discussion-types';
 
 export function resolveExecutorPreference(raw: string | undefined): ExecutorName {
   const normalized = (raw || 'claude').toLowerCase();
-  if (normalized === 'codex' || normalized === 'claude' || normalized === 'openai' || normalized === 'deerflow') {
+  if (normalized === 'codex' || normalized === 'claude' || normalized === 'gemini' || normalized === 'openai' || normalized === 'deerflow') {
     return normalized as ExecutorName;
   }
   return 'claude';

@@ -154,7 +154,7 @@ export function registerRuntimeRoutes(app: express.Application, dependencies: Ru
 
   app.post('/api/runtime/recommend', async (req, res) => {
     const topic = typeof req.body?.topic === 'string' ? req.body.topic : '';
-    const hostId = (typeof req.body?.hostId === 'string' ? req.body.hostId : 'codex') as HostId;
+    const hostId = (typeof req.body?.hostId === 'string' ? req.body.hostId : (process.env.AGENCY_TASK_EXECUTOR || 'claude')) as HostId;
     const activeAgentIds = Array.isArray(req.body?.activeAgentIds)
       ? req.body.activeAgentIds
       : dependencies.store.getActiveIds();

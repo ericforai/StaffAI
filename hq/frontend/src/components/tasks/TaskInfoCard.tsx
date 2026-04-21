@@ -228,6 +228,7 @@ export function TaskInfoCard({
             <option value="openai">OpenAI API</option>
             <option value="codex">Codex CLI</option>
             <option value="claude">Claude CLI</option>
+            <option value="gemini">Gemini CLI</option>
             <option value="deerflow">DeerFlow Engine</option>
           </select>
         </label>

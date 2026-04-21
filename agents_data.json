@@ -725,7 +725,6 @@
     "file": "/Users/user/agency-agents/testing/testing-accessibility-auditor.md"
   },
   "dispatcher": {
-    "id": "dispatcher",
     "name": "Dispatcher (Orchestrator)",
     "description": "System-level orchestrator responsible for task decomposition, routing, and workflow management.",
     "file": "/Users/user/agency-agents/specialized/dispatcher.md"

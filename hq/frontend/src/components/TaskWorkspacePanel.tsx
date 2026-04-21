@@ -198,7 +198,7 @@ export function TaskWorkspacePanel({
         <div className="rounded-[1.6rem] border border-slate-200 bg-white p-5 shadow-sm">
           <div className="mb-5 flex items-center justify-between gap-3">
             <div>
-              <p className="text-[11px] font-black tracking-[0.18em] text-slate-500">Task Console</p>
+              <p className="text-[11px] font-black tracking-[0.18em] text-slate-500">任务控制台</p>
               <h3 className="mt-1 text-xl font-black tracking-tight text-slate-900">统一任务入口</h3>
             </div>
             <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-black tracking-[0.18em] text-slate-600">
@@ -236,7 +236,7 @@ export function TaskWorkspacePanel({
         <div className="rounded-[1.6rem] border border-slate-200 bg-white p-5 shadow-sm">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
-              <p className="text-[11px] font-black tracking-[0.18em] text-slate-500">Task Stream</p>
+              <p className="text-[11px] font-black tracking-[0.18em] text-slate-500">任务流</p>
               <h3 className="mt-1 text-xl font-black tracking-tight text-slate-900">任务主线</h3>
             </div>
             <div className="flex gap-2">
@@ -328,7 +328,7 @@ export function TaskWorkspacePanel({
         <div className="rounded-[1.6rem] border border-slate-200 bg-white p-5 shadow-sm">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
-              <p className="text-[11px] font-black tracking-[0.18em] text-slate-500">Execution Control</p>
+              <p className="text-[11px] font-black tracking-[0.18em] text-slate-500">执行控制</p>
               <h3 className="mt-1 text-xl font-black tracking-tight text-slate-900">任务与执行控制台</h3>
             </div>
             {selectedTask && (
@@ -446,7 +446,7 @@ export function TaskWorkspacePanel({
         <div className="rounded-[1.6rem] border border-slate-200 bg-white p-5 shadow-sm">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
-              <p className="text-[11px] font-black tracking-[0.18em] text-slate-500">Approval Queue</p>
+              <p className="text-[11px] font-black tracking-[0.18em] text-slate-500">审批队列</p>
               <h3 className="mt-1 text-xl font-black tracking-tight text-slate-900">待审批项</h3>
             </div>
             <Link
@@ -501,7 +501,7 @@ export function TaskWorkspacePanel({
         </div>
 
         <div className="rounded-[1.6rem] border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-[11px] font-black tracking-[0.18em] text-slate-500">Workspace Split</p>
+          <p className="text-[11px] font-black tracking-[0.18em] text-slate-500">工作区分区</p>
           <div className="mt-3 grid gap-3 md:grid-cols-2">
             <div className="rounded-[1.2rem] border border-slate-200 bg-slate-50 p-4">
               <div className="flex items-center gap-2">

@@ -13,7 +13,7 @@ import { executeTaskAfterApproval } from '../orchestration/approval-execution-br
 
 interface ApprovalRouteDependencies {
   onApprovalResolved?: (approval: ApprovalRecord) => void;
-  onExecutionStarted?: (input: { taskId: string; executor: 'claude' | 'codex' | 'openai' | 'deerflow' }) => void;
+  onExecutionStarted?: (input: { taskId: string; executor: 'claude' | 'codex' | 'gemini' | 'openai' | 'deerflow' }) => void;
   onExecutionFinished?: (execution: ExecutionLifecycleRecord) => void;
   onExecutionEvent?: (input: { taskId: string; message: string; payload?: any }) => void;
   loadMemoryContext?: (task: TaskRecord) => Promise<string | undefined | void> | string | undefined | void;
@@ -164,10 +164,13 @@ export function registerApprovalRoutes(
         : dependencies.autoExecuteAfterApproval ?? true;
     const executor = 
       req.body?.executor === 'claude' || 
+      req.body?.executor === 'codex' || 
+      req.body?.executor === 'gemini' || 
       req.body?.executor === 'openai' || 
       req.body?.executor === 'deerflow' 
         ? req.body.executor 
-        : 'codex';    const summary = typeof req.body?.summary === 'string' ? req.body.summary : undefined;
+        : (process.env.AGENCY_TASK_EXECUTOR || 'claude');
+    const summary = typeof req.body?.summary === 'string' ? req.body.summary : undefined;
     const topic = typeof req.body?.topic === 'string' ? req.body.topic : undefined;
     const timeoutMs = typeof req.body?.timeoutMs === 'number' ? req.body.timeoutMs : undefined;
     const maxRetries = typeof req.body?.maxRetries === 'number' ? req.body.maxRetries : undefined;

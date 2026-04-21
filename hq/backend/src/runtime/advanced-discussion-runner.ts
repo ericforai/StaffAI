@@ -9,7 +9,7 @@ export interface AdvancedDiscussionRunnerDeps {
 
 export async function runAdvancedDiscussionExecution(
   task: TaskRecord,
-  executor: 'claude' | 'codex' | 'openai' | 'deerflow',
+  executor: 'claude' | 'codex' | 'gemini' | 'openai' | 'deerflow',
   store: Pick<Store, 'saveExecution' | 'updateExecution' | 'updateTask'>,
   runner?: AdvancedDiscussionRunnerDeps['runAdvancedDiscussion']
 ): Promise<{

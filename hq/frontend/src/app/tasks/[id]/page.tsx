@@ -45,7 +45,7 @@ export default function TaskDetailPage() {
   const { approveApproval, rejectApproval, pendingId } = useApprovalActions(data?.approvals || []);
 
   // State
-  const [selectedExecutor, setSelectedExecutor] = useState<'openai' | 'claude' | 'codex' | 'deerflow'>('claude');
+  const [selectedExecutor, setSelectedExecutor] = useState<'openai' | 'claude' | 'codex' | 'gemini' | 'deerflow'>('claude');
   const [expandedExecutionId, setExpandedExecutionId] = useState<string | null>(null);
   const [copiedExecutionId, setCopiedExecutionId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'plan' | 'artifacts'>('overview');

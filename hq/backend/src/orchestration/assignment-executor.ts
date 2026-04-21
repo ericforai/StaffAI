@@ -34,7 +34,7 @@ export interface AssignmentExecutionInput {
   taskId: string;
   title: string;
   description: string;
-  executor: 'claude' | 'codex' | 'openai' | 'deerflow';
+  executor: 'claude' | 'codex' | 'gemini' | 'openai' | 'deerflow';
   timeoutMs?: number;
   maxRetries?: number;
   memoryContextExcerpt?: string;
@@ -84,7 +84,7 @@ interface RunningAssignment {
 export interface AssignmentExecutorConfig {
   store: Pick<Store, 'getTaskById' | 'updateTaskAssignment' | 'saveExecution' | 'logAudit' | 'savePendingHumanInput' | 'getAgentMemoryByAgentId'> & Partial<Pick<Store, 'getTaskAssignments'>>;
   auditLogger: AuditLogger | null;
-  executor: 'claude' | 'codex' | 'openai' | 'deerflow';
+  executor: 'claude' | 'codex' | 'gemini' | 'openai' | 'deerflow';
   timeoutMs?: number;
 }
 
@@ -94,7 +94,7 @@ export interface AssignmentExecutorConfig {
 export class DefaultAssignmentExecutor implements AssignmentExecutor {
   private readonly store: AssignmentExecutorConfig['store'];
   private readonly auditLogger: AssignmentExecutorConfig['auditLogger'];
-  private readonly defaultExecutor: 'claude' | 'codex' | 'openai' | 'deerflow';
+  private readonly defaultExecutor: 'claude' | 'codex' | 'gemini' | 'openai' | 'deerflow';
   private readonly defaultTimeoutMs: number;
   private readonly runningAssignments = new Map<string, RunningAssignment>();
 
@@ -234,7 +234,7 @@ export class DefaultAssignmentExecutor implements AssignmentExecutor {
     assignment: TaskAssignment,
     task: TaskRecord,
     input: AssignmentExecutionInput,
-    executor: 'claude' | 'codex' | 'openai' | 'deerflow',
+    executor: 'claude' | 'codex' | 'gemini' | 'openai' | 'deerflow',
     timeoutMs: number
   ): Promise<RuntimeExecutionContext> {
     const memory = await this.store.getAgentMemoryByAgentId(assignment.agentId);

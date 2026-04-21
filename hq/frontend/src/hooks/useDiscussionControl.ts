@@ -21,7 +21,7 @@ export interface DiscussionRunResult {
   topic: string;
   participants: DiscussionParticipant[];
   synthesis: string;
-  executor?: 'codex' | 'claude' | 'openai' | 'deerflow';
+  executor?: 'claude' | 'codex' | 'gemini' | 'openai' | 'deerflow';
   degraded?: boolean;
   notice?: string;
 }

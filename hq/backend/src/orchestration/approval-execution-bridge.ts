@@ -4,7 +4,7 @@ import type { TaskRecord } from '../shared/task-types';
 import { executeTaskRecord } from './task-execution-orchestrator';
 
 export interface ApprovalExecutionBridgeDependencies {
-  onExecutionStarted?: (input: { taskId: string; executor: 'claude' | 'codex' | 'openai' | 'deerflow' }) => void;
+  onExecutionStarted?: (input: { taskId: string; executor: 'claude' | 'codex' | 'gemini' | 'openai' | 'deerflow' }) => void;
   onExecutionFinished?: (execution: ExecutionLifecycleRecord) => void;
   onEvent?: (event: { type: string; data: any }) => void;
   loadMemoryContext?: (task: TaskRecord) => Promise<string | undefined | void> | string | undefined | void;
@@ -16,7 +16,7 @@ export interface ApprovalExecutionBridgeDependencies {
 export async function executeTaskAfterApproval(
   input: {
     taskId: string;
-    executor: 'claude' | 'codex' | 'openai' | 'deerflow';
+    executor: 'claude' | 'codex' | 'gemini' | 'openai' | 'deerflow';
     summary?: string;
     topic?: string;
     timeoutMs?: number;

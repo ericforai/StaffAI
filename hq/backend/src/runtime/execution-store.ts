@@ -9,7 +9,7 @@ export interface ExecutionState {
   taskId: string;
   workflowPlanId?: string;
   assignmentId?: string;
-  executor: 'claude' | 'codex' | 'openai' | 'deerflow';
+  executor: 'claude' | 'codex' | 'gemini' | 'openai' | 'deerflow';
   startedAt: string;
   pausedAt?: string;
   resumedAt?: string;

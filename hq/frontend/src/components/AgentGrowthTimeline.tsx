@@ -21,8 +21,8 @@ export function AgentGrowthTimeline({ memory, loading }: Props) {
         <div className="p-4 bg-white rounded-full shadow-sm mb-4">
           <History className="text-slate-300" size={32} />
         </div>
-        <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">No Growth History Yet</p>
-        <p className="mt-2 text-xs text-slate-500 max-w-[200px]">This agent will learn and evolve as it completes more tasks.</p>
+        <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">暂无成长记录</p>
+        <p className="mt-2 text-xs text-slate-500 max-w-[200px]">此专家会随着完成更多任务不断学习和进化。</p>
       </div>
     );
   }
@@ -40,7 +40,7 @@ export function AgentGrowthTimeline({ memory, loading }: Props) {
     ...memory.behavioralHeuristics.map(h => ({
       id: h.id,
       type: 'heuristic' as const,
-      title: 'New Heuristic Learned',
+      title: '学到新启发式',
       content: `Pattern: ${h.pattern}\nCorrection: ${h.correction}`,
       timestamp: h.timestamp,
       taskId: h.sourceTaskId

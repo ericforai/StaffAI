@@ -5,7 +5,7 @@ export interface RuntimeHostSummary {
   id: string;
   label: string;
   capabilityLevel: 'full' | 'partial' | 'advisory';
-  supportedExecutors: Array<'claude' | 'codex' | 'openai' | 'deerflow'>;
+  supportedExecutors: Array<'claude' | 'codex' | 'gemini' | 'openai' | 'deerflow'>;
   supportsSampling: boolean;
   supportsInjection: boolean;
   supportsRuntimeExecution: boolean;

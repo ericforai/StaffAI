@@ -60,7 +60,7 @@ export function OKRCreateModal({ isOpen, onClose, onSuccess }: Props) {
         <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
           <div>
             <h2 className="text-2xl font-black text-slate-900 tracking-tight">发布战略 OKR</h2>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">New Strategic Objective</p>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">新建战略目标</p>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
             <X size={24} className="text-slate-400" />
@@ -70,7 +70,7 @@ export function OKRCreateModal({ isOpen, onClose, onSuccess }: Props) {
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
           {/* Objective */}
           <div className="space-y-3">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Objective (目标)</label>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">目标（Objective）</label>
             <input
               required
               value={objective}
@@ -83,7 +83,7 @@ export function OKRCreateModal({ isOpen, onClose, onSuccess }: Props) {
           {/* Key Results */}
           <div className="space-y-6">
             <div className="flex justify-between items-center px-1">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Key Results (关键结果)</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">关键结果（Key Results）</label>
               <button type="button" onClick={addKR} className="text-blue-600 hover:text-blue-700 font-black text-[10px] uppercase flex items-center gap-1 transition-colors">
                 <Plus size={14} /> 增加 KR
               </button>
@@ -112,7 +112,7 @@ export function OKRCreateModal({ isOpen, onClose, onSuccess }: Props) {
                     />
                     <div className="grid grid-cols-3 gap-4">
                       <div className="space-y-1">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Target</span>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">目标值</span>
                         <input
                           type="number"
                           value={kr.targetValue}
@@ -121,7 +121,7 @@ export function OKRCreateModal({ isOpen, onClose, onSuccess }: Props) {
                         />
                       </div>
                       <div className="space-y-1">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Unit</span>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">单位</span>
                         <input
                           placeholder="%"
                           value={kr.unit}
@@ -130,15 +130,15 @@ export function OKRCreateModal({ isOpen, onClose, onSuccess }: Props) {
                         />
                       </div>
                       <div className="space-y-1">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Metric</span>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">指标</span>
                         <select
                           value={kr.metricKey}
                           onChange={(e) => updateKR(index, { metricKey: e.target.value })}
                           className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 text-sm"
                         >
-                          <option value="test_coverage">Test Coverage</option>
-                          <option value="success_rate">Success Rate</option>
-                          <option value="custom">Custom</option>
+                          <option value="test_coverage">测试覆盖率</option>
+                          <option value="success_rate">成功率</option>
+                          <option value="custom">自定义</option>
                         </select>
                       </div>
                     </div>

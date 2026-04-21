@@ -71,7 +71,7 @@ export function OKRManager() {
                   </div>
                   <div>
                     <h3 className="text-xl font-black text-slate-900 leading-tight">{okr.objective}</h3>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1">Strategic Objective</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1">战略目标</p>
                   </div>
                 </div>
                 <div className="px-4 py-1 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest border border-blue-100">

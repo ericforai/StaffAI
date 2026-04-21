@@ -24,7 +24,7 @@ export type AgentRiskScope = 'low' | 'medium' | 'high';
 
 export interface AgentExecutionPreference {
   preferredMode: 'single' | 'serial' | 'parallel' | 'advanced_discussion';
-  preferredExecutor: 'claude' | 'codex' | 'openai' | 'auto';
+  preferredExecutor: 'claude' | 'codex' | 'gemini' | 'openai' | 'auto';
   supportsParallelWork: boolean;
   discussionCapable: boolean;
 }
@@ -81,7 +81,7 @@ export interface SkillFrontmatter {
   [key: string]: string | number | boolean | string[] | undefined;
 }
 
-export type SkillHost = 'claude' | 'codex' | 'agents' | 'project-claude' | 'project-agents';
+export type SkillHost = 'claude' | 'codex' | 'gemini' | 'agents' | 'project-claude' | 'project-agents';
 
 export interface SkillInstallation {
   host: SkillHost;

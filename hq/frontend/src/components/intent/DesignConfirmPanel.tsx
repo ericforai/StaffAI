@@ -15,14 +15,14 @@ export function DesignConfirmPanel({ draft, onConfirm, loading }: Props) {
   const ds = draft.designSummary!;
 
   const fields: { key: keyof DesignSummary; label: string }[] = [
-    { key: 'goal', label: 'Goal' },
-    { key: 'targetUser', label: 'Target User' },
-    { key: 'coreFlow', label: 'Core Flow' },
-    { key: 'scope', label: 'Scope' },
-    { key: 'outOfScope', label: 'Out of Scope' },
-    { key: 'deliverables', label: 'Deliverables' },
-    { key: 'constraints', label: 'Constraints' },
-    { key: 'risks', label: 'Risks' },
+    { key: 'goal', label: '目标' },
+    { key: 'targetUser', label: '目标用户' },
+    { key: 'coreFlow', label: '核心流程' },
+    { key: 'scope', label: '开发范围' },
+    { key: 'outOfScope', label: '不包含范围' },
+    { key: 'deliverables', label: '交付物' },
+    { key: 'constraints', label: '约束条件' },
+    { key: 'risks', label: '风险' },
   ];
 
   const getValue = (key: keyof DesignSummary) =>
@@ -55,14 +55,14 @@ export function DesignConfirmPanel({ draft, onConfirm, loading }: Props) {
           className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 text-sm"
           onClick={() => setEditing(!editing)}
         >
-          {editing ? 'Done Editing' : 'Edit'}
+          {editing ? '完成编辑' : '编辑'}
         </button>
         <button
           className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm"
           onClick={() => onConfirm(editing ? modifications : undefined)}
           disabled={loading}
         >
-          {loading ? 'Generating Plan...' : 'Confirm & Generate Plan'}
+          {loading ? '正在生成方案...' : '确认并生成方案'}
         </button>
       </div>
     </div>

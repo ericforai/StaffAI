@@ -297,7 +297,7 @@ export class Scanner {
 
     return {
       preferredMode: discussionCapable ? 'serial' : 'single',
-      preferredExecutor: role === 'technical-writer' ? 'claude' : 'codex',
+      preferredExecutor: role === 'technical-writer' ? 'claude' : (process.env.AGENCY_TASK_EXECUTOR as any || 'auto'),
       supportsParallelWork,
       discussionCapable,
     };

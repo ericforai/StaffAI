@@ -32,7 +32,7 @@ export function ChatPanel({
 
       <div className="px-10 py-3 border-b border-white/5 flex items-center justify-between bg-black/20 backdrop-blur-md">
         <h2 className="text-[10px] font-black text-slate-400 tracking-[0.2em] uppercase flex items-center gap-2">
-          <MessageSquare className="w-3 h-3 text-cyan-500" /> MISSION CONTROL
+          <MessageSquare className="w-3 h-3 text-cyan-500" /> 任务指挥
         </h2>
         <div className="flex items-center gap-2">
           <div className="flex -space-x-1.5">

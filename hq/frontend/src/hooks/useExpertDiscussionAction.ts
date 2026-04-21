@@ -17,7 +17,7 @@ export interface ExpertDiscussionResult {
   topic: string;
   participants: DiscussionParticipantResult[];
   synthesis: string;
-  executor?: 'claude' | 'codex' | 'openai' | 'deerflow';
+  executor?: 'claude' | 'codex' | 'gemini' | 'openai' | 'deerflow';
   capabilities?: { sampling: boolean };
   executionModeRequested?: ExecutionMode;
   executionModeApplied?: 'parallel' | 'serial' | null;

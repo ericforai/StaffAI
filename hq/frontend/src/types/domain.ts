@@ -106,7 +106,7 @@ export interface TaskExecution {
   displayExecutionId?: string;
   taskId: string;
   status: string;
-  executor?: 'claude' | 'codex' | 'openai' | 'deerflow';
+  executor?: 'claude' | 'codex' | 'gemini' | 'openai' | 'deerflow';
   runtimeName?: string;
   degraded?: boolean;
   outputSummary?: string;

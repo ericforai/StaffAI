@@ -9,7 +9,7 @@ import { TaskLifecycleService, type CreateTaskInput } from './task-lifecycle-ser
 import { TaskStateMachine } from './task-state-machine';
 import { executeTaskAfterApproval, type ApprovalExecutionBridgeDependencies } from './approval-execution-bridge';
 
-export type MainChainExecutor = 'claude' | 'codex' | 'openai' | 'deerflow';
+export type MainChainExecutor = 'claude' | 'codex' | 'gemini' | 'openai' | 'deerflow';
 
 export interface MainChainInput {
   title: string;
