@@ -164,38 +164,47 @@ export function registerTaskRoutes(
       executor,
     });
 
-    const result = await executeTaskRecord(
-      task,
-      {
-        executor,
-        summary,
-        ...(executionMode ? { executionMode } : {}),
-        ...(timeoutMs ? { timeoutMs } : {}),
-        ...(typeof maxRetries === 'number' ? { maxRetries } : {}),
-      },
-      store,
-      {
-        runAdvancedDiscussion: dependencies.runAdvancedDiscussion
-          ? async () => dependencies.runAdvancedDiscussion?.(topic) ?? { summary }
-          : undefined,
-        loadMemoryContext: dependencies.loadMemoryContext,
-        writeExecutionSummary: dependencies.writeExecutionSummary,
-        sessionCapabilities: dependencies.sessionCapabilities,
-        onEvent: (event) => {
-          dependencies.onExecutionEvent?.({
-            taskId: task.id,
-            message: `Execution chunk received: ${event.type}`,
-            payload: event.data,
-          });
+    try {
+      const result = await executeTaskRecord(
+        task,
+        {
+          executor,
+          summary,
+          ...(executionMode ? { executionMode } : {}),
+          ...(timeoutMs ? { timeoutMs } : {}),
+          ...(typeof maxRetries === 'number' ? { maxRetries } : {}),
         },
-      },
-    );
+        store,
+        {
+          runAdvancedDiscussion: dependencies.runAdvancedDiscussion
+            ? async () => dependencies.runAdvancedDiscussion?.(topic) ?? { summary }
+            : undefined,
+          loadMemoryContext: dependencies.loadMemoryContext,
+          writeExecutionSummary: dependencies.writeExecutionSummary,
+          sessionCapabilities: dependencies.sessionCapabilities,
+          onEvent: (event) => {
+            dependencies.onExecutionEvent?.({
+              taskId: task.id,
+              message: `Execution chunk received: ${event.type}`,
+              payload: event.data,
+            });
+          },
+        },
+      );
 
-    dependencies.onExecutionFinished?.(result.execution);
+      dependencies.onExecutionFinished?.(result.execution);
 
-    return res.status(201).json({
-      ...result,
-    });
+      return res.status(201).json({
+        ...result,
+      });
+    } catch (err: any) {
+      console.error(`[TaskExecution] Global failure for task ${task.id}:`, err);
+      return res.status(500).json({
+        error: 'Task execution failed due to an internal error',
+        message: err.message,
+        taskId: task.id,
+      });
+    }
   });
 
   app.post('/api/tasks', async (req, res) => {
