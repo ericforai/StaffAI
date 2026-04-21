@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1775077436411,
+  "lastScanned": 1776690721656,
   "projectRoot": "/Users/user/agency-agents",
   "techStack": {
     "languages": [],
@@ -40,7 +40,7 @@
       "path": "conductor",
       "purpose": null,
       "fileCount": 6,
-      "lastAccessed": 1775077436367,
+      "lastAccessed": 1776690719893,
       "keyFiles": [
         "index.md",
         "product-guidelines.md",
@@ -53,7 +53,7 @@
       "path": "crm",
       "purpose": null,
       "fileCount": 1,
-      "lastAccessed": 1775077436370,
+      "lastAccessed": 1776690719930,
       "keyFiles": [
         "SPEC.md"
       ]
@@ -62,7 +62,7 @@
       "path": "design",
       "purpose": null,
       "fileCount": 8,
-      "lastAccessed": 1775077436374,
+      "lastAccessed": 1776690720172,
       "keyFiles": [
         "design-brand-guardian.md",
         "design-image-prompt-engineer.md",
@@ -75,7 +75,7 @@
       "path": "docs",
       "purpose": "Documentation",
       "fileCount": 5,
-      "lastAccessed": 1775077436379,
+      "lastAccessed": 1776690720252,
       "keyFiles": [
         "ClaudeCode使用说明书.md",
         "Codex使用说明书.md",
@@ -87,7 +87,7 @@
       "path": "engineering",
       "purpose": null,
       "fileCount": 23,
-      "lastAccessed": 1775077436380,
+      "lastAccessed": 1776690720325,
       "keyFiles": [
         "engineering-ai-data-remediation-engineer.md",
         "engineering-ai-engineer.md",
@@ -100,7 +100,7 @@
       "path": "examples",
       "purpose": "Example code",
       "fileCount": 6,
-      "lastAccessed": 1775077436381,
+      "lastAccessed": 1776690720372,
       "keyFiles": [
         "README.md",
         "nexus-spatial-discovery.md",
@@ -113,7 +113,7 @@
       "path": "game-development",
       "purpose": null,
       "fileCount": 6,
-      "lastAccessed": 1775077436382,
+      "lastAccessed": 1776690720492,
       "keyFiles": [
         "game-audio-engineer.md",
         "game-designer.md",
@@ -126,7 +126,7 @@
       "path": "hq",
       "purpose": null,
       "fileCount": 19,
-      "lastAccessed": 1775077436385,
+      "lastAccessed": 1776690720581,
       "keyFiles": [
         "CHANGELOG.md",
         "PLAN-sampling-fallback.md",
@@ -139,7 +139,7 @@
       "path": "integrations",
       "purpose": null,
       "fileCount": 2,
-      "lastAccessed": 1775077436389,
+      "lastAccessed": 1776690720606,
       "keyFiles": [
         "README.md"
       ]
@@ -148,7 +148,7 @@
       "path": "marketing",
       "purpose": null,
       "fileCount": 26,
-      "lastAccessed": 1775077436392,
+      "lastAccessed": 1776690720627,
       "keyFiles": [
         "marketing-app-store-optimizer.md",
         "marketing-baidu-seo-specialist.md",
@@ -161,7 +161,7 @@
       "path": "paid-media",
       "purpose": null,
       "fileCount": 7,
-      "lastAccessed": 1775077436393,
+      "lastAccessed": 1776690720672,
       "keyFiles": [
         "paid-media-auditor.md",
         "paid-media-creative-strategist.md",
@@ -174,7 +174,7 @@
       "path": "product",
       "purpose": null,
       "fileCount": 4,
-      "lastAccessed": 1775077436396,
+      "lastAccessed": 1776690720700,
       "keyFiles": [
         "product-behavioral-nudge-engine.md",
         "product-feedback-synthesizer.md",
@@ -186,7 +186,7 @@
       "path": "project-management",
       "purpose": null,
       "fileCount": 6,
-      "lastAccessed": 1775077436397,
+      "lastAccessed": 1776690720713,
       "keyFiles": [
         "project-management-experiment-tracker.md",
         "project-management-jira-workflow-steward.md",
@@ -199,7 +199,7 @@
       "path": "sales",
       "purpose": null,
       "fileCount": 8,
-      "lastAccessed": 1775077436399,
+      "lastAccessed": 1776690720739,
       "keyFiles": [
         "sales-account-strategist.md",
         "sales-coach.md",
@@ -212,7 +212,7 @@
       "path": "scripts",
       "purpose": "Build/utility scripts",
       "fileCount": 5,
-      "lastAccessed": 1775077436399,
+      "lastAccessed": 1776690720764,
       "keyFiles": [
         "convert.sh",
         "generate-execution-history.ts",
@@ -225,7 +225,7 @@
       "path": "spatial-computing",
       "purpose": null,
       "fileCount": 6,
-      "lastAccessed": 1775077436400,
+      "lastAccessed": 1776690720785,
       "keyFiles": [
         "macos-spatial-metal-engineer.md",
         "terminal-integration-specialist.md",
@@ -238,7 +238,7 @@
       "path": "specialized",
       "purpose": null,
       "fileCount": 23,
-      "lastAccessed": 1775077436408,
+      "lastAccessed": 1776690720848,
       "keyFiles": [
         "accounts-payable-agent.md",
         "agentic-identity-trust.md",
@@ -251,7 +251,7 @@
       "path": "strategy",
       "purpose": null,
       "fileCount": 4,
-      "lastAccessed": 1775077436409,
+      "lastAccessed": 1776690720863,
       "keyFiles": [
         "EXECUTIVE-BRIEF.md",
         "QUICKSTART.md",
@@ -262,7 +262,7 @@
       "path": "support",
       "purpose": null,
       "fileCount": 6,
-      "lastAccessed": 1775077436409,
+      "lastAccessed": 1776690720889,
       "keyFiles": [
         "support-analytics-reporter.md",
         "support-executive-summary-generator.md",
@@ -275,7 +275,7 @@
       "path": "testing",
       "purpose": null,
       "fileCount": 8,
-      "lastAccessed": 1775077436409,
+      "lastAccessed": 1776690720923,
       "keyFiles": [
         "testing-accessibility-auditor.md",
         "testing-api-tester.md",
@@ -287,8 +287,8 @@
     "workshop": {
       "path": "workshop",
       "purpose": null,
-      "fileCount": 10,
-      "lastAccessed": 1775077436410,
+      "fileCount": 12,
+      "lastAccessed": 1776690721004,
       "keyFiles": [
         "config.yaml",
         "main.py",
@@ -298,253 +298,6 @@
       ]
     }
   },
-  "hotPaths": [
-    {
-      "path": "workshop/main.py",
-      "accessCount": 11,
-      "lastAccessed": 1775080604308,
-      "type": "file"
-    },
-    {
-      "path": "hq/backend/src/api/intents.ts",
-      "accessCount": 8,
-      "lastAccessed": 1775078273422,
-      "type": "file"
-    },
-    {
-      "path": "workshop/config.yaml",
-      "accessCount": 8,
-      "lastAccessed": 1775080250150,
-      "type": "file"
-    },
-    {
-      "path": "workshop/deer-flow/backend/packages/harness/deerflow/client.py",
-      "accessCount": 6,
-      "lastAccessed": 1775080950032,
-      "type": "file"
-    },
-    {
-      "path": "hq/backend/src/orchestration/brainstorming-service.ts",
-      "accessCount": 5,
-      "lastAccessed": 1775097649757,
-      "type": "file"
-    },
-    {
-      "path": "hq/frontend/src/hooks/useIntentWizard.ts",
-      "accessCount": 4,
-      "lastAccessed": 1775078307728,
-      "type": "file"
-    },
-    {
-      "path": "hq/frontend/src/components/tasks/AdvancedTaskWizard.tsx",
-      "accessCount": 4,
-      "lastAccessed": 1775078372829,
-      "type": "file"
-    },
-    {
-      "path": "workshop",
-      "accessCount": 3,
-      "lastAccessed": 1775078029059,
-      "type": "directory"
-    },
-    {
-      "path": "hq/frontend/src/components/intent/ClarificationPanel.tsx",
-      "accessCount": 3,
-      "lastAccessed": 1775078356097,
-      "type": "file"
-    },
-    {
-      "path": "workshop/deer-flow/backend/packages/harness/deerflow/agents/checkpointer/provider.py",
-      "accessCount": 3,
-      "lastAccessed": 1775079510627,
-      "type": "directory"
-    },
-    {
-      "path": "hq/backend/src/orchestration/mvp-preset.ts",
-      "accessCount": 2,
-      "lastAccessed": 1774910151980,
-      "type": "file"
-    },
-    {
-      "path": "hq/backend/src/orchestration/hitl-service.ts",
-      "accessCount": 2,
-      "lastAccessed": 1774925053579,
-      "type": "file"
-    },
-    {
-      "path": "hq/frontend/src/app/tasks/[id]/page.tsx",
-      "accessCount": 2,
-      "lastAccessed": 1774925377120,
-      "type": "file"
-    },
-    {
-      "path": "hq/frontend/src/components/TaskWorkspacePanel.tsx",
-      "accessCount": 2,
-      "lastAccessed": 1774925377487,
-      "type": "file"
-    },
-    {
-      "path": "hq/backend/.env",
-      "accessCount": 2,
-      "lastAccessed": 1775077512932,
-      "type": "file"
-    },
-    {
-      "path": "docs/plans/staffai_superpowers_latest_dev_plan.md",
-      "accessCount": 2,
-      "lastAccessed": 1775078052633,
-      "type": "file"
-    },
-    {
-      "path": "workshop/deer-flow/backend/packages/harness/deerflow/agents/checkpointer/__init__.py",
-      "accessCount": 2,
-      "lastAccessed": 1775079489939,
-      "type": "directory"
-    },
-    {
-      "path": "workshop/.env",
-      "accessCount": 2,
-      "lastAccessed": 1775080531785,
-      "type": "file"
-    },
-    {
-      "path": "workshop/deer-flow/backend/packages/harness/deerflow/config/app_config.py",
-      "accessCount": 2,
-      "lastAccessed": 1775081281035,
-      "type": "directory"
-    },
-    {
-      "path": "TODOS.md",
-      "accessCount": 1,
-      "lastAccessed": 1774910055799,
-      "type": "file"
-    },
-    {
-      "path": "hq/backend/src/shared/dual-core-protocol.ts",
-      "accessCount": 1,
-      "lastAccessed": 1774910102926,
-      "type": "file"
-    },
-    {
-      "path": "hq/backend/src/shared/hitl-types.ts",
-      "accessCount": 1,
-      "lastAccessed": 1774910102940,
-      "type": "file"
-    },
-    {
-      "path": "hq/backend/src/shared/task-envelope-v2.ts",
-      "accessCount": 1,
-      "lastAccessed": 1774910102982,
-      "type": "file"
-    },
-    {
-      "path": "hq/backend/src/orchestration/task-main-chain-service.ts",
-      "accessCount": 1,
-      "lastAccessed": 1774910103035,
-      "type": "file"
-    },
-    {
-      "path": "hq/backend/src/app/register-backend-routes.ts",
-      "accessCount": 1,
-      "lastAccessed": 1774910151926,
-      "type": "directory"
-    },
-    {
-      "path": "hq/backend",
-      "accessCount": 1,
-      "lastAccessed": 1774910151968,
-      "type": "directory"
-    },
-    {
-      "path": "hq/backend/src/runtime/runtime-adapter.ts",
-      "accessCount": 1,
-      "lastAccessed": 1774925039091,
-      "type": "file"
-    },
-    {
-      "path": "hq/backend/src/orchestration/plan-generation-service.ts",
-      "accessCount": 1,
-      "lastAccessed": 1774925059810,
-      "type": "file"
-    },
-    {
-      "path": "hq/backend/src/orchestration/task-execution-orchestrator.ts",
-      "accessCount": 1,
-      "lastAccessed": 1774925453404,
-      "type": "file"
-    },
-    {
-      "path": "hq/backend/src/orchestration/task-orchestrator.ts",
-      "accessCount": 1,
-      "lastAccessed": 1774925477299,
-      "type": "file"
-    },
-    {
-      "path": "hq/tasks.json",
-      "accessCount": 1,
-      "lastAccessed": 1774957872139,
-      "type": "file"
-    },
-    {
-      "path": "hq/executions.json",
-      "accessCount": 1,
-      "lastAccessed": 1774957872201,
-      "type": "file"
-    },
-    {
-      "path": "conductor/tracks.md",
-      "accessCount": 1,
-      "lastAccessed": 1774957883978,
-      "type": "file"
-    },
-    {
-      "path": "hq/workflow_plans.json",
-      "accessCount": 1,
-      "lastAccessed": 1774957884042,
-      "type": "file"
-    },
-    {
-      "path": "conductor/tracks/feature_delivery_v02_20260331/plan.md",
-      "accessCount": 1,
-      "lastAccessed": 1774957898450,
-      "type": "file"
-    },
-    {
-      "path": "hq",
-      "accessCount": 1,
-      "lastAccessed": 1775077985626,
-      "type": "directory"
-    },
-    {
-      "path": "hq/backend/src/shared/intent-types.ts",
-      "accessCount": 1,
-      "lastAccessed": 1775078014746,
-      "type": "file"
-    },
-    {
-      "path": "",
-      "accessCount": 1,
-      "lastAccessed": 1775078047930,
-      "type": "directory"
-    },
-    {
-      "path": "hq/frontend/src/components/intent",
-      "accessCount": 1,
-      "lastAccessed": 1775078098590,
-      "type": "directory"
-    },
-    {
-      "path": "workshop/deer-flow/backend/langgraph.json",
-      "accessCount": 1,
-      "lastAccessed": 1775079449567,
-      "type": "file"
-    },
-    {
-      "path": "workshop/deer-flow/backend/packages/harness/deerflow/agents/checkpointer/async_provider.py",
-      "accessCount": 1,
-      "lastAccessed": 1775079472088,
-      "type": "directory"
-    }
-  ],
+  "hotPaths": [],
   "userDirectives": []
 }

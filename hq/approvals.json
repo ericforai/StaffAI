@@ -78,7 +78,7 @@
     "id": "74076cbf-fc3a-4934-80f7-c8d676d3c4ed",
     "taskId": "20260327040",
     "taskTitle": "Delete production data",
-    "status": "pending",
+    "status": "approved",
     "requestedBy": "system",
     "requestedAt": "2026-03-27T05:58:00.518Z",
     "riskLevel": "HIGH",
@@ -89,6 +89,7 @@
         "General routine task"
       ],
       "confidence": 0.51
-    }
+    },
+    "resolvedAt": "2026-04-19T07:02:10.799Z"
   }
 ]
