@@ -723,10 +723,5 @@
     "name": "Accessibility Auditor",
     "description": "Expert accessibility specialist who audits interfaces against WCAG standards, tests with assistive technologies, and ensures inclusive design. Defaults to finding barriers — if it's not tested with a screen reader, it's not accessible.",
     "file": "/Users/user/agency-agents/testing/testing-accessibility-auditor.md"
-  },
-  "dispatcher": {
-    "name": "Dispatcher (Orchestrator)",
-    "description": "System-level orchestrator responsible for task decomposition, routing, and workflow management.",
-    "file": "/Users/user/agency-agents/specialized/dispatcher.md"
   }
 }
