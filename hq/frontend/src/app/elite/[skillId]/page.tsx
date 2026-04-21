@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { useParams } from 'next/navigation';
-import { ArrowLeft, MessageCircle, FileText, Clock, Download, Sparkles } from 'lucide-react';
+import { ArrowLeft, MessageCircle, FileText, Clock, Download, Sparkles, ChevronDown } from 'lucide-react';
 import { useEliteSkill } from '../../../hooks/useEliteSkills';
 
 function getSkillIdParam(skillId: string | string[] | undefined) {
@@ -17,6 +18,7 @@ export default function SkillDetailPage() {
   const params = useParams<{ skillId: string | string[] }>();
   const skillId = getSkillIdParam(params.skillId);
   const { skill, content, loading, error } = useEliteSkill(skillId);
+  const [showFullContent, setShowFullContent] = useState(false);
 
   if (loading) {
     return (
@@ -91,14 +93,18 @@ export default function SkillDetailPage() {
               <div className="bg-white rounded-2xl p-6 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold">技能内容</h2>
-                  <button className="text-purple-500 hover:text-purple-600 flex items-center gap-1 text-sm">
+                  <button
+                    onClick={() => setShowFullContent(!showFullContent)}
+                    className="text-purple-500 hover:text-purple-600 flex items-center gap-1 text-sm"
+                  >
                     <FileText className="w-4 h-4" />
-                    查看完整内容
+                    {showFullContent ? '收起内容' : '查看完整内容'}
+                    <ChevronDown className={`w-4 h-4 transition-transform ${showFullContent ? 'rotate-180' : ''}`} />
                   </button>
                 </div>
-                <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-700 whitespace-pre-wrap font-mono max-h-96 overflow-y-auto">
-                  {content.slice(0, 2000)}
-                  {content.length > 2000 && '...'}
+                <div className={`bg-gray-50 rounded-xl p-4 text-sm text-gray-700 whitespace-pre-wrap font-mono overflow-y-auto transition-all ${showFullContent ? 'max-h-none' : 'max-h-96'}`}>
+                  {showFullContent ? content : content.slice(0, 2000)}
+                  {!showFullContent && content.length > 2000 && '...'}
                 </div>
               </div>
             )}
